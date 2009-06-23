@@ -1,0 +1,11 @@
+<package>
+<description brief="Python bindings for OpenCV">
+</description>
+<author>James Bowman</author>
+<license>BSD</license>
+<review status="3rdparty" notes=""/>
+<depend package="opencv_latest"/>
+<url>http://opencvpython.sourceforge.net</url>
+<export>
+</export>
+</package>

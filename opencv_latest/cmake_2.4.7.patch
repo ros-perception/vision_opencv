@@ -1,0 +1,38 @@
+Index: src/cv/cvimgwarp.cpp
+===================================================================
+--- src/cv/cvimgwarp.cpp	(revision 1734)
++++ src/cv/cvimgwarp.cpp	(working copy)
+@@ -2751,7 +2751,8 @@
+                 {
+                     short* alpha = A + y1*bw;
+                     x1 = 0;
+-                #if CV_SSE2
++                //#if CV_SSE2
++                #if 0
+                     __m128i XX = _mm_set1_epi32(X0), YY = _mm_set1_epi32(Y0);
+                     for( ; x1 <= bw - 8; x1 += 8 )
+                     {
+Index: CMakeLists.txt
+===================================================================
+--- CMakeLists.txt	(revision 1734)
++++ CMakeLists.txt	(working copy)
+@@ -221,13 +221,15 @@
+         if (${ALIAS_FOUND})
+             set(${define} 1)
+             foreach(P "${ALIAS_INCLUDE_DIRS}")
+-                list(APPEND HIGHGUI_INCLUDE_DIRS ${${P}})
++                if (${P})
++                    list(APPEND HIGHGUI_INCLUDE_DIRS ${${P}})
++                endif(${P})
+             endforeach()
+ 
+             foreach(P "${ALIAS_LIBRARY_DIRS}")
+-                if (${${P}})
+-                    list(APPEND HIGHGUI_LIBRARY_DIRS ${${P}})
+-                endif()
++                if (${P})
++                    list(APPEND HIGHGUI_LIBRARY_DIRS ${P})
++                endif(${P})
+             endforeach()
+ 
+             list(APPEND HIGHGUI_LIBRARIES ${${ALIAS_LIBRARIES}})

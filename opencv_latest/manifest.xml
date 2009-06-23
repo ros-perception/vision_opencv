@@ -1,0 +1,38 @@
+<package>
+<description brief="The Open Source Computer Vision Library (latest)">
+
+This package contains the latest code from the Open Source Computer Vision
+Library (opencv).  This ROS package does not modify OpenCV in any way;
+it simply provides a convenient way to download and compile the library
+in a way that can be managed by the ROS dependency system.
+
+</description>
+<author>Gary Bradski and many others. See web page for a full contributor list. ROS package maintained by JD Chen.</author>
+<license>BSD</license>
+<review status="3rdparty" notes=""/>
+<url>http://opencvlibrary.sourceforge.net</url>
+<export>
+  <cpp cflags="-I${prefix}/opencv/include -I${prefix}/opencv/include/opencv -I${prefix}/include" lflags="-L${prefix}/opencv/lib -Wl,-rpath,${prefix}/opencv/lib -lcvaux -lcv -lcxcore -lhighgui -lml"/>
+  <doxymaker external="http://opencvlibrary.sourceforge.net/" />
+</export>
+<depend package="image_msgs" />
+<sysdepend os="ubuntu" version="7.04-feisty" package="libavformat-dev"/>
+<sysdepend os="ubuntu" version="8.04-hardy" package="libavformat-dev"/>
+<sysdepend os="ubuntu" version="9.04-jaunty" package="libavformat-dev"/>
+<sysdepend os="ubuntu" version="7.04-feisty" package="libavcodec-dev"/>
+<sysdepend os="ubuntu" version="8.04-hardy" package="libavcodec-dev"/>
+<sysdepend os="ubuntu" version="9.04-jaunty" package="libavcodec-dev"/>
+<sysdepend os="ubuntu" version="7.04-feisty" package="libjasper-1.701-dev"/>
+<sysdepend os="ubuntu" version="8.04-hardy" package="libjasper-dev"/>
+<sysdepend os="ubuntu" version="9.04-jaunty" package="libjasper-dev"/>
+<sysdepend os="ubuntu" version="7.04-feisty" package="libgraphicsmagick++1-dev"/>
+<sysdepend os="ubuntu" version="8.04-hardy" package="libgraphicsmagick++1-dev"/>
+<sysdepend os="ubuntu" version="9.04-jaunty" package="libswscale-dev"/>
+<versioncontrol type="svn" url="https://opencvlibrary.svn.sourceforge.net/svnroot/opencvlibrary/tags/latest_tested_snapshot/opencv"/>
+<rosdep name="libavformat"/>
+<rosdep name="libavcodec"/>
+<rosdep name="libjasper"/>
+<rosdep name="libswscale"/>
+<rosdep name="libgraphicsmagick++"/>
+</package>
+

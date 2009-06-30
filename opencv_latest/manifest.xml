@@ -15,7 +15,7 @@ in a way that can be managed by the ROS dependency system.
   <cpp cflags="-I${prefix}/opencv/include -I${prefix}/opencv/include/opencv -I${prefix}/include" lflags="-L${prefix}/opencv/lib -Wl,-rpath,${prefix}/opencv/lib -lcvaux -lcv -lcxcore -lhighgui -lml"/>
   <doxymaker external="http://opencvlibrary.sourceforge.net/" />
 </export>
-<depend package="image_msgs" />
+<depend package="sensor_msgs" />
 <sysdepend os="ubuntu" version="7.04-feisty" package="libavformat-dev"/>
 <sysdepend os="ubuntu" version="8.04-hardy" package="libavformat-dev"/>
 <sysdepend os="ubuntu" version="9.04-jaunty" package="libavformat-dev"/>

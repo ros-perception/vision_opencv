@@ -35,11 +35,11 @@
 #ifndef CVBRIDGE_HH
 #define CVBRIDGE_HH
 
-#include "image_msgs/Image.h"
+#include "sensor_msgs/Image.h"
 #include "opencv/cxcore.h"
 #include "opencv/cv.h"
 
-namespace image_msgs
+namespace sensor_msgs
 {
 
   class CvBridge
@@ -169,7 +169,7 @@ namespace image_msgs
      * \param source The original Ipl Image that we want to copy from
      * \param dest The ROS Image message that we want to copy to
      */
-    static bool fromIpltoRosImage(const IplImage* source, image_msgs::Image& dest)
+    static bool fromIpltoRosImage(const IplImage* source, sensor_msgs::Image& dest)
     {
       switch(source->nChannels)
       {

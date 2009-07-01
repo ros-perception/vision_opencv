@@ -1,0 +1,12 @@
+<stack name="opencv" version="0.1">
+  <description brief="A stack for opencv libraries">
+    opencv c++ and python libraries.
+  </description>
+  <author>Maintained by Tully Foote tfoote@willowgarage.com</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://pr.willowgarage.com/wiki/ROS</url>
+  <depend stack="ros" version="0.6.0"/>
+  <depend stack="common_msgs" version="0.1"/>
+</stack>
+

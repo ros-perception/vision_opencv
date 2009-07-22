@@ -16,19 +16,6 @@ in a way that can be managed by the ROS dependency system.
   <doxymaker external="http://opencvlibrary.sourceforge.net/" />
 </export>
 <depend package="sensor_msgs" />
-<sysdepend os="ubuntu" version="7.04-feisty" package="libavformat-dev"/>
-<sysdepend os="ubuntu" version="8.04-hardy" package="libavformat-dev"/>
-<sysdepend os="ubuntu" version="9.04-jaunty" package="libavformat-dev"/>
-<sysdepend os="ubuntu" version="7.04-feisty" package="libavcodec-dev"/>
-<sysdepend os="ubuntu" version="8.04-hardy" package="libavcodec-dev"/>
-<sysdepend os="ubuntu" version="9.04-jaunty" package="libavcodec-dev"/>
-<sysdepend os="ubuntu" version="7.04-feisty" package="libjasper-1.701-dev"/>
-<sysdepend os="ubuntu" version="8.04-hardy" package="libjasper-dev"/>
-<sysdepend os="ubuntu" version="9.04-jaunty" package="libjasper-dev"/>
-<sysdepend os="ubuntu" version="7.04-feisty" package="libgraphicsmagick++1-dev"/>
-<sysdepend os="ubuntu" version="8.04-hardy" package="libgraphicsmagick++1-dev"/>
-<sysdepend os="ubuntu" version="8.04-hardy" package="libswscale-dev"/>
-<sysdepend os="ubuntu" version="9.04-jaunty" package="libswscale-dev"/>
 <versioncontrol type="svn" url="https://opencvlibrary.svn.sourceforge.net/svnroot/opencvlibrary/tags/latest_tested_snapshot/opencv"/>
 <rosdep name="libavformat"/>
 <rosdep name="libavcodec"/>

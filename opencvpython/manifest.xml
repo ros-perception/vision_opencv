@@ -8,4 +8,5 @@
 <url>http://opencvpython.sourceforge.net</url>
 <export>
 </export>
+<versioncontrol type="svn" url="https://opencvpython.svn.sourceforge.net/svnroot/opencvpython"/>
 </package>

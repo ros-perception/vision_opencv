@@ -1,4 +1,4 @@
-# opencv rev. 1795
+# opencv rev. 1975
 INSTALL_DIR = opencv
 
 all: installed

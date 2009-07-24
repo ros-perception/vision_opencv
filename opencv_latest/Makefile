@@ -7,6 +7,7 @@ SVN_DIR = build/opencv-svn
 SVN_URL = https://opencvlibrary.svn.sourceforge.net/svnroot/opencvlibrary/tags/latest_tested_snapshot/opencv
 #SVN_PATCH = cmake_2.4.6.patch
 #SVN_PATCH = calibration.patch
+SVN_PATCH = osx.patch
 include $(shell rospack find mk)/svn_checkout.mk
 
 

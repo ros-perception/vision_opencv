@@ -14,7 +14,7 @@ include $(shell rospack find mk)/svn_checkout.mk
 
 CMAKE = cmake 
 CMAKE_ARGS = -D CMAKE_BUILD_TYPE=RELEASE \
-             -D CMAKE_INSTALL_PREFIX=$(PWD)/$(INSTALL_DIR) \
+             -D CMAKE_INSTALL_PREFIX=`rospack find opencv_latest`/$(INSTALL_DIR) \
              -D BUILD_PYTHON_SUPPORT=OFF
 
 installed: $(SVN_DIR) patched
@@ -22,8 +22,8 @@ installed: $(SVN_DIR) patched
 	cd $(SVN_DIR)/build && $(CMAKE) $(CMAKE_ARGS) ..
 	cd $(SVN_DIR)/build && make $(ROS_PARALLEL_JOBS) && make install
 	@echo "patch opencv.pc to pass -Wl,-rpath,-L{libdir}"
-	-mv $(PWD)/$(INSTALL_DIR)/lib/pkgconfig/opencv.pc $(PWD)/$(INSTALL_DIR)/lib/pkgconfig/opencv.bak
-	sed 's%Libs: -L$${libdir} -lcxcore%Libs: -Wl,-rpath,$${libdir} -L$${libdir} -lcxcore%g' $(PWD)/$(INSTALL_DIR)/lib/pkgconfig/opencv.bak > $(PWD)/$(INSTALL_DIR)/lib/pkgconfig/opencv.pc
+	-mv `rospack find opencv_latest`/$(INSTALL_DIR)/lib/pkgconfig/opencv.pc $(PWD)/$(INSTALL_DIR)/lib/pkgconfig/opencv.bak
+	sed 's%Libs: -L$${libdir} -lcxcore%Libs: -Wl,-rpath,$${libdir} -L$${libdir} -lcxcore%g' `rospack find opencv_latest`/$(INSTALL_DIR)/lib/pkgconfig/opencv.bak > `rospack find opencv_latest`/$(INSTALL_DIR)/lib/pkgconfig/opencv.pc
 	touch installed
 
 clean:

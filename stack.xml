@@ -6,7 +6,8 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://pr.willowgarage.com/wiki/ROS</url>
-  <depend stack="ros" version="0.6.0"/>
-  <depend stack="common_msgs" version="0.1"/>
-</stack>
 
+  <depend stack="ros"/> <!-- roscpp --> 
+  <depend stack="common_msgs"/> <!-- sensor_msgs, sensor_msgs --> 
+
+</stack>

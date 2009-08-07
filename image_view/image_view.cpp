@@ -95,7 +95,7 @@ public:
       msg->encoding = "mono";
 #endif
 
-    if (img_bridge_.fromImage(*msg, "bgr"))
+    if (img_bridge_.fromImage(*msg))
       cvShowImage(window_name_.c_str(), img_bridge_.toIpl());
     else
       ROS_ERROR("Unable to convert from %d to bgr", msg->type);

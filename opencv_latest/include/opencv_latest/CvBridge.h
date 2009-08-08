@@ -101,7 +101,7 @@ namespace sensor_msgs
     {
       CvMat cvmHeader;
       
-      cvInitMatHeader(&cvmHeader, rosimg.rows, rosimg.cols, rosimg.type, const_cast<uint8_t*>(&(rosimg.data[0])), rosimg.step);
+      cvInitMatHeader(&cvmHeader, rosimg.height, rosimg.width, rosimg.type, const_cast<uint8_t*>(&(rosimg.data[0])), rosimg.step);
       cvGetImage(&cvmHeader, rosimg_);
 
       // cvSetData(rosimg_, const_cast<uint8_t*>(&(rosimg.data[0])), rosimg.step);
@@ -147,11 +147,11 @@ namespace sensor_msgs
 
       cvm = cvGetMat(source, &header);
       dest.type = cvm->type & (CV_MAT_TYPE_MASK | CV_MAT_DEPTH_MASK);
-      dest.cols = cvm->cols;
-      dest.rows = cvm->rows;
+      dest.width = cvm->width;
+      dest.height = cvm->height;
       dest.step = cvm->step;
-      dest.data.resize(cvm->step * cvm->rows);
-      memcpy((char*)(&dest.data[0]), source->imageData, cvm->step * cvm->rows);
+      dest.data.resize(cvm->step * cvm->height);
+      memcpy((char*)(&dest.data[0]), source->imageData, cvm->step * cvm->height);
       return true;
     }
   };

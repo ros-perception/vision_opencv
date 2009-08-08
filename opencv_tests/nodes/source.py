@@ -69,8 +69,8 @@ class source:
         ball_yv = -ball_yv
 
       img_msg = sensor_msgs.msg.Image()
-      img_msg.rows = 480
-      img_msg.cols = 640
+      img_msg.width = 640
+      img_msg.height = 480
       img_msg.type = cv.CV_8UC1
       img_msg.step = 640
       img_msg.data = cvim.tostring()

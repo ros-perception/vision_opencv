@@ -204,6 +204,10 @@ namespace sensor_msgs
         if (encoding == "mono16")
            newtype = CV_16UC1;
 
+        // printf("change=%d, newtype=%d\n", change, newtype);
+
+        img_ = rosimg_;  // realloc uses this as a hidden argument.
+
         if (change == -1 || newtype == -1)
           return false;
         reallocIfNeeded(&cvtimg_, IPL_DEPTH_8U, CV_MAT_CN(newtype));

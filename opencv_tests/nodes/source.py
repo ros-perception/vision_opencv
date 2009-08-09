@@ -71,7 +71,7 @@ class source:
       img_msg = sensor_msgs.msg.Image()
       img_msg.width = 640
       img_msg.height = 480
-      img_msg.type = "8UC1"
+      img_msg.encoding = "_8UC1"
       img_msg.step = 640
       img_msg.data = cvim.tostring()
       self.pub.publish(img_msg)

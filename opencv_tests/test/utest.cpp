@@ -108,6 +108,10 @@ TEST(OpencvTests, testCase_decode_conversion)
   success = img_bridge_.fromImage(image_message, "rgb8");
   ASSERT_TRUE(success);
   EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 3);
+
+  success = img_bridge_.fromImage(image_message, "bgr8");
+  ASSERT_TRUE(success);
+  EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 3);
 }
 
 int main(int argc, char **argv)

@@ -97,15 +97,15 @@ TEST(OpencvTests, testCase_decode_conversion)
   success = img_bridge_.fromIpltoRosImage(original, image_message);
   ASSERT_TRUE(success);
 
-  success = img_bridge_.fromImage(image_message, "");
+  success = img_bridge_.fromImage(image_message, "passthrough");
   ASSERT_TRUE(success);
   EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 1);
 
-  success = img_bridge_.fromImage(image_message, "mono");
+  success = img_bridge_.fromImage(image_message, "mono8");
   ASSERT_TRUE(success);
   EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 1);
 
-  success = img_bridge_.fromImage(image_message, "rgb");
+  success = img_bridge_.fromImage(image_message, "rgb8");
   ASSERT_TRUE(success);
   EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 3);
 }

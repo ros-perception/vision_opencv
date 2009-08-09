@@ -97,32 +97,121 @@ namespace sensor_msgs
      * Converts a ROS Image into an OpenCV IPL Image.
      * \param rosimg The ROS Image message
      */
-    bool fromImage(const Image& rosimg, std::string encoding = "")
+    bool fromImage(const Image& rosimg, std::string encoding = "passthrough")
     {
       CvMat cvmHeader;
       
-      cvInitMatHeader(&cvmHeader, rosimg.height, rosimg.width, rosimg.type, const_cast<uint8_t*>(&(rosimg.data[0])), rosimg.step);
+      int type;
+      if (rosimg.encoding == "_8UC1") type = CV_8UC1;
+      else if (rosimg.encoding == "_8UC2") type = CV_8UC2;
+      else if (rosimg.encoding == "_8UC3") type = CV_8UC3;
+      else if (rosimg.encoding == "_8UC4") type = CV_8UC4;
+      else if (rosimg.encoding == "_8SC1") type = CV_8SC1;
+      else if (rosimg.encoding == "_8SC2") type = CV_8SC2;
+      else if (rosimg.encoding == "_8SC3") type = CV_8SC3;
+      else if (rosimg.encoding == "_8SC4") type = CV_8SC4;
+      else if (rosimg.encoding == "_16UC1") type = CV_16UC1;
+      else if (rosimg.encoding == "_16UC2") type = CV_16UC2;
+      else if (rosimg.encoding == "_16UC3") type = CV_16UC3;
+      else if (rosimg.encoding == "_16UC4") type = CV_16UC4;
+      else if (rosimg.encoding == "_16SC1") type = CV_16SC1;
+      else if (rosimg.encoding == "_16SC2") type = CV_16SC2;
+      else if (rosimg.encoding == "_16SC3") type = CV_16SC3;
+      else if (rosimg.encoding == "_16SC4") type = CV_16SC4;
+      else if (rosimg.encoding == "_32SC1") type = CV_32SC1;
+      else if (rosimg.encoding == "_32SC2") type = CV_32SC2;
+      else if (rosimg.encoding == "_32SC3") type = CV_32SC3;
+      else if (rosimg.encoding == "_32SC4") type = CV_32SC4;
+      else if (rosimg.encoding == "_32FC1") type = CV_32FC1;
+      else if (rosimg.encoding == "_32FC2") type = CV_32FC2;
+      else if (rosimg.encoding == "_32FC3") type = CV_32FC3;
+      else if (rosimg.encoding == "_32FC4") type = CV_32FC4;
+      else if (rosimg.encoding == "_64FC1") type = CV_64FC1;
+      else if (rosimg.encoding == "_64FC2") type = CV_64FC2;
+      else if (rosimg.encoding == "_64FC3") type = CV_64FC3;
+      else if (rosimg.encoding == "_64FC4") type = CV_64FC4;
+      else if (rosimg.encoding == "rgb8") type = CV_8UC3;
+      else if (rosimg.encoding == "bgr8") type = CV_8UC3;
+      else if (rosimg.encoding == "rgba8") type = CV_8UC4;
+      else if (rosimg.encoding == "bgra8") type = CV_8UC4;
+      else if (rosimg.encoding == "mono8") type = CV_8UC1;
+      else if (rosimg.encoding == "mono16") type = CV_16UC1;
+      else return false;
+      cvInitMatHeader(&cvmHeader, rosimg.height, rosimg.width, type, const_cast<uint8_t*>(&(rosimg.data[0])), rosimg.step);
       cvGetImage(&cvmHeader, rosimg_);
 
       // cvSetData(rosimg_, const_cast<uint8_t*>(&(rosimg.data[0])), rosimg.step);
 
-      if (encoding == "") {
+      if ((encoding == "passthrough") || (rosimg.encoding == encoding)) {
         img_ = rosimg_;
       } else {
-        if ((encoding == "bgr" || encoding == "rgb") && rosimg.type == CV_8UC1)
-        {
-          reallocIfNeeded(&cvtimg_, IPL_DEPTH_8U, 3);
-          cvCvtColor(rosimg_, cvtimg_, CV_GRAY2BGR);
-          img_ = cvtimg_;
+        int change = -1;
+        int newtype = -1;
+
+        if (rosimg.encoding == "rgb8") {
+          if (encoding == "bgr8")
+            change = CV_RGB2BGR;
+          if (encoding == "bgra8")
+            change = CV_RGB2BGRA;
+          if (encoding == "rgba8")
+            change = CV_RGB2RGBA;
+          if (encoding == "mono8" || encoding == "mono16")
+            change = CV_RGB2GRAY;
+        } else if ((rosimg.encoding == "bgr8") || (rosimg.encoding == "_8UC3")) {
+          if (encoding == "rgb8")
+            change = CV_BGR2RGB;
+          if (encoding == "bgra8")
+            change = CV_BGR2BGRA;
+          if (encoding == "mono8" || encoding == "mono16")
+            change = CV_BGR2GRAY;
+        } else if (rosimg.encoding == "rgba8") {
+          if (encoding == "rgb8")
+            change = CV_RGBA2RGB;
+          if (encoding == "bgr8")
+            change = CV_RGBA2BGR;
+          if (encoding == "mono8" || encoding == "mono16")
+            change = CV_RGBA2GRAY;
+        } else if ((rosimg.encoding == "bgra8") || (rosimg.encoding == "_8UC4")) {
+          if (encoding == "rgb8")
+            change = CV_BGRA2RGB;
+          if (encoding == "bgr8")
+            change = CV_BGRA2BGR;
+          if (encoding == "mono8" || encoding == "mono16")
+            change = CV_BGRA2GRAY;
+        } else if (rosimg.encoding == "mono8" || rosimg.encoding == "mono16"  || rosimg.encoding == "_8UC1") {
+          if (encoding == "rgb8")
+            change = CV_GRAY2RGB;
+          if (encoding == "bgr8")
+            change = CV_GRAY2BGR;
+          if (encoding == "bgra8")
+            change = CV_GRAY2BGRA;
+          if (encoding == "rgba8")
+            change = CV_GRAY2RGBA;
+          if (encoding == "mono8" || encoding == "mono16")
+            change = CV_COLORCVT_MAX; // means do no conversion
         }
-        else if (encoding == "mono" && rosimg.type == CV_8UC3)
-        {
-          reallocIfNeeded(&cvtimg_, IPL_DEPTH_8U, 1);
-          cvCvtColor(rosimg_, cvtimg_, CV_RGB2GRAY);
-          img_ = cvtimg_;
-        } else {
-          img_ = rosimg_;
-        }
+
+        if (encoding == "bgr8")
+           newtype = CV_8UC3;
+        if (encoding == "rgb8")
+           newtype = CV_8UC3;
+        if (encoding == "bgra8")
+           newtype = CV_8UC4;
+        if (encoding == "rgba")
+           newtype = CV_8UC4;
+        if (encoding == "mono8")
+           newtype = CV_8UC1;
+        if (encoding == "mono16")
+           newtype = CV_16UC1;
+
+        if (change == -1 || newtype == -1)
+          return false;
+        reallocIfNeeded(&cvtimg_, IPL_DEPTH_8U, CV_MAT_CN(newtype));
+        if (change == CV_COLORCVT_MAX)
+          cvConvertScale(rosimg_, cvtimg_);
+        else
+          cvCvtColor(rosimg_, cvtimg_, change);
+        img_ = cvtimg_;
       }
       return true;
     }
@@ -141,12 +230,52 @@ namespace sensor_msgs
      * \param source The original Ipl Image that we want to copy from
      * \param dest The ROS Image message that we want to copy to
      */
-    static bool fromIpltoRosImage(const IplImage* source, sensor_msgs::Image& dest)
+    static bool fromIpltoRosImage(const IplImage* source, sensor_msgs::Image& dest, std::string encoding = "passthrough")
     {
       CvMat header, *cvm;
 
       cvm = cvGetMat(source, &header);
-      dest.type = cvm->type & (CV_MAT_TYPE_MASK | CV_MAT_DEPTH_MASK);
+      // dest.type = cvm->type & (CV_MAT_TYPE_MASK | CV_MAT_DEPTH_MASK);
+      dest.encoding = encoding;
+
+      if (encoding == "passthrough") {
+        switch (cvm->type & (CV_MAT_TYPE_MASK | CV_MAT_DEPTH_MASK)) {
+        case CV_8UC1: dest.encoding = "_8UC1"; break;
+        case CV_8UC2: dest.encoding = "_8UC2"; break;
+        case CV_8UC3: dest.encoding = "_8UC3"; break;
+        case CV_8UC4: dest.encoding = "_8UC4"; break;
+        case CV_8SC1: dest.encoding = "_8SC1"; break;
+        case CV_8SC2: dest.encoding = "_8SC2"; break;
+        case CV_8SC3: dest.encoding = "_8SC3"; break;
+        case CV_8SC4: dest.encoding = "_8SC4"; break;
+        case CV_16UC1: dest.encoding = "_16UC1"; break;
+        case CV_16UC2: dest.encoding = "_16UC2"; break;
+        case CV_16UC3: dest.encoding = "_16UC3"; break;
+        case CV_16UC4: dest.encoding = "_16UC4"; break;
+        case CV_16SC1: dest.encoding = "_16SC1"; break;
+        case CV_16SC2: dest.encoding = "_16SC2"; break;
+        case CV_16SC3: dest.encoding = "_16SC3"; break;
+        case CV_16SC4: dest.encoding = "_16SC4"; break;
+        case CV_32SC1: dest.encoding = "_32SC1"; break;
+        case CV_32SC2: dest.encoding = "_32SC2"; break;
+        case CV_32SC3: dest.encoding = "_32SC3"; break;
+        case CV_32SC4: dest.encoding = "_32SC4"; break;
+        case CV_32FC1: dest.encoding = "_32FC1"; break;
+        case CV_32FC2: dest.encoding = "_32FC2"; break;
+        case CV_32FC3: dest.encoding = "_32FC3"; break;
+        case CV_32FC4: dest.encoding = "_32FC4"; break;
+        case CV_64FC1: dest.encoding = "_64FC1"; break;
+        case CV_64FC2: dest.encoding = "_64FC2"; break;
+        case CV_64FC3: dest.encoding = "_64FC3"; break;
+        case CV_64FC4: dest.encoding = "_64FC4"; break;
+        default: assert(0);
+        }
+      } else {
+        // XXX JCB - should verify encoding
+        // XXX JCB - should verify that channels match the channels in original image
+        dest.encoding = encoding;
+      }
+
       dest.width = cvm->width;
       dest.height = cvm->height;
       dest.step = cvm->step;

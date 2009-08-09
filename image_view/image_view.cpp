@@ -95,10 +95,10 @@ public:
       msg->encoding = "mono";
 #endif
 
-    if (img_bridge_.fromImage(*msg))
+    if (img_bridge_.fromImage(*msg, "bgr8"))
       cvShowImage(window_name_.c_str(), img_bridge_.toIpl());
     else
-      ROS_ERROR("Unable to convert from %d to bgr", msg->type);
+      ROS_ERROR("Unable to convert image to bgr");
   }
 
   static void mouse_cb(int event, int x, int y, int flags, void* param)

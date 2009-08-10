@@ -102,34 +102,34 @@ namespace sensor_msgs
       CvMat cvmHeader;
       
       int type;
-      if (rosimg.encoding == "_8UC1") type = CV_8UC1;
-      else if (rosimg.encoding == "_8UC2") type = CV_8UC2;
-      else if (rosimg.encoding == "_8UC3") type = CV_8UC3;
-      else if (rosimg.encoding == "_8UC4") type = CV_8UC4;
-      else if (rosimg.encoding == "_8SC1") type = CV_8SC1;
-      else if (rosimg.encoding == "_8SC2") type = CV_8SC2;
-      else if (rosimg.encoding == "_8SC3") type = CV_8SC3;
-      else if (rosimg.encoding == "_8SC4") type = CV_8SC4;
-      else if (rosimg.encoding == "_16UC1") type = CV_16UC1;
-      else if (rosimg.encoding == "_16UC2") type = CV_16UC2;
-      else if (rosimg.encoding == "_16UC3") type = CV_16UC3;
-      else if (rosimg.encoding == "_16UC4") type = CV_16UC4;
-      else if (rosimg.encoding == "_16SC1") type = CV_16SC1;
-      else if (rosimg.encoding == "_16SC2") type = CV_16SC2;
-      else if (rosimg.encoding == "_16SC3") type = CV_16SC3;
-      else if (rosimg.encoding == "_16SC4") type = CV_16SC4;
-      else if (rosimg.encoding == "_32SC1") type = CV_32SC1;
-      else if (rosimg.encoding == "_32SC2") type = CV_32SC2;
-      else if (rosimg.encoding == "_32SC3") type = CV_32SC3;
-      else if (rosimg.encoding == "_32SC4") type = CV_32SC4;
-      else if (rosimg.encoding == "_32FC1") type = CV_32FC1;
-      else if (rosimg.encoding == "_32FC2") type = CV_32FC2;
-      else if (rosimg.encoding == "_32FC3") type = CV_32FC3;
-      else if (rosimg.encoding == "_32FC4") type = CV_32FC4;
-      else if (rosimg.encoding == "_64FC1") type = CV_64FC1;
-      else if (rosimg.encoding == "_64FC2") type = CV_64FC2;
-      else if (rosimg.encoding == "_64FC3") type = CV_64FC3;
-      else if (rosimg.encoding == "_64FC4") type = CV_64FC4;
+      if (rosimg.encoding == "8UC1") type = CV_8UC1;
+      else if (rosimg.encoding == "8UC2") type = CV_8UC2;
+      else if (rosimg.encoding == "8UC3") type = CV_8UC3;
+      else if (rosimg.encoding == "8UC4") type = CV_8UC4;
+      else if (rosimg.encoding == "8SC1") type = CV_8SC1;
+      else if (rosimg.encoding == "8SC2") type = CV_8SC2;
+      else if (rosimg.encoding == "8SC3") type = CV_8SC3;
+      else if (rosimg.encoding == "8SC4") type = CV_8SC4;
+      else if (rosimg.encoding == "16UC1") type = CV_16UC1;
+      else if (rosimg.encoding == "16UC2") type = CV_16UC2;
+      else if (rosimg.encoding == "16UC3") type = CV_16UC3;
+      else if (rosimg.encoding == "16UC4") type = CV_16UC4;
+      else if (rosimg.encoding == "16SC1") type = CV_16SC1;
+      else if (rosimg.encoding == "16SC2") type = CV_16SC2;
+      else if (rosimg.encoding == "16SC3") type = CV_16SC3;
+      else if (rosimg.encoding == "16SC4") type = CV_16SC4;
+      else if (rosimg.encoding == "32SC1") type = CV_32SC1;
+      else if (rosimg.encoding == "32SC2") type = CV_32SC2;
+      else if (rosimg.encoding == "32SC3") type = CV_32SC3;
+      else if (rosimg.encoding == "32SC4") type = CV_32SC4;
+      else if (rosimg.encoding == "32FC1") type = CV_32FC1;
+      else if (rosimg.encoding == "32FC2") type = CV_32FC2;
+      else if (rosimg.encoding == "32FC3") type = CV_32FC3;
+      else if (rosimg.encoding == "32FC4") type = CV_32FC4;
+      else if (rosimg.encoding == "64FC1") type = CV_64FC1;
+      else if (rosimg.encoding == "64FC2") type = CV_64FC2;
+      else if (rosimg.encoding == "64FC3") type = CV_64FC3;
+      else if (rosimg.encoding == "64FC4") type = CV_64FC4;
       else if (rosimg.encoding == "rgb8") type = CV_8UC3;
       else if (rosimg.encoding == "bgr8") type = CV_8UC3;
       else if (rosimg.encoding == "rgba8") type = CV_8UC4;
@@ -157,7 +157,7 @@ namespace sensor_msgs
             change = CV_RGB2RGBA;
           if (encoding == "mono8" || encoding == "mono16")
             change = CV_RGB2GRAY;
-        } else if ((rosimg.encoding == "bgr8") || (rosimg.encoding == "_8UC3")) {
+        } else if ((rosimg.encoding == "bgr8") || (rosimg.encoding == "8UC3")) {
           if (encoding == "rgb8")
             change = CV_BGR2RGB;
           if (encoding == "bgra8")
@@ -171,14 +171,14 @@ namespace sensor_msgs
             change = CV_RGBA2BGR;
           if (encoding == "mono8" || encoding == "mono16")
             change = CV_RGBA2GRAY;
-        } else if ((rosimg.encoding == "bgra8") || (rosimg.encoding == "_8UC4")) {
+        } else if ((rosimg.encoding == "bgra8") || (rosimg.encoding == "8UC4")) {
           if (encoding == "rgb8")
             change = CV_BGRA2RGB;
           if (encoding == "bgr8")
             change = CV_BGRA2BGR;
           if (encoding == "mono8" || encoding == "mono16")
             change = CV_BGRA2GRAY;
-        } else if (rosimg.encoding == "mono8" || rosimg.encoding == "mono16"  || rosimg.encoding == "_8UC1") {
+        } else if (rosimg.encoding == "mono8" || rosimg.encoding == "mono16"  || rosimg.encoding == "8UC1") {
           if (encoding == "rgb8")
             change = CV_GRAY2RGB;
           if (encoding == "bgr8")

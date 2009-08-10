@@ -84,7 +84,7 @@ TEST(OpencvTests, testCase_encode_decode)
 }
 
 
-TEST(OpencvTests, testCase_decode_conversion)
+TEST(OpencvTests, testCase_decode_8u)
 {
   IplImage *original = cvCreateImage(cvSize(640, 480), IPL_DEPTH_8U, 1);
   CvRNG r = cvRNG(77);
@@ -100,6 +100,36 @@ TEST(OpencvTests, testCase_decode_conversion)
   success = img_bridge_.fromImage(image_message, "passthrough");
   ASSERT_TRUE(success);
   EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 1);
+
+  success = img_bridge_.fromImage(image_message, "mono8");
+  ASSERT_TRUE(success);
+  EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 1);
+
+  success = img_bridge_.fromImage(image_message, "rgb8");
+  ASSERT_TRUE(success);
+  EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 3);
+
+  success = img_bridge_.fromImage(image_message, "bgr8");
+  ASSERT_TRUE(success);
+  EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 3);
+}
+
+TEST(OpencvTests, testCase_decode_8uc3)
+{
+  IplImage *original = cvCreateImage(cvSize(640, 480), IPL_DEPTH_8U, 3);
+  CvRNG r = cvRNG(77);
+  cvRandArr(&r, original, CV_RAND_UNI, cvScalar(0,0,0,0), cvScalar(255,255,255,255));
+
+  sensor_msgs::Image image_message;
+  sensor_msgs::CvBridge img_bridge_;
+
+  int success;
+  success = img_bridge_.fromIpltoRosImage(original, image_message);
+  ASSERT_TRUE(success);
+
+  success = img_bridge_.fromImage(image_message, "passthrough");
+  ASSERT_TRUE(success);
+  EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 3);
 
   success = img_bridge_.fromImage(image_message, "mono8");
   ASSERT_TRUE(success);

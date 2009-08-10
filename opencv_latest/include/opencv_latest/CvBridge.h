@@ -160,6 +160,8 @@ namespace sensor_msgs
         } else if ((rosimg.encoding == "bgr8") || (rosimg.encoding == "8UC3")) {
           if (encoding == "rgb8")
             change = CV_BGR2RGB;
+          if (encoding == "bgr8")
+            change = CV_COLORCVT_MAX;
           if (encoding == "bgra8")
             change = CV_BGR2BGRA;
           if (encoding == "mono8" || encoding == "mono16")
@@ -244,34 +246,34 @@ namespace sensor_msgs
 
       if (encoding == "passthrough") {
         switch (cvm->type & (CV_MAT_TYPE_MASK | CV_MAT_DEPTH_MASK)) {
-        case CV_8UC1: dest.encoding = "_8UC1"; break;
-        case CV_8UC2: dest.encoding = "_8UC2"; break;
-        case CV_8UC3: dest.encoding = "_8UC3"; break;
-        case CV_8UC4: dest.encoding = "_8UC4"; break;
-        case CV_8SC1: dest.encoding = "_8SC1"; break;
-        case CV_8SC2: dest.encoding = "_8SC2"; break;
-        case CV_8SC3: dest.encoding = "_8SC3"; break;
-        case CV_8SC4: dest.encoding = "_8SC4"; break;
-        case CV_16UC1: dest.encoding = "_16UC1"; break;
-        case CV_16UC2: dest.encoding = "_16UC2"; break;
-        case CV_16UC3: dest.encoding = "_16UC3"; break;
-        case CV_16UC4: dest.encoding = "_16UC4"; break;
-        case CV_16SC1: dest.encoding = "_16SC1"; break;
-        case CV_16SC2: dest.encoding = "_16SC2"; break;
-        case CV_16SC3: dest.encoding = "_16SC3"; break;
-        case CV_16SC4: dest.encoding = "_16SC4"; break;
-        case CV_32SC1: dest.encoding = "_32SC1"; break;
-        case CV_32SC2: dest.encoding = "_32SC2"; break;
-        case CV_32SC3: dest.encoding = "_32SC3"; break;
-        case CV_32SC4: dest.encoding = "_32SC4"; break;
-        case CV_32FC1: dest.encoding = "_32FC1"; break;
-        case CV_32FC2: dest.encoding = "_32FC2"; break;
-        case CV_32FC3: dest.encoding = "_32FC3"; break;
-        case CV_32FC4: dest.encoding = "_32FC4"; break;
-        case CV_64FC1: dest.encoding = "_64FC1"; break;
-        case CV_64FC2: dest.encoding = "_64FC2"; break;
-        case CV_64FC3: dest.encoding = "_64FC3"; break;
-        case CV_64FC4: dest.encoding = "_64FC4"; break;
+        case CV_8UC1: dest.encoding = "8UC1"; break;
+        case CV_8UC2: dest.encoding = "8UC2"; break;
+        case CV_8UC3: dest.encoding = "8UC3"; break;
+        case CV_8UC4: dest.encoding = "8UC4"; break;
+        case CV_8SC1: dest.encoding = "8SC1"; break;
+        case CV_8SC2: dest.encoding = "8SC2"; break;
+        case CV_8SC3: dest.encoding = "8SC3"; break;
+        case CV_8SC4: dest.encoding = "8SC4"; break;
+        case CV_16UC1: dest.encoding = "16UC1"; break;
+        case CV_16UC2: dest.encoding = "16UC2"; break;
+        case CV_16UC3: dest.encoding = "16UC3"; break;
+        case CV_16UC4: dest.encoding = "16UC4"; break;
+        case CV_16SC1: dest.encoding = "16SC1"; break;
+        case CV_16SC2: dest.encoding = "16SC2"; break;
+        case CV_16SC3: dest.encoding = "16SC3"; break;
+        case CV_16SC4: dest.encoding = "16SC4"; break;
+        case CV_32SC1: dest.encoding = "32SC1"; break;
+        case CV_32SC2: dest.encoding = "32SC2"; break;
+        case CV_32SC3: dest.encoding = "32SC3"; break;
+        case CV_32SC4: dest.encoding = "32SC4"; break;
+        case CV_32FC1: dest.encoding = "32FC1"; break;
+        case CV_32FC2: dest.encoding = "32FC2"; break;
+        case CV_32FC3: dest.encoding = "32FC3"; break;
+        case CV_32FC4: dest.encoding = "32FC4"; break;
+        case CV_64FC1: dest.encoding = "64FC1"; break;
+        case CV_64FC2: dest.encoding = "64FC2"; break;
+        case CV_64FC3: dest.encoding = "64FC3"; break;
+        case CV_64FC4: dest.encoding = "64FC4"; break;
         default: assert(0);
         }
       } else {
@@ -289,6 +291,5 @@ namespace sensor_msgs
     }
   };
 }
-
 
 #endif

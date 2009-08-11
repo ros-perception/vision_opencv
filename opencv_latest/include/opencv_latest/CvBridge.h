@@ -93,131 +93,147 @@ namespace sensor_msgs
       return img_;
     }
 
+    int encoding_as_cvtype(std::string encoding)
+    {
+      if (encoding == "8UC1") return CV_8UC1;
+      if (encoding == "8UC2") return CV_8UC2;
+      if (encoding == "8UC3") return CV_8UC3;
+      if (encoding == "8UC4") return CV_8UC4;
+      if (encoding == "8SC1") return CV_8SC1;
+      if (encoding == "8SC2") return CV_8SC2;
+      if (encoding == "8SC3") return CV_8SC3;
+      if (encoding == "8SC4") return CV_8SC4;
+      if (encoding == "16UC1") return CV_16UC1;
+      if (encoding == "16UC2") return CV_16UC2;
+      if (encoding == "16UC3") return CV_16UC3;
+      if (encoding == "16UC4") return CV_16UC4;
+      if (encoding == "16SC1") return CV_16SC1;
+      if (encoding == "16SC2") return CV_16SC2;
+      if (encoding == "16SC3") return CV_16SC3;
+      if (encoding == "16SC4") return CV_16SC4;
+      if (encoding == "32SC1") return CV_32SC1;
+      if (encoding == "32SC2") return CV_32SC2;
+      if (encoding == "32SC3") return CV_32SC3;
+      if (encoding == "32SC4") return CV_32SC4;
+      if (encoding == "32FC1") return CV_32FC1;
+      if (encoding == "32FC2") return CV_32FC2;
+      if (encoding == "32FC3") return CV_32FC3;
+      if (encoding == "32FC4") return CV_32FC4;
+      if (encoding == "64FC1") return CV_64FC1;
+      if (encoding == "64FC2") return CV_64FC2;
+      if (encoding == "64FC3") return CV_64FC3;
+      if (encoding == "64FC4") return CV_64FC4;
+      if (encoding == "rgb8") return CV_8UC3;
+      if (encoding == "bgr8") return CV_8UC3;
+      if (encoding == "rgba8") return CV_8UC4;
+      if (encoding == "bgra8") return CV_8UC4;
+      if (encoding == "mono8") return CV_8UC1;
+      if (encoding == "mono16") return CV_16UC1;
+      return -1;
+    }
+
+    std::string encoding_as_fmt(std::string encoding)
+    {
+      std::string fmt;
+      int source_channels = CV_MAT_CN(encoding_as_cvtype(encoding));
+      if (source_channels == 1)
+        fmt = "GRAY";
+      else if ("rgb8" == encoding)
+        fmt = "RGB";
+      else if ("rgba8" == encoding)
+        fmt = "RGBA";
+      else if (source_channels == 3)
+        fmt = "BGR";
+      else if (source_channels == 4)
+        fmt = "BGRA";
+      return fmt;
+    }
+
     /**
      * Converts a ROS Image into an OpenCV IPL Image.
      * \param rosimg The ROS Image message
      */
-    bool fromImage(const Image& rosimg, std::string encoding = "passthrough")
+    bool fromImage(const Image& rosimg, std::string desired_encoding = "passthrough")
     {
       CvMat cvmHeader;
       
-      int type;
-      if (rosimg.encoding == "8UC1") type = CV_8UC1;
-      else if (rosimg.encoding == "8UC2") type = CV_8UC2;
-      else if (rosimg.encoding == "8UC3") type = CV_8UC3;
-      else if (rosimg.encoding == "8UC4") type = CV_8UC4;
-      else if (rosimg.encoding == "8SC1") type = CV_8SC1;
-      else if (rosimg.encoding == "8SC2") type = CV_8SC2;
-      else if (rosimg.encoding == "8SC3") type = CV_8SC3;
-      else if (rosimg.encoding == "8SC4") type = CV_8SC4;
-      else if (rosimg.encoding == "16UC1") type = CV_16UC1;
-      else if (rosimg.encoding == "16UC2") type = CV_16UC2;
-      else if (rosimg.encoding == "16UC3") type = CV_16UC3;
-      else if (rosimg.encoding == "16UC4") type = CV_16UC4;
-      else if (rosimg.encoding == "16SC1") type = CV_16SC1;
-      else if (rosimg.encoding == "16SC2") type = CV_16SC2;
-      else if (rosimg.encoding == "16SC3") type = CV_16SC3;
-      else if (rosimg.encoding == "16SC4") type = CV_16SC4;
-      else if (rosimg.encoding == "32SC1") type = CV_32SC1;
-      else if (rosimg.encoding == "32SC2") type = CV_32SC2;
-      else if (rosimg.encoding == "32SC3") type = CV_32SC3;
-      else if (rosimg.encoding == "32SC4") type = CV_32SC4;
-      else if (rosimg.encoding == "32FC1") type = CV_32FC1;
-      else if (rosimg.encoding == "32FC2") type = CV_32FC2;
-      else if (rosimg.encoding == "32FC3") type = CV_32FC3;
-      else if (rosimg.encoding == "32FC4") type = CV_32FC4;
-      else if (rosimg.encoding == "64FC1") type = CV_64FC1;
-      else if (rosimg.encoding == "64FC2") type = CV_64FC2;
-      else if (rosimg.encoding == "64FC3") type = CV_64FC3;
-      else if (rosimg.encoding == "64FC4") type = CV_64FC4;
-      else if (rosimg.encoding == "rgb8") type = CV_8UC3;
-      else if (rosimg.encoding == "bgr8") type = CV_8UC3;
-      else if (rosimg.encoding == "rgba8") type = CV_8UC4;
-      else if (rosimg.encoding == "bgra8") type = CV_8UC4;
-      else if (rosimg.encoding == "mono8") type = CV_8UC1;
-      else if (rosimg.encoding == "mono16") type = CV_16UC1;
-      else return false;
-      cvInitMatHeader(&cvmHeader, rosimg.height, rosimg.width, type, const_cast<uint8_t*>(&(rosimg.data[0])), rosimg.step);
-      cvGetImage(&cvmHeader, rosimg_);
-
       // cvSetData(rosimg_, const_cast<uint8_t*>(&(rosimg.data[0])), rosimg.step);
 
-      if ((encoding == "passthrough") || (rosimg.encoding == encoding)) {
+      int source_type = encoding_as_cvtype(rosimg.encoding);
+
+      cvInitMatHeader(&cvmHeader, rosimg.height, rosimg.width, source_type, const_cast<uint8_t*>(&(rosimg.data[0])), rosimg.step);
+      cvGetImage(&cvmHeader, rosimg_);
+
+      if (desired_encoding == "passthrough") {
         img_ = rosimg_;
       } else {
-        int change = -1;
-        int newtype = -1;
+        // Might need to do a conversion.  sourcefmt and destfmt can be
+        // one of GRAY, RGB, BGR, RGBA, BGRA.
+        std::string sourcefmt = encoding_as_fmt(rosimg.encoding);
+        std::string destfmt = encoding_as_fmt(desired_encoding);
+        int destination_type = encoding_as_cvtype(desired_encoding);
 
-        if (rosimg.encoding == "rgb8") {
-          if (encoding == "bgr8")
-            change = CV_RGB2BGR;
-          if (encoding == "bgra8")
-            change = CV_RGB2BGRA;
-          if (encoding == "rgba8")
-            change = CV_RGB2RGBA;
-          if (encoding == "mono8" || encoding == "mono16")
-            change = CV_RGB2GRAY;
-        } else if ((rosimg.encoding == "bgr8") || (rosimg.encoding == "8UC3")) {
-          if (encoding == "rgb8")
-            change = CV_BGR2RGB;
-          if (encoding == "bgr8")
-            change = CV_COLORCVT_MAX;
-          if (encoding == "bgra8")
-            change = CV_BGR2BGRA;
-          if (encoding == "mono8" || encoding == "mono16")
-            change = CV_BGR2GRAY;
-        } else if (rosimg.encoding == "rgba8") {
-          if (encoding == "rgb8")
-            change = CV_RGBA2RGB;
-          if (encoding == "bgr8")
-            change = CV_RGBA2BGR;
-          if (encoding == "mono8" || encoding == "mono16")
-            change = CV_RGBA2GRAY;
-        } else if ((rosimg.encoding == "bgra8") || (rosimg.encoding == "8UC4")) {
-          if (encoding == "rgb8")
-            change = CV_BGRA2RGB;
-          if (encoding == "bgr8")
-            change = CV_BGRA2BGR;
-          if (encoding == "mono8" || encoding == "mono16")
-            change = CV_BGRA2GRAY;
-        } else if (rosimg.encoding == "mono8" || rosimg.encoding == "mono16"  || rosimg.encoding == "8UC1") {
-          if (encoding == "rgb8")
-            change = CV_GRAY2RGB;
-          if (encoding == "bgr8")
-            change = CV_GRAY2BGR;
-          if (encoding == "bgra8")
-            change = CV_GRAY2BGRA;
-          if (encoding == "rgba8")
-            change = CV_GRAY2RGBA;
-          if (encoding == "mono8" || encoding == "mono16")
-            change = CV_COLORCVT_MAX; // means do no conversion
-        }
-
-        if (encoding == "bgr8")
-           newtype = CV_8UC3;
-        if (encoding == "rgb8")
-           newtype = CV_8UC3;
-        if (encoding == "bgra8")
-           newtype = CV_8UC4;
-        if (encoding == "rgba")
-           newtype = CV_8UC4;
-        if (encoding == "mono8")
-           newtype = CV_8UC1;
-        if (encoding == "mono16")
-           newtype = CV_16UC1;
-
-        // printf("change=%d, newtype=%d\n", change, newtype);
-
-        img_ = rosimg_;  // realloc uses this as a hidden argument.
-
-        if (change == -1 || newtype == -1)
-          return false;
-        reallocIfNeeded(&cvtimg_, IPL_DEPTH_8U, CV_MAT_CN(newtype));
-        if (change == CV_COLORCVT_MAX)
-          cvConvertScale(rosimg_, cvtimg_);
-        else
-          cvCvtColor(rosimg_, cvtimg_, change);
+        if ((sourcefmt == destfmt) && (source_type == destination_type)) {
+          img_ = rosimg_;
+        } else {
+          img_ = rosimg_;  // realloc uses this as a hidden argument.
+          reallocIfNeeded(&cvtimg_, IPL_DEPTH_8U, CV_MAT_CN(destination_type));
+          if (sourcefmt == destfmt) {
+            cvConvertScale(rosimg_, cvtimg_);
+          } else {
+            if (sourcefmt == "GRAY") {
+              if (destfmt == "RGB")
+                cvCvtColor(rosimg_, cvtimg_, CV_GRAY2RGB);
+              if (destfmt == "BGR")
+                cvCvtColor(rosimg_, cvtimg_, CV_GRAY2BGR);
+              if (destfmt == "RGBA")
+                cvCvtColor(rosimg_, cvtimg_, CV_GRAY2RGBA);
+              if (destfmt == "BGRA")
+                cvCvtColor(rosimg_, cvtimg_, CV_GRAY2BGRA);
+            }
+            if (sourcefmt == "RGB") {
+              if (destfmt == "GRAY")
+                cvCvtColor(rosimg_, cvtimg_, CV_RGB2GRAY);
+              if (destfmt == "BGR")
+                cvCvtColor(rosimg_, cvtimg_, CV_RGB2BGR);
+              if (destfmt == "RGBA")
+                cvCvtColor(rosimg_, cvtimg_, CV_RGB2RGBA);
+              if (destfmt == "BGRA")
+                cvCvtColor(rosimg_, cvtimg_, CV_RGB2BGRA);
+            }
+            if (sourcefmt == "BGR") {
+              if (destfmt == "GRAY")
+                cvCvtColor(rosimg_, cvtimg_, CV_BGR2GRAY);
+              if (destfmt == "RGB")
+                cvCvtColor(rosimg_, cvtimg_, CV_BGR2RGB);
+              if (destfmt == "RGBA")
+                cvCvtColor(rosimg_, cvtimg_, CV_BGR2RGBA);
+              if (destfmt == "BGRA")
+                cvCvtColor(rosimg_, cvtimg_, CV_BGR2BGRA);
+            }
+            if (sourcefmt == "RGBA") {
+              if (destfmt == "GRAY")
+                cvCvtColor(rosimg_, cvtimg_, CV_RGBA2GRAY);
+              if (destfmt == "RGB")
+                cvCvtColor(rosimg_, cvtimg_, CV_RGBA2RGB);
+              if (destfmt == "BGR")
+                cvCvtColor(rosimg_, cvtimg_, CV_RGBA2BGR);
+              if (destfmt == "BGRA")
+                cvCvtColor(rosimg_, cvtimg_, CV_RGBA2BGRA);
+            }
+            if (sourcefmt == "BGRA") {
+              if (destfmt == "GRAY")
+                cvCvtColor(rosimg_, cvtimg_, CV_BGRA2GRAY);
+              if (destfmt == "RGB")
+                cvCvtColor(rosimg_, cvtimg_, CV_BGRA2RGB);
+              if (destfmt == "BGR")
+                cvCvtColor(rosimg_, cvtimg_, CV_BGRA2BGR);
+              if (destfmt == "RGBA")
+                cvCvtColor(rosimg_, cvtimg_, CV_BGRA2RGBA);
+            }
+          }
         img_ = cvtimg_;
+        }
       }
       return true;
     }

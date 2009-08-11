@@ -41,6 +41,7 @@ import rospy
 import cv
 
 import sensor_msgs.msg
+from opencv_latest.cv_bridge import CvBridge
 
 class source:
 
@@ -56,6 +57,9 @@ class source:
     ball_yv = 10
     ball_x = 100
     ball_y = 100
+
+    cvb = CvBridge()
+
     while not rospy.core.is_shutdown():
 
       cv.Set(cvim, 0)
@@ -68,13 +72,7 @@ class source:
       if ball_y in [10, 470]:
         ball_yv = -ball_yv
 
-      img_msg = sensor_msgs.msg.Image()
-      img_msg.width = 640
-      img_msg.height = 480
-      img_msg.encoding = "_8UC1"
-      img_msg.step = 640
-      img_msg.data = cvim.tostring()
-      self.pub.publish(img_msg)
+      self.pub.publish(cvb.cv_to_imgmsg(cvim))
 
       time.sleep(0.03)
 

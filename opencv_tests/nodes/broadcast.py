@@ -41,28 +41,25 @@ import rospy
 import cv
 
 import sensor_msgs.msg
+from opencv_latest.cv_bridge import CvBridge
 
 class source:
 
-  def __init__(self, filenames):
-    self.pub = rospy.Publisher("/opencv_tests/images", sensor_msgs.msg.Image)
+  def __init__(self, topic, filenames):
+    self.pub = rospy.Publisher(topic, sensor_msgs.msg.Image)
     self.filenames = filenames
 
   def spin(self):
     time.sleep(1.0)
+    cvb = CvBridge()
     while not rospy.core.is_shutdown():
       cvim = cv.LoadImage(self.filenames[0])
+      self.pub.publish(cvb.cv_to_imgmsg(cvim))
       self.filenames = self.filenames[1:] + [self.filenames[0]]
-      img_msg = sensor_msgs.msg.Image()
-      (img_msg.width, img_msg.height) = cv.GetSize(cvim)
-      img_msg.type = cv.GetElemType(cvim)
-      img_msg.step = img_msg.width * cv.CV_MAT_CN(cv.GetElemType(cvim))
-      img_msg.data = cvim.tostring()
-      self.pub.publish(img_msg)
       time.sleep(1)
 
 def main(args):
-  s = source(args[1:])
+  s = source(args[1], args[2:])
   rospy.init_node('source')
   try:
     s.spin()

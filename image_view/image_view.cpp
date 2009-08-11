@@ -98,7 +98,7 @@ public:
     if (img_bridge_.fromImage(*msg, "bgr8"))
       cvShowImage(window_name_.c_str(), img_bridge_.toIpl());
     else
-      ROS_ERROR("Unable to convert image to bgr");
+      ROS_ERROR("Unable to convert %s image to bgr8", msg->encoding.c_str());
   }
 
   static void mouse_cb(int event, int x, int y, int flags, void* param)

@@ -1,5 +1,6 @@
 <package>
 <description brief="Python bindings for OpenCV">
+A Python OpenCV interface that is efficient, comprehensive, and intuitive. 
 </description>
 <author>James Bowman</author>
 <license>BSD</license>

@@ -15,7 +15,8 @@ include $(shell rospack find mk)/svn_checkout.mk
 CMAKE = cmake 
 CMAKE_ARGS = -D CMAKE_BUILD_TYPE=RELEASE \
              -D CMAKE_INSTALL_PREFIX=`rospack find opencv_latest`/$(INSTALL_DIR) \
-             -D BUILD_PYTHON_SUPPORT=OFF
+             -D BUILD_PYTHON_SUPPORT=OFF \
+						 -D WITH_FFMPEG=OFF
 
 installed: $(SVN_DIR) patched
 	mkdir -p $(SVN_DIR)/build

@@ -1,0 +1,18 @@
+ffmpeg:
+  ubuntu: libavcodec-dev libavformat-dev libavutil-dev libswscale-dev
+  debian: libavcodec-dev libavformat-dev libavutil-dev libswscale-dev
+  macports: ffmpeg
+  arch: ffmpeg
+  gentoo: ffmpeg
+graphicsmagick:
+  ubuntu: libgraphicsmagick++1-dev
+  debian: libgraphicsmagick++1-dev
+  macports: GraphicsMagick
+  arch: graphicsmagick
+  gentoo: imagemagick
+jasper:
+  ubuntu: libjasper-dev
+  debian: libjasper-dev
+  macports: jasper
+  arch: jasper
+  gentoo: jasper

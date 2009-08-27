@@ -1,13 +1,14 @@
-<stack name="opencv" version="0.1">
-  <description brief="A stack for opencv libraries">
-    opencv c++ and python libraries.
-  </description>
-  <author>Maintained by Tully Foote tfoote@willowgarage.com</author>
-  <license>BSD</license>
-  <review status="unreviewed" notes=""/>
-  <url>http://pr.willowgarage.com/wiki/ROS</url>
+<stack name="opencv" version="0.1.0">
+  <description brief="opencv">
 
-  <depend stack="ros"/> <!-- roscpp --> 
-  <depend stack="common_msgs"/> <!-- sensor_msgs, sensor_msgs --> 
+    opencv c++ and python libraries.
+
+  </description>
+  <author>James Bowman</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/opencv</url>
+  <depend stack="ros"/> <!-- rostest, rospy --> 
+  <depend stack="common_msgs"/> <!-- sensor_msgs --> 
 
 </stack>

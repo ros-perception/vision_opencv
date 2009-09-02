@@ -19,6 +19,7 @@ in a way that can be managed by the ROS dependency system.
 <versioncontrol type="svn" url="https://opencvlibrary.svn.sourceforge.net/svnroot/opencvlibrary/tags/latest_tested_snapshot/opencv"/>
 <rosdep name="ffmpeg"/>
 <rosdep name="jasper"/>
+<rosdep name="swig"/>
 <rosdep name="graphicsmagick"/>
 </package>
 

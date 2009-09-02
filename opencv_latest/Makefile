@@ -24,7 +24,7 @@ installed: $(SVN_DIR) patched
 	cd $(SVN_DIR)/build && $(CMAKE) $(CMAKE_ARGS) ..
 	cd $(SVN_DIR)/build && make $(ROS_PARALLEL_JOBS) && make install
 	@echo "patch opencv.pc to pass -Wl,-rpath,-L{libdir}"
-	-mv `rospack find opencv_latest`/$(INSTALL_DIR)/lib/pkgconfig/opencv.pc $(PWD)/$(INSTALL_DIR)/lib/pkgconfig/opencv.bak
+	-mv `rospack find opencv_latest`/$(INSTALL_DIR)/lib/pkgconfig/opencv.pc $(CURDIR)/$(INSTALL_DIR)/lib/pkgconfig/opencv.bak
 	sed 's%Libs: -L$${libdir} -lcxcore%Libs: -Wl,-rpath,$${libdir} -L$${libdir} -lcxcore%g' `rospack find opencv_latest`/$(INSTALL_DIR)/lib/pkgconfig/opencv.bak > `rospack find opencv_latest`/$(INSTALL_DIR)/lib/pkgconfig/opencv.pc
 	touch installed
 

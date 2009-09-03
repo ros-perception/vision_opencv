@@ -21,5 +21,6 @@ in a way that can be managed by the ROS dependency system.
 <rosdep name="jasper"/>
 <rosdep name="swig"/>
 <rosdep name="graphicsmagick"/>
+<rosdep name="gtk2"/>
 </package>
 

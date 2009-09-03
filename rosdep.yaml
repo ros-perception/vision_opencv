@@ -16,3 +16,9 @@ jasper:
   macports: jasper
   arch: jasper
   gentoo: jasper
+gtk2:
+  ubuntu: libgtk2.0-dev
+  debian: libgtk2.0-dev
+  arch: gtk2
+  macports: gtk2
+  gentoo: gtk+

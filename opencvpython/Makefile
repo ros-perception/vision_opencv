@@ -10,8 +10,8 @@ installed: $(SVN_DIR)
 	-rm -rf src
 	mkdir -p src
 	cd $(SVN_DIR) && \
-			   OPENCV_ROOT=$(PWD)/../opencv_latest/opencv python setup.py build_ext --rpath $(PWD)/../opencv_latest/opencv/lib && \
-			   OPENCV_ROOT=$(PWD)/../opencv_latest/opencv python setup.py install --prefix ../../src 
+			   OPENCV_ROOT=$(shell rospack find opencv_latest)/opencv python setup.py build_ext --rpath $(shell rospack find opencv_latest)/opencv/lib && \
+			   OPENCV_ROOT=$(shell rospack find opencv_latest)/opencv python setup.py install --prefix ../../src 
 	mv src/lib/python2.?/site-packages/* src/ 
 	rm -rf src/bin src/lib
 	touch installed

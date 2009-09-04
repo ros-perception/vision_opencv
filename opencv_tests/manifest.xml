@@ -1,0 +1,20 @@
+<package>
+  <description brief="opencv_tests">
+
+     opencv_tests
+
+  </description>
+  <author>James Bowman</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://pr.willowgarage.com/wiki/opencv_tests</url>
+  <depend package="opencv_latest"/>
+  <depend package="opencvpython"/>
+  <depend package="rostest"/>
+  <depend package="rospy"/>
+  <depend package="opencvpython"/>
+  <depend package="sensor_msgs"/>
+
+</package>
+
+

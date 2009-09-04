@@ -1,5 +1,6 @@
 <package>
 <description brief="Python bindings for OpenCV">
+A Python OpenCV interface that is efficient, comprehensive, and intuitive. 
 </description>
 <author>James Bowman</author>
 <license>BSD</license>
@@ -8,4 +9,5 @@
 <url>http://opencvpython.sourceforge.net</url>
 <export>
 </export>
+<versioncontrol type="svn" url="https://opencvpython.svn.sourceforge.net/svnroot/opencvpython"/>
 </package>

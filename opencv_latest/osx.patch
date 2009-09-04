@@ -1,0 +1,16 @@
+Index: src/highgui/cvcap_ffmpeg.cpp
+===================================================================
+--- src/highgui/cvcap_ffmpeg.cpp	(revision 1981)
++++ src/highgui/cvcap_ffmpeg.cpp	(working copy)
+@@ -574,7 +574,11 @@
+     return &frame;
+ }
+ 
++#if defined(__APPLE__)
++#define AV_NOPTS_VALUE_ ((int64_t)0x8000000000000000LL)
++#else
+ #define AV_NOPTS_VALUE_ ((int64_t)AV_NOPTS_VALUE)
++#endif
+ 
+ double CvCapture_FFMPEG::getProperty( int property_id )
+ {

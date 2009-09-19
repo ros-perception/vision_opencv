@@ -18,7 +18,8 @@ CMAKE_ARGS = -D CMAKE_BUILD_TYPE=RELEASE \
              -D BUILD_PYTHON_SUPPORT=OFF \
 						 -D WITH_FFMPEG=OFF \
 						 -D WITH_XINE=OFF \
-						 -D WITH_GSTREAMER=OFF
+						 -D WITH_GSTREAMER=OFF \
+						 -D WITH_1394=OFF
 
 installed: $(SVN_DIR) patched
 	mkdir -p $(SVN_DIR)/build

@@ -52,9 +52,29 @@ namespace sensor_msgs
   {
   public:
 
+    // @cond DOXYGEN_IGNORE
+
     IplImage* img_;
     IplImage* rosimg_;
     IplImage* cvtimg_;
+
+    CvBridge() : img_(0), rosimg_(0), cvtimg_(0)
+    {
+      rosimg_ = cvCreateImageHeader( cvSize(0,0), IPL_DEPTH_8U, 1 );
+    }
+
+    ~CvBridge()
+    {
+      if (rosimg_) {
+        cvReleaseImageHeader(&rosimg_);
+        rosimg_ = 0;
+      }
+
+      if (cvtimg_) {
+        cvReleaseImage(&cvtimg_);
+        cvtimg_ = 0;
+      }
+    }
 
     bool reallocIfNeeded_(IplImage** img, CvSize sz, int depth, int channels)
     {
@@ -76,27 +96,13 @@ namespace sensor_msgs
       return false;
     }
 
-    CvBridge() : img_(0), rosimg_(0), cvtimg_(0)
+    bool reallocIfNeeded(IplImage** img, int depth = -1, int channels = -1)
     {
-      rosimg_ = cvCreateImageHeader( cvSize(0,0), IPL_DEPTH_8U, 1 );
-    }
-
-    ~CvBridge()
-    {
-      if (rosimg_) {
-        cvReleaseImageHeader(&rosimg_);
-	rosimg_ = 0;
-      }
-
-      if (cvtimg_) {
-        cvReleaseImage(&cvtimg_);
-	cvtimg_ = 0;
-      }
-    }
-
-    inline IplImage* toIpl()
-    {
-      return img_;
+      if (depth == -1)
+        depth = img_->depth;
+      if (channels == -1)
+        channels = img_->nChannels;
+      return reallocIfNeeded_(img, cvGetSize(img_), depth, channels);
     }
 
     int encoding_as_cvtype(std::string encoding)
@@ -154,10 +160,27 @@ namespace sensor_msgs
         fmt = "BGRA";
       return fmt;
     }
+    // @endcond
+
+
+    /**
+     * Returns the OpenCV IPL Image created by method fromImage.
+     *
+     * This method will be deprecated and removed in a future release.  Use method rosImgToCv instead.
+     *
+     */
+    inline IplImage* toIpl()
+    {
+      return img_;
+    }
 
     /**
      * Converts a ROS Image into an OpenCV IPL Image.
+     *
+     * This method will be deprecated and removed in a future release.  Use method rosImgToCv instead.
+     *
      * \param rosimg The ROS Image message
+     * \desired_encoding image encoding.  See method rosImgToCv for details.
      */
     bool fromImage(const Image& rosimg, std::string desired_encoding = "passthrough")
     {
@@ -244,19 +267,14 @@ namespace sensor_msgs
       return true;
     }
 
-    bool reallocIfNeeded(IplImage** img, int depth = -1, int channels = -1)
-    {
-      if (depth == -1)
-        depth = img_->depth;
-      if (channels == -1)
-        channels = img_->nChannels;
-      return reallocIfNeeded_(img, cvGetSize(img_), depth, channels);
-    }
-
     /**
      * Converts an OpenCV IPL Image into a ROS Image that can be sent 'over the wire'.
+     *
+     * This method will be deprecated and removed in a future release.  Use method cvToRosImg instead. 
+     *
      * \param source The original Ipl Image that we want to copy from
      * \param dest The ROS Image message that we want to copy to
+     * \encoding image encoding.  See method cvToRosImg for details.
      */
     static bool fromIpltoRosImage(const IplImage* source, sensor_msgs::Image& dest, std::string encoding = "passthrough")
     {
@@ -314,6 +332,26 @@ namespace sensor_msgs
 
     /**
      * 
+        Convert an OpenCV CvArr type (that is, an IplImage or CvMat) to a ROS sensor_msgs::Image message.
+        \param cvim      An OpenCV IplImage or CvMat
+        \param encoding  The encoding of the image data, one of the following strings:
+           - \c "passthrough"
+           - \c "rgb8"
+           - \c "rgba8"
+           - \c "bgr8"
+           - \c "bgra8"
+           - \c "mono8"
+           - \c "mono16"
+            
+        If \a encoding is \c "passthrough", then the message has the same encoding as the image's OpenCV type.
+        Otherwise \a encoding must be one of the strings \c "rgb8", \c "bgr8", \c "rgba8", \c "bgra8", \c "mono8" or \c "mono16",
+        in which case the OpenCV image must have the appropriate type:
+           - \c CV_8UC3 (for \c "rgb8", \c "bgr8"),
+           - \c CV_8UC4 (for \c "rgba8", \c "bgra8"),
+           - \c CV_8UC1 (for \c "mono8"), or
+           - \c CV_16UC1 (for \c "mono16")
+
+        This function returns a sensor_msgs::Image message on success, or raises CvBridgeException on failure.
      */
     static sensor_msgs::Image::Ptr cvToRosImg(const IplImage* source, std::string encoding = "passthrough")
     {
@@ -323,6 +361,33 @@ namespace sensor_msgs
       return rosimg;
     }
 
+    /**
+        Convert a
+        sensor_msgs::Image message to an OpenCV IplImage.
+
+        \param rosimg   A sensor_msgs::Image message
+        \param desired_encoding  The encoding of the image data, one of the following strings:
+           - \c "passthrough"
+           - \c "rgb8"
+           - \c "rgba8"
+           - \c "bgr8"
+           - \c "bgra8"
+           - \c "mono8"
+           - \c "mono16"
+            
+        If \a desired_encoding is \c "passthrough", then the returned image has the same format as \a img_msg.
+        Otherwise \a desired_encoding must be one of the strings \c "rgb8", \c "bgr8", \c "rgba8", \c "bgra8", \c "mono8" or \c "mono16",
+        in which case this method converts the image using
+        \c cvCvtColor (http://opencv.willowgarage.com/documentation/image_processing.html#cvCvtColor)
+        (if necessary) and the returned image has a type as follows:
+           - \c CV_8UC3 (for \c "rgb8", \c "bgr8"),
+           - \c CV_8UC4 (for \c "rgba8", \c "bgra8"),
+           - \c CV_8UC1 (for \c "mono8"), or
+           - \c CV_16UC1 (for \c "mono16")
+
+        This function returns an OpenCV IplImage on success, or raises CvBridgeException on failure.
+
+     */
     IplImage* rosImgToCv(sensor_msgs::Image::ConstPtr rosimg, std::string desired_encoding = "passthrough")
     {
       if (!fromImage(*rosimg, desired_encoding))

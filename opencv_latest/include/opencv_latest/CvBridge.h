@@ -35,12 +35,18 @@
 #ifndef CVBRIDGE_HH
 #define CVBRIDGE_HH
 
+#include <stdexcept>
 #include "sensor_msgs/Image.h"
 #include "opencv/cxcore.h"
 #include "opencv/cv.h"
 
 namespace sensor_msgs
 {
+  class CvBridgeException: public std::runtime_error
+  {
+  public:
+    CvBridgeException(const std::string errorDescription) : std::runtime_error(errorDescription) { ; };
+  };
 
   class CvBridge
   {
@@ -304,6 +310,24 @@ namespace sensor_msgs
       dest.data.resize(cvm->step * cvm->height);
       memcpy((char*)(&dest.data[0]), source->imageData, cvm->step * cvm->height);
       return true;
+    }
+
+    /**
+     * 
+     */
+    static sensor_msgs::Image::Ptr cvToRosImg(const IplImage* source, std::string encoding = "passthrough")
+    {
+      sensor_msgs::Image::Ptr rosimg(new sensor_msgs::Image);
+      if (!fromIpltoRosImage(source, *rosimg, encoding))
+        throw CvBridgeException("Conversion to OpenCV image failed");
+      return rosimg;
+    }
+
+    IplImage* rosImgToCv(sensor_msgs::Image::ConstPtr rosimg, std::string desired_encoding = "passthrough")
+    {
+      if (!fromImage(*rosimg, desired_encoding))
+        throw CvBridgeException("Conversion to OpenCV image failed");
+      return toIpl();
     }
   };
 }

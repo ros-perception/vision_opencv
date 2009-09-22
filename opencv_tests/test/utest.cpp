@@ -144,6 +144,26 @@ TEST(OpencvTests, testCase_decode_8uc3)
   EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 3);
 }
 
+TEST(OpencvTests, testCase_new_methods)
+{
+  int channels = 3;
+  IplImage *original = cvCreateImage(cvSize(640, 480), IPL_DEPTH_8U, channels);
+  CvRNG r = cvRNG(77);
+  cvRandArr(&r, original, CV_RAND_UNI, cvScalar(0,0,0,0), cvScalar(255,255,255,255));
+
+  sensor_msgs::CvBridge img_bridge_;
+  sensor_msgs::Image::Ptr rosimg = img_bridge_.cvToRosImg(original);
+
+  IplImage *final = img_bridge_.rosImgToCv(rosimg);
+
+  IplImage *diff = cvCloneImage(original);
+  cvAbsDiff(original, final, diff);
+  CvScalar sum = cvSum(diff);
+  for (int c = 0; c < channels; c++) {
+    EXPECT_TRUE(sum.val[c] == 0);
+  }
+}
+
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);

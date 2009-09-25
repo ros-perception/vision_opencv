@@ -152,9 +152,9 @@ TEST(OpencvTests, testCase_new_methods)
   cvRandArr(&r, original, CV_RAND_UNI, cvScalar(0,0,0,0), cvScalar(255,255,255,255));
 
   sensor_msgs::CvBridge img_bridge_;
-  sensor_msgs::Image::Ptr rosimg = img_bridge_.cvToRosImg(original);
+  sensor_msgs::Image::Ptr rosimg = img_bridge_.cvToImgMsg(original);
 
-  IplImage *final = img_bridge_.rosImgToCv(rosimg);
+  IplImage *final = img_bridge_.imgMsgToCv(rosimg);
 
   IplImage *diff = cvCloneImage(original);
   cvAbsDiff(original, final, diff);

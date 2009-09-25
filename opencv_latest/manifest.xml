@@ -16,6 +16,7 @@ Image messages and OpenCV images.
 <url>http://opencvlibrary.sourceforge.net</url>
 <export>
   <cpp cflags="-I${prefix}/opencv/include -I${prefix}/opencv/include/opencv -I${prefix}/include" lflags="-L${prefix}/opencv/lib -Wl,-rpath,${prefix}/opencv/lib -lcvaux -lcv -lcxcore -lhighgui -lml"/>
+  <rosdoc builder="sphinx" />
 </export>
 <depend package="sensor_msgs" />
 <versioncontrol type="svn" url="https://opencvlibrary.svn.sourceforge.net/svnroot/opencvlibrary/tags/latest_tested_snapshot/opencv"/>

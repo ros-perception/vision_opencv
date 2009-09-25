@@ -317,8 +317,29 @@ namespace sensor_msgs
         default: assert(0);
         }
       } else {
-        // XXX JCB - should verify encoding
-        // XXX JCB - should verify that channels match the channels in original image
+        int ct = cvm->type & (CV_MAT_TYPE_MASK | CV_MAT_DEPTH_MASK);
+        if (encoding == "rgb8") {
+          if (ct != CV_8UC3)
+            return false;
+        } else if (encoding == "rgba8") {
+          if (ct != CV_8UC4)
+            return false;
+        } else if (encoding == "bgr8") {
+          if (ct != CV_8UC3)
+            return false;
+        } else if (encoding == "bgra8") {
+          if (ct != CV_8UC4)
+            return false;
+        } else if (encoding == "mono8") {
+          if (ct != CV_8UC1)
+            return false;
+        } else if (encoding == "mono16") {
+          if (ct != CV_16UC1)
+            return false;
+        } else {
+          return false;
+        }
+
         dest.encoding = encoding;
       }
 

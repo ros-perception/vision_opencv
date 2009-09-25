@@ -8,16 +8,28 @@ import sensor_msgs.msg
 import cv
 
 class CvBridgeError(TypeError):
-    """!
-    This is the error raised by CvBridge methods when they fail.
+    """
+    This is the error raised by :class:`opencv_latest.cv_bridge.CvBridge` methods when they fail.
     """
     pass
 
 class CvBridge:
-
-    """!
-    @cond DOXYGEN_IGNORE
     """
+    The CvBridge is an object that converts between OpenCV Images and ROS Image messages.
+
+       .. doctest::
+           :options: -ELLIPSIS, +NORMALIZE_WHITESPACE
+
+           >>> import cv
+           >>> from opencv_latest.cv_bridge import CvBridge
+           >>> im = cv.CreateImage((640, 480), 8, 3)
+           >>> br = CvBridge()
+           >>> msg = br.cv_to_imgmsg(im)  # Convert the image to a message
+           >>> im2 = br.imgmsg_to_cv(msg) # Convert the mesage to a new image
+           >>> cv.SaveImage("this_was_a_message_briefly.png", im2)
+
+    """
+
     def __init__(self):
         self.cvtype_names = {}
 
@@ -55,35 +67,38 @@ class CvBridge:
           fmt = "BGRA"
         return fmt
 
-    """!
-    @endcond DOXYGEN_IGNORE
-    """
     def imgmsg_to_cv(self, img_msg, desired_encoding = "passthrough"):
-        """!
-        Convert a
-        sensor_msgs::Image message to
-        an OpenCV IplImage.
-        \param img_msg   A sensor_msgs::Image message
-        \param desired_encoding  The encoding of the image data, one of the following strings:
-           - \c "passthrough"
-           - \c "rgb8"
-           - \c "rgba8"
-           - \c "bgr8"
-           - \c "bgra8"
-           - \c "mono8"
-           - \c "mono16"
-            
-        If \a desired_encoding is \c "passthrough", then the returned image has the same format as \a img_msg.
-        Otherwise \a desired_encoding must be one of the strings \c "rgb8", \c "bgr8", \c "rgba8", \c "bgra8", \c "mono8" or \c "mono16",
-        in which case this method converts the image using
-        \c CvtColor (http://opencv.willowgarage.com/documentation/python/image_processing.html#CvtColor)
-        (if necessary) and the returned image has a type as follows:
-           - \c CV_8UC3 (for \c "rgb8", \c "bgr8"),
-           - \c CV_8UC4 (for \c "rgba8", \c "bgra8"),
-           - \c CV_8UC1 (for \c "mono8"), or
-           - \c CV_16UC1 (for \c "mono16")
+        """
+        Convert a sensor_msgs::Image message to an OpenCV :ctype:`IplImage`.
 
-        This function returns an OpenCV IplImage message on success, or raises CvBridgeError on failure.
+        :param img_msg:   A sensor_msgs::Image message
+        :param desired_encoding:  The encoding of the image data, one of the following strings:
+
+           * ``"passthrough"``
+           * ``"rgb8"``
+           * ``"rgba8"``
+           * ``"bgr8"``
+           * ``"bgra8"``
+           * ``"mono8"``
+           * ``"mono16"``
+
+        :rtype: :ctype:`IplImage`
+            
+        If desired_encoding is ``"passthrough"``, then the returned image has the same format as img_msg.
+        Otherwise desired_encoding must be one of the strings "rgb8", "bgr8", "rgba8", "bgra8", "mono8" or "mono16",
+        in which case this method converts the image using
+        :func:`CvtColor`
+        (if necessary) and the returned image has a type as follows:
+           ``CV_8UC3``
+                for "rgb8", "bgr8"
+           ``CV_8UC4``
+                for "rgba8", "bgra8"
+           ``CV_8UC1``
+                for "mono8"
+           ``CV_16UC1``
+                for "mono16"
+
+        This function returns an OpenCV :ctype:`IplImage` message on success, or raises :exc:`opencv_latest.cv_bridge.CvBridgeError` on failure.
         """
 
         source_type = self.encoding_as_cvtype(img_msg.encoding)
@@ -110,27 +125,37 @@ class CvBridge:
         return cvtim
 
     def cv_to_imgmsg(self, cvim, encoding = "passthrough"):
-        """!
-        Convert an OpenCV CvArr type (that is, an IplImage or CvMat) to a ROS sensor_msgs::Image message.
-        \param cvim      An OpenCV IplImage or CvMat
-        \param encoding  The encoding of the image data, one of the following strings:
-           - \c "passthrough"
-           - \c "rgb8"
-           - \c "rgba8"
-           - \c "bgr8"
-           - \c "bgra8"
-           - \c "mono8"
-           - \c "mono16"
-            
-        If \a encoding is \c "passthrough", then the message has the same encoding as the image's OpenCV type.
-        Otherwise \a encoding must be one of the strings \c "rgb8", \c "bgr8", \c "rgba8", \c "bgra8", \c "mono8" or \c "mono16",
-        in which case the OpenCV image must have the appropriate type:
-           - \c CV_8UC3 (for \c "rgb8", \c "bgr8"),
-           - \c CV_8UC4 (for \c "rgba8", \c "bgra8"),
-           - \c CV_8UC1 (for \c "mono8"), or
-           - \c CV_16UC1 (for \c "mono16")
+        """
 
-        This function returns a sensor_msgs::Image message on success, or raises CvBridgeError on failure.
+        Convert an OpenCV :ctype:`CvArr` type (that is, an :ctype:`IplImage` or :ctype:`CvMat`) to a ROS sensor_msgs::Image message.
+
+        :param cvim:      An OpenCV :ctype:`IplImage` or :ctype:`CvMat`
+        :param encoding:  The encoding of the image data, one of the following strings:
+
+           * ``"passthrough"``
+           * ``"rgb8"``
+           * ``"rgba8"``
+           * ``"bgr8"``
+           * ``"bgra8"``
+           * ``"mono8"``
+           * ``"mono16"``
+
+        :rtype:           A sensor_msgs.msg.Image message
+            
+        If encoding is ``"passthrough"``, then the message has the same encoding as the image's OpenCV type.
+        Otherwise encoding must be one of the strings "rgb8", "bgr8", "rgba8", "bgra8", "mono8" or "mono16",
+        in which case the OpenCV image must have the appropriate type:
+
+           ``CV_8UC3``
+                for "rgb8", "bgr8"
+           ``CV_8UC4``
+                for "rgba8", "bgra8"
+           ``CV_8UC1``
+                for "mono8"
+           ``CV_16UC1``
+                for "mono16"
+
+        This function returns a sensor_msgs::Image message on success, or raises :exc:`opencv_latest.cv_bridge.CvBridgeError` on failure.
         """
         img_msg = sensor_msgs.msg.Image()
         (img_msg.width, img_msg.height) = cv.GetSize(cvim)

@@ -166,7 +166,7 @@ namespace sensor_msgs
     /**
      * Returns the OpenCV IPL Image created by method fromImage.
      *
-     * This method will be deprecated and removed in a future release.  Use method rosImgToCv instead.
+     * This method will be deprecated and removed in a future release.  Use method imgMsgToCv instead.
      *
      */
     inline IplImage* toIpl()
@@ -177,10 +177,10 @@ namespace sensor_msgs
     /**
      * Converts a ROS Image into an OpenCV IPL Image.
      *
-     * This method will be deprecated and removed in a future release.  Use method rosImgToCv instead.
+     * This method will be deprecated and removed in a future release.  Use method imgMsgToCv instead.
      *
      * \param rosimg The ROS Image message
-     * \desired_encoding image encoding.  See method rosImgToCv for details.
+     * \desired_encoding image encoding.  See method imgMsgToCv for details.
      */
     bool fromImage(const Image& rosimg, std::string desired_encoding = "passthrough")
     {
@@ -270,11 +270,11 @@ namespace sensor_msgs
     /**
      * Converts an OpenCV IPL Image into a ROS Image that can be sent 'over the wire'.
      *
-     * This method will be deprecated and removed in a future release.  Use method cvToRosImg instead. 
+     * This method will be deprecated and removed in a future release.  Use method cvToImgMsg instead. 
      *
      * \param source The original Ipl Image that we want to copy from
      * \param dest The ROS Image message that we want to copy to
-     * \encoding image encoding.  See method cvToRosImg for details.
+     * \encoding image encoding.  See method cvToImgMsg for details.
      */
     static bool fromIpltoRosImage(const IplImage* source, sensor_msgs::Image& dest, std::string encoding = "passthrough")
     {

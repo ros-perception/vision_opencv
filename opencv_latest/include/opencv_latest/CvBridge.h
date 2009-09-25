@@ -353,7 +353,7 @@ namespace sensor_msgs
 
         This function returns a sensor_msgs::Image message on success, or raises CvBridgeException on failure.
      */
-    static sensor_msgs::Image::Ptr cvToRosImg(const IplImage* source, std::string encoding = "passthrough")
+    static sensor_msgs::Image::Ptr cvToImgMsg(const IplImage* source, std::string encoding = "passthrough")
     {
       sensor_msgs::Image::Ptr rosimg(new sensor_msgs::Image);
       if (!fromIpltoRosImage(source, *rosimg, encoding))
@@ -388,7 +388,7 @@ namespace sensor_msgs
         This function returns an OpenCV IplImage on success, or raises CvBridgeException on failure.
 
      */
-    IplImage* rosImgToCv(sensor_msgs::Image::ConstPtr rosimg, std::string desired_encoding = "passthrough")
+    IplImage* imgMsgToCv(sensor_msgs::Image::ConstPtr rosimg, std::string desired_encoding = "passthrough")
     {
       if (!fromImage(*rosimg, desired_encoding))
         throw CvBridgeException("Conversion to OpenCV image failed");

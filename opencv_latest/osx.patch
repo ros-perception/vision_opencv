@@ -1,16 +1,19 @@
-Index: src/highgui/cvcap_ffmpeg.cpp
+Index: interfaces/python/CMakeLists.txt
 ===================================================================
---- src/highgui/cvcap_ffmpeg.cpp	(revision 1981)
-+++ src/highgui/cvcap_ffmpeg.cpp	(working copy)
-@@ -574,7 +574,11 @@
-     return &frame;
- }
- 
-+#if defined(__APPLE__)
-+#define AV_NOPTS_VALUE_ ((int64_t)0x8000000000000000LL)
-+#else
- #define AV_NOPTS_VALUE_ ((int64_t)AV_NOPTS_VALUE)
-+#endif
- 
- double CvCapture_FFMPEG::getProperty( int property_id )
- {
+--- interfaces/python/CMakeLists.txt	(revision 2200)
++++ interfaces/python/CMakeLists.txt	(working copy)
+@@ -24,4 +24,13 @@
+ target_link_libraries(${the_target} ${PYTHON_LIBRARIES} cxcore cv highgui)
+ set_target_properties(${the_target} PROPERTIES PREFIX "")
+ set_target_properties(${the_target} PROPERTIES OUTPUT_NAME "cv")
+-install(FILES ${LIBRARY_OUTPUT_PATH}/cv.so DESTINATION ${PYTHON_PACKAGES_PATH})
++
++install(TARGETS ${the_target}
++        LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/${PYTHON_PACKAGES_PATH}
++        RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/${PYTHON_PACKAGES_PATH})
++# If on Darwin, then copy cv.so -> cv.dylib,
++# because the MacPorts version of Python won't find cv.dylib for 'import cv'
++include(CMakeDetermineSystem)
++if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
++  install(CODE "execute_process(COMMAND cmake -E copy ${CMAKE_INSTALL_PREFIX}/${PYTHON_PACKAGES_PATH}/cv.dylib ${CMAKE_INSTALL_PREFIX}/${PYTHON_PACKAGES_PATH}/cv.so)")
++endif(CMAKE_SYSTEM_NAME MATCHES "Darwin")

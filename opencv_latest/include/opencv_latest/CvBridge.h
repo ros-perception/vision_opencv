@@ -193,6 +193,10 @@ namespace sensor_msgs
       cvInitMatHeader(&cvmHeader, rosimg.height, rosimg.width, source_type, const_cast<uint8_t*>(&(rosimg.data[0])), rosimg.step);
       cvGetImage(&cvmHeader, rosimg_);
 
+      // Check that the message encoding is legal
+      if (encoding_as_cvtype(rosimg.encoding) == -1)
+        return false;
+
       if (desired_encoding == "passthrough") {
         img_ = rosimg_;
       } else {

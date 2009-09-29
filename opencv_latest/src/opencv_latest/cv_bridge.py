@@ -113,16 +113,36 @@ class CvBridge:
         sourcefmt = self.encoding_as_fmt(img_msg.encoding)
         destfmt = self.encoding_as_fmt(desired_encoding)
 
+        source_type = self.encoding_as_cvtype(img_msg.encoding)
         destination_type = self.encoding_as_cvtype(desired_encoding)
         if sourcefmt == destfmt and source_type == destination_type:
             return im
 
-        cvtim = cv.CreateMat(img_msg.height, img_msg.width, self.encoding_as_cvtype(desired_encoding))
-        if sourcefmt == destfmt:
-            cv.ConvertScale(im, cvtim)
+        # First want to make sure that source depth matches destination depth
+        if source_type != destination_type:
+            # im2 is the intermediate image. It has the same # channels as source_type,
+            # but the depth of destination_type.
+
+            # XXX - these macros were missing from OpenCV Python, so roll our own here:
+            CV_CN_SHIFT = 3
+            def CV_MAKETYPE(depth,cn):
+                return cv.CV_MAT_DEPTH(depth) + ((cn - 1) << CV_CN_SHIFT)
+
+            im2_type = CV_MAKETYPE(destination_type, cv.CV_MAT_CN(source_type))
+            print 'src', self.cvtype_names[source_type]
+            print 'dst', self.cvtype_names[destination_type]
+            print 'im2', self.cvtype_names[im2_type]
+            im2 = cv.CreateMat(img_msg.height, img_msg.width, im2_type)
+            cv.ConvertScale(im, im2)
         else:
-            cv.CvtColor(im, cvtim, eval("cv.CV_%s2%s" % (sourcefmt, destfmt)))
-        return cvtim
+            im2 = im
+
+        if sourcefmt != destfmt:
+            im3 = cv.CreateMat(img_msg.height, img_msg.width, destination_type)
+            cv.CvtColor(im2, im3, eval("cv.CV_%s2%s" % (sourcefmt, destfmt)))
+        else:
+            im3 = im2
+        return im3
 
     def cv_to_imgmsg(self, cvim, encoding = "passthrough"):
         """

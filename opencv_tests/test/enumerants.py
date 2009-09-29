@@ -48,10 +48,16 @@ class TestEnumerants(unittest.TestCase):
                         self.assert_(cv.GetSize(original) == cv.GetSize(newimg))
                         self.assert_(len(original.tostring()) == len(newimg.tostring()))
 
+    def test_mono16(self):
+        br = CvBridge()
+        im = cv.CreateImage((640, 480), 8, 3)
+        msg = br.cv_to_imgmsg(im)
+        print br.imgmsg_to_cv(msg, "mono16")
+
 if __name__ == '__main__':
-  if 0:
+  if 1:
     rostest.unitrun('opencv_tests', 'enumerants', TestEnumerants)
   else:
     suite = unittest.TestSuite()
-    suite.addTest(TestEnumerants('test_encode_decode'))
+    suite.addTest(TestEnumerants('test_mono16'))
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -12,7 +12,6 @@
   <depend package="opencvpython"/>
   <depend package="rostest"/>
   <depend package="rospy"/>
-  <depend package="opencvpython"/>
   <depend package="sensor_msgs"/>
 
 </package>

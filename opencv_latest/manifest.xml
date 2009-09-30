@@ -6,6 +6,9 @@ Library (opencv).  This ROS package does not modify OpenCV in any way;
 it simply provides a convenient way to download and compile the library
 in a way that can be managed by the ROS dependency system.
 
+This package also includes CvBridge, which eases conversion between ROS
+Image messages and OpenCV images.
+
 </description>
 <author>Gary Bradski and many others. See web page for a full contributor list. ROS package maintained by James Bowman.</author>
 <license>BSD</license>
@@ -13,7 +16,7 @@ in a way that can be managed by the ROS dependency system.
 <url>http://opencvlibrary.sourceforge.net</url>
 <export>
   <cpp cflags="-I${prefix}/opencv/include -I${prefix}/opencv/include/opencv -I${prefix}/include" lflags="-L${prefix}/opencv/lib -Wl,-rpath,${prefix}/opencv/lib -lcvaux -lcv -lcxcore -lhighgui -lml"/>
-  <doxymaker external="http://opencvlibrary.sourceforge.net/" />
+  <rosdoc config="rosdoc.yaml" />
 </export>
 <depend package="sensor_msgs" />
 <versioncontrol type="svn" url="https://opencvlibrary.svn.sourceforge.net/svnroot/opencvlibrary/tags/latest_tested_snapshot/opencv"/>

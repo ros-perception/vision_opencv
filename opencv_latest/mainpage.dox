@@ -3,6 +3,7 @@
 
 @mainpage
 
+
 @htmlinclude manifest.html
 
 @b OpenCV is a C, C++ and Python library for computer vision, homepage http://opencv.willowgarage.com/wiki/

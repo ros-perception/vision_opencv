@@ -9,6 +9,7 @@ in a way that can be managed by the ROS dependency system.
 This package also includes CvBridge, which eases conversion between ROS
 Image messages and OpenCV images.
 
+
 </description>
 <author>Gary Bradski and many others. See web page for a full contributor list. ROS package maintained by James Bowman.</author>
 <license>BSD</license>

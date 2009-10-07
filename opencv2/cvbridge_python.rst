@@ -1,5 +1,5 @@
 OpenCV (Python)
 ===============
 
-.. automodule:: opencv_latest.cv_bridge
+.. automodule:: opencv2.cv_bridge
       :members:

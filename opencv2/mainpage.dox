@@ -12,7 +12,7 @@
 
 In addition to a snapshot of OpenCV, this package
 includes a class CvBridge for easy conversion between ROS Image messages and OpenCV images.
-The C++ implementation is sensor_msgs::CvBridge, and the Python implementation is opencv_latest::cv_bridge::CvBridge.
+The C++ implementation is sensor_msgs::CvBridge, and the Python implementation is opencv2::cv_bridge::CvBridge.
 
 
 **/

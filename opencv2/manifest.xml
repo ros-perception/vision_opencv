@@ -1,5 +1,5 @@
 <package>
-<description brief="The Open Source Computer Vision Library (latest)">
+<description brief="The Open Source Computer Vision Library 2.0">
 
 This package contains the latest code from the Open Source Computer Vision
 Library (opencv).  This ROS package does not modify OpenCV in any way;

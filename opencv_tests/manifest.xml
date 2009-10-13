@@ -8,8 +8,7 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://pr.willowgarage.com/wiki/opencv_tests</url>
-  <depend package="opencv_latest"/>
-  <depend package="opencvpython"/>
+  <depend package="opencv2"/>
   <depend package="rostest"/>
   <depend package="rospy"/>
   <depend package="sensor_msgs"/>

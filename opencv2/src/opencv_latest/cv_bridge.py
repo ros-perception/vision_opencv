@@ -129,9 +129,6 @@ class CvBridge:
                 return cv.CV_MAT_DEPTH(depth) + ((cn - 1) << CV_CN_SHIFT)
 
             im2_type = CV_MAKETYPE(destination_type, cv.CV_MAT_CN(source_type))
-            print 'src', self.cvtype_names[source_type]
-            print 'dst', self.cvtype_names[destination_type]
-            print 'im2', self.cvtype_names[im2_type]
             im2 = cv.CreateMat(img_msg.height, img_msg.width, im2_type)
             cv.ConvertScale(im, im2)
         else:

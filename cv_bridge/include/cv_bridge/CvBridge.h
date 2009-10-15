@@ -1,7 +1,7 @@
 /*********************************************************************
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2008, Willow Garage, Inc.
+*  Copyright (c) 2009, Willow Garage, Inc.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -179,8 +179,8 @@ namespace sensor_msgs
      *
      * This method will be deprecated and removed in a future release.  Use method imgMsgToCv instead.
      *
-     * \param rosimg The ROS Image message
-     * \desired_encoding image encoding.  See method imgMsgToCv for details.
+     * \param rosimg            The ROS Image message
+     * \param desired_encoding  image encoding.  See method imgMsgToCv for details.
      */
     bool fromImage(const Image& rosimg, std::string desired_encoding = "passthrough")
     {
@@ -276,9 +276,9 @@ namespace sensor_msgs
      *
      * This method will be deprecated and removed in a future release.  Use method cvToImgMsg instead. 
      *
-     * \param source The original Ipl Image that we want to copy from
-     * \param dest The ROS Image message that we want to copy to
-     * \encoding image encoding.  See method cvToImgMsg for details.
+     * \param source    The original Ipl Image that we want to copy from
+     * \param dest      The ROS Image message that we want to copy to
+     * \param encoding  image encoding.  See method cvToImgMsg for details.
      */
     static bool fromIpltoRosImage(const IplImage* source, sensor_msgs::Image& dest, std::string encoding = "passthrough")
     {
@@ -358,7 +358,7 @@ namespace sensor_msgs
     /**
      * 
         Convert an OpenCV CvArr type (that is, an IplImage or CvMat) to a ROS sensor_msgs::Image message.
-        \param cvim      An OpenCV IplImage or CvMat
+        \param source      An OpenCV IplImage or CvMat
         \param encoding  The encoding of the image data, one of the following strings:
            - \c "passthrough"
            - \c "rgb8"

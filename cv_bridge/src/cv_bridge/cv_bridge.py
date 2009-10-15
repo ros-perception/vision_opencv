@@ -25,7 +25,7 @@ class CvBridge:
            >>> im = cv.CreateImage((640, 480), 8, 3)
            >>> br = CvBridge()
            >>> msg = br.cv_to_imgmsg(im)  # Convert the image to a message
-           >>> im2 = br.imgmsg_to_cv(msg) # Convert the mesage to a new image
+           >>> im2 = br.imgmsg_to_cv(msg) # Convert the message to a new image
            >>> cv.SaveImage("this_was_a_message_briefly.png", im2)
 
     """
@@ -83,6 +83,7 @@ class CvBridge:
            * ``"mono16"``
 
         :rtype: :ctype:`IplImage`
+        :raises CvBridgeError: when conversion is not possible.
             
         If desired_encoding is ``"passthrough"``, then the returned image has the same format as img_msg.
         Otherwise desired_encoding must be one of the strings "rgb8", "bgr8", "rgba8", "bgra8", "mono8" or "mono16",
@@ -158,6 +159,7 @@ class CvBridge:
            * ``"mono16"``
 
         :rtype:           A sensor_msgs.msg.Image message
+        :raises CvBridgeError: when the ``cvim`` has a type that is incompatible with ``encoding``
             
         If encoding is ``"passthrough"``, then the message has the same encoding as the image's OpenCV type.
         Otherwise encoding must be one of the strings "rgb8", "bgr8", "rgba8", "bgra8", "mono8" or "mono16",

@@ -40,7 +40,7 @@
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
 
-#include "opencv_latest/CvBridge.h"
+#include "cv_bridge/CvBridge.h"
 #include "sensor_msgs/Image.h"
 
 

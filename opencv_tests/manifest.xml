@@ -9,6 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://pr.willowgarage.com/wiki/opencv_tests</url>
   <depend package="opencv2"/>
+  <depend package="cv_bridge"/>
   <depend package="rostest"/>
   <depend package="rospy"/>
   <depend package="sensor_msgs"/>

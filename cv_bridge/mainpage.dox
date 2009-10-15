@@ -1,0 +1,14 @@
+/**
+
+@mainpage
+
+@htmlinclude manifest.html
+
+@b cv_bridge is a class for converting between ROS image messages and OpenCV images.
+
+@section usage Using with ROS
+
+This package
+contains a class sensor_msgs::CvBridge for easy conversion between ROS Image messages and OpenCV images.
+
+**/

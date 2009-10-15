@@ -23,7 +23,6 @@ Image messages and OpenCV images.
 <versioncontrol type="svn" url="https://opencvlibrary.svn.sourceforge.net/svnroot/opencvlibrary/tags/latest_tested_snapshot/opencv"/>
 <rosdep name="ffmpeg"/>
 <rosdep name="jasper"/>
-<rosdep name="swig"/>
 <rosdep name="graphicsmagick"/>
 <rosdep name="gtk2"/>
 </package>

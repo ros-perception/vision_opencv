@@ -16,14 +16,13 @@ Image messages and OpenCV images.
 <review status="3rdparty" notes=""/>
 <url>http://opencvlibrary.sourceforge.net</url>
 <export>
-  <cpp cflags="-I${prefix}/opencv/include -I${prefix}/opencv/include/opencv -I${prefix}/include" lflags="-L${prefix}/opencv/lib -Wl,-rpath,${prefix}/opencv/lib -lcvaux -lcv -lcxcore -lhighgui -lml"/>
+  <cpp cflags="-I${prefix}/opencv/include -I${prefix}/opencv/include/opencv" lflags="-L${prefix}/opencv/lib -Wl,-rpath,${prefix}/opencv/lib -lcvaux -lcv -lcxcore -lhighgui -lml"/>
   <rosdoc config="rosdoc.yaml" />
 </export>
 <depend package="sensor_msgs" />
 <versioncontrol type="svn" url="https://opencvlibrary.svn.sourceforge.net/svnroot/opencvlibrary/tags/latest_tested_snapshot/opencv"/>
 <rosdep name="ffmpeg"/>
 <rosdep name="jasper"/>
-<rosdep name="swig"/>
 <rosdep name="graphicsmagick"/>
 <rosdep name="gtk2"/>
 </package>

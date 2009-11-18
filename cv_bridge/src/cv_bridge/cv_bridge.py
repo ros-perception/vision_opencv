@@ -21,7 +21,7 @@ class CvBridge:
            :options: -ELLIPSIS, +NORMALIZE_WHITESPACE
 
            >>> import cv
-           >>> from opencv_latest.cv_bridge import CvBridge
+           >>> from cv_bridge import CvBridge
            >>> im = cv.CreateImage((640, 480), 8, 3)
            >>> br = CvBridge()
            >>> msg = br.cv_to_imgmsg(im)  # Convert the image to a message

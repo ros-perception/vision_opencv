@@ -5,7 +5,7 @@ import sensor_msgs.msg
 
 def mkmat(rows, cols, L):
     mat = cv.CreateMat(rows, cols, cv.CV_64FC1)
-    cv.SetData(mat, array.array('f', L), 8 * cols)
+    cv.SetData(mat, array.array('d', L), 8 * cols)
     return mat
 
 class PinholeCameraModel:
@@ -47,8 +47,19 @@ class PinholeCameraModel:
 
     def tfFrame(self):
         pass
+
     def project3dToPixel(self, point):
-        pass
+        src = mkmat(4, 1, [point[0], point[1], point[2], 1.0])
+        dst = cv.CreateMat(3, 1, cv.CV_64FC1)
+        cv.MatMul(self.P, src, dst)
+        x = dst[0,0]
+        y = dst[1,0]
+        w = dst[2,0]
+        if w != 0:
+            return (x / w, y / w)
+        else:
+            return (0.0, 0.0)
+
     def projectPixelTo3dRay(self, uv):
         pass
 
@@ -66,20 +77,66 @@ class PinholeCameraModel:
         return self.P
 
     def cx(self):
-        return self.K[0,3]
+        return self.K[0,2]
     def cy(self):
-        return self.K[1,3]
+        return self.K[1,2]
     def fx(self):
         return self.K[0,0]
     def fy(self):
         return self.K[1,1]
 
-    """
-    // File I/O (using camera_calibration_parsers)
-    void load (const std::string& file_name);
-    void parse (const std::string& buffer);
-    void save (const std::string& file_name) const;
-    """
-
 class StereoCameraModel:
-    pass
+    def __init__(self):
+        self.left = PinholeCameraModel()
+        self.right = PinholeCameraModel()
+
+    def fromCameraInfo(self, left_msg, right_msg):
+        self.left.fromCameraInfo(left_msg)
+        self.right.fromCameraInfo(right_msg)
+
+        # [ Fx, 0,  Cx,  Fx*-Tx ]
+        # [ 0,  Fy, Cy,  0      ]
+        # [ 0,  0,  1,   0      ]
+        
+        fx = self.right.P[0, 0]
+        fy = self.right.P[1, 1]
+        cx = self.right.P[0, 2]
+        cy = self.right.P[1, 2]
+        tx = -self.right.P[0, 3] / fx
+
+        # Q is:
+        #    [ 1, 0,  0, -Clx ]
+        #    [ 0, 1,  0, -Cy ]
+        #    [ 0, 0,  0,  Fx ]
+        #    [ 0, 0, 1 / Tx, (Crx-Clx)/Tx ]
+
+        self.Q = cv.CreateMat(4, 4, cv.CV_64FC1)
+        cv.SetZero(self.Q)
+        self.Q[0, 0] = 1.0
+        self.Q[0, 3] = -cx
+        self.Q[1, 1] = 1.0
+        self.Q[1, 3] = -cy
+        self.Q[2, 3] = fx
+        self.Q[3, 2] = 1 / tx
+
+    def tfFrame(self):
+        return self.left.tfFrame()
+
+    def project3dToPixel(self, point):
+        l = self.left.project3dToPixel(point)
+        r = self.right.project3dToPixel(point)
+        return (l, r)
+
+    def projectPixelTo3d(self, left_uv, disparity):
+        src = mkmat(4, 1, [left_uv[0], left_uv[1], disparity, 1.0])
+        dst = cv.CreateMat(4, 1, cv.CV_64FC1)
+        cv.SetZero(dst)
+        cv.MatMul(self.Q, src, dst)
+        x = dst[0, 0]
+        y = dst[1, 0]
+        z = dst[2, 0]
+        w = dst[3, 0]
+        if w != 0:
+            return (x / w, y / w, z / w)
+        else:
+            return (0.0, 0.0, 0.0)

@@ -7,6 +7,7 @@
   <export>
     <cpp cflags="-I${prefix}/include" lflags=""/>
   </export>
+  <depend package="rospy"/>
   <depend package="roscpp"/>
   <depend package="opencv2"/>
   <depend package="cv_bridge"/>

@@ -57,7 +57,7 @@ class TestDirected(unittest.TestCase):
                     self.assertAlmostEqual(x, rx + d, 3)
 
 if __name__ == '__main__':
-    if 0:
+    if 1:
         rostest.unitrun('image_geometry', 'directed', TestDirected)
     else:
         suite = unittest.TestSuite()

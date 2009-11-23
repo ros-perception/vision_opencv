@@ -12,6 +12,7 @@ parameters from sensor_msgs/CameraInfo.
 .. autoclass:: image_geometry.StereoCameraModel
       :members:
 
+
 Indices and tables
 ==================
 

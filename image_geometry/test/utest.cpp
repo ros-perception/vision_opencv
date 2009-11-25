@@ -1,0 +1,53 @@
+#include "image_geometry/pinhole_camera_model.h"
+#include <gtest/gtest.h>
+
+class PinholeTest : public testing::Test
+{
+protected:
+  virtual void SetUp()
+  {
+    // These parameters taken from a real camera calibration
+    double D[] = {-0.363528858080088, 0.16117037733986861, -8.1109585007538829e-05, -0.00044776712298447841, 0.0};
+    double K[] = {430.15433020105519,                0.0, 311.71339830549732,
+                                 0.0, 430.60920415473657, 221.06824942698509,
+                                 0.0,                0.0,                1.0};
+    double R[] = {0.99806560714807102, 0.0068562422224214027, 0.061790256276695904,
+                  -0.0067522959054715113, 0.99997541519165112, -0.0018909025066874664,
+                  -0.061801701660692349, 0.0014700186639396652, 0.99808736527268516};
+    double P[] = {295.53402059708782, 0.0, 285.55760765075684, 0.0,
+                  0.0, 295.53402059708782, 223.29617881774902, 0.0,
+                  0.0, 0.0, 1.0, 0.0};
+
+    cam_info_.header.frame_id = "tf_frame";
+    cam_info_.height = 480;
+    cam_info_.width  = 640;
+    // No ROI
+    std::copy(D, D+5, cam_info_.D.begin());
+    std::copy(K, K+9, cam_info_.K.begin());
+    std::copy(R, R+9, cam_info_.R.begin());
+    std::copy(P, P+12, cam_info_.P.begin());
+
+    model_.fromCameraInfo(cam_info_);
+  }
+  
+  sensor_msgs::CameraInfo cam_info_;
+  image_geometry::PinholeCameraModel model_;
+};
+
+TEST_F(PinholeTest, AccessorsCorrect)
+{
+  EXPECT_EQ((unsigned)480, model_.height());
+  EXPECT_EQ((unsigned)640, model_.width());
+  EXPECT_STREQ("tf_frame", model_.tfFrame().c_str());
+  EXPECT_EQ(cam_info_.P[0], model_.fx());
+  EXPECT_EQ(cam_info_.P[5], model_.fy());
+  EXPECT_EQ(cam_info_.P[2], model_.cx());
+  EXPECT_EQ(cam_info_.P[6], model_.cy());
+}
+
+
+int main(int argc, char** argv)
+{
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}

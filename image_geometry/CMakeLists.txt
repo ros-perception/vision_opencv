@@ -32,3 +32,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 rosbuild_add_library(${PROJECT_NAME} src/pinhole_camera_model.cpp)
 
 rospack_add_pyunit(test/directed.py)
+
+rospack_add_gtest(utest test/utest.cpp)
+target_link_libraries(utest ${PROJECT_NAME})
+set_target_properties(utest PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/test)

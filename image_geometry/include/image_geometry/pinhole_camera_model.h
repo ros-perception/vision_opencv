@@ -29,7 +29,8 @@ public:
   void projectPixelTo3dRay(const Point2d& uv_rect, Point3d& ray) const;
 
   // Rectification
-  void rectifyImage(const CvArr* raw, CvArr* rectified) const;
+  void rectifyImage(const CvArr* raw, CvArr* rectified,
+                    int interpolation = CV_INTER_LINEAR) const;
 
   void unrectifyImage(const CvArr* rectified, CvArr* raw) const;
 

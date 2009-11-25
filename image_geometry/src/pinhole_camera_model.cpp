@@ -1,4 +1,5 @@
 #include "image_geometry/pinhole_camera_model.h"
+#include <stdexcept>
 
 namespace image_geometry {
 
@@ -18,6 +19,12 @@ PinholeCameraModel::PinholeCameraModel(const PinholeCameraModel& other)
 
 void PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
 {
+  // The full-res camera dimensions should never change.
+  assert(!initialized_ || (msg.height == cam_info_.height && msg.width == cam_info_.width));
+
+  cam_info_.height = msg.height;
+  cam_info_.width  = msg.width;
+  
   parameters_changed_ = !initialized_ ||
     msg.K != cam_info_.K || msg.D != cam_info_.D ||
     msg.R != cam_info_.R || msg.P != cam_info_.P;
@@ -58,16 +65,25 @@ void PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& m
 void PinholeCameraModel::project3dToPixel(const Point3d& xyz, Point2d& uv_rect) const
 {
   assert(initialized_);
-  
+
+  /// @todo Principal point not adjusted for ROI anywhere yet
+  uv_rect.x = fx() * (xyz.x / xyz.z) + cx();
+  uv_rect.y = fy() * (xyz.y / xyz.z) + cy();
 }
 
 void PinholeCameraModel::projectPixelTo3dRay(const Point2d& uv_rect, Point3d& ray) const
 {
   assert(initialized_);
-  
+
+  ray.x = (uv_rect.x - cx()) / fx();
+  ray.y = (uv_rect.y - cy()) / fy();
+  double norm = std::sqrt(ray.x*ray.x + ray.y*ray.y + 1);
+  ray.x /= norm;
+  ray.y /= norm;
+  ray.z = 1.0 / norm;
 }
 
-void PinholeCameraModel::rectifyImage(const CvArr* raw, CvArr* rectified) const
+void PinholeCameraModel::rectifyImage(const CvArr* raw, CvArr* rectified, int interpolation) const
 {
   assert(initialized_);
 
@@ -81,8 +97,7 @@ void PinholeCameraModel::rectifyImage(const CvArr* raw, CvArr* rectified) const
       undistort_x = undistort_map_x_.Ipl();
       undistort_y = undistort_map_y_.Ipl();
     }
-    /// @todo Allow user to choose interpolation
-    cvRemap(raw, rectified, undistort_x, undistort_y, CV_INTER_LINEAR | CV_WARP_FILL_OUTLIERS);
+    cvRemap(raw, rectified, undistort_x, undistort_y, interpolation | CV_WARP_FILL_OUTLIERS);
   }
   else {
     cvCopy(raw, rectified);
@@ -92,23 +107,39 @@ void PinholeCameraModel::rectifyImage(const CvArr* raw, CvArr* rectified) const
 void PinholeCameraModel::unrectifyImage(const CvArr* rectified, CvArr* raw) const
 {
   assert(initialized_);
-  
+
+  throw std::runtime_error("[image_geometry] PinholeCameraModel::unrectifyImage is unimplemented.");
 }
 
 void PinholeCameraModel::rectifyPoint(const Point2d& uv_raw, Point2d& uv_rect) const
 {
   assert(initialized_);
-  
+
+  const CvMat src_pt = cvMat(1, 1, CV_64FC2, const_cast<double*>(&uv_raw.x));
+  CvMat dst_pt = cvMat(1, 1, CV_64FC2, &uv_rect.x);
+  cvUndistortPoints(&src_pt, &dst_pt, &K_, &D_, &R_, &P_);
 }
 
 void PinholeCameraModel::unrectifyPoint(const Point2d& uv_rect, Point2d& uv_raw) const
 {
   assert(initialized_);
-  
+
+  throw std::runtime_error("[image_geometry] PinholeCameraModel::unrectifyPoint is unimplemented.");
+  /*
+  /// @todo Could just do reverse transformation, see cvInitUndistortRectifyMap docs
+  if (has_distortion_) {
+    initUndistortMaps();
+    /// @todo use ROI maps if needed
+    
+  }
+  else
+    uv_raw = uv_rect;
+  */
 }
 
 void PinholeCameraModel::initUndistortMaps() const
 {
+  /// @todo Switch to faster integer maps, see stereo_image_proc
   if (parameters_changed_) {
     undistort_map_x_.Allocate(cam_info_.width, cam_info_.height);
     undistort_map_y_.Allocate(cam_info_.width, cam_info_.height);

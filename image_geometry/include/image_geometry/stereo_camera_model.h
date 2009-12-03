@@ -40,7 +40,9 @@ public:
 
 private:
   PinholeCameraModel left_, right_;
+  double Q_buf_[16];
   CvMat Q_;
+  bool initialized_;
 };
 
 
@@ -55,7 +57,7 @@ inline const CvMat* StereoCameraModel::reprojectionMatrix() const { return &Q_; 
 inline double StereoCameraModel::baseline() const
 {
   /// @todo Assuming horizontal baseline ok?
-  return right_.projectionMatrix()->data.db[3];
+  return -right_.projectionMatrix()->data.db[3] / right_.fx();
 }
 
 } //namespace image_geometry

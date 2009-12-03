@@ -49,8 +49,8 @@ TEST_F(PinholeTest, projectPoint)
 {
   // Spot test an arbitrary point.
   {
-    CvPoint2D64f uv = {100, 100};
-    CvPoint3D64f xyz;
+    cv::Point2d uv(100, 100);
+    cv::Point3d xyz;
     model_.projectPixelTo3dRay(uv, xyz);
     EXPECT_DOUBLE_EQ(-0.501371686835080932, xyz.x);
     EXPECT_DOUBLE_EQ(-0.333142973423770972, xyz.y);
@@ -59,8 +59,8 @@ TEST_F(PinholeTest, projectPoint)
 
   // Principal point should project straight out.
   {
-    CvPoint2D64f uv = {model_.cx(), model_.cy()};
-    CvPoint3D64f xyz;
+    cv::Point2d uv(model_.cx(), model_.cy());
+    cv::Point3d xyz;
     model_.projectPixelTo3dRay(uv, xyz);
     EXPECT_DOUBLE_EQ(0.0, xyz.x);
     EXPECT_DOUBLE_EQ(0.0, xyz.y);
@@ -71,8 +71,8 @@ TEST_F(PinholeTest, projectPoint)
   const size_t step = 10;
   for (size_t row = 0; row <= cam_info_.height; row += step) {
     for (size_t col = 0; col <= cam_info_.width; col += step) {
-      CvPoint2D64f uv = {row, col}, uv_back;
-      CvPoint3D64f xyz;
+      cv::Point2d uv(row, col), uv_back;
+      cv::Point3d xyz;
       model_.projectPixelTo3dRay(uv, xyz);
       model_.project3dToPixel(xyz, uv_back);
       // Measured max error at 1.13687e-13

@@ -13,8 +13,14 @@ PinholeCameraModel::PinholeCameraModel()
 }
 
 PinholeCameraModel::PinholeCameraModel(const PinholeCameraModel& other)
+  : initialized_(false),
+    K_(3, 3, &cam_info_.K[0]),
+    D_(1, 5, &cam_info_.D[0]),
+    R_(3, 3, &cam_info_.R[0]),
+    P_(3, 4, &cam_info_.P[0])
 {
-  /// @todo Copy constructor
+  if (other.initialized_)
+    fromCameraInfo(other.cam_info_);
 }
 
 void PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)

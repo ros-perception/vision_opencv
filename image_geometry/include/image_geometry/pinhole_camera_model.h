@@ -3,52 +3,126 @@
 
 #include <sensor_msgs/CameraInfo.h>
 #include <opencv/cv.h>
-#include <opencv/cvwimage.h>
 
 namespace image_geometry {
 
-typedef CvPoint2D64f Point2d;
-typedef CvPoint3D64f Point3d;
-
+/**
+ * \brief Simplifies interpreting images geometrically using the parameters from
+ * sensor_msgs/CameraInfo.
+ */
 class PinholeCameraModel
 {
 public:
+  
   PinholeCameraModel();
 
   PinholeCameraModel(const PinholeCameraModel& other);
 
-  // Update in image/info callback
+  /**
+   * \brief Set the camera parameters from the sensor_msgs/CameraInfo message.
+   */
   void fromCameraInfo(const sensor_msgs::CameraInfo& msg);
+
+  /**
+   * \brief Set the camera parameters from the sensor_msgs/CameraInfo message.
+   */
   void fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& msg);
 
-  // Projection functions, 3d points are in tfFrame()
+  /**
+   * \brief Get the name of the camera coordinate frame in tf.
+   */
   std::string tfFrame() const;
-  
-  void project3dToPixel(const Point3d& xyz, Point2d& uv_rect) const;
 
-  void projectPixelTo3dRay(const Point2d& uv_rect, Point3d& ray) const;
+  /**
+   * \brief Project a 3d point to rectified pixel coordinates.
+   *
+   * This is the inverse of projectPixelTo3dRay().
+   *
+   * \param xyz 3d point in the camera coordinate frame
+   * \param[out] uv_rect Rectified pixel coordinates
+   */
+  void project3dToPixel(const cv::Point3d& xyz, cv::Point2d& uv_rect) const;
 
-  // Rectification
-  void rectifyImage(const CvArr* raw, CvArr* rectified) const;
+  /**
+   * \brief Project a rectified pixel to a 3d ray.
+   *
+   * Returns the unit vector in the camera coordinate frame in the direction of rectified
+   * pixel (u,v) in the image plane. This is the inverse of project3dToPixel().
+   *
+   * \param uv_rect Rectified pixel coordinates
+   * \param[out] ray 3d ray passing through (u,v).
+   */
+  void projectPixelTo3dRay(const cv::Point2d& uv_rect, cv::Point3d& ray) const;
 
-  void unrectifyImage(const CvArr* rectified, CvArr* raw) const;
+  /**
+   * \brief Rectify a raw camera image.
+   */
+  void rectifyImage(const cv::Mat& raw, cv::Mat& rectified,
+                    int interpolation = CV_INTER_LINEAR) const;
 
-  void rectifyPoint(const Point2d& uv_raw, Point2d& uv_rect) const;
+  /**
+   * \brief Apply camera distortion to a rectified image.
+   */
+  void unrectifyImage(const cv::Mat& rectified, cv::Mat& raw) const;
 
-  void unrectifyPoint(const Point2d& uv_rect, Point2d& uv_raw) const;
+  /**
+   * \brief Compute the rectified image coordinates of a pixel in the raw image.
+   */
+  void rectifyPoint(const cv::Point2d& uv_raw, cv::Point2d& uv_rect) const;
 
-  // Arguments for OpenCV functions
-  const CvMat* intrinsicMatrix() const;  // K, also called camera_matrix in cv docs
-  const CvMat* distortionCoeffs() const; // D, 1x4 or 1x5?
-  const CvMat* rotationMatrix() const;   // R, rectificationMatrix?
-  const CvMat* projectionMatrix() const; // P, 3x4
+  /**
+   * \brief Compute the raw image coordinates of a pixel in the rectified image.
+   */
+  void unrectifyPoint(const cv::Point2d& uv_rect, cv::Point2d& uv_raw) const;
 
-  // Accessors for specific parameters
+  /**
+   * \brief Returns the original camera matrix.
+   */
+  const cv::Mat_<double>& intrinsicMatrix() const;
+
+  /**
+   * \brief Returns the distortion coefficients.
+   */
+  const cv::Mat_<double>& distortionCoeffs() const;
+
+  /**
+   * \brief Returns the rotation matrix.
+   */
+  const cv::Mat_<double>& rotationMatrix() const;
+
+  /**
+   * \brief Returns the projection matrix.
+   */
+  const cv::Mat_<double>& projectionMatrix() const;
+
+  /**
+   * \brief Returns the focal length (pixels) in x direction of the rectified image.
+   */
   double fx() const;
+
+  /**
+   * \brief Returns the focal length (pixels) in y direction of the rectified image.
+   */
   double fy() const;
+
+  /**
+   * \brief Returns the x coordinate of the optical center.
+   */
   double cx() const;
+
+  /**
+   * \brief Returns the y coordinate of the optical center.
+   */
   double cy() const;
+
+  /**
+   * \brief Returns the image height.
+   */
   uint32_t height() const;
+
+  /**
+   * \brief Returns the image width.
+   */
   uint32_t width() const;
 
 private:
@@ -57,10 +131,10 @@ private:
   bool has_distortion_, has_roi_;
   
   sensor_msgs::CameraInfo cam_info_;
-  CvMat K_, D_, R_, P_;
-  
-  mutable cv::WImageBuffer1_f undistort_map_x_, undistort_map_y_;
-  mutable cv::WImageBuffer1_f roi_undistort_map_x_, roi_undistort_map_y_;
+  cv::Mat_<double> K_, D_, R_, P_;
+
+  mutable cv::Mat undistort_map_x_, undistort_map_y_;
+  mutable cv::Mat roi_undistort_map_x_, roi_undistort_map_y_;
 
   void initUndistortMaps() const;
 };
@@ -74,15 +148,15 @@ inline std::string PinholeCameraModel::tfFrame() const
 }
 
 /// @todo assert initialized in all these
-inline const CvMat* PinholeCameraModel::intrinsicMatrix() const  { return &K_; }
-inline const CvMat* PinholeCameraModel::distortionCoeffs() const { return &D_; }
-inline const CvMat* PinholeCameraModel::rotationMatrix() const   { return &R_; }
-inline const CvMat* PinholeCameraModel::projectionMatrix() const { return &P_; }
+inline const cv::Mat_<double>& PinholeCameraModel::intrinsicMatrix() const  { return K_; }
+inline const cv::Mat_<double>& PinholeCameraModel::distortionCoeffs() const { return D_; }
+inline const cv::Mat_<double>& PinholeCameraModel::rotationMatrix() const   { return R_; }
+inline const cv::Mat_<double>& PinholeCameraModel::projectionMatrix() const { return P_; }
 
-inline double PinholeCameraModel::fx() const { return cam_info_.P[0]; }
-inline double PinholeCameraModel::fy() const { return cam_info_.P[5]; }
-inline double PinholeCameraModel::cx() const { return cam_info_.P[2]; }
-inline double PinholeCameraModel::cy() const { return cam_info_.P[6]; }
+inline double PinholeCameraModel::fx() const { return P_(0,0); }
+inline double PinholeCameraModel::fy() const { return P_(1,1); }
+inline double PinholeCameraModel::cx() const { return P_(0,2); }
+inline double PinholeCameraModel::cy() const { return P_(1,2); }
 inline uint32_t PinholeCameraModel::height() const { return cam_info_.height; }
 inline uint32_t PinholeCameraModel::width() const  { return cam_info_.width; }
 

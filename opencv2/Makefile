@@ -4,8 +4,8 @@ INSTALL_DIR = opencv
 all: installed
 
 SVN_DIR = build/opencv-svn
-SVN_URL = https://opencvlibrary.svn.sourceforge.net/svnroot/opencvlibrary/trunk/opencv
-SVN_REVISION = -r2232
+SVN_URL = https://code.ros.org/svn/opencv/trunk/opencv
+SVN_REVISION = -r2312
 include $(shell rospack find mk)/svn_checkout.mk
 
 

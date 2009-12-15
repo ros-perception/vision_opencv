@@ -5,7 +5,8 @@ all: installed
 
 SVN_DIR = build/opencv-svn
 SVN_URL = https://code.ros.org/svn/opencv/trunk/opencv
-SVN_REVISION = -r2312
+SVN_REVISION = -r2435
+SVN_PATCH = pythontest.patch
 include $(shell rospack find mk)/svn_checkout.mk
 
 
@@ -29,6 +30,10 @@ installed: $(SVN_DIR) patched
 	mkdir -p $(CURDIR)/lib
 	mv $(CURDIR)/$(INSTALL_DIR)/lib/python*/site-packages/* $(CURDIR)/lib/
 	touch installed
+
+test: installed
+	python build/opencv-svn/tests/python/test.py
+	build/opencv-svn/build/bin/cxcoretest
 
 clean:
 	-cd $(SVN_DIR)/build && make clean

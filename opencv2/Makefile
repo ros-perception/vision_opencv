@@ -19,7 +19,7 @@ CMAKE_ARGS = -D CMAKE_BUILD_TYPE=RELEASE \
 						 -D WITH_FFMPEG=OFF \
 						 -D WITH_XINE=OFF
 
-installed: $(SVN_DIR) patched
+installed: wiped $(SVN_DIR) patched
 	mkdir -p $(SVN_DIR)/build
 	cd $(SVN_DIR)/build && $(CMAKE) $(CMAKE_ARGS) ..
 	cd $(SVN_DIR)/build && make $(ROS_PARALLEL_JOBS) && make install
@@ -38,6 +38,10 @@ test: installed
 clean:
 	-cd $(SVN_DIR)/build && make clean
 	rm -rf $(INSTALL_DIR) installed
+
+wiped: Makefile
+	rm -rf build patched
+	touch wiped
 
 wipe: clean
 	rm -rf build patched

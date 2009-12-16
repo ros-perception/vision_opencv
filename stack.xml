@@ -1,4 +1,4 @@
-<stack name="vision_opencv" version="0.4.3">
+<stack name="vision_opencv" version="0.4.4">
   <description brief="opencv">
 
     opencv c++ and python libraries.

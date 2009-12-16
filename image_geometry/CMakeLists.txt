@@ -12,7 +12,7 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 rosbuild_init()
 
 #set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+#set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
@@ -33,6 +33,5 @@ rosbuild_add_library(${PROJECT_NAME} src/pinhole_camera_model.cpp src/stereo_cam
 
 rosbuild_add_pyunit(test/directed.py)
 
-rosbuild_add_gtest(utest test/utest.cpp)
-target_link_libraries(utest ${PROJECT_NAME})
-set_target_properties(utest PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/test)
+rosbuild_add_gtest(test/utest test/utest.cpp)
+target_link_libraries(test/utest ${PROJECT_NAME})

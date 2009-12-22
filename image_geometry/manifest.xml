@@ -5,7 +5,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://pr.willowgarage.com/wiki/image_proc</url>
   <export>
-    <cpp cflags="-I${prefix}/include" lflags=""/>
+    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -limage_geometry"/>
     <rosdoc config="rosdoc.yaml" />
   </export>
   <depend package="rospy"/>

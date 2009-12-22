@@ -127,12 +127,12 @@ public:
 
 private:
   bool initialized_;
-  bool parameters_changed_, roi_changed_;
   bool has_distortion_, has_roi_;
   
   sensor_msgs::CameraInfo cam_info_;
   cv::Mat_<double> K_, D_, R_, P_;
 
+  mutable bool parameters_changed_, roi_changed_;
   mutable cv::Mat undistort_map_x_, undistort_map_y_;
   mutable cv::Mat roi_undistort_map_x_, roi_undistort_map_y_;
 

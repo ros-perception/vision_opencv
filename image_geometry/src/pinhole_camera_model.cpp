@@ -131,19 +131,21 @@ void PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect, cv::Point2d&
 
 void PinholeCameraModel::initUndistortMaps() const
 {
-  if (parameters_changed_) {
+  if (undistort_map_x_.empty() || parameters_changed_) {
     // m1type=CV_16SC2 to use fast fixed-point maps
     cv::initUndistortRectifyMap(K_, D_, R_, P_, cv::Size(width(), height()),
                                 CV_16SC2, undistort_map_x_, undistort_map_y_);
   }
 
-  if (has_roi_ && (parameters_changed_ || roi_changed_)) {
+  if (has_roi_ && (roi_undistort_map_x_.empty() || parameters_changed_ || roi_changed_)) {
     cv::Rect roi(cam_info_.roi.x_offset, cam_info_.roi.y_offset,
                  cam_info_.roi.height, cam_info_.roi.width);
     //roi_undistort_map_x_ = undistort_map_x_(roi) - cv::Scalar(roi.x);
     cv::subtract(undistort_map_x_(roi), cv::Scalar(roi.x), roi_undistort_map_x_);
     cv::subtract(undistort_map_y_(roi), cv::Scalar(roi.y), roi_undistort_map_y_);
   }
+
+  parameters_changed_ = roi_changed_ = false;
 }
 
 } //namespace image_geometry

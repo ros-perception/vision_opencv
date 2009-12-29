@@ -6,7 +6,7 @@ Library (opencv).  This ROS package does not modify OpenCV in any way;
 it simply provides a convenient way to download and compile the library
 in a way that can be managed by the ROS dependency system.
 
-This package also includes CvBridge, which eases conversion between ROS
+Note: The cv_bridge package in the vision_opencv stack eases conversion between ROS
 Image messages and OpenCV images.
 
 

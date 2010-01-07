@@ -16,6 +16,9 @@ public:
   void fromCameraInfo(const sensor_msgs::CameraInfo& left,
                       const sensor_msgs::CameraInfo& right);
 
+  void fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& left,
+                      const sensor_msgs::CameraInfoConstPtr& right);
+
   // Read-only access to both mono camera models
   const PinholeCameraModel& left() const;
   const PinholeCameraModel& right() const;
@@ -25,7 +28,9 @@ public:
 
   void projectDisparityTo3d(const cv::Point2d& left_uv_rect, float disparity, cv::Point3d& xyz) const;
 
-  /// @todo Function for projecting disparity image to point cloud
+  // Project disparity image to point cloud
+  /// @todo handleMissingValues?
+  void projectDisparityImageTo3d(const cv::Mat& disparity, cv::Mat& point_cloud) const;
 
   // Arguments for OpenCV functions
   const cv::Mat_<double>& reprojectionMatrix() const; // Q, 4x4
@@ -55,6 +60,7 @@ inline const cv::Mat_<double>& StereoCameraModel::reprojectionMatrix() const { r
 inline double StereoCameraModel::baseline() const
 {
   /// @todo Currently assuming horizontal baseline
+  /// @todo Make sure this is correct! Kurt sets dimg_.Tx = P[0]/P[3] !!
   return -right_.projectionMatrix()(0,3) / right_.fx();
 }
 

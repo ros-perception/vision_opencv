@@ -40,6 +40,12 @@ void StereoCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& left,
   initialized_ = true;
 }
 
+void StereoCameraModel::fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& left,
+                                       const sensor_msgs::CameraInfoConstPtr& right)
+{
+  fromCameraInfo(*left, *right);
+}
+
 void StereoCameraModel::updateQ()
 {
   // Update variable fields of reprojection matrix
@@ -66,11 +72,19 @@ void StereoCameraModel::updateQ()
   Q_(3,3) = (right_.cx() - left_.cx()) / Tx;
 }
 
-void StereoCameraModel::projectDisparityTo3d(const cv::Point2d& left_uv_rect, float disparity, cv::Point3d& xyz) const
+void StereoCameraModel::projectDisparityTo3d(const cv::Point2d& left_uv_rect, float disparity,
+                                             cv::Point3d& xyz) const
 {
   assert(initialized_);
 
   throw std::runtime_error("[image_geometry] StereoCameraModel::projectPixelTo3d is unimplemented.");
+}
+
+void StereoCameraModel::projectDisparityImageTo3d(const cv::Mat& disparity, cv::Mat& point_cloud) const
+{
+  assert(initialized_);
+
+  cv::reprojectImageTo3D(disparity, point_cloud, Q_);
 }
 
 } //namespace image_geometry

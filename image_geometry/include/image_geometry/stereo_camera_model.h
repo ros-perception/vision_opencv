@@ -30,7 +30,9 @@ public:
 
   // Project disparity image to point cloud
   /// @todo handleMissingValues?
-  void projectDisparityImageTo3d(const cv::Mat& disparity, cv::Mat& point_cloud) const;
+  static const double MISSING_Z;
+  void projectDisparityImageTo3d(const cv::Mat& disparity, cv::Mat& point_cloud,
+                                 bool handleMissingValues = false) const;
 
   // Arguments for OpenCV functions
   const cv::Mat_<double>& reprojectionMatrix() const; // Q, 4x4

@@ -80,11 +80,14 @@ void StereoCameraModel::projectDisparityTo3d(const cv::Point2d& left_uv_rect, fl
   throw std::runtime_error("[image_geometry] StereoCameraModel::projectPixelTo3d is unimplemented.");
 }
 
-void StereoCameraModel::projectDisparityImageTo3d(const cv::Mat& disparity, cv::Mat& point_cloud) const
+const double StereoCameraModel::MISSING_Z = 10000.;
+
+void StereoCameraModel::projectDisparityImageTo3d(const cv::Mat& disparity, cv::Mat& point_cloud,
+                                                  bool handleMissingValues) const
 {
   assert(initialized_);
 
-  cv::reprojectImageTo3D(disparity, point_cloud, Q_);
+  cv::reprojectImageTo3D(disparity, point_cloud, Q_, handleMissingValues);
 }
 
 } //namespace image_geometry

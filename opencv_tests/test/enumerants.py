@@ -52,7 +52,6 @@ class TestEnumerants(unittest.TestCase):
         br = CvBridge()
         im = cv.CreateImage((640, 480), 8, 3)
         msg = br.cv_to_imgmsg(im)
-        print br.imgmsg_to_cv(msg, "mono16")
 
 if __name__ == '__main__':
   if 1:

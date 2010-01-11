@@ -114,6 +114,25 @@ TEST(OpencvTests, testCase_decode_8u)
   EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 3);
 }
 
+TEST(OpencvTests, testCase_decode_16u)
+{
+  IplImage *original = cvCreateImage(cvSize(640, 480), IPL_DEPTH_8U, 1);
+  CvRNG r = cvRNG(77);
+  cvRandArr(&r, original, CV_RAND_UNI, cvScalar(0,0,0,0), cvScalar(255,255,255,255));
+
+  sensor_msgs::Image image_message;
+  sensor_msgs::CvBridge img_bridge_;
+
+  int success;
+  success = img_bridge_.fromIpltoRosImage(original, image_message);
+  ASSERT_TRUE(success);
+
+  success = img_bridge_.fromImage(image_message, "mono16");
+  ASSERT_TRUE(success);
+  printf("%d\n", cvGetElemType(img_bridge_.toIpl()));
+  EXPECT_TRUE(cvGetElemType(img_bridge_.toIpl()) == CV_16UC1);
+}
+
 TEST(OpencvTests, testCase_decode_8uc3)
 {
   IplImage *original = cvCreateImage(cvSize(640, 480), IPL_DEPTH_8U, 3);
@@ -166,6 +185,7 @@ TEST(OpencvTests, testCase_new_methods)
 
 int main(int argc, char **argv)
 {
+  printf("HELLO WORLD\n");
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

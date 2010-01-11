@@ -148,7 +148,9 @@ namespace sensor_msgs
     {
       std::string fmt;
       int source_channels = CV_MAT_CN(encoding_as_cvtype(encoding));
-      if (source_channels == 1)
+      if (source_channels == -1)
+        fmt == "";
+      else if (source_channels == 1)
         fmt = "GRAY";
       else if ("rgb8" == encoding)
         fmt = "RGB";
@@ -210,10 +212,16 @@ namespace sensor_msgs
           img_ = rosimg_;
         } else {
           img_ = rosimg_;  // realloc uses this as a hidden argument.
-          reallocIfNeeded(&cvtimg_, IPL_DEPTH_8U, CV_MAT_CN(destination_type));
+          if (desired_encoding != "mono16")
+            reallocIfNeeded(&cvtimg_, IPL_DEPTH_8U, CV_MAT_CN(destination_type));
+          else
+            reallocIfNeeded(&cvtimg_, IPL_DEPTH_16U, CV_MAT_CN(destination_type));
           if (sourcefmt == destfmt) {
             cvConvertScale(rosimg_, cvtimg_);
           } else {
+            if (sourcefmt == "") {
+              return false;
+            }
             if (sourcefmt == "GRAY") {
               if (destfmt == "RGB")
                 cvCvtColor(rosimg_, cvtimg_, CV_GRAY2RGB);

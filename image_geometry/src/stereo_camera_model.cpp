@@ -40,6 +40,12 @@ void StereoCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& left,
   initialized_ = true;
 }
 
+void StereoCameraModel::fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& left,
+                                       const sensor_msgs::CameraInfoConstPtr& right)
+{
+  fromCameraInfo(*left, *right);
+}
+
 void StereoCameraModel::updateQ()
 {
   // Update variable fields of reprojection matrix
@@ -59,18 +65,29 @@ void StereoCameraModel::updateQ()
    */
   /// @todo This is not exactly what stereo_image_proc does... see StereoData::setReprojection.
   double Tx = baseline();
-  Q_(3,2) = -1.0 / Tx;
+  Q_(3,2) = 1.0 / Tx;
   Q_(0,3) = -right_.cx();
   Q_(1,3) = -right_.cy();
   Q_(2,3) = right_.fx();
-  Q_(3,3) = (right_.cx() - left_.cx()) / Tx;
+  //Q_(3,3) = (right_.cx() - left_.cx()) / Tx; // zero when disparities are pre-adjusted
 }
 
-void StereoCameraModel::projectDisparityTo3d(const cv::Point2d& left_uv_rect, float disparity, cv::Point3d& xyz) const
+void StereoCameraModel::projectDisparityTo3d(const cv::Point2d& left_uv_rect, float disparity,
+                                             cv::Point3d& xyz) const
 {
   assert(initialized_);
 
   throw std::runtime_error("[image_geometry] StereoCameraModel::projectPixelTo3d is unimplemented.");
+}
+
+const double StereoCameraModel::MISSING_Z = 10000.;
+
+void StereoCameraModel::projectDisparityImageTo3d(const cv::Mat& disparity, cv::Mat& point_cloud,
+                                                  bool handleMissingValues) const
+{
+  assert(initialized_);
+
+  cv::reprojectImageTo3D(disparity, point_cloud, Q_, handleMissingValues);
 }
 
 } //namespace image_geometry

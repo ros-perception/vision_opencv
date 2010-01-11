@@ -2,8 +2,8 @@
   <description>Image geometry functions.</description>
   <author>Patrick Mihelich</author>
   <license>BSD</license>
-  <review status="unreviewed" notes=""/>
-  <url>http://pr.willowgarage.com/wiki/image_proc</url>
+  <review status="Doc reviewed" notes="Jan 11, 2010"/>
+  <url>http://www.ros.org/wiki/image_geometry</url>
   <export>
     <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -limage_geometry"/>
     <rosdoc config="rosdoc.yaml" />

@@ -65,11 +65,11 @@ void StereoCameraModel::updateQ()
    */
   /// @todo This is not exactly what stereo_image_proc does... see StereoData::setReprojection.
   double Tx = baseline();
-  Q_(3,2) = -1.0 / Tx;
+  Q_(3,2) = 1.0 / Tx;
   Q_(0,3) = -right_.cx();
   Q_(1,3) = -right_.cy();
   Q_(2,3) = right_.fx();
-  Q_(3,3) = (right_.cx() - left_.cx()) / Tx;
+  //Q_(3,3) = (right_.cx() - left_.cx()) / Tx; // zero when disparities are pre-adjusted
 }
 
 void StereoCameraModel::projectDisparityTo3d(const cv::Point2d& left_uv_rect, float disparity,

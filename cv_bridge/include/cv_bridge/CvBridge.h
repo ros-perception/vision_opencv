@@ -212,7 +212,10 @@ namespace sensor_msgs
           img_ = rosimg_;
         } else {
           img_ = rosimg_;  // realloc uses this as a hidden argument.
-          reallocIfNeeded(&cvtimg_, IPL_DEPTH_8U, CV_MAT_CN(destination_type));
+          if (desired_encoding != "mono16")
+            reallocIfNeeded(&cvtimg_, IPL_DEPTH_8U, CV_MAT_CN(destination_type));
+          else
+            reallocIfNeeded(&cvtimg_, IPL_DEPTH_16U, CV_MAT_CN(destination_type));
           if (sourcefmt == destfmt) {
             cvConvertScale(rosimg_, cvtimg_);
           } else {

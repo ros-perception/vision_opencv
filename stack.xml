@@ -6,7 +6,7 @@
   </description>
   <author>James Bowman</author>
   <license>BSD</license>  
-  <review status="unreviewed" notes=""/>
+  <review status="reviewed" notes=""/>
   <url>http://ros.org/wiki/vision_opencv</url>
   <depend stack="ros"/> <!-- rostest, rospy --> 
   <depend stack="common_msgs"/> <!-- sensor_msgs --> 

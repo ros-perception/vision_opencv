@@ -5,6 +5,10 @@
 
 namespace image_geometry {
 
+/**
+ * \brief Simplifies interpreting stereo image pairs geometrically using the
+ * parameters from the left and right sensor_msgs/CameraInfo.
+ */
 class StereoCameraModel
 {
 public:
@@ -12,33 +16,60 @@ public:
 
   StereoCameraModel(const StereoCameraModel& other);
 
-  // Update in image/info callback
+  /**
+   * \brief Set the camera parameters from the sensor_msgs/CameraInfo messages.
+   */
   void fromCameraInfo(const sensor_msgs::CameraInfo& left,
                       const sensor_msgs::CameraInfo& right);
 
+  /**
+   * \brief Set the camera parameters from the sensor_msgs/CameraInfo messages.
+   */
   void fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& left,
                       const sensor_msgs::CameraInfoConstPtr& right);
 
-  // Read-only access to both mono camera models
+  /**
+   * \brief Get the left monocular camera model.
+   */
   const PinholeCameraModel& left() const;
+
+  /**
+   * \brief Get the right monocular camera model.
+   */
   const PinholeCameraModel& right() const;
 
-  // Projection functions, 3d points are in tfFrame()
-  std::string tfFrame() const; // Should be same for both cameras
+  /**
+   * \brief Get the name of the camera coordinate frame in tf.
+   *
+   * For stereo cameras, both the left and right CameraInfo should be in the left
+   * optical frame.
+   */
+  std::string tfFrame() const;
 
+  /**
+   * \brief Project a rectified pixel with disparity to a 3d point.
+   */
   void projectDisparityTo3d(const cv::Point2d& left_uv_rect, float disparity, cv::Point3d& xyz) const;
 
-  // Project disparity image to point cloud
-  /// @todo handleMissingValues?
-  static const double MISSING_Z;
+  /**
+   * \brief Project a disparity image to a 3d point cloud.
+   *
+   * If handleMissingValues = true, all points with minimal disparity (outliers) have
+   * Z set to MISSING_Z (currently 10000.0).
+   */
   void projectDisparityImageTo3d(const cv::Mat& disparity, cv::Mat& point_cloud,
                                  bool handleMissingValues = false) const;
+  static const double MISSING_Z;
+  
+  /**
+   * \brief Returns the disparity reprojection matrix.
+   */
+  const cv::Mat_<double>& reprojectionMatrix() const;
 
-  // Arguments for OpenCV functions
-  const cv::Mat_<double>& reprojectionMatrix() const; // Q, 4x4
-
-  // Accessors for specific parameters
-  double baseline() const; //Tx
+  /**
+   * \brief Returns the horizontal baseline in world coordinates.
+   */
+  double baseline() const;
 
   /// @todo Maybe more convenience functions from CvStereoCamModel in stereo_util, like getDelta_.
 

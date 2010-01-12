@@ -1,5 +1,10 @@
 <package>
-  <description>Image geometry functions.</description>
+  <description>
+    `image_geometry` contains C++ and Python libraries for interpreting images
+    geometrically. It interfaces the calibration parameters in sensor_msgs/CameraInfo
+    messages with OpenCV functions such as image rectification, much as [[cv_bridge]]
+    interfaces ROS sensor_msgs/Image with OpenCV data types.
+  </description>
   <author>Patrick Mihelich</author>
   <license>BSD</license>
   <review status="Doc reviewed" notes="Jan 11, 2010"/>

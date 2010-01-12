@@ -177,23 +177,8 @@ class StereoCameraModel:
         Returns the tf frame name - a string - of the 3d points.  This is
         the frame of the :class:`sensor_msgs.msg.CameraInfo` message.  It
         may be used as a source frame in :class:`tf.TransformListener`.
-
-        It may be used like this::
-
-            import tf
-            import message_filters
-
-            class MyNode:
-
-                def __init__(self):
-
-                    self.tl = tf.TransformListener()
-                    rospy.Subscriber('img', sensor_msgs.msg.Image, handle_image)
-
-                def handle_stereo(self, left_image, right_image):
-                    outlet_in_world = self.tl.transformPoint("world", 
-
         """
+
         return self.left.tfFrame()
 
     def project3dToPixel(self, point):

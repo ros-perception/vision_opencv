@@ -1,11 +1,11 @@
-# opencv rev. 1978
+# opencv rev. 2633
 INSTALL_DIR = opencv
 
 all: installed
 
 SVN_DIR = build/opencv-svn
 SVN_URL = https://code.ros.org/svn/opencv/trunk/opencv
-SVN_REVISION = -r2435
+SVN_REVISION = -r2633
 SVN_PATCH = pythontest.patch
 include $(shell rospack find mk)/svn_checkout.mk
 
@@ -14,6 +14,7 @@ include $(shell rospack find mk)/svn_checkout.mk
 CMAKE = cmake 
 CMAKE_ARGS = -D CMAKE_BUILD_TYPE=RELEASE \
              -D CMAKE_INSTALL_PREFIX=`rospack find opencv2`/$(INSTALL_DIR) \
+             -D BUILD_EXAMPLES=ON \
              -D BUILD_NEW_PYTHON_SUPPORT=ON \
              -D BUILD_SWIG_PYTHON_SUPPORT=OFF \
 						 -D WITH_FFMPEG=OFF \

@@ -4,8 +4,7 @@ INSTALL_DIR = opencv
 all: installed
 
 SVN_DIR = build/opencv-svn
-SVN_URL = https://code.ros.org/svn/opencv/trunk/opencv
-SVN_REVISION = -r2435
+SVN_URL = https://code.ros.org/svn/opencv/branches/r2435/opencv/
 SVN_PATCH = pythontest.patch
 include $(shell rospack find mk)/svn_checkout.mk
 

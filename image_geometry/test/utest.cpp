@@ -84,11 +84,47 @@ TEST_F(PinholeTest, projectPoint)
 
 TEST_F(PinholeTest, rectifyPoint)
 {
-  /// @todo Should test this together with unrectifyPoint
-  cv::Point2d uv_raw(100, 100), uv_rect;
-  model_.rectifyPoint(uv_raw, uv_rect);
-  EXPECT_DOUBLE_EQ(142.30311584472656, uv_rect.x);
-  EXPECT_DOUBLE_EQ(132.061065673828, uv_rect.y);
+  // Spot test an arbitrary point.
+  {
+    cv::Point2d uv_raw(100, 100), uv_rect;
+    model_.rectifyPoint(uv_raw, uv_rect);
+    EXPECT_DOUBLE_EQ(142.30311584472656, uv_rect.x);
+    EXPECT_DOUBLE_EQ(132.061065673828, uv_rect.y);
+  }
+
+  /// @todo Need R = identity for the principal point tests.
+#if 0
+  // Test rectifyPoint takes (c'x, c'y) [from K] -> (cx, cy) [from P].
+  double cxp = model_.intrinsicMatrix()(0,2), cyp = model_.intrinsicMatrix()(1,2);
+  {
+    cv::Point2d uv_raw(cxp, cyp), uv_rect;
+    model_.rectifyPoint(uv_raw, uv_rect);
+    EXPECT_NEAR(uv_rect.x, model_.cx(), 1e-4);
+    EXPECT_NEAR(uv_rect.y, model_.cy(), 1e-4);
+  }
+
+  // Test unrectifyPoint takes (cx, cy) [from P] -> (c'x, c'y) [from K].
+  {
+    cv::Point2d uv_rect(model_.cx(), model_.cy()), uv_raw;
+    model_.unrectifyPoint(uv_rect, uv_raw);
+    EXPECT_NEAR(uv_raw.x, cxp, 1e-4);
+    EXPECT_NEAR(uv_raw.y, cyp, 1e-4);
+  }
+#endif
+
+  // Check rectifying then unrectifying over most of the image is accurate.
+  const size_t step = 5;
+  const size_t border = 65; // Expect bad accuracy far from the center of the image.
+  for (size_t row = border; row <= cam_info_.height - border; row += step) {
+    for (size_t col = border; col <= cam_info_.width - border; col += step) {
+      cv::Point2d uv_raw(row, col), uv_rect, uv_unrect;
+      model_.rectifyPoint(uv_raw, uv_rect);
+      model_.unrectifyPoint(uv_rect, uv_unrect);
+      // Check that we're at least within a pixel...
+      EXPECT_NEAR(uv_raw.x, uv_unrect.x, 1.0);
+      EXPECT_NEAR(uv_raw.y, uv_unrect.y, 1.0);
+    }
+  }
 }
 
 int main(int argc, char** argv)

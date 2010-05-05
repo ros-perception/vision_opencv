@@ -128,8 +128,39 @@ void PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect, cv::Point2d&
 {
   assert(initialized_);
 
-  throw std::runtime_error("[image_geometry] PinholeCameraModel::unrectifyPoint is unimplemented.");
-  /// @todo Do reverse transformation, see projectPoints & cvInitUndistortRectifyMap docs
+  if (!has_distortion_) {
+    uv_raw = uv_rect;
+    return;
+  }
+
+  // Formulae from docs for cv::initUndistortRectifyMap,
+  // http://opencv.willowgarage.com/documentation/cpp/camera_calibration_and_3d_reconstruction.html
+
+  // x <- (u - c'x) / f'x
+  // y <- (v - c'y) / f'y
+  // c'x, f'x, etc. (primed) come from "new camera matrix" P[0:3, 0:3].
+  double x = (uv_rect.x - cx()) / fx();
+  double y = (uv_rect.y - cy()) / fy();
+  // [X Y W]^T <- R^-1 * [x y 1]^T
+  double X = R_(0,0)*x + R_(1,0)*y + R_(2,0);
+  double Y = R_(0,1)*x + R_(1,1)*y + R_(2,1);
+  double W = R_(0,2)*x + R_(1,2)*y + R_(2,2);
+  // x' <- X/W, y' <- Y/W
+  double xp = X / W;
+  double yp = Y / W;
+  // x'' <- x'(1+k1*r^2+k2*r^4+k3*r^6) + 2p1*x'*y' + p2(r^2+2x'^2)
+  // y'' <- y'(1+k1*r^2+k2*r^4+k3*r^6) + p1(r^2+2y'^2) + 2p2*x'*y'
+  // where r^2 = x'^2 + y'^2
+  double r2 = xp*xp + yp*yp;
+  double k1 = D_(0,0), k2 = D_(0,1), p1 = D_(0,2), p2 = D_(0,3), k3 = D_(0,4);
+  double barrel_correction = 1 + k1*r2 + k2*(r2*r2) + k3*(r2*r2*r2);
+  double xpp = xp*barrel_correction + 2*p1*(xp*yp) + p2*(r2+2*(xp*xp));
+  double ypp = yp*barrel_correction + p1*(r2+2*(yp*yp)) + 2*p2*(xp*yp);
+  // map_x(u,v) <- x''fx + cx
+  // map_y(u,v) <- y''fy + cy
+  // cx, fx, etc. come from original camera matrix K.
+  uv_raw.x = xpp*K_(0,0) + K_(0,2);
+  uv_raw.y = ypp*K_(1,1) + K_(1,2);
 }
 
 void PinholeCameraModel::initUndistortMaps() const

@@ -116,9 +116,12 @@ void PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw, cv::Point2d& uv
 {
   assert(initialized_);
 
-  const cv::Mat src_pt(1, 1, CV_64FC2, const_cast<double*>(&uv_raw.x));
-  cv::Mat dst_pt(1, 1, CV_64FC2, &uv_rect.x);
+  // cv::undistortPoints requires the point data to be float
+  cv::Point2f raw32 = uv_raw, rect32;
+  const cv::Mat src_pt(1, 1, CV_32FC2, &raw32.x);
+  cv::Mat dst_pt(1, 1, CV_32FC2, &rect32.x);
   cv::undistortPoints(src_pt, dst_pt, K_, D_, R_, P_);
+  uv_rect = rect32;
 }
 
 void PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect, cv::Point2d& uv_raw) const

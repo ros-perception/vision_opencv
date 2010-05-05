@@ -82,6 +82,15 @@ TEST_F(PinholeTest, projectPoint)
   }
 }
 
+TEST_F(PinholeTest, rectifyPoint)
+{
+  /// @todo Should test this together with unrectifyPoint
+  cv::Point2d uv_raw(100, 100), uv_rect;
+  model_.rectifyPoint(uv_raw, uv_rect);
+  EXPECT_DOUBLE_EQ(142.30311584472656, uv_rect.x);
+  EXPECT_DOUBLE_EQ(132.061065673828, uv_rect.y);
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);

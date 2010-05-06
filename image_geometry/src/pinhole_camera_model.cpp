@@ -83,10 +83,9 @@ void PinholeCameraModel::projectPixelTo3dRay(const cv::Point2d& uv_rect, cv::Poi
 
   ray.x = (uv_rect.x - cx()) / fx();
   ray.y = (uv_rect.y - cy()) / fy();
+  ray.z = 1.0;
   double norm = std::sqrt(ray.x*ray.x + ray.y*ray.y + 1);
-  ray.x /= norm;
-  ray.y /= norm;
-  ray.z = 1.0 / norm;
+  ray *= 1.0/norm;
 }
 
 void PinholeCameraModel::rectifyImage(const cv::Mat& raw, cv::Mat& rectified, int interpolation) const
@@ -110,6 +109,12 @@ void PinholeCameraModel::unrectifyImage(const cv::Mat& rectified, cv::Mat& raw) 
   assert(initialized_);
 
   throw std::runtime_error("[image_geometry] PinholeCameraModel::unrectifyImage is unimplemented.");
+  // Similar to rectifyImage, but need to build separate set of inverse maps (raw->rectified)...
+  // - Build src_pt Mat with all the raw pixel coordinates (or do it one row at a time)
+  // - Do cv::undistortPoints(src_pt, dst_pt, K_, D_, R_, P_)
+  // - Use convertMaps() to convert dst_pt to fast fixed-point maps
+  // - cv::remap(rectified, raw, ...)
+  // Need interpolation argument. Same caching behavior?
 }
 
 void PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw, cv::Point2d& uv_rect) const
@@ -132,6 +137,8 @@ void PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect, cv::Point2d&
     uv_raw = uv_rect;
     return;
   }
+
+  /// @todo Is there not an OpenCV call to do this directly?
 
   // Formulae from docs for cv::initUndistortRectifyMap,
   // http://opencv.willowgarage.com/documentation/cpp/camera_calibration_and_3d_reconstruction.html

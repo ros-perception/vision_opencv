@@ -34,6 +34,11 @@ public:
   std::string tfFrame() const;
 
   /**
+   * \brief Get the time stamp associated with this camera model.
+   */
+  ros::Time stamp() const;
+  
+  /**
    * \brief Project a 3d point to rectified pixel coordinates.
    *
    * This is the inverse of projectPixelTo3dRay().
@@ -156,6 +161,12 @@ inline std::string PinholeCameraModel::tfFrame() const
 {
   assert(initialized_);
   return cam_info_.header.frame_id;
+}
+
+inline ros::Time PinholeCameraModel::stamp() const
+{
+  assert(initialized_);
+  return cam_info_.header.stamp;
 }
 
 inline const cv::Mat_<double>& PinholeCameraModel::intrinsicMatrix() const  { return K_; }

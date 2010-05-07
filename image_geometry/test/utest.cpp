@@ -1,6 +1,12 @@
 #include "image_geometry/pinhole_camera_model.h"
 #include <gtest/gtest.h>
 
+/// @todo Tests with simple values (R = identity, D = 0, P = K or simple scaling)
+/// @todo Test projection functions for right stereo values, P(:,3) != 0
+/// @todo Tests for [un]rectifyImage
+/// @todo Tests using ROI, needs support from PinholeCameraModel
+/// @todo Tests for StereoCameraModel
+
 class PinholeTest : public testing::Test
 {
 protected:

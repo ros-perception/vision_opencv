@@ -32,8 +32,8 @@ void StereoCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& left,
   assert( left_.fx() == right_.fx() );
   assert( left_.fy() == right_.fy() );
   assert( left_.cy() == right_.cy() );
-  assert( left_.cx() == right_.cx() );
-  /// @todo Cx may differ for verged cameras, support that case.
+  assert( left_.cx() == right_.cx() ); /// @todo Cx may differ for verged cameras, support that case.
+  /// @todo Check that translations in P make sense
 
   updateQ();
 

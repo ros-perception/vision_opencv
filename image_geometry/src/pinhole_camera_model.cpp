@@ -71,10 +71,11 @@ void PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& m
 void PinholeCameraModel::project3dToPixel(const cv::Point3d& xyz, cv::Point2d& uv_rect) const
 {
   assert(initialized_);
-
+  assert(P_(2, 3) == 0.0); // Calibrated stereo cameras should be in the same plane
   /// @todo Principal point not adjusted for ROI anywhere yet
-  uv_rect.x = fx() * (xyz.x / xyz.z) + cx();
-  uv_rect.y = fy() * (xyz.y / xyz.z) + cy();
+
+  uv_rect.x = (fx()*xyz.x + P_(0, 3)) / xyz.z + cx();
+  uv_rect.y = (fy()*xyz.y + P_(1, 3)) / xyz.z + cy();
 }
 
 void PinholeCameraModel::projectPixelTo3dRay(const cv::Point2d& uv_rect, cv::Point3d& ray) const
@@ -104,7 +105,7 @@ void PinholeCameraModel::rectifyImage(const cv::Mat& raw, cv::Mat& rectified, in
   }
 }
 
-void PinholeCameraModel::unrectifyImage(const cv::Mat& rectified, cv::Mat& raw) const
+void PinholeCameraModel::unrectifyImage(const cv::Mat& rectified, cv::Mat& raw, int interpolation) const
 {
   assert(initialized_);
 

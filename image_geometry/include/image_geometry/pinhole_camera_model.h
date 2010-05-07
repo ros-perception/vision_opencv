@@ -63,7 +63,8 @@ public:
   /**
    * \brief Apply camera distortion to a rectified image.
    */
-  void unrectifyImage(const cv::Mat& rectified, cv::Mat& raw) const;
+  void unrectifyImage(const cv::Mat& rectified, cv::Mat& raw,
+                      int interpolation = CV_INTER_LINEAR) const;
 
   /**
    * \brief Compute the rectified image coordinates of a pixel in the raw image.

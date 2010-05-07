@@ -74,16 +74,19 @@ void PinholeCameraModel::project3dToPixel(const cv::Point3d& xyz, cv::Point2d& u
   assert(P_(2, 3) == 0.0); // Calibrated stereo cameras should be in the same plane
   /// @todo Principal point not adjusted for ROI anywhere yet
 
-  uv_rect.x = (fx()*xyz.x + P_(0, 3)) / xyz.z + cx();
-  uv_rect.y = (fy()*xyz.y + P_(1, 3)) / xyz.z + cy();
+  // [U V W]^T = P * [X Y Z 1]^T
+  // u = U/W
+  // v = V/W
+  uv_rect.x = (fx()*xyz.x + Tx()) / xyz.z + cx();
+  uv_rect.y = (fy()*xyz.y + Ty()) / xyz.z + cy();
 }
 
 void PinholeCameraModel::projectPixelTo3dRay(const cv::Point2d& uv_rect, cv::Point3d& ray) const
 {
   assert(initialized_);
 
-  ray.x = (uv_rect.x - cx()) / fx();
-  ray.y = (uv_rect.y - cy()) / fy();
+  ray.x = (uv_rect.x - cx() - Tx()) / fx();
+  ray.y = (uv_rect.y - cy() - Ty()) / fy();
   ray.z = 1.0;
   double norm = std::sqrt(ray.x*ray.x + ray.y*ray.y + 1);
   ray *= 1.0/norm;
@@ -147,8 +150,8 @@ void PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect, cv::Point2d&
   // x <- (u - c'x) / f'x
   // y <- (v - c'y) / f'y
   // c'x, f'x, etc. (primed) come from "new camera matrix" P[0:3, 0:3].
-  double x = (uv_rect.x - cx()) / fx();
-  double y = (uv_rect.y - cy()) / fy();
+  double x = (uv_rect.x - cx() - Tx()) / fx(); /// @todo Duplicated from projectPixelTo3dRay
+  double y = (uv_rect.y - cy() - Ty()) / fy();
   // [X Y W]^T <- R^-1 * [x y 1]^T
   double X = R_(0,0)*x + R_(1,0)*y + R_(2,0);
   double Y = R_(0,1)*x + R_(1,1)*y + R_(2,1);

@@ -26,7 +26,7 @@ import cv
 # scale_factor=1.2, min_neighbors=2, flags=CV_HAAR_DO_CANNY_PRUNING, 
 # min_size=<minimum possible face size
 
-min_size = (20, 20)
+min_size = (10, 10)
 image_scale = 2
 haar_scale = 1.2
 min_neighbors = 2

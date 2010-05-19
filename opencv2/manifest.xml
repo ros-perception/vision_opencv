@@ -24,5 +24,8 @@ Image messages and OpenCV images.
 <rosdep name="jasper"/>
 <rosdep name="graphicsmagick"/>
 <rosdep name="gtk2"/>
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
 </package>
 

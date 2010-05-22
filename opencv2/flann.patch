@@ -1,8 +1,8 @@
-Index: modules/core/include/opencv2/core/flann.hpp
+Index: include/opencv/cxflann.h
 ===================================================================
---- modules/core/include/opencv2/core/flann.hpp	(revision 3093)
-+++ modules/core/include/opencv2/core/flann.hpp	(working copy)
-@@ -45,7 +45,7 @@
+--- include/opencv/cxflann.h	(revision 3028)
++++ include/opencv/cxflann.h	(working copy)
+@@ -45,14 +45,14 @@
  
  #ifdef __cplusplus
  
@@ -11,6 +11,14 @@ Index: modules/core/include/opencv2/core/flann.hpp
  {
  	class Index;
  }
+ 
+ namespace cv {
+ 
+-namespace flann {
++namespace cvflann {
+ 
+ /* Nearest neighbor index algorithms */
+ enum flann_algorithm_t {
 @@ -89,7 +89,7 @@
  {
  public:
@@ -83,13 +91,29 @@ Index: modules/core/include/opencv2/core/flann.hpp
  
  public:
  	Index(const Mat& features, const IndexParams& params);
-Index: modules/core/src/flann.cpp
+Index: include/opencv/cvaux.hpp
 ===================================================================
---- modules/core/src/flann.cpp	(revision 3093)
-+++ modules/core/src/flann.cpp	(working copy)
-@@ -40,70 +40,70 @@
+--- include/opencv/cvaux.hpp	(revision 3028)
++++ include/opencv/cvaux.hpp	(working copy)
+@@ -1802,7 +1802,7 @@
+     CvMat* m_pca_hr_eigenvectors; // PCA eigenvectors for large patches
+     OneWayDescriptor* m_pca_descriptors; // an array of PCA descriptors
  
- namespace flann {
+-    cv::flann::Index* m_pca_descriptors_tree;
++    cv::cvflann::Index* m_pca_descriptors_tree;
+     CvMat* m_pca_descriptors_matrix;
+ 
+     CvAffinePose* m_poses; // array of poses
+Index: src/cxcore/cxflann.cpp
+===================================================================
+--- src/cxcore/cxflann.cpp	(revision 3028)
++++ src/cxcore/cxflann.cpp	(working copy)
+@@ -38,72 +38,72 @@
+ namespace cv
+ {
+ 
+-namespace flann {
++namespace cvflann {
  
 -::flann::Index* LinearIndexParams::createIndex(const Mat& dataset) const
 +::cvflann::Index* LinearIndexParams::createIndex(const Mat& dataset) const
@@ -272,9 +296,126 @@ Index: modules/core/src/flann.cpp
  			(::flann_centers_init_t)params.centers_init, params.cb_index));
  }
  
+Index: src/cvaux/cvoneway.cpp
+===================================================================
+--- src/cvaux/cvoneway.cpp	(revision 3028)
++++ src/cvaux/cvoneway.cpp	(working copy)
+@@ -150,7 +150,7 @@
+                               std::vector<int>& desc_idxs, std::vector<int>&  pose_idxs, std::vector<float>& distances,
+                               CvMat* avg = 0, CvMat* eigenvalues = 0);
+     
+-    void FindOneWayDescriptor(cv::flann::Index* m_pca_descriptors_tree, CvSize patch_size, int m_pca_dim_low, int m_pose_count, IplImage* patch, int& desc_idx, int& pose_idx, float& distance,
++    void FindOneWayDescriptor(cv::cvflann::Index* m_pca_descriptors_tree, CvSize patch_size, int m_pca_dim_low, int m_pose_count, IplImage* patch, int& desc_idx, int& pose_idx, float& distance,
+                               CvMat* avg = 0, CvMat* eigenvalues = 0);
+     
+     void FindOneWayDescriptorEx(int desc_count, const OneWayDescriptor* descriptors, IplImage* patch,
+@@ -164,7 +164,7 @@
+                                 std::vector<float>& distances, std::vector<float>& scales,
+                                 CvMat* avg, CvMat* eigenvectors);
+     
+-    void FindOneWayDescriptorEx(cv::flann::Index* m_pca_descriptors_tree, CvSize patch_size, int m_pca_dim_low, int m_pose_count, IplImage* patch,
++    void FindOneWayDescriptorEx(cv::cvflann::Index* m_pca_descriptors_tree, CvSize patch_size, int m_pca_dim_low, int m_pose_count, IplImage* patch,
+                                 float scale_min, float scale_max, float scale_step,
+                                 int& desc_idx, int& pose_idx, float& distance, float& scale,
+                                 CvMat* avg, CvMat* eigenvectors);
+@@ -801,7 +801,7 @@
+     
+ #if defined(_KDTREE)
+     
+-    void FindOneWayDescriptor(cv::flann::Index* m_pca_descriptors_tree, CvSize patch_size, int m_pca_dim_low, int m_pose_count, IplImage* patch, int& desc_idx, int& pose_idx, float& distance,
++    void FindOneWayDescriptor(cv::cvflann::Index* m_pca_descriptors_tree, CvSize patch_size, int m_pca_dim_low, int m_pose_count, IplImage* patch, int& desc_idx, int& pose_idx, float& distance,
+                               CvMat* avg, CvMat* eigenvectors)
+     {
+         desc_idx = -1;
+@@ -849,8 +849,8 @@
+         //--------
+         
+ 		//float* target = new float[m_pca_dim_low];
+-		//::flann::KNNResultSet res(1,pca_coeffs->data.fl,m_pca_dim_low);
+-		//::flann::SearchParams params;
++		//::cvflann::KNNResultSet res(1,pca_coeffs->data.fl,m_pca_dim_low);
++		//::cvflann::SearchParams params;
+ 		//params.checks = -1;
+         
+ 		//int maxDepth = 1000000;
+@@ -876,7 +876,7 @@
+ 			object_ptr[i] = pca_coeffs->data.fl[i];
+ 		}
+         
+-		m_pca_descriptors_tree->knnSearch(m_object, m_indices, m_dists, 1, cv::flann::SearchParams(-1) );
++		m_pca_descriptors_tree->knnSearch(m_object, m_indices, m_dists, 1, cv::cvflann::SearchParams(-1) );
+         
+ 		desc_idx = ((int*)(m_indices.ptr<int>(0)))[0] / m_pose_count;
+ 		pose_idx = ((int*)(m_indices.ptr<int>(0)))[0] % m_pose_count;
+@@ -1110,7 +1110,7 @@
+     }
+     
+ #if defined(_KDTREE)
+-    void FindOneWayDescriptorEx(cv::flann::Index* m_pca_descriptors_tree, CvSize patch_size, int m_pca_dim_low,
++    void FindOneWayDescriptorEx(cv::cvflann::Index* m_pca_descriptors_tree, CvSize patch_size, int m_pca_dim_low,
+                                 int m_pose_count, IplImage* patch,
+                                 float scale_min, float scale_max, float scale_step,
+                                 int& desc_idx, int& pose_idx, float& distance, float& scale,
+@@ -1634,13 +1634,13 @@
+         int pca_dim_low = this->GetDescriptor(0)->GetPCADimLow();
+         
+         //if (!m_pca_descriptors_matrix)
+-        //	m_pca_descriptors_matrix = new ::flann::Matrix<float>(n*m_pose_count,pca_dim_low);
++        //	m_pca_descriptors_matrix = new ::cvflann::Matrix<float>(n*m_pose_count,pca_dim_low);
+         //else
+         //{
+         //	if ((m_pca_descriptors_matrix->cols != pca_dim_low)&&(m_pca_descriptors_matrix->rows != n*m_pose_count))
+         //	{
+         //		delete m_pca_descriptors_matrix;
+-        //		m_pca_descriptors_matrix = new ::flann::Matrix<float>(n*m_pose_count,pca_dim_low);
++        //		m_pca_descriptors_matrix = new ::cvflann::Matrix<float>(n*m_pose_count,pca_dim_low);
+         //	}
+         //}
+         
+@@ -1658,10 +1658,10 @@
+         }
+         cv::Mat pca_descriptors_mat(m_pca_descriptors_matrix,false);
+         
+-        //::flann::KDTreeIndexParams params;
++        //::cvflann::KDTreeIndexParams params;
+         //params.trees = 1;
+         //m_pca_descriptors_tree = new KDTree(pca_descriptors_mat);
+-        m_pca_descriptors_tree = new cv::flann::Index(pca_descriptors_mat,cv::flann::KDTreeIndexParams(1));
++        m_pca_descriptors_tree = new cv::cvflann::Index(pca_descriptors_mat,cv::cvflann::KDTreeIndexParams(1));
+         //cvReleaseMat(&m_pca_descriptors_matrix);
+         //m_pca_descriptors_tree->buildIndex();
+     }
+Index: tests/cv/src/anearestneighbors.cpp
+===================================================================
+--- tests/cv/src/anearestneighbors.cpp	(revision 3028)
++++ tests/cv/src/anearestneighbors.cpp	(working copy)
+@@ -47,7 +47,7 @@
+ #include <iostream>
+ 
+ using namespace cv;
+-using namespace cv::flann;
++using namespace cv::cvflann;
+ 
+ //--------------------------------------------------------------------------------
+ class NearestNeighborTest : public CvTest
+Index: samples/c/find_obj.cpp
+===================================================================
+--- samples/c/find_obj.cpp	(revision 3028)
++++ samples/c/find_obj.cpp	(working copy)
+@@ -138,8 +138,8 @@
+     // find nearest neighbors using FLANN
+     cv::Mat m_indices(objectDescriptors->total, 2, CV_32S);
+     cv::Mat m_dists(objectDescriptors->total, 2, CV_32F);
+-    cv::flann::Index flann_index(m_image, cv::flann::KDTreeIndexParams(4));  // using 4 randomized kdtrees
+-    flann_index.knnSearch(m_object, m_indices, m_dists, 2, cv::flann::SearchParams(64) ); // maximum number of leafs checked
++    cv::cvflann::Index flann_index(m_image, cv::cvflann::KDTreeIndexParams(4));  // using 4 randomized kdtrees
++    flann_index.knnSearch(m_object, m_indices, m_dists, 2, cv::cvflann::SearchParams(64) ); // maximum number of leafs checked
+ 
+     int* indices_ptr = m_indices.ptr<int>(0);
+     float* dists_ptr = m_dists.ptr<float>(0);
 Index: 3rdparty/include/flann/flann.hpp
 ===================================================================
---- 3rdparty/include/flann/flann.hpp	(revision 3093)
+--- 3rdparty/include/flann/flann.hpp	(revision 3028)
 +++ 3rdparty/include/flann/flann.hpp	(working copy)
 @@ -40,7 +40,7 @@
  
@@ -287,7 +428,7 @@ Index: 3rdparty/include/flann/flann.hpp
  class NNIndex;
 Index: 3rdparty/include/flann/random.h
 ===================================================================
---- 3rdparty/include/flann/random.h	(revision 3093)
+--- 3rdparty/include/flann/random.h	(revision 3028)
 +++ 3rdparty/include/flann/random.h	(working copy)
 @@ -37,7 +37,7 @@
  
@@ -300,7 +441,7 @@ Index: 3rdparty/include/flann/random.h
  /**
 Index: 3rdparty/include/flann/matrix.h
 ===================================================================
---- 3rdparty/include/flann/matrix.h	(revision 3093)
+--- 3rdparty/include/flann/matrix.h	(revision 3028)
 +++ 3rdparty/include/flann/matrix.h	(working copy)
 @@ -35,7 +35,7 @@
  #include "random.h"
@@ -313,7 +454,7 @@ Index: 3rdparty/include/flann/matrix.h
  * Class implementing a generic rectangular dataset.
 Index: 3rdparty/include/flann/common.h
 ===================================================================
---- 3rdparty/include/flann/common.h	(revision 3093)
+--- 3rdparty/include/flann/common.h	(revision 3028)
 +++ 3rdparty/include/flann/common.h	(working copy)
 @@ -36,7 +36,7 @@
  
@@ -326,7 +467,7 @@ Index: 3rdparty/include/flann/common.h
   public:
 Index: 3rdparty/flann/flann.cpp
 ===================================================================
---- 3rdparty/flann/flann.cpp	(revision 3093)
+--- 3rdparty/flann/flann.cpp	(revision 3028)
 +++ 3rdparty/flann/flann.cpp	(working copy)
 @@ -58,7 +58,7 @@
  #endif
@@ -348,7 +489,7 @@ Index: 3rdparty/flann/flann.cpp
  typedef Matrix<float>* MatrixPtr;
 Index: 3rdparty/flann/flann.hpp
 ===================================================================
---- 3rdparty/flann/flann.hpp	(revision 3093)
+--- 3rdparty/flann/flann.hpp	(revision 3028)
 +++ 3rdparty/flann/flann.hpp	(working copy)
 @@ -40,7 +40,7 @@
  
@@ -361,7 +502,7 @@ Index: 3rdparty/flann/flann.hpp
  class NNIndex;
 Index: 3rdparty/flann/algorithms/composite_index.h
 ===================================================================
---- 3rdparty/flann/algorithms/composite_index.h	(revision 3093)
+--- 3rdparty/flann/algorithms/composite_index.h	(revision 3028)
 +++ 3rdparty/flann/algorithms/composite_index.h	(working copy)
 @@ -34,7 +34,7 @@
  #include "constants.h"
@@ -374,7 +515,7 @@ Index: 3rdparty/flann/algorithms/composite_index.h
  class CompositeIndex : public NNIndex
 Index: 3rdparty/flann/algorithms/dist.cpp
 ===================================================================
---- 3rdparty/flann/algorithms/dist.cpp	(revision 3093)
+--- 3rdparty/flann/algorithms/dist.cpp	(revision 3028)
 +++ 3rdparty/flann/algorithms/dist.cpp	(working copy)
 @@ -30,7 +30,7 @@
  
@@ -387,7 +528,7 @@ Index: 3rdparty/flann/algorithms/dist.cpp
  /** Global variable indicating the distance metric
 Index: 3rdparty/flann/algorithms/autotuned_index.h
 ===================================================================
---- 3rdparty/flann/algorithms/autotuned_index.h	(revision 3093)
+--- 3rdparty/flann/algorithms/autotuned_index.h	(revision 3028)
 +++ 3rdparty/flann/algorithms/autotuned_index.h	(working copy)
 @@ -36,7 +36,7 @@
  #include "ground_truth.h"
@@ -400,7 +541,7 @@ Index: 3rdparty/flann/algorithms/autotuned_index.h
  class AutotunedIndex : public NNIndex
 Index: 3rdparty/flann/algorithms/linear_index.h
 ===================================================================
---- 3rdparty/flann/algorithms/linear_index.h	(revision 3093)
+--- 3rdparty/flann/algorithms/linear_index.h	(revision 3028)
 +++ 3rdparty/flann/algorithms/linear_index.h	(working copy)
 @@ -34,7 +34,7 @@
  #include "constants.h"
@@ -413,7 +554,7 @@ Index: 3rdparty/flann/algorithms/linear_index.h
  class LinearIndex : public NNIndex {
 Index: 3rdparty/flann/algorithms/nn_index.h
 ===================================================================
---- 3rdparty/flann/algorithms/nn_index.h	(revision 3093)
+--- 3rdparty/flann/algorithms/nn_index.h	(revision 3028)
 +++ 3rdparty/flann/algorithms/nn_index.h	(working copy)
 @@ -41,7 +41,7 @@
  
@@ -426,7 +567,7 @@ Index: 3rdparty/flann/algorithms/nn_index.h
  class ResultSet;
 Index: 3rdparty/flann/algorithms/dist.h
 ===================================================================
---- 3rdparty/flann/algorithms/dist.h	(revision 3093)
+--- 3rdparty/flann/algorithms/dist.h	(revision 3028)
 +++ 3rdparty/flann/algorithms/dist.h	(working copy)
 @@ -36,7 +36,7 @@
  
@@ -439,7 +580,7 @@ Index: 3rdparty/flann/algorithms/dist.h
  /**
 Index: 3rdparty/flann/algorithms/kdtree_index.h
 ===================================================================
---- 3rdparty/flann/algorithms/kdtree_index.h	(revision 3093)
+--- 3rdparty/flann/algorithms/kdtree_index.h	(revision 3028)
 +++ 3rdparty/flann/algorithms/kdtree_index.h	(working copy)
 @@ -48,7 +48,7 @@
  using namespace std;
@@ -452,7 +593,7 @@ Index: 3rdparty/flann/algorithms/kdtree_index.h
  
 Index: 3rdparty/flann/algorithms/kmeans_index.h
 ===================================================================
---- 3rdparty/flann/algorithms/kmeans_index.h	(revision 3093)
+--- 3rdparty/flann/algorithms/kmeans_index.h	(revision 3028)
 +++ 3rdparty/flann/algorithms/kmeans_index.h	(working copy)
 @@ -50,7 +50,7 @@
  using namespace std;
@@ -465,7 +606,7 @@ Index: 3rdparty/flann/algorithms/kmeans_index.h
  /**
 Index: 3rdparty/flann/nn/index_testing.cpp
 ===================================================================
---- 3rdparty/flann/nn/index_testing.cpp	(revision 3093)
+--- 3rdparty/flann/nn/index_testing.cpp	(revision 3028)
 +++ 3rdparty/flann/nn/index_testing.cpp	(working copy)
 @@ -40,7 +40,7 @@
  #include <string.h>
@@ -478,7 +619,7 @@ Index: 3rdparty/flann/nn/index_testing.cpp
  const float SEARCH_EPS = 0.001f;
 Index: 3rdparty/flann/nn/simplex_downhill.h
 ===================================================================
---- 3rdparty/flann/nn/simplex_downhill.h	(revision 3093)
+--- 3rdparty/flann/nn/simplex_downhill.h	(revision 3028)
 +++ 3rdparty/flann/nn/simplex_downhill.h	(working copy)
 @@ -31,7 +31,7 @@
  #ifndef SIMPLEX_DOWNHILL_H
@@ -491,7 +632,7 @@ Index: 3rdparty/flann/nn/simplex_downhill.h
  /**
 Index: 3rdparty/flann/nn/ground_truth.h
 ===================================================================
---- 3rdparty/flann/nn/ground_truth.h	(revision 3093)
+--- 3rdparty/flann/nn/ground_truth.h	(revision 3028)
 +++ 3rdparty/flann/nn/ground_truth.h	(working copy)
 @@ -34,7 +34,7 @@
  #include "matrix.h"
@@ -504,7 +645,7 @@ Index: 3rdparty/flann/nn/ground_truth.h
  template <typename T>
 Index: 3rdparty/flann/nn/index_testing.h
 ===================================================================
---- 3rdparty/flann/nn/index_testing.h	(revision 3093)
+--- 3rdparty/flann/nn/index_testing.h	(revision 3028)
 +++ 3rdparty/flann/nn/index_testing.h	(working copy)
 @@ -38,7 +38,7 @@
  
@@ -517,7 +658,7 @@ Index: 3rdparty/flann/nn/index_testing.h
  void search_for_neighbors(NNIndex& index, const Matrix<float>& testset, Matrix<int>& result, Matrix<float>& dists, const SearchParams &searchParams, int skip = 0);
 Index: 3rdparty/flann/util/result_set.h
 ===================================================================
---- 3rdparty/flann/util/result_set.h	(revision 3093)
+--- 3rdparty/flann/util/result_set.h	(revision 3028)
 +++ 3rdparty/flann/util/result_set.h	(working copy)
 @@ -40,7 +40,7 @@
  using namespace std;
@@ -530,7 +671,7 @@ Index: 3rdparty/flann/util/result_set.h
  /* This record represents a branch point when finding neighbors in
 Index: 3rdparty/flann/util/logger.cpp
 ===================================================================
---- 3rdparty/flann/util/logger.cpp	(revision 3093)
+--- 3rdparty/flann/util/logger.cpp	(revision 3028)
 +++ 3rdparty/flann/util/logger.cpp	(working copy)
 @@ -36,7 +36,7 @@
  
@@ -543,7 +684,7 @@ Index: 3rdparty/flann/util/logger.cpp
  Logger logger;
 Index: 3rdparty/flann/util/random.cpp
 ===================================================================
---- 3rdparty/flann/util/random.cpp	(revision 3093)
+--- 3rdparty/flann/util/random.cpp	(revision 3028)
 +++ 3rdparty/flann/util/random.cpp	(working copy)
 @@ -31,7 +31,7 @@
  #include "random.h"
@@ -556,7 +697,7 @@ Index: 3rdparty/flann/util/random.cpp
  void seed_random(unsigned int seed)
 Index: 3rdparty/flann/util/heap.h
 ===================================================================
---- 3rdparty/flann/util/heap.h	(revision 3093)
+--- 3rdparty/flann/util/heap.h	(revision 3028)
 +++ 3rdparty/flann/util/heap.h	(working copy)
 @@ -35,7 +35,7 @@
  #include <algorithm>
@@ -569,7 +710,7 @@ Index: 3rdparty/flann/util/heap.h
  /**
 Index: 3rdparty/flann/util/object_factory.h
 ===================================================================
---- 3rdparty/flann/util/object_factory.h	(revision 3093)
+--- 3rdparty/flann/util/object_factory.h	(revision 3028)
 +++ 3rdparty/flann/util/object_factory.h	(working copy)
 @@ -33,7 +33,7 @@
  
@@ -582,7 +723,7 @@ Index: 3rdparty/flann/util/object_factory.h
  template<typename BaseClass, typename DerivedClass>
 Index: 3rdparty/flann/util/logger.h
 ===================================================================
---- 3rdparty/flann/util/logger.h	(revision 3093)
+--- 3rdparty/flann/util/logger.h	(revision 3028)
 +++ 3rdparty/flann/util/logger.h	(working copy)
 @@ -39,7 +39,7 @@
  
@@ -595,7 +736,7 @@ Index: 3rdparty/flann/util/logger.h
  class Logger
 Index: 3rdparty/flann/util/allocator.h
 ===================================================================
---- 3rdparty/flann/util/allocator.h	(revision 3093)
+--- 3rdparty/flann/util/allocator.h	(revision 3028)
 +++ 3rdparty/flann/util/allocator.h	(working copy)
 @@ -35,7 +35,7 @@
  #include <stdio.h>
@@ -608,7 +749,7 @@ Index: 3rdparty/flann/util/allocator.h
  /**
 Index: 3rdparty/flann/util/random.h
 ===================================================================
---- 3rdparty/flann/util/random.h	(revision 3093)
+--- 3rdparty/flann/util/random.h	(revision 3028)
 +++ 3rdparty/flann/util/random.h	(working copy)
 @@ -37,7 +37,7 @@
  
@@ -621,7 +762,7 @@ Index: 3rdparty/flann/util/random.h
  /**
 Index: 3rdparty/flann/util/timer.h
 ===================================================================
---- 3rdparty/flann/util/timer.h	(revision 3093)
+--- 3rdparty/flann/util/timer.h	(revision 3028)
 +++ 3rdparty/flann/util/timer.h	(working copy)
 @@ -34,7 +34,7 @@
  #include <time.h>
@@ -634,7 +775,7 @@ Index: 3rdparty/flann/util/timer.h
  /**
 Index: 3rdparty/flann/util/saving.cpp
 ===================================================================
---- 3rdparty/flann/util/saving.cpp	(revision 3093)
+--- 3rdparty/flann/util/saving.cpp	(revision 3028)
 +++ 3rdparty/flann/util/saving.cpp	(working copy)
 @@ -33,7 +33,7 @@
  #include "nn_index.h"
@@ -647,7 +788,7 @@ Index: 3rdparty/flann/util/saving.cpp
  const char FLANN_SIGNATURE[] = "FLANN_INDEX";
 Index: 3rdparty/flann/util/matrix.h
 ===================================================================
---- 3rdparty/flann/util/matrix.h	(revision 3093)
+--- 3rdparty/flann/util/matrix.h	(revision 3028)
 +++ 3rdparty/flann/util/matrix.h	(working copy)
 @@ -35,7 +35,7 @@
  #include <random.h>
@@ -660,7 +801,7 @@ Index: 3rdparty/flann/util/matrix.h
  * Class implementing a generic rectangular dataset.
 Index: 3rdparty/flann/util/saving.h
 ===================================================================
---- 3rdparty/flann/util/saving.h	(revision 3093)
+--- 3rdparty/flann/util/saving.h	(revision 3028)
 +++ 3rdparty/flann/util/saving.h	(working copy)
 @@ -35,7 +35,7 @@
  #include "nn_index.h"
@@ -673,7 +814,7 @@ Index: 3rdparty/flann/util/saving.h
  /**
 Index: 3rdparty/flann/util/common.h
 ===================================================================
---- 3rdparty/flann/util/common.h	(revision 3093)
+--- 3rdparty/flann/util/common.h	(revision 3028)
 +++ 3rdparty/flann/util/common.h	(working copy)
 @@ -36,7 +36,7 @@
  

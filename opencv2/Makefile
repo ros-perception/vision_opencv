@@ -4,7 +4,7 @@ all: installed
 
 SVN_DIR = build/opencv-svn
 SVN_URL = https://code.ros.org/svn/opencv/trunk/opencv
-SVN_REVISION = -r3028
+SVN_REVISION = -r3090
 SVN_PATCH = pythontest.patch flann.patch
 include $(shell rospack find mk)/svn_checkout.mk
 
@@ -17,7 +17,8 @@ CMAKE_ARGS = -D CMAKE_BUILD_TYPE=RELEASE \
              -D BUILD_NEW_PYTHON_SUPPORT=ON \
              -D BUILD_SWIG_PYTHON_SUPPORT=OFF \
 						 -D WITH_FFMPEG=OFF \
-						 -D WITH_XINE=OFF
+						 -D WITH_XINE=OFF \
+						 -D BUILD_DOXYGEN_DOCS=OFF
 
 installed: wiped $(SVN_DIR) patched
 	mkdir -p $(SVN_DIR)/build
@@ -29,11 +30,11 @@ installed: wiped $(SVN_DIR) patched
 	@echo "copy Python module to ./lib"
 	mkdir -p $(CURDIR)/lib
 	mv $(CURDIR)/$(INSTALL_DIR)/lib/python*/site-packages/* $(CURDIR)/lib/
+	touch opencv/include/opencv/cxtypes.h
 	touch installed
 
 test: installed
 	python build/opencv-svn/tests/python/test.py
-	build/opencv-svn/build/bin/cxcoretest
 
 clean:
 	-cd $(SVN_DIR)/build && make clean

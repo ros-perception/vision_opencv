@@ -16,7 +16,7 @@ Image messages and OpenCV images.
 <review status="3rdparty" notes=""/>
 <url>http://opencvlibrary.sourceforge.net</url>
 <export>
-  <cpp cflags="-I${prefix}/opencv/include -I${prefix}/opencv/include/opencv" lflags="-L${prefix}/opencv/lib -Wl,-rpath,${prefix}/opencv/lib -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video -lopencv_objdetect -lopencv_features2d -lopencv_calib3d -lopencv_contrib -lopencv_legacy"/>
+  <cpp cflags="-I${prefix}/opencv/include -I${prefix}/opencv/include/opencv" lflags="-L${prefix}/opencv/lib -Wl,-rpath,${prefix}/opencv/lib -lcvaux -lcv -lcxcore -lhighgui -lml"/>
   <rosdoc config="rosdoc.yaml" />
 </export>
 <versioncontrol type="svn" url="https://opencvlibrary.svn.sourceforge.net/svnroot/opencvlibrary/tags/latest_tested_snapshot/opencv"/>
@@ -24,8 +24,5 @@ Image messages and OpenCV images.
 <rosdep name="jasper"/>
 <rosdep name="graphicsmagick"/>
 <rosdep name="gtk2"/>
-  <platform os="ubuntu" version="9.04"/>
-  <platform os="ubuntu" version="9.10"/>
-  <platform os="ubuntu" version="10.04"/>
 </package>
 

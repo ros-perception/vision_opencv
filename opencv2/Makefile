@@ -39,8 +39,8 @@ clean:
 	-cd $(SVN_DIR)/build && make clean
 	rm -rf $(INSTALL_DIR) installed
 
-wiped: Makefile
-	rm -rf build patched
+wiped: Makefile $(SVN_PATCH)
+	make wipe
 	touch wiped
 
 wipe: clean

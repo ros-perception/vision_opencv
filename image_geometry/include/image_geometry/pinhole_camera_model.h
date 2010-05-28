@@ -34,6 +34,11 @@ public:
   std::string tfFrame() const;
 
   /**
+   * \brief Get the time stamp associated with this camera model.
+   */
+  ros::Time stamp() const;
+  
+  /**
    * \brief Project a 3d point to rectified pixel coordinates.
    *
    * This is the inverse of projectPixelTo3dRay().
@@ -63,7 +68,8 @@ public:
   /**
    * \brief Apply camera distortion to a rectified image.
    */
-  void unrectifyImage(const cv::Mat& rectified, cv::Mat& raw) const;
+  void unrectifyImage(const cv::Mat& rectified, cv::Mat& raw,
+                      int interpolation = CV_INTER_LINEAR) const;
 
   /**
    * \brief Compute the rectified image coordinates of a pixel in the raw image.
@@ -116,6 +122,16 @@ public:
   double cy() const;
 
   /**
+   * \brief Returns the x-translation term of the projection matrix.
+   */
+  double Tx() const;
+
+  /**
+   * \brief Returns the y-translation term of the projection matrix.
+   */
+  double Ty() const;
+
+  /**
    * \brief Returns the image height.
    */
   uint32_t height() const;
@@ -147,7 +163,12 @@ inline std::string PinholeCameraModel::tfFrame() const
   return cam_info_.header.frame_id;
 }
 
-/// @todo assert initialized in all these
+inline ros::Time PinholeCameraModel::stamp() const
+{
+  assert(initialized_);
+  return cam_info_.header.stamp;
+}
+
 inline const cv::Mat_<double>& PinholeCameraModel::intrinsicMatrix() const  { return K_; }
 inline const cv::Mat_<double>& PinholeCameraModel::distortionCoeffs() const { return D_; }
 inline const cv::Mat_<double>& PinholeCameraModel::rotationMatrix() const   { return R_; }
@@ -157,6 +178,8 @@ inline double PinholeCameraModel::fx() const { return P_(0,0); }
 inline double PinholeCameraModel::fy() const { return P_(1,1); }
 inline double PinholeCameraModel::cx() const { return P_(0,2); }
 inline double PinholeCameraModel::cy() const { return P_(1,2); }
+inline double PinholeCameraModel::Tx() const { return P_(0,3); }
+inline double PinholeCameraModel::Ty() const { return P_(1,3); }
 inline uint32_t PinholeCameraModel::height() const { return cam_info_.height; }
 inline uint32_t PinholeCameraModel::width() const  { return cam_info_.width; }
 

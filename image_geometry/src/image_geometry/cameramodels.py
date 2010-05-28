@@ -2,6 +2,7 @@ import array
 
 import cv
 import sensor_msgs.msg
+import math
 
 def mkmat(rows, cols, L):
     mat = cv.CreateMat(rows, cols, cv.CV_64FC1)
@@ -99,7 +100,13 @@ class PinholeCameraModel:
         using the camera :math:`P` matrix.
         This is the inverse of :meth:`project3dToPixel`.
         """
-        pass
+        x = (uv[0] - self.cx()) / self.fx()
+        y = (uv[1] - self.cy()) / self.fy()
+        norm = math.sqrt(x*x + y*y + 1)
+        x /= norm
+        y /= norm
+        z = 1.0 / norm
+        return (x, y, z)
 
     def intrinsicMatrix(self):
         """ Returns :math:`K`, also called camera_matrix in cv docs """

@@ -216,64 +216,79 @@ namespace sensor_msgs
             reallocIfNeeded(&cvtimg_, IPL_DEPTH_8U, CV_MAT_CN(destination_type));
           else
             reallocIfNeeded(&cvtimg_, IPL_DEPTH_16U, CV_MAT_CN(destination_type));
+          void *sourceimg;
+          CvMat *same_depth = NULL;
+          if ((source_type & CV_MAT_DEPTH_MASK) != (destination_type & CV_MAT_DEPTH_MASK)) {
+            // need to convert depth, but not number of channels, which happens below
+            same_depth = cvCreateMat(rosimg.height,
+                rosimg.width,
+                CV_MAKETYPE((destination_type & CV_MAT_TYPE_MASK), CV_MAT_CN(source_type)));
+            cvConvertScale(rosimg_, same_depth);
+            sourceimg = same_depth;
+          } else {
+            sourceimg = rosimg_;
+          }
           if (sourcefmt == destfmt) {
-            cvConvertScale(rosimg_, cvtimg_);
+            cvConvertScale(sourceimg, cvtimg_);
           } else {
             if (sourcefmt == "") {
               return false;
             }
             if (sourcefmt == "GRAY") {
               if (destfmt == "RGB")
-                cvCvtColor(rosimg_, cvtimg_, CV_GRAY2RGB);
+                cvCvtColor(sourceimg, cvtimg_, CV_GRAY2RGB);
               if (destfmt == "BGR")
-                cvCvtColor(rosimg_, cvtimg_, CV_GRAY2BGR);
+                cvCvtColor(sourceimg, cvtimg_, CV_GRAY2BGR);
               if (destfmt == "RGBA")
-                cvCvtColor(rosimg_, cvtimg_, CV_GRAY2RGBA);
+                cvCvtColor(sourceimg, cvtimg_, CV_GRAY2RGBA);
               if (destfmt == "BGRA")
-                cvCvtColor(rosimg_, cvtimg_, CV_GRAY2BGRA);
+                cvCvtColor(sourceimg, cvtimg_, CV_GRAY2BGRA);
             }
             if (sourcefmt == "RGB") {
               if (destfmt == "GRAY")
-                cvCvtColor(rosimg_, cvtimg_, CV_RGB2GRAY);
+                cvCvtColor(sourceimg, cvtimg_, CV_RGB2GRAY);
               if (destfmt == "BGR")
-                cvCvtColor(rosimg_, cvtimg_, CV_RGB2BGR);
+                cvCvtColor(sourceimg, cvtimg_, CV_RGB2BGR);
               if (destfmt == "RGBA")
-                cvCvtColor(rosimg_, cvtimg_, CV_RGB2RGBA);
+                cvCvtColor(sourceimg, cvtimg_, CV_RGB2RGBA);
               if (destfmt == "BGRA")
-                cvCvtColor(rosimg_, cvtimg_, CV_RGB2BGRA);
+                cvCvtColor(sourceimg, cvtimg_, CV_RGB2BGRA);
             }
             if (sourcefmt == "BGR") {
               if (destfmt == "GRAY")
-                cvCvtColor(rosimg_, cvtimg_, CV_BGR2GRAY);
+                cvCvtColor(sourceimg, cvtimg_, CV_BGR2GRAY);
               if (destfmt == "RGB")
-                cvCvtColor(rosimg_, cvtimg_, CV_BGR2RGB);
+                cvCvtColor(sourceimg, cvtimg_, CV_BGR2RGB);
               if (destfmt == "RGBA")
-                cvCvtColor(rosimg_, cvtimg_, CV_BGR2RGBA);
+                cvCvtColor(sourceimg, cvtimg_, CV_BGR2RGBA);
               if (destfmt == "BGRA")
-                cvCvtColor(rosimg_, cvtimg_, CV_BGR2BGRA);
+                cvCvtColor(sourceimg, cvtimg_, CV_BGR2BGRA);
             }
             if (sourcefmt == "RGBA") {
               if (destfmt == "GRAY")
-                cvCvtColor(rosimg_, cvtimg_, CV_RGBA2GRAY);
+                cvCvtColor(sourceimg, cvtimg_, CV_RGBA2GRAY);
               if (destfmt == "RGB")
-                cvCvtColor(rosimg_, cvtimg_, CV_RGBA2RGB);
+                cvCvtColor(sourceimg, cvtimg_, CV_RGBA2RGB);
               if (destfmt == "BGR")
-                cvCvtColor(rosimg_, cvtimg_, CV_RGBA2BGR);
+                cvCvtColor(sourceimg, cvtimg_, CV_RGBA2BGR);
               if (destfmt == "BGRA")
-                cvCvtColor(rosimg_, cvtimg_, CV_RGBA2BGRA);
+                cvCvtColor(sourceimg, cvtimg_, CV_RGBA2BGRA);
             }
             if (sourcefmt == "BGRA") {
               if (destfmt == "GRAY")
-                cvCvtColor(rosimg_, cvtimg_, CV_BGRA2GRAY);
+                cvCvtColor(sourceimg, cvtimg_, CV_BGRA2GRAY);
               if (destfmt == "RGB")
-                cvCvtColor(rosimg_, cvtimg_, CV_BGRA2RGB);
+                cvCvtColor(sourceimg, cvtimg_, CV_BGRA2RGB);
               if (destfmt == "BGR")
-                cvCvtColor(rosimg_, cvtimg_, CV_BGRA2BGR);
+                cvCvtColor(sourceimg, cvtimg_, CV_BGRA2BGR);
               if (destfmt == "RGBA")
-                cvCvtColor(rosimg_, cvtimg_, CV_BGRA2RGBA);
+                cvCvtColor(sourceimg, cvtimg_, CV_BGRA2RGBA);
             }
           }
-        img_ = cvtimg_;
+          if (same_depth != NULL) {
+              cvReleaseMat(&same_depth);
+          }
+          img_ = cvtimg_;
         }
       }
       return true;

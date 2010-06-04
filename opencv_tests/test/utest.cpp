@@ -183,9 +183,28 @@ TEST(OpencvTests, testCase_new_methods)
   }
 }
 
+TEST(OpencvTests, testCase_16u_bgr)
+{
+  int channels = 1;
+  IplImage *original = cvCreateImage(cvSize(640, 480), IPL_DEPTH_16U, channels);
+  CvRNG r = cvRNG(77);
+  cvRandArr(&r, original, CV_RAND_UNI, cvScalar(0,0,0,0), cvScalar(255,255,255,255));
+
+  sensor_msgs::CvBridge img_bridge_;
+  sensor_msgs::Image::Ptr image_message = img_bridge_.cvToImgMsg(original, "mono16");
+
+  int success;
+  success = img_bridge_.fromImage(*image_message, "mono16");
+  ASSERT_TRUE(success);
+  EXPECT_TRUE(cvGetElemType(img_bridge_.toIpl()) == CV_16UC1);
+
+  success = img_bridge_.fromImage(*image_message, "bgr8");
+  ASSERT_TRUE(success);
+  EXPECT_TRUE(cvGetElemType(img_bridge_.toIpl()) == CV_8UC3);
+}
+
 int main(int argc, char **argv)
 {
-  printf("HELLO WORLD\n");
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

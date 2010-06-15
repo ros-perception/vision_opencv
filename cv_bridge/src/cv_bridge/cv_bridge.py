@@ -90,6 +90,7 @@ class CvBridge:
         in which case this method converts the image using
         :func:`CvtColor`
         (if necessary) and the returned image has a type as follows:
+
            ``CV_8UC3``
                 for "rgb8", "bgr8"
            ``CV_8UC4``
@@ -144,7 +145,6 @@ class CvBridge:
 
     def cv_to_imgmsg(self, cvim, encoding = "passthrough"):
         """
-
         Convert an OpenCV :ctype:`CvArr` type (that is, an :ctype:`IplImage` or :ctype:`CvMat`) to a ROS sensor_msgs::Image message.
 
         :param cvim:      An OpenCV :ctype:`IplImage` or :ctype:`CvMat`

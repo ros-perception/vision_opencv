@@ -141,6 +141,22 @@ public:
    */
   uint32_t width() const;
 
+  /**
+   * \brief Compute delta u, given Z and delta X in Cartesian space.
+   *
+   * \param deltaX Delta X, in cartesian space
+   * \param Z      Z (depth), in cartesian space
+   */
+  double getDeltaU(double deltaX, double Z);
+
+  /**
+   * \brief Compute delta v, given Z and delta Y in Cartesian space.
+   *
+   * \param deltaY Delta Y, in cartesian space
+   * \param Z      Z (depth), in cartesian space
+   */
+  double getDeltaV(double deltaY, double Z);
+
 private:
   bool initialized_;
   bool has_distortion_, has_roi_;
@@ -182,6 +198,18 @@ inline double PinholeCameraModel::Tx() const { return P_(0,3); }
 inline double PinholeCameraModel::Ty() const { return P_(1,3); }
 inline uint32_t PinholeCameraModel::height() const { return cam_info_.height; }
 inline uint32_t PinholeCameraModel::width() const  { return cam_info_.width; }
+
+inline double PinholeCameraModel::getDeltaU(double deltaX, double Z)
+{
+  assert(initialized_);
+  return fx() * deltaX / Z;
+}
+
+inline double PinholeCameraModel::getDeltaV(double deltaY, double Z)
+{
+  assert(initialized_);
+  return fy() * deltaY / Z;
+}
 
 } //namespace image_geometry
 

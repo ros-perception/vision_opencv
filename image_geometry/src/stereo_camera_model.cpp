@@ -63,7 +63,6 @@ void StereoCameraModel::updateQ()
 
     Disparity = x_left - x_right
    */
-  /// @todo This is not exactly what stereo_image_proc does... see StereoData::setReprojection.
   double Tx = baseline();
   Q_(3,2) = 1.0 / Tx;
   Q_(0,3) = -right_.cx();

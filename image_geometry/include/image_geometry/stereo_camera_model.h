@@ -93,8 +93,7 @@ inline const cv::Mat_<double>& StereoCameraModel::reprojectionMatrix() const { r
 inline double StereoCameraModel::baseline() const
 {
   /// @todo Currently assuming horizontal baseline
-  /// @todo Make sure this is correct! Kurt sets dimg_.Tx = P[0]/P[3] !!
-  return -right_.projectionMatrix()(0,3) / right_.fx();
+  return -right_.Tx() / right_.fx();
 }
 
 } //namespace image_geometry

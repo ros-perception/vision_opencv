@@ -133,6 +133,22 @@ TEST_F(PinholeTest, rectifyPoint)
   }
 }
 
+TEST_F(PinholeTest, getDeltas)
+{
+  double u = 100.0, v = 200.0, du = 17.0, dv = 23.0, Z = 2.0;
+  cv::Point2d uv0(u, v), uv1(u + du, v + dv);
+  cv::Point3d xyz0, xyz1;
+  model_.projectPixelTo3dRay(uv0, xyz0);
+  xyz0 *= (Z / xyz0.z);
+  model_.projectPixelTo3dRay(uv1, xyz1);
+  xyz1 *= (Z / xyz1.z);
+
+  EXPECT_NEAR(model_.getDeltaU(xyz1.x - xyz0.x, Z), du, 1e-4);
+  EXPECT_NEAR(model_.getDeltaV(xyz1.y - xyz0.y, Z), dv, 1e-4);
+  EXPECT_NEAR(model_.getDeltaX(du, Z), xyz1.x - xyz0.x, 1e-4);
+  EXPECT_NEAR(model_.getDeltaY(dv, Z), xyz1.y - xyz0.y, 1e-4);
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);

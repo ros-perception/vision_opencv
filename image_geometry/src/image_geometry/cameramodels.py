@@ -108,6 +108,68 @@ class PinholeCameraModel:
         z = 1.0 / norm
         return (x, y, z)
 
+    def getDeltaU(self, deltaX, Z):
+        """
+        :param deltaX:          delta X, in cartesian space
+        :type deltaX:           float
+        :param Z:               Z, in cartesian space
+        :type Z:                float
+        :rtype:                 float
+
+        Compute delta u, given Z and delta X in Cartesian space.
+        For given Z, this is the inverse of :meth:`getDeltaX`.
+        """
+        fx = self.P[0, 0]
+        if Z == 0:
+            return float('inf')
+        else:
+            return fx * deltaX / Z
+
+    def getDeltaV(self, deltaY, Z):
+        """
+        :param deltaY:          delta Y, in cartesian space
+        :type deltaY:           float
+        :param Z:               Z, in cartesian space
+        :type Z:                float
+        :rtype:                 float
+
+        Compute delta v, given Z and delta Y in Cartesian space.
+        For given Z, this is the inverse of :meth:`getDeltaY`.
+        """
+        fy = self.P[1, 1]
+        if Z == 0:
+            return float('inf')
+        else:
+            return fy * deltaY / Z
+
+    def getDeltaX(self, deltaU, Z):
+        """
+        :param deltaU:          delta u in pixels
+        :type deltaU:           float
+        :param Z:               Z, in cartesian space
+        :type Z:                float
+        :rtype:                 float
+
+        Compute delta X, given Z in cartesian space and delta u in pixels.
+        For given Z, this is the inverse of :meth:`getDeltaU`.
+        """
+        fx = self.P[0, 0]
+        return Z * deltaU / fx
+
+    def getDeltaY(self, deltaV, Z):
+        """
+        :param deltaV:          delta v in pixels
+        :type deltaV:           float
+        :param Z:               Z, in cartesian space
+        :type Z:                float
+        :rtype:                 float
+
+        Compute delta Y, given Z in cartesian space and delta v in pixels.
+        For given Z, this is the inverse of :meth:`getDeltaV`.
+        """
+        fy = self.P[1, 1]
+        return Z * deltaV / fy
+
     def intrinsicMatrix(self):
         """ Returns :math:`K`, also called camera_matrix in cv docs """
         return self.K
@@ -123,16 +185,16 @@ class PinholeCameraModel:
 
     def cx(self):
         """ Returns x center """
-        return self.K[0,2]
+        return self.P[0,2]
     def cy(self):
         """ Returns y center """
-        return self.K[1,2]
+        return self.P[1,2]
     def fx(self):
         """ Returns x focal length """
-        return self.K[0,0]
+        return self.P[0,0]
     def fy(self):
         """ Returns y focal length """
-        return self.K[1,1]
+        return self.P[1,1]
 
 class StereoCameraModel:
     """
@@ -227,81 +289,30 @@ class StereoCameraModel:
         else:
             return (0.0, 0.0, 0.0)
 
-    def getDeltaU(self, deltaX, Z):
+    def getZ(self, disparity):
         """
-        :param deltaX:          delta X, in cartesian space
-        :type deltaX:           float
-        :param deltaZ:          Z, in cartesian space
-        :type deltaZ:           float
-        :rtype:                 float
+        :param disparity:        disparity, in pixels
+        :type disparity:         float
 
-        Compute delta u, given Z and delta X in Cartesian space.
+        Returns the depth at which a point is observed with a given disparity.
+        This is the inverse of :meth:`getDisparity`.
+
+        Note that a disparity of zero implies Z is infinite.
         """
-        fx = self.right.P[0, 0]
+        if disparity == 0:
+            return float('inf')
+        Tx = -self.right.P[0, 3]
+        return Tx / disparity
+
+    def getDisparity(self, Z):
+        """
+        :param Z:          Z (depth), in cartesian space
+        :type Z:           float
+
+        Returns the disparity observed for a point at depth Z.
+        This is the inverse of :meth:`getZ`.
+        """
         if Z == 0:
             return float('inf')
-        else:
-            return fx * deltaX / Z
-
-    def getDeltaV(self, deltaY, Z):
-        """
-        :param deltaY:          delta Y, in cartesian space
-        :type deltaY:           float
-        :param deltaZ:          Z, in cartesian space
-        :type deltaZ:           float
-        :rtype:                 float
-
-        compute delta v, given Z and delta Y in Cartesian space.
-        """
-        fy = self.right.P[1, 1]
-        if Z == 0:
-            return float('inf')
-        else:
-            return fy * deltaY / Z
-
-    def getDeltaX(self, deltaU, d):
-        """
-        :param deltaU:          delta u in pixels
-        :type deltaU:           float
-        :param d:               disparity, in pixels
-        :type d:                float
-        :rtype:                 float
-
-        Compute delta X, given disparity and delta u in pixels
-        """
-        fx = self.right.P[0, 0]
-        fy = self.right.P[1, 1]
-        tx = -self.right.P[0, 3] / fx
-        clx = self.left.P[0, 2]
-        crx = self.right.P[0, 2]
-
-        dn = (d - (clx - crx))
-        if dn == 0:
-            dx = 0.
-        else:
-            dx = deltaU * tx/dn;
-        return dx
-
-
-    def getDeltaY(self, deltaV, d):
-        """
-        :param deltaV:          delta v in pixels
-        :type deltaV:           float
-        :param d:               disparity, in pixels
-        :type d:                float
-        :rtype:                 float
-
-        compute delta Y, given disparity and delta v in disparity space.
-        """
-        fx = self.right.P[0, 0]
-        fy = self.right.P[1, 1]
-        tx = -self.right.P[0, 3] / fx
-        clx = self.left.P[0, 2]
-        crx = self.right.P[0, 2]
-
-        dn = (d - (clx - crx)) * fy;
-        if dn == 0:
-            dy =  0.
-        else:
-            dy = deltaV * tx * fx / dn;
-        return dy
+        Tx = -self.right.P[0, 3]
+        return Tx / Z

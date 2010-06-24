@@ -28,6 +28,7 @@ void StereoCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& left,
   left_.fromCameraInfo(left);
   right_.fromCameraInfo(right);
 
+  // Note: don't require identical time stamps to allow imperfectly synced stereo.
   assert( left_.tfFrame() == right_.tfFrame() );
   assert( left_.fx() == right_.fx() );
   assert( left_.fy() == right_.fy() );

@@ -46,6 +46,6 @@ wiped: Makefile $(SVN_PATCH)
 	touch wiped
 
 wipe: clean
-	rm -rf build patched
+	rm -rf build patched lib
 
 .PHONY : clean download

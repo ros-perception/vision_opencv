@@ -58,6 +58,7 @@ void PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
     has_roi_ = (cam_info_.roi.width != 0 && cam_info_.roi.width != cam_info_.width) ||
       (cam_info_.roi.height != 0 && cam_info_.roi.height != cam_info_.height);
     /// @todo Adjust principal point in K and P? Will that do the right thing?
+    // Need original K and P for initializing undistort maps
   }
 
   initialized_ = true;
@@ -184,7 +185,7 @@ void PinholeCameraModel::initUndistortMaps() const
 
   if (has_roi_ && (roi_undistort_map_x_.empty() || parameters_changed_ || roi_changed_)) {
     cv::Rect roi(cam_info_.roi.x_offset, cam_info_.roi.y_offset,
-                 cam_info_.roi.height, cam_info_.roi.width);
+                 cam_info_.roi.width, cam_info_.roi.height);
     //roi_undistort_map_x_ = undistort_map_x_(roi) - cv::Scalar(roi.x);
     cv::subtract(undistort_map_x_(roi), cv::Scalar(roi.x), roi_undistort_map_x_);
     cv::subtract(undistort_map_y_(roi), cv::Scalar(roi.y), roi_undistort_map_y_);

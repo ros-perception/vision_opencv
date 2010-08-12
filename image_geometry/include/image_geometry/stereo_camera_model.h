@@ -71,7 +71,19 @@ public:
    */
   double baseline() const;
 
-  /// @todo Maybe more convenience functions from CvStereoCamModel in stereo_util, like getDelta_.
+  /**
+   * \brief Returns the depth at which a point is observed with a given disparity.
+   *
+   * This is the inverse of getDisparity().
+   */
+  double getZ(double disparity) const;
+
+  /**
+   * \brief Returns the disparity observed for a point at depth Z.
+   *
+   * This is the inverse of getZ().
+   */
+  double getDisparity(double Z) const;
 
 private:
   bool initialized_;
@@ -93,8 +105,19 @@ inline const cv::Mat_<double>& StereoCameraModel::reprojectionMatrix() const { r
 inline double StereoCameraModel::baseline() const
 {
   /// @todo Currently assuming horizontal baseline
-  /// @todo Make sure this is correct! Kurt sets dimg_.Tx = P[0]/P[3] !!
-  return -right_.projectionMatrix()(0,3) / right_.fx();
+  return -right_.Tx() / right_.fx();
+}
+
+inline double StereoCameraModel::getZ(double disparity) const
+{
+  assert(initialized_);
+  return -right_.Tx() / disparity;
+}
+
+inline double StereoCameraModel::getDisparity(double Z) const
+{
+  assert(initialized_);
+  return -right_.Tx() / Z;
 }
 
 } //namespace image_geometry

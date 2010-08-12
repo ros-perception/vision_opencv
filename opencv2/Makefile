@@ -3,8 +3,8 @@ INSTALL_DIR = opencv
 all: installed
 
 SVN_DIR = build/opencv-svn
-SVN_URL = https://code.ros.org/svn/opencv/branches/r3110/opencv
-SVN_REVISION = -r3119
+SVN_URL = https://code.ros.org/svn/opencv/trunk/opencv
+SVN_REVISION = -r3476
 SVN_PATCH = pythontest.patch
 include $(shell rospack find mk)/svn_checkout.mk
 
@@ -16,9 +16,10 @@ CMAKE_ARGS = -D CMAKE_BUILD_TYPE=RELEASE \
              -D BUILD_EXAMPLES=ON \
              -D BUILD_NEW_PYTHON_SUPPORT=ON \
              -D BUILD_SWIG_PYTHON_SUPPORT=OFF \
-						 -D WITH_FFMPEG=OFF \
-						 -D WITH_XINE=OFF \
-						 -D BUILD_DOXYGEN_DOCS=OFF
+             -D WITH_FFMPEG=OFF \
+             -D WITH_XINE=OFF \
+             -D WITH_1394=OFF \
+             -D BUILD_DOXYGEN_DOCS=OFF
 
 installed: wiped $(SVN_DIR) patched
 	mkdir -p $(SVN_DIR)/build
@@ -45,6 +46,6 @@ wiped: Makefile $(SVN_PATCH)
 	touch wiped
 
 wipe: clean
-	rm -rf build patched
+	rm -rf build patched lib
 
 .PHONY : clean download

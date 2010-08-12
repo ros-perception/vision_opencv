@@ -141,6 +141,46 @@ public:
    */
   uint32_t width() const;
 
+  /**
+   * \brief Compute delta u, given Z and delta X in Cartesian space.
+   *
+   * For given Z, this is the inverse of getDeltaX().
+   *
+   * \param deltaX Delta X, in Cartesian space
+   * \param Z      Z (depth), in Cartesian space
+   */
+  double getDeltaU(double deltaX, double Z) const;
+
+  /**
+   * \brief Compute delta v, given Z and delta Y in Cartesian space.
+   *
+   * For given Z, this is the inverse of getDeltaY().
+   *
+   * \param deltaY Delta Y, in Cartesian space
+   * \param Z      Z (depth), in Cartesian space
+   */
+  double getDeltaV(double deltaY, double Z) const;
+
+  /**
+   * \brief Compute delta X, given Z in Cartesian space and delta u in pixels.
+   *
+   * For given Z, this is the inverse of getDeltaU().
+   *
+   * \param deltaU Delta u, in pixels
+   * \param Z      Z (depth), in Cartesian space
+   */
+  double getDeltaX(double deltaU, double Z) const;
+
+  /**
+   * \brief Compute delta Y, given Z in Cartesian space and delta v in pixels.
+   *
+   * For given Z, this is the inverse of getDeltaV().
+   *
+   * \param deltaV Delta v, in pixels
+   * \param Z      Z (depth), in Cartesian space
+   */
+  double getDeltaY(double deltaV, double Z) const;
+  
 private:
   bool initialized_;
   bool has_distortion_, has_roi_;
@@ -182,6 +222,30 @@ inline double PinholeCameraModel::Tx() const { return P_(0,3); }
 inline double PinholeCameraModel::Ty() const { return P_(1,3); }
 inline uint32_t PinholeCameraModel::height() const { return cam_info_.height; }
 inline uint32_t PinholeCameraModel::width() const  { return cam_info_.width; }
+
+inline double PinholeCameraModel::getDeltaU(double deltaX, double Z) const
+{
+  assert(initialized_);
+  return fx() * deltaX / Z;
+}
+
+inline double PinholeCameraModel::getDeltaV(double deltaY, double Z) const
+{
+  assert(initialized_);
+  return fy() * deltaY / Z;
+}
+
+inline double PinholeCameraModel::getDeltaX(double deltaU, double Z) const
+{
+  assert(initialized_);
+  return Z * deltaU / fx();
+}
+
+inline double PinholeCameraModel::getDeltaY(double deltaV, double Z) const
+{
+  assert(initialized_);
+  return Z * deltaV / fy();
+}
 
 } //namespace image_geometry
 

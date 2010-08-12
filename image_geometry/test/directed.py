@@ -55,6 +55,20 @@ class TestDirected(unittest.TestCase):
                     self.assertAlmostEqual(y, ry, 3)
                     self.assertAlmostEqual(x, lx, 3)
                     self.assertAlmostEqual(x, rx + d, 3)
+        
+        u = 100.0
+        v = 200.0
+        du = 17.0
+        dv = 23.0
+        Z = 2.0
+        xyz0 = cam.left.projectPixelTo3dRay((u, v))
+        xyz0 = (xyz0[0] * (Z / xyz0[2]), xyz0[1] * (Z / xyz0[2]), Z)
+        xyz1 = cam.left.projectPixelTo3dRay((u + du, v + dv))
+        xyz1 = (xyz1[0] * (Z / xyz1[2]), xyz1[1] * (Z / xyz1[2]), Z)
+        self.assertAlmostEqual(cam.left.getDeltaU(xyz1[0] - xyz0[0], Z), du, 3)
+        self.assertAlmostEqual(cam.left.getDeltaV(xyz1[1] - xyz0[1], Z), dv, 3)
+        self.assertAlmostEqual(cam.left.getDeltaX(du, Z), xyz1[0] - xyz0[0], 3)
+        self.assertAlmostEqual(cam.left.getDeltaY(dv, Z), xyz1[1] - xyz0[1], 3)
 
 if __name__ == '__main__':
     if 1:

@@ -23,6 +23,7 @@ Image messages and OpenCV images.
 <rosdep name="ffmpeg"/>
 <rosdep name="jasper"/>
 <rosdep name="graphicsmagick"/>
+<rosdep name="libdc1394-dev"/>
 <rosdep name="gtk2"/>
   <platform os="ubuntu" version="9.04"/>
   <platform os="ubuntu" version="9.10"/>

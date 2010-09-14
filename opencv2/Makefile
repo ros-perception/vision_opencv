@@ -31,7 +31,7 @@ installed: wiped $(SVN_DIR) patched
 	@echo "copy Python module to ./lib"
 	mkdir -p $(CURDIR)/lib
 	mv $(CURDIR)/$(INSTALL_DIR)/lib/python*/site-packages/* $(CURDIR)/lib/
-	chrpath -r `chrpath $(CURDIR)/lib/cv.so | sed 's!build/opencv-svn/build/lib!opencv/lib!;s/^.*=//'` $(CURDIR)/lib/cv.so
+	# chrpath -r `chrpath $(CURDIR)/lib/cv.so | sed 's!build/opencv-svn/build/lib!opencv/lib!;s/^.*=//'` $(CURDIR)/lib/cv.so
 	touch opencv/include/opencv/cxtypes.h
 	touch installed
 

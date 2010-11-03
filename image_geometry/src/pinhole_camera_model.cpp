@@ -6,31 +6,35 @@ namespace image_geometry {
 PinholeCameraModel::PinholeCameraModel()
   : initialized_(false),
     K_(3, 3, &cam_info_.K[0]),
-    D_(1, 5, &cam_info_.D[0]),
     R_(3, 3, &cam_info_.R[0]),
     P_(3, 4, &cam_info_.P[0])
 {
+  cam_info_.D.resize(8, 0.0);
+  D_ = cv::Mat_<double>(1, 8, &cam_info_.D[0]);
 }
 
 PinholeCameraModel::PinholeCameraModel(const PinholeCameraModel& other)
   : initialized_(false),
     K_(3, 3, &cam_info_.K[0]),
-    D_(1, 5, &cam_info_.D[0]),
     R_(3, 3, &cam_info_.R[0]),
     P_(3, 4, &cam_info_.P[0])
 {
+  cam_info_.D.resize(8, 0.0);
+  D_ = cv::Mat_<double>(1, 8, &cam_info_.D[0]);
   if (other.initialized_)
     fromCameraInfo(other.cam_info_);
 }
 
 void PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
 {
+  /// @todo Why shouldn't full-res dimensions ever change?
   // The full-res camera dimensions should never change.
   assert(!initialized_ || (msg.height == cam_info_.height && msg.width == cam_info_.width));
 
   cam_info_.height = msg.height;
   cam_info_.width  = msg.width;
-  
+
+  /// @todo Check distortion_model same, is recognized
   parameters_changed_ = !initialized_ ||
     msg.K != cam_info_.K || msg.D != cam_info_.D ||
     msg.R != cam_info_.R || msg.P != cam_info_.P;
@@ -44,7 +48,7 @@ void PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
   cam_info_.header = msg.header;
   
   if (parameters_changed_) {
-    // Being extra sure we don't reallocate memory and invalidate our CvMats
+    // Being extra sure we don't reallocate memory and invalidate our cv::Mats
     std::copy(msg.K.begin(), msg.K.end(), cam_info_.K.begin());
     std::copy(msg.D.begin(), msg.D.end(), cam_info_.D.begin());
     std::copy(msg.R.begin(), msg.R.end(), cam_info_.R.begin());

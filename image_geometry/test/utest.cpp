@@ -12,6 +12,7 @@ class PinholeTest : public testing::Test
 protected:
   virtual void SetUp()
   {
+    /// @todo Just load these from file
     // These parameters taken from a real camera calibration
     double D[] = {-0.363528858080088, 0.16117037733986861, -8.1109585007538829e-05, -0.00044776712298447841, 0.0};
     double K[] = {430.15433020105519,                0.0, 311.71339830549732,
@@ -28,6 +29,8 @@ protected:
     cam_info_.height = 480;
     cam_info_.width  = 640;
     // No ROI
+    /// @todo Set distortion_model
+    cam_info_.D.resize(5);
     std::copy(D, D+5, cam_info_.D.begin());
     std::copy(K, K+9, cam_info_.K.begin());
     std::copy(R, R+9, cam_info_.R.begin());

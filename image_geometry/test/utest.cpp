@@ -1,4 +1,5 @@
 #include "image_geometry/pinhole_camera_model.h"
+#include <sensor_msgs/distortion_models.h>
 #include <gtest/gtest.h>
 
 /// @todo Tests with simple values (R = identity, D = 0, P = K or simple scaling)
@@ -29,12 +30,12 @@ protected:
     cam_info_.height = 480;
     cam_info_.width  = 640;
     // No ROI
-    /// @todo Set distortion_model
     cam_info_.D.resize(5);
     std::copy(D, D+5, cam_info_.D.begin());
     std::copy(K, K+9, cam_info_.K.begin());
     std::copy(R, R+9, cam_info_.R.begin());
     std::copy(P, P+12, cam_info_.P.begin());
+    cam_info_.distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;
 
     model_.fromCameraInfo(cam_info_);
   }

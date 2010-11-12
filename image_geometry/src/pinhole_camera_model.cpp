@@ -1,66 +1,127 @@
 #include "image_geometry/pinhole_camera_model.h"
+#include <sensor_msgs/distortion_models.h>
 #include <stdexcept>
 
 namespace image_geometry {
 
 PinholeCameraModel::PinholeCameraModel()
   : initialized_(false),
-    K_(3, 3, &cam_info_.K[0]),
-    D_(1, 5, &cam_info_.D[0]),
-    R_(3, 3, &cam_info_.R[0]),
-    P_(3, 4, &cam_info_.P[0])
+    full_maps_dirty_(true), current_maps_dirty_(true)
 {
 }
 
 PinholeCameraModel::PinholeCameraModel(const PinholeCameraModel& other)
   : initialized_(false),
-    K_(3, 3, &cam_info_.K[0]),
-    D_(1, 5, &cam_info_.D[0]),
-    R_(3, 3, &cam_info_.R[0]),
-    P_(3, 4, &cam_info_.P[0])
+    full_maps_dirty_(true), current_maps_dirty_(true)
 {
   if (other.initialized_)
     fromCameraInfo(other.cam_info_);
 }
 
+// For uint32_t, string, bool...
+template<typename T>
+bool update(const T& new_val, T& my_val)
+{
+  if (my_val == new_val)
+    return false;
+  my_val = new_val;
+  return true;
+}
+
+// For boost::array, std::vector
+template<typename MatT>
+bool updateMat(const MatT& new_mat, MatT& my_mat, cv::Mat_<double>& cv_mat, int rows, int cols)
+{
+  if (my_mat == new_mat)
+    return false;
+  my_mat = new_mat;
+  // D may be empty if camera is uncalibrated or distortion model is non-standard
+  cv_mat = (my_mat.size() == 0) ? cv::Mat_<double>() : cv::Mat_<double>(rows, cols, &my_mat[0]);
+  return true;
+}
+
 void PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
 {
-  // The full-res camera dimensions should never change.
-  assert(!initialized_ || (msg.height == cam_info_.height && msg.width == cam_info_.width));
+  // Binning = 0 is considered the same as binning = 1 (no binning).
+  uint32_t binning_x = msg.binning_x ? msg.binning_x : 1;
+  uint32_t binning_y = msg.binning_y ? msg.binning_y : 1;
 
-  cam_info_.height = msg.height;
-  cam_info_.width  = msg.width;
-  
-  parameters_changed_ = !initialized_ ||
-    msg.K != cam_info_.K || msg.D != cam_info_.D ||
-    msg.R != cam_info_.R || msg.P != cam_info_.P;
-  
-  roi_changed_ = !initialized_ ||
-    msg.roi.x_offset != cam_info_.roi.x_offset ||
-    msg.roi.y_offset != cam_info_.roi.y_offset ||
-    msg.roi.height   != cam_info_.roi.height ||
-    msg.roi.width    != cam_info_.roi.width;
+  // ROI all zeros is considered the same as full resolution.
+  sensor_msgs::RegionOfInterest roi = msg.roi;
+  if (roi.x_offset == 0 && roi.y_offset == 0 && roi.width == 0 && roi.height == 0) {
+    roi.width  = msg.width;
+    roi.height = msg.height;
+  }
 
+  // Update time stamp (and frame_id if that changes for some reason)
   cam_info_.header = msg.header;
   
-  if (parameters_changed_) {
-    // Being extra sure we don't reallocate memory and invalidate our CvMats
-    std::copy(msg.K.begin(), msg.K.end(), cam_info_.K.begin());
-    std::copy(msg.D.begin(), msg.D.end(), cam_info_.D.begin());
-    std::copy(msg.R.begin(), msg.R.end(), cam_info_.R.begin());
-    std::copy(msg.P.begin(), msg.P.end(), cam_info_.P.begin());
+  // Update any parameters that have changed. The full rectification maps are
+  // invalidated by any change in the calibration parameters OR binning.
+  full_maps_dirty_ |= update(msg.height, cam_info_.height);
+  full_maps_dirty_ |= update(msg.width,  cam_info_.width);
+  full_maps_dirty_ |= update(msg.distortion_model, cam_info_.distortion_model);
+  full_maps_dirty_ |= updateMat(msg.D, cam_info_.D, D_, 1, msg.D.size());
+  full_maps_dirty_ |= updateMat(msg.K, cam_info_.K, K_full_, 3, 3);
+  full_maps_dirty_ |= updateMat(msg.R, cam_info_.R, R_, 3, 3);
+  full_maps_dirty_ |= updateMat(msg.P, cam_info_.P, P_full_, 3, 4);
+  full_maps_dirty_ |= update(binning_x, cam_info_.binning_x);
+  full_maps_dirty_ |= update(binning_y, cam_info_.binning_y);
 
-    has_distortion_ = cam_info_.D[0] != 0.0;
+  // The current rectification maps are invalidated by any of the above or a
+  // change in ROI.
+  current_maps_dirty_  = full_maps_dirty_;
+  current_maps_dirty_ |= update(roi.x_offset,   cam_info_.roi.x_offset);
+  current_maps_dirty_ |= update(roi.y_offset,   cam_info_.roi.y_offset);
+  current_maps_dirty_ |= update(roi.height,     cam_info_.roi.height);
+  current_maps_dirty_ |= update(roi.width,      cam_info_.roi.width);
+  current_maps_dirty_ |= update(roi.do_rectify, cam_info_.roi.do_rectify);
+
+  // Figure out how to handle the distortion
+  if (cam_info_.distortion_model == sensor_msgs::distortion_models::PLUMB_BOB ||
+      cam_info_.distortion_model == sensor_msgs::distortion_models::RATIONAL_POLYNOMIAL) {
+    distortion_state_ = (cam_info_.D[0] == 0.0) ? NONE : CALIBRATED;
   }
+  else
+    distortion_state_ = UNKNOWN;
 
-  if (roi_changed_) {
-    cam_info_.roi = msg.roi;
-    has_roi_ = (cam_info_.roi.width != 0 && cam_info_.roi.width != cam_info_.width) ||
-      (cam_info_.roi.height != 0 && cam_info_.roi.height != cam_info_.height);
-    /// @todo Adjust principal point in K and P? Will that do the right thing?
-    // Need original K and P for initializing undistort maps
+  // If necessary, create new K_ and P_ adjusted for binning and ROI
+  /// @todo Calculate and use rectified ROI
+  bool adjust_binning = (binning_x > 1) || (binning_y > 1);
+  bool adjust_roi = (roi.x_offset != 0) || (roi.y_offset != 0);
+
+  if (!adjust_binning && !adjust_roi) {
+    K_ = K_full_;
+    P_ = P_full_;
   }
+  else {
+    K_full_.copyTo(K_);
+    P_full_.copyTo(P_);
 
+    // ROI is in full image coordinates, so change it first
+    if (adjust_roi) {
+      // Move principal point by the offset
+      K_(0,2) -= roi.x_offset;
+      K_(1,2) -= roi.y_offset;
+      P_(0,2) -= roi.x_offset;
+      P_(1,2) -= roi.y_offset;
+    }
+
+    if (adjust_binning) {
+      // Rescale all values
+      K_(0,0) /= binning_x;
+      K_(0,2) /= binning_x;
+      K_(1,1) /= binning_y;
+      K_(1,2) /= binning_y;
+      P_(0,0) /= binning_x;
+      P_(0,2) /= binning_x;
+      P_(1,1) /= binning_y;
+      P_(1,2) /= binning_y;
+      P_(0,3) /= binning_x;
+      P_(1,3) /= binning_y;
+    }
+  }
+  
   initialized_ = true;
 }
 
@@ -73,7 +134,6 @@ void PinholeCameraModel::project3dToPixel(const cv::Point3d& xyz, cv::Point2d& u
 {
   assert(initialized_);
   assert(P_(2, 3) == 0.0); // Calibrated stereo cameras should be in the same plane
-  /// @todo Principal point not adjusted for ROI anywhere yet
 
   // [U V W]^T = P * [X Y Z 1]^T
   // u = U/W
@@ -97,15 +157,17 @@ void PinholeCameraModel::rectifyImage(const cv::Mat& raw, cv::Mat& rectified, in
 {
   assert(initialized_);
 
-  if (has_distortion_) {
-    initUndistortMaps();
-    if (has_roi_)
-      cv::remap(raw, rectified, roi_undistort_map_x_, roi_undistort_map_y_, interpolation);
-    else
-      cv::remap(raw, rectified, undistort_map_x_, undistort_map_y_, interpolation);
-  }
-  else {
-    raw.copyTo(rectified);
+  switch (distortion_state_) {
+    case NONE:
+      raw.copyTo(rectified);
+      break;
+    case CALIBRATED:
+      initUndistortMaps();
+      cv::remap(raw, rectified, current_map1_, current_map2_, interpolation);
+      break;
+    default:
+      assert(distortion_state_ == UNKNOWN);
+      throw std::runtime_error("Cannot call rectifyImage when distortion is unknown.");
   }
 }
 
@@ -126,6 +188,15 @@ void PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw, cv::Point2d& uv
 {
   assert(initialized_);
 
+  if (distortion_state_ == NONE) {
+    uv_rect = uv_raw;
+    return;
+  }
+  if (distortion_state_ == UNKNOWN) {
+    throw std::runtime_error("Cannot call rectifyPoint when distortion is unknown.");
+  }
+  assert(distortion_state_ == CALIBRATED);
+
   // cv::undistortPoints requires the point data to be float
   cv::Point2f raw32 = uv_raw, rect32;
   const cv::Mat src_pt(1, 1, CV_32FC2, &raw32.x);
@@ -138,10 +209,14 @@ void PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect, cv::Point2d&
 {
   assert(initialized_);
 
-  if (!has_distortion_) {
+  if (distortion_state_ == NONE) {
     uv_raw = uv_rect;
     return;
   }
+  if (distortion_state_ == UNKNOWN) {
+    throw std::runtime_error("Cannot call unrectifyPoint when distortion is unknown.");
+  }
+  assert(distortion_state_ == CALIBRATED);
 
   /// @todo Is there not an OpenCV call to do this directly?
 
@@ -177,21 +252,29 @@ void PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect, cv::Point2d&
 
 void PinholeCameraModel::initUndistortMaps() const
 {
-  if (undistort_map_x_.empty() || parameters_changed_) {
+  if (full_maps_dirty_) {
     // m1type=CV_16SC2 to use fast fixed-point maps
-    cv::initUndistortRectifyMap(K_, D_, R_, P_, cv::Size(width(), height()),
-                                CV_16SC2, undistort_map_x_, undistort_map_y_);
+    cv::initUndistortRectifyMap(K_full_, D_, R_, P_full_, cv::Size(width(), height()), /// @todo fullResolution()
+                                CV_16SC2, full_map1_, full_map2_);
   }
 
-  if (has_roi_ && (roi_undistort_map_x_.empty() || parameters_changed_ || roi_changed_)) {
+  if (current_maps_dirty_) {
     cv::Rect roi(cam_info_.roi.x_offset, cam_info_.roi.y_offset,
                  cam_info_.roi.width, cam_info_.roi.height);
-    //roi_undistort_map_x_ = undistort_map_x_(roi) - cv::Scalar(roi.x);
-    cv::subtract(undistort_map_x_(roi), cv::Scalar(roi.x), roi_undistort_map_x_);
-    cv::subtract(undistort_map_y_(roi), cv::Scalar(roi.y), roi_undistort_map_y_);
+    if (roi.x != 0 || roi.y != 0 || roi.height != cam_info_.height || roi.width != cam_info_.height) {
+      
+      //roi_undistort_map_x_ = undistort_map_x_(roi) - cv::Scalar(roi.x);
+      //cv::subtract(undistort_map_x_(roi), cv::Scalar(roi.x), roi_undistort_map_x_);
+      //cv::subtract(undistort_map_y_(roi), cv::Scalar(roi.y), roi_undistort_map_y_);
+      current_map1_ = full_map1_(roi) - cv::Scalar(roi.x, roi.y);
+      current_map2_ = full_map2_(roi);
+    }
+    else {
+      // Otherwise we're rectifying the full image
+      current_map1_ = full_map1_;
+      current_map2_ = full_map2_;
+    }
   }
-
-  parameters_changed_ = roi_changed_ = false;
 }
 
 } //namespace image_geometry

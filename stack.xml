@@ -1,4 +1,4 @@
-<stack name="vision_opencv">
+<stack>
   <description brief="opencv">
 
     opencv c++ and python libraries.
@@ -8,7 +8,7 @@
   <license>BSD</license>  
   <review status="reviewed" notes=""/>
   <url>http://ros.org/wiki/vision_opencv</url>
-  <depend stack="ros"/> <!-- rostest, rospy --> 
-  <depend stack="common_msgs"/> <!-- sensor_msgs --> 
+  <depend stack="common_msgs" /> <!-- sensor_msgs -->
+  <depend stack="ros" /> <!-- rostest, rospy, roscpp -->
 
 </stack>

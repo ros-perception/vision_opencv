@@ -6,6 +6,8 @@
 
 namespace image_geometry {
 
+/// @todo Exception class
+
 /**
  * \brief Simplifies interpreting images geometrically using the parameters from
  * sensor_msgs/CameraInfo.
@@ -131,6 +133,7 @@ public:
    */
   double Ty() const;
 
+  /// @todo Deprecate height(), width()
   /**
    * \brief Returns the image height.
    */
@@ -141,6 +144,16 @@ public:
    */
   uint32_t width() const;
 
+  /**
+   * \brief Returns the number of columns in each bin.
+   */
+  uint32_t binningX() const;
+
+  /**
+   * \brief Returns the number of rows in each bin.
+   */
+  uint32_t binningY() const;
+  
   /**
    * \brief Compute delta u, given Z and delta X in Cartesian space.
    *
@@ -181,16 +194,19 @@ public:
    */
   double getDeltaY(double deltaV, double Z) const;
   
-private:
-  bool initialized_;
-  bool has_distortion_, has_roi_;
+protected:
+  bool initialized_; /// @todo This can go away once PIMPL being used
   
   sensor_msgs::CameraInfo cam_info_;
-  cv::Mat_<double> K_, D_, R_, P_;
+  cv::Mat_<double> D_, R_; // Unaffected by binning, ROI
+  cv::Mat_<double> K_, P_; // Describe current image
+  cv::Mat_<double> K_full_, P_full_; // Describe full-res image, needed for full maps
 
-  mutable bool parameters_changed_, roi_changed_;
-  mutable cv::Mat undistort_map_x_, undistort_map_y_;
-  mutable cv::Mat roi_undistort_map_x_, roi_undistort_map_y_;
+  enum DistortionState { NONE, CALIBRATED, UNKNOWN } distortion_state_;
+
+  mutable bool full_maps_dirty_, current_maps_dirty_;
+  mutable cv::Mat full_map1_, full_map2_;
+  mutable cv::Mat current_map1_, current_map2_;
 
   void initUndistortMaps() const;
 };
@@ -222,6 +238,9 @@ inline double PinholeCameraModel::Tx() const { return P_(0,3); }
 inline double PinholeCameraModel::Ty() const { return P_(1,3); }
 inline uint32_t PinholeCameraModel::height() const { return cam_info_.height; }
 inline uint32_t PinholeCameraModel::width() const  { return cam_info_.width; }
+
+inline uint32_t PinholeCameraModel::binningX() const { return cam_info_.binning_x ? cam_info_.binning_x : 1; }
+inline uint32_t PinholeCameraModel::binningY() const { return cam_info_.binning_y ? cam_info_.binning_y : 1; }
 
 inline double PinholeCameraModel::getDeltaU(double deltaX, double Z) const
 {

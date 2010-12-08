@@ -9,6 +9,7 @@
   <review status="reviewed" notes=""/>
   <url>http://ros.org/wiki/vision_opencv</url>
   <depend stack="common_msgs" /> <!-- sensor_msgs -->
-  <depend stack="ros" /> <!-- rostest, rospy, roscpp -->
+  <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- rostest, rospy, roscpp -->
 
 </stack>

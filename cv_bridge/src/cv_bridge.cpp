@@ -39,7 +39,6 @@
 
 namespace enc = sensor_msgs::image_encodings;
 
-/// @todo Handle endianness - e.g. 16-bit dc1394 camera images are big-endian
 namespace cv_bridge {
 
 int getCvType(const std::string& encoding)
@@ -132,41 +131,14 @@ int getConversionCode(Format src_format, Format dst_format)
   return CONVERSION_CODES[src_format*5 + dst_format];
 }
 
-/// @endcond
-
-sensor_msgs::ImagePtr CvImage::toImageMsg() const
-{
-  sensor_msgs::ImagePtr ptr = boost::make_shared<sensor_msgs::Image>();
-  toImageMsg(*ptr);
-  return ptr;
-}
-
-void CvImage::toImageMsg(sensor_msgs::Image& ros_image) const
-{
-  ros_image.header = header;
-  ros_image.height = image.rows;
-  ros_image.width = image.cols;
-  ros_image.encoding = encoding;
-  ros_image.is_bigendian = false;
-  ros_image.step = image.step;
-  size_t size = image.step * image.rows;
-  ros_image.data.resize(size);
-  memcpy((char*)(&ros_image.data[0]), image.data, size);
-}
-
-// Deep copy data, returnee is mutable
-CvImagePtr toCvCopy(const sensor_msgs::ImageConstPtr& source,
-                    const std::string& encoding)
-{
-  return toCvCopy(*source);
-}
-
 // Internal, used by toCvCopy and cvtColor
 CvImagePtr toCvCopyImpl(const cv::Mat& source,
                         const std_msgs::Header& src_header,
                         const std::string& src_encoding,
                         const std::string& dst_encoding)
 {
+  /// @todo Handle endianness - e.g. 16-bit dc1394 camera images are big-endian
+  
   // Copy metadata
   CvImagePtr ptr = boost::make_shared<CvImage>();
   ptr->header = src_header;
@@ -202,6 +174,35 @@ CvImagePtr toCvCopyImpl(const cv::Mat& source,
   }
 
   return ptr;
+}
+
+/// @endcond
+
+sensor_msgs::ImagePtr CvImage::toImageMsg() const
+{
+  sensor_msgs::ImagePtr ptr = boost::make_shared<sensor_msgs::Image>();
+  toImageMsg(*ptr);
+  return ptr;
+}
+
+void CvImage::toImageMsg(sensor_msgs::Image& ros_image) const
+{
+  ros_image.header = header;
+  ros_image.height = image.rows;
+  ros_image.width = image.cols;
+  ros_image.encoding = encoding;
+  ros_image.is_bigendian = false;
+  ros_image.step = image.step;
+  size_t size = image.step * image.rows;
+  ros_image.data.resize(size);
+  memcpy((char*)(&ros_image.data[0]), image.data, size);
+}
+
+// Deep copy data, returnee is mutable
+CvImagePtr toCvCopy(const sensor_msgs::ImageConstPtr& source,
+                    const std::string& encoding)
+{
+  return toCvCopy(*source);
 }
 
 CvImagePtr toCvCopy(const sensor_msgs::Image& source,

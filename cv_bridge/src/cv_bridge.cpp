@@ -1,4 +1,39 @@
+/*********************************************************************
+* Software License Agreement (BSD License)
+*
+*  Copyright (c) 2011, Willow Garage, Inc.
+*  All rights reserved.
+*
+*  Redistribution and use in source and binary forms, with or without
+*  modification, are permitted provided that the following conditions
+*  are met:
+*
+*   * Redistributions of source code must retain the above copyright
+*     notice, this list of conditions and the following disclaimer.
+*   * Redistributions in binary form must reproduce the above
+*     copyright notice, this list of conditions and the following
+*     disclaimer in the documentation and/or other materials provided
+*     with the distribution.
+*   * Neither the name of the Willow Garage nor the names of its
+*     contributors may be used to endorse or promote products derived
+*     from this software without specific prior written permission.
+*
+*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+*  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+*  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+*  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+*  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+*  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+*  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+*  POSSIBILITY OF SUCH DAMAGE.
+*********************************************************************/
+
 #include <cv_bridge/cv_bridge.h>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <sensor_msgs/image_encodings.h>
 #include <boost/make_shared.hpp>
 
@@ -52,7 +87,7 @@ int getCvType(const std::string& encoding)
 
 enum Format { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA };
 
-Format getFormat(const std::string& encoding, int cv_type)
+Format getFormat(const std::string& encoding)
 {
   if (encoding == enc::BGR8)   return BGR;
   if (encoding == enc::MONO8)  return GRAY;
@@ -126,49 +161,58 @@ CvImagePtr toCvCopy(const sensor_msgs::ImageConstPtr& source,
   return toCvCopy(*source);
 }
 
-CvImagePtr toCvCopy(const sensor_msgs::Image& source,
-                    const std::string& encoding)
+// Internal, used by toCvCopy and cvtColor
+CvImagePtr toCvCopyImpl(const cv::Mat& source,
+                        const std_msgs::Header& src_header,
+                        const std::string& src_encoding,
+                        const std::string& dst_encoding)
 {
   // Copy metadata
   CvImagePtr ptr = boost::make_shared<CvImage>();
-  ptr->header = source.header;
-
-  // Construct matrix pointing to source data
-  int source_type = getCvType(source.encoding);
-  const cv::Mat tmp((int)source.height, (int)source.width, source_type,
-                    const_cast<uint8_t*>(&source.data[0]), (size_t)source.step);
+  ptr->header = src_header;
+  
   // Copy to new buffer if same encoding requested
-  if (encoding.empty() || encoding == source.encoding)
+  if (dst_encoding.empty() || dst_encoding == src_encoding)
   {
-    ptr->encoding = source.encoding;
-    tmp.copyTo(ptr->image);
+    ptr->encoding = src_encoding;
+    source.copyTo(ptr->image);
   }
   else
   {
     // Convert the source data to the desired encoding
-    int destination_type = getCvType(encoding);
-    Format source_format = getFormat(source.encoding, source_type);
-    Format destination_format = getFormat(encoding, destination_type);
-    if (source_format == INVALID || destination_format == INVALID)
-      throw Exception("Unsupported conversion from [" + source.encoding +
-                      "] to [" + encoding + "]");
+    Format src_format = getFormat(src_encoding);
+    Format dst_format = getFormat(dst_encoding);
+    if (src_format == INVALID || dst_format == INVALID)
+      throw Exception("Unsupported conversion from [" + src_encoding +
+                      "] to [" + dst_encoding + "]");
 
-    int conversion_code = getConversionCode(source_format, destination_format);
+    int conversion_code = getConversionCode(src_format, dst_format);
     if (conversion_code == SAME_FORMAT)
     {
       // Same number of channels, but different bit depth
       /// @todo Should do scaling, e.g. for MONO16 -> MONO8
-      tmp.convertTo(ptr->image, destination_type);
+      source.convertTo(ptr->image, getCvType(dst_encoding));
     }
     else
     {
       // Perform color conversion
-      cv::cvtColor(tmp, ptr->image, conversion_code);
+      cv::cvtColor(source, ptr->image, conversion_code);
     }
-    ptr->encoding = encoding;
+    ptr->encoding = dst_encoding;
   }
 
   return ptr;
+}
+
+CvImagePtr toCvCopy(const sensor_msgs::Image& source,
+                    const std::string& encoding)
+{
+  // Construct matrix pointing to source data
+  int source_type = getCvType(source.encoding);
+  const cv::Mat tmp((int)source.height, (int)source.width, source_type,
+                    const_cast<uint8_t*>(&source.data[0]), (size_t)source.step);
+
+  return toCvCopyImpl(tmp, source.header, source.encoding, encoding);
 }
 
 // Share const data, returnee is immutable
@@ -193,6 +237,12 @@ CvImageConstPtr toCvShare(const sensor_msgs::Image& source,
   ptr->image = cv::Mat(source.height, source.width, type,
                        const_cast<uchar*>(&source.data[0]), source.step);
   return ptr;
+}
+
+CvImagePtr cvtColor(const CvImageConstPtr& source,
+                    const std::string& encoding)
+{
+  return toCvCopyImpl(source->image, source->header, source->encoding, encoding);
 }
 
 } //namespace cv_bridge

@@ -48,6 +48,9 @@ namespace sensor_msgs
     CvBridgeException(const std::string errorDescription) : std::runtime_error(errorDescription) { ; };
   };
 
+  /**
+   * \brief Old C++ API. Use cv_bridge::CvImage, toCvCopy(), toCvShare() instead.
+   */
   class CvBridge
   {
   public:

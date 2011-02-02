@@ -16,6 +16,3 @@ jasper:
   macports: jasper
   arch: jasper
   gentoo: jasper
-libdc1394-dev:
-  ubuntu: libdc1394-22-dev
-  arch: libdc1394

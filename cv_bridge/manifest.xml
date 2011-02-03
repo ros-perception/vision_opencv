@@ -7,7 +7,7 @@
   </description>
   <author>James Bowman, Patrick Mihelich</author>
   <license>BSD</license>
-  <review status="unreviewed" notes=""/>
+  <review status="Doc reviewed" notes="Feb 1, 2011"/>
   <url>http://www.ros.org/wiki/cv_bridge</url>
 
   <export>

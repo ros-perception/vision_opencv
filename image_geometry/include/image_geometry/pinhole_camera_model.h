@@ -195,33 +195,31 @@ public:
   double getDeltaY(double deltaV, double Z) const;
   
 protected:
-  bool initialized_; /// @todo This can go away once PIMPL being used
-  
   sensor_msgs::CameraInfo cam_info_;
-  cv::Mat_<double> D_, R_; // Unaffected by binning, ROI
-  cv::Mat_<double> K_, P_; // Describe current image
+  cv::Mat_<double> D_, R_;           // Unaffected by binning, ROI
+  cv::Mat_<double> K_, P_;           // Describe current image (includes binning, ROI)
   cv::Mat_<double> K_full_, P_full_; // Describe full-res image, needed for full maps
 
-  enum DistortionState { NONE, CALIBRATED, UNKNOWN } distortion_state_;
-
-  mutable bool full_maps_dirty_, current_maps_dirty_;
-  mutable cv::Mat full_map1_, full_map2_;
-  mutable cv::Mat current_map1_, current_map2_;
+  // Use PIMPL here so we can change internals in patch updates if needed
+  struct Cache;
+  boost::shared_ptr<Cache> cache_; // Holds cached data for internal use
 
   void initUndistortMaps() const;
+
+  bool initialized() const { return cache_; }
 };
 
 
 /* Trivial inline functions */
 inline std::string PinholeCameraModel::tfFrame() const
 {
-  assert(initialized_);
+  assert( initialized() );
   return cam_info_.header.frame_id;
 }
 
 inline ros::Time PinholeCameraModel::stamp() const
 {
-  assert(initialized_);
+  assert( initialized() );
   return cam_info_.header.stamp;
 }
 
@@ -244,25 +242,25 @@ inline uint32_t PinholeCameraModel::binningY() const { return cam_info_.binning_
 
 inline double PinholeCameraModel::getDeltaU(double deltaX, double Z) const
 {
-  assert(initialized_);
+  assert( initialized() );
   return fx() * deltaX / Z;
 }
 
 inline double PinholeCameraModel::getDeltaV(double deltaY, double Z) const
 {
-  assert(initialized_);
+  assert( initialized() );
   return fy() * deltaY / Z;
 }
 
 inline double PinholeCameraModel::getDeltaX(double deltaU, double Z) const
 {
-  assert(initialized_);
+  assert( initialized() );
   return Z * deltaU / fx();
 }
 
 inline double PinholeCameraModel::getDeltaY(double deltaV, double Z) const
 {
-  assert(initialized_);
+  assert( initialized() );
   return Z * deltaV / fy();
 }
 

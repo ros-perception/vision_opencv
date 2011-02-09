@@ -256,7 +256,7 @@ protected:
   struct Cache;
   boost::shared_ptr<Cache> cache_; // Holds cached data for internal use
 
-  void initUndistortMaps() const;
+  void initRectificationMaps() const;
 
   bool initialized() const { return cache_; }
 

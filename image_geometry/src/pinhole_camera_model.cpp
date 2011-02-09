@@ -9,11 +9,22 @@ enum DistortionState { NONE, CALIBRATED, UNKNOWN };
 struct PinholeCameraModel::Cache
 {
   DistortionState distortion_state;
-  mutable bool full_maps_dirty, current_maps_dirty;
+  
+  mutable bool full_maps_dirty;
   mutable cv::Mat full_map1, full_map2;
-  mutable cv::Mat current_map1, current_map2;
 
-  Cache() : full_maps_dirty(true), current_maps_dirty(true) {}
+  mutable bool reduced_maps_dirty;
+  mutable cv::Mat reduced_map1, reduced_map2;
+  
+  mutable bool rectified_roi_dirty;
+  mutable cv::Rect rectified_roi;
+
+  Cache()
+    : full_maps_dirty(true),
+      reduced_maps_dirty(true),
+      rectified_roi_dirty(true)
+  {
+  }
 };
 
 PinholeCameraModel::PinholeCameraModel()
@@ -81,15 +92,17 @@ void PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
   full_dirty |= update(binning_x, cam_info_.binning_x);
   full_dirty |= update(binning_y, cam_info_.binning_y);
 
-  // The current rectification maps are invalidated by any of the above or a
+  // The reduced rectification maps are invalidated by any of the above or a
   // change in ROI.
-  bool &current_dirty = cache_->current_maps_dirty;
-  current_dirty  = full_dirty;
-  current_dirty |= update(roi.x_offset,   cam_info_.roi.x_offset);
-  current_dirty |= update(roi.y_offset,   cam_info_.roi.y_offset);
-  current_dirty |= update(roi.height,     cam_info_.roi.height);
-  current_dirty |= update(roi.width,      cam_info_.roi.width);
-  current_dirty |= update(roi.do_rectify, cam_info_.roi.do_rectify);
+  bool &reduced_dirty = cache_->reduced_maps_dirty;
+  reduced_dirty  = full_dirty;
+  reduced_dirty |= update(roi.x_offset,   cam_info_.roi.x_offset);
+  reduced_dirty |= update(roi.y_offset,   cam_info_.roi.y_offset);
+  reduced_dirty |= update(roi.height,     cam_info_.roi.height);
+  reduced_dirty |= update(roi.width,      cam_info_.roi.width);
+  reduced_dirty |= update(roi.do_rectify, cam_info_.roi.do_rectify);
+  // As is the rectified ROI
+  cache_->rectified_roi_dirty = reduced_dirty;
 
   // Figure out how to handle the distortion
   if (cam_info_.distortion_model == sensor_msgs::distortion_models::PLUMB_BOB ||
@@ -173,8 +186,16 @@ cv::Rect PinholeCameraModel::rawRoi() const
 cv::Rect PinholeCameraModel::rectifiedRoi() const
 {
   assert( initialized() );
-
-  /// @todo Call rectifyRoi(rawRoi()) and cache
+  
+  if (cache_->rectified_roi_dirty)
+  {
+    if (!cam_info_.roi.do_rectify)
+      cache_->rectified_roi = rawRoi();
+    else
+      cache_->rectified_roi = rectifyRoi(rawRoi());
+    cache_->rectified_roi_dirty = false;
+  }
+  return cache_->rectified_roi;
 }
 
 cv::Point2d PinholeCameraModel::project3dToPixel(const cv::Point3d& xyz) const
@@ -216,8 +237,8 @@ void PinholeCameraModel::rectifyImage(const cv::Mat& raw, cv::Mat& rectified, in
       raw.copyTo(rectified);
       break;
     case CALIBRATED:
-      initUndistortMaps();
-      cv::remap(raw, rectified, cache_->current_map1, cache_->current_map2, interpolation);
+      initRectificationMaps();
+      cv::remap(raw, rectified, cache_->reduced_map1, cache_->reduced_map2, interpolation);
       break;
     default:
       assert(cache_->distortion_state == UNKNOWN);
@@ -230,6 +251,7 @@ void PinholeCameraModel::unrectifyImage(const cv::Mat& rectified, cv::Mat& raw, 
   assert( initialized() );
 
   throw Exception("PinholeCameraModel::unrectifyImage is unimplemented.");
+  /// @todo Implement unrectifyImage()
   // Similar to rectifyImage, but need to build separate set of inverse maps (raw->rectified)...
   // - Build src_pt Mat with all the raw pixel coordinates (or do it one row at a time)
   // - Do cv::undistortPoints(src_pt, dst_pt, K_, D_, R_, P_)
@@ -355,15 +377,17 @@ cv::Rect PinholeCameraModel::unrectifyRoi(const cv::Rect& roi_rect) const
   return cv::Rect(roi_tl.x, roi_tl.y, roi_br.x - roi_tl.x, roi_br.y - roi_tl.y);
 }
 
-void PinholeCameraModel::initUndistortMaps() const
+void PinholeCameraModel::initRectificationMaps() const
 {
   if (cache_->full_maps_dirty) {
     // m1type=CV_16SC2 to use fast fixed-point maps
     cv::initUndistortRectifyMap(K_full_, D_, R_, P_full_, fullResolution(),
                                 CV_16SC2, cache_->full_map1, cache_->full_map2);
+    cache_->full_maps_dirty = false;
   }
 
-  if (cache_->current_maps_dirty) {
+  if (cache_->reduced_maps_dirty) {
+    /// @todo Use rectified ROI
     cv::Rect roi(cam_info_.roi.x_offset, cam_info_.roi.y_offset,
                  cam_info_.roi.width, cam_info_.roi.height);
     if (roi.x != 0 || roi.y != 0 ||
@@ -371,14 +395,15 @@ void PinholeCameraModel::initUndistortMaps() const
         roi.width != (int)cam_info_.height) {
 
       // map1 contains integer (x,y) offsets
-      cache_->current_map1 = cache_->full_map1(roi) - cv::Scalar(roi.x, roi.y);
-      cache_->current_map2 = cache_->full_map2(roi);
+      cache_->reduced_map1 = cache_->full_map1(roi) - cv::Scalar(roi.x, roi.y);
+      cache_->reduced_map2 = cache_->full_map2(roi);
     }
     else {
       // Otherwise we're rectifying the full image
-      cache_->current_map1 = cache_->full_map1;
-      cache_->current_map2 = cache_->full_map2;
+      cache_->reduced_map1 = cache_->full_map1;
+      cache_->reduced_map2 = cache_->full_map2;
     }
+    cache_->reduced_maps_dirty = false;
   }
 }
 

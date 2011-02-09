@@ -3,10 +3,15 @@
 
 #include <sensor_msgs/CameraInfo.h>
 #include <opencv/cv.h>
+#include <stdexcept>
 
 namespace image_geometry {
 
-/// @todo Exception class
+class Exception : public std::runtime_error
+{
+public:
+  Exception(const std::string& description) : std::runtime_error(description) {}
+};
 
 /**
  * \brief Simplifies interpreting images geometrically using the parameters from

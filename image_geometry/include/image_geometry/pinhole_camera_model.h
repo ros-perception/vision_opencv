@@ -44,6 +44,36 @@ public:
    * \brief Get the time stamp associated with this camera model.
    */
   ros::Time stamp() const;
+
+  /**
+   * \brief The resolution at which the camera was calibrated.
+   *
+   * The maximum resolution at which the camera can be used with the current
+   * calibration; normally this is the same as the imager resolution.
+   */
+  cv::Size fullResolution() const;
+
+  /**
+   * \brief The resolution of the current rectified image.
+   *
+   * The size of the rectified image associated with the latest CameraInfo, as
+   * reduced by binning/ROI and affected by distortion. If binning and ROI are
+   * not in use, this is the same as fullResolution().
+   */
+  cv::Size reducedResolution() const;
+
+  /**
+   * \brief The current raw ROI, as used for capture by the camera driver.
+   */
+  cv::Rect rawRoi() const;
+
+  /**
+   * \brief The current rectified ROI, which best fits the raw ROI.
+   */
+  cv::Rect rectifiedRoi() const;
+
+  /// @todo Hide or group deprecated overloads in Doxygen
+  void project3dToPixel(const cv::Point3d& xyz, cv::Point2d& uv_rect) const ROS_DEPRECATED;
   
   /**
    * \brief Project a 3d point to rectified pixel coordinates.
@@ -51,9 +81,11 @@ public:
    * This is the inverse of projectPixelTo3dRay().
    *
    * \param xyz 3d point in the camera coordinate frame
-   * \param[out] uv_rect Rectified pixel coordinates
+   * \return (u,v) in rectified pixel coordinates
    */
-  void project3dToPixel(const cv::Point3d& xyz, cv::Point2d& uv_rect) const;
+  cv::Point2d project3dToPixel(const cv::Point3d& xyz) const;
+
+  void projectPixelTo3dRay(const cv::Point2d& uv_rect, cv::Point3d& ray) const ROS_DEPRECATED;
 
   /**
    * \brief Project a rectified pixel to a 3d ray.
@@ -61,10 +93,12 @@ public:
    * Returns the unit vector in the camera coordinate frame in the direction of rectified
    * pixel (u,v) in the image plane. This is the inverse of project3dToPixel().
    *
+   * In 1.4.x, the vector has z = 1.0. Previously, this function returned a unit vector.
+   *
    * \param uv_rect Rectified pixel coordinates
-   * \param[out] ray 3d ray passing through (u,v).
+   * \return 3d ray passing through (u,v)
    */
-  void projectPixelTo3dRay(const cv::Point2d& uv_rect, cv::Point3d& ray) const;
+  cv::Point3d projectPixelTo3dRay(const cv::Point2d& uv_rect) const;
 
   /**
    * \brief Rectify a raw camera image.
@@ -78,16 +112,30 @@ public:
   void unrectifyImage(const cv::Mat& rectified, cv::Mat& raw,
                       int interpolation = CV_INTER_LINEAR) const;
 
+  void rectifyPoint(const cv::Point2d& uv_raw, cv::Point2d& uv_rect) const ROS_DEPRECATED;
+  
   /**
    * \brief Compute the rectified image coordinates of a pixel in the raw image.
    */
-  void rectifyPoint(const cv::Point2d& uv_raw, cv::Point2d& uv_rect) const;
+  cv::Point2d rectifyPoint(const cv::Point2d& uv_raw) const;
 
+  void unrectifyPoint(const cv::Point2d& uv_rect, cv::Point2d& uv_raw) const ROS_DEPRECATED;
+  
   /**
    * \brief Compute the raw image coordinates of a pixel in the rectified image.
    */
-  void unrectifyPoint(const cv::Point2d& uv_rect, cv::Point2d& uv_raw) const;
+  cv::Point2d unrectifyPoint(const cv::Point2d& uv_rect) const;
 
+  /**
+   * \brief Compute the rectified ROI best fitting a raw ROI.
+   */
+  cv::Rect rectifyRoi(const cv::Rect& roi_raw) const;
+
+  /**
+   * \brief Compute the raw ROI best fitting a rectified ROI.
+   */
+  cv::Rect unrectifyRoi(const cv::Rect& roi_rect) const;
+  
   /**
    * \brief Returns the original camera matrix.
    */
@@ -138,16 +186,15 @@ public:
    */
   double Ty() const;
 
-  /// @todo Deprecate height(), width()
   /**
    * \brief Returns the image height.
    */
-  uint32_t height() const;
+  uint32_t height() const ROS_DEPRECATED;
 
   /**
    * \brief Returns the image width.
    */
-  uint32_t width() const;
+  uint32_t width() const ROS_DEPRECATED;
 
   /**
    * \brief Returns the number of columns in each bin.
@@ -212,6 +259,8 @@ protected:
   void initUndistortMaps() const;
 
   bool initialized() const { return cache_; }
+
+  friend class StereoCameraModel;
 };
 
 

@@ -146,23 +146,65 @@ void PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& m
 
 void PinholeCameraModel::project3dToPixel(const cv::Point3d& xyz, cv::Point2d& uv_rect) const
 {
+  uv_rect = project3dToPixel(xyz);
+}
+
+cv::Size PinholeCameraModel::fullResolution() const
+{
+  assert( initialized() );
+  return cv::Size(cam_info_.width, cam_info_.height);
+}
+
+cv::Size PinholeCameraModel::reducedResolution() const
+{
+  assert( initialized() );
+
+  /// @todo Implement
+}
+
+cv::Rect PinholeCameraModel::rawRoi() const
+{
+  assert( initialized() );
+
+  return cv::Rect(cam_info_.roi.x_offset, cam_info_.roi.y_offset,
+                  cam_info_.roi.width, cam_info_.roi.height);
+}
+
+cv::Rect PinholeCameraModel::rectifiedRoi() const
+{
+  assert( initialized() );
+
+  /// @todo Call rectifyRoi(rawRoi()) and cache
+}
+
+cv::Point2d PinholeCameraModel::project3dToPixel(const cv::Point3d& xyz) const
+{
   assert( initialized() );
   assert(P_(2, 3) == 0.0); // Calibrated stereo cameras should be in the same plane
 
   // [U V W]^T = P * [X Y Z 1]^T
   // u = U/W
   // v = V/W
+  cv::Point2d uv_rect;
   uv_rect.x = (fx()*xyz.x + Tx()) / xyz.z + cx();
   uv_rect.y = (fy()*xyz.y + Ty()) / xyz.z + cy();
+  return uv_rect;
 }
 
 void PinholeCameraModel::projectPixelTo3dRay(const cv::Point2d& uv_rect, cv::Point3d& ray) const
 {
+  ray = projectPixelTo3dRay(uv_rect);
+}
+
+cv::Point3d PinholeCameraModel::projectPixelTo3dRay(const cv::Point2d& uv_rect) const
+{
   assert( initialized() );
 
+  cv::Point3d ray;
   ray.x = (uv_rect.x - cx() - Tx()) / fx();
   ray.y = (uv_rect.y - cy() - Ty()) / fy();
   ray.z = 1.0;
+  return ray;
 }
 
 void PinholeCameraModel::rectifyImage(const cv::Mat& raw, cv::Mat& rectified, int interpolation) const
@@ -198,15 +240,17 @@ void PinholeCameraModel::unrectifyImage(const cv::Mat& rectified, cv::Mat& raw, 
 
 void PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw, cv::Point2d& uv_rect) const
 {
+  uv_rect = rectifyPoint(uv_raw);
+}
+
+cv::Point2d PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw) const
+{
   assert( initialized() );
 
-  if (cache_->distortion_state == NONE) {
-    uv_rect = uv_raw;
-    return;
-  }
-  if (cache_->distortion_state == UNKNOWN) {
+  if (cache_->distortion_state == NONE)
+    return uv_raw;
+  if (cache_->distortion_state == UNKNOWN)
     throw Exception("Cannot call rectifyPoint when distortion is unknown.");
-  }
   assert(cache_->distortion_state == CALIBRATED);
 
   /// @todo cv::undistortPoints requires the point data to be float, should allow double
@@ -214,20 +258,22 @@ void PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw, cv::Point2d& uv
   const cv::Mat src_pt(1, 1, CV_32FC2, &raw32.x);
   cv::Mat dst_pt(1, 1, CV_32FC2, &rect32.x);
   cv::undistortPoints(src_pt, dst_pt, K_, D_, R_, P_);
-  uv_rect = rect32;
+  return rect32;
 }
 
 void PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect, cv::Point2d& uv_raw) const
 {
+  uv_raw = unrectifyPoint(uv_rect);
+}
+
+cv::Point2d PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect) const
+{
   assert( initialized() );
 
-  if (cache_->distortion_state == NONE) {
-    uv_raw = uv_rect;
-    return;
-  }
-  if (cache_->distortion_state == UNKNOWN) {
+  if (cache_->distortion_state == NONE)
+    return uv_rect;
+  if (cache_->distortion_state == UNKNOWN)
     throw Exception("Cannot call unrectifyPoint when distortion is unknown.");
-  }
   assert(cache_->distortion_state == CALIBRATED);
 
   /// @todo Make this just call projectPixelTo3dRay followed by cv::projectPoints. But
@@ -264,15 +310,42 @@ void PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect, cv::Point2d&
   // map_x(u,v) <- x''fx + cx
   // map_y(u,v) <- y''fy + cy
   // cx, fx, etc. come from original camera matrix K.
-  uv_raw.x = xpp*K_(0,0) + K_(0,2);
-  uv_raw.y = ypp*K_(1,1) + K_(1,2);
+  return cv::Point2d(xpp*K_(0,0) + K_(0,2), ypp*K_(1,1) + K_(1,2));
+}
+
+cv::Rect PinholeCameraModel::rectifyRoi(const cv::Rect& roi_raw) const
+{
+  assert( initialized() );
+
+  /// @todo Implement
+}
+
+cv::Rect PinholeCameraModel::unrectifyRoi(const cv::Rect& roi_rect) const
+{
+  assert( initialized() );
+
+  /// @todo Actually implement "best fit" as described by REP 104.
+  
+  // For now, just unrectify the four corners and take the bounding box.
+  cv::Point2d raw_tl = unrectifyPoint(cv::Point2d(roi_rect.x, roi_rect.y));
+  cv::Point2d raw_tr = unrectifyPoint(cv::Point2d(roi_rect.x + roi_rect.width, roi_rect.y));
+  cv::Point2d raw_br = unrectifyPoint(cv::Point2d(roi_rect.x + roi_rect.width,
+                                                  roi_rect.y + roi_rect.height));
+  cv::Point2d raw_bl = unrectifyPoint(cv::Point2d(roi_rect.x, roi_rect.y + roi_rect.height));
+
+  cv::Point roi_tl(std::floor(std::min(raw_tl.x, raw_bl.x)),
+                   std::floor(std::min(raw_tl.y, raw_tr.y)));
+  cv::Point roi_br(std::ceil(std::max(raw_tr.x, raw_br.x)),
+                   std::ceil(std::max(raw_bl.y, raw_br.y)));
+
+  return cv::Rect(roi_tl.x, roi_tl.y, roi_br.x - roi_tl.x, roi_br.y - roi_tl.y);
 }
 
 void PinholeCameraModel::initUndistortMaps() const
 {
   if (cache_->full_maps_dirty) {
     // m1type=CV_16SC2 to use fast fixed-point maps
-    cv::initUndistortRectifyMap(K_full_, D_, R_, P_full_, cv::Size(width(), height()), /// @todo fullResolution()
+    cv::initUndistortRectifyMap(K_full_, D_, R_, P_full_, fullResolution(),
                                 CV_16SC2, cache_->full_map1, cache_->full_map2);
   }
 

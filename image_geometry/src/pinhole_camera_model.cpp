@@ -317,7 +317,21 @@ cv::Rect PinholeCameraModel::rectifyRoi(const cv::Rect& roi_raw) const
 {
   assert( initialized() );
 
-  /// @todo Implement
+  /// @todo Actually implement "best fit" as described by REP 104.
+  
+  // For now, just unrectify the four corners and take the bounding box.
+  cv::Point2d rect_tl = rectifyPoint(cv::Point2d(roi_raw.x, roi_raw.y));
+  cv::Point2d rect_tr = rectifyPoint(cv::Point2d(roi_raw.x + roi_raw.width, roi_raw.y));
+  cv::Point2d rect_br = rectifyPoint(cv::Point2d(roi_raw.x + roi_raw.width,
+                                                 roi_raw.y + roi_raw.height));
+  cv::Point2d rect_bl = rectifyPoint(cv::Point2d(roi_raw.x, roi_raw.y + roi_raw.height));
+
+  cv::Point roi_tl(std::ceil (std::min(rect_tl.x, rect_bl.x)),
+                   std::ceil (std::min(rect_tl.y, rect_tr.y)));
+  cv::Point roi_br(std::floor(std::max(rect_tr.x, rect_br.x)),
+                   std::floor(std::max(rect_bl.y, rect_br.y)));
+
+  return cv::Rect(roi_tl.x, roi_tl.y, roi_br.x - roi_tl.x, roi_br.y - roi_tl.y);
 }
 
 cv::Rect PinholeCameraModel::unrectifyRoi(const cv::Rect& roi_rect) const
@@ -335,8 +349,8 @@ cv::Rect PinholeCameraModel::unrectifyRoi(const cv::Rect& roi_rect) const
 
   cv::Point roi_tl(std::floor(std::min(raw_tl.x, raw_bl.x)),
                    std::floor(std::min(raw_tl.y, raw_tr.y)));
-  cv::Point roi_br(std::ceil(std::max(raw_tr.x, raw_br.x)),
-                   std::ceil(std::max(raw_bl.y, raw_br.y)));
+  cv::Point roi_br(std::ceil (std::max(raw_tr.x, raw_br.x)),
+                   std::ceil (std::max(raw_bl.y, raw_br.y)));
 
   return cv::Rect(roi_tl.x, roi_tl.y, roi_br.x - roi_tl.x, roi_br.y - roi_tl.y);
 }

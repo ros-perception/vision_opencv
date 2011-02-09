@@ -85,12 +85,13 @@ public:
    */
   double getDisparity(double Z) const;
 
-private:
-  bool initialized_;
+protected:
   PinholeCameraModel left_, right_;
   cv::Mat_<double> Q_;
 
   void updateQ();
+
+  bool initialized() const { return left_.initialized() && right_.initialized(); }
 };
 
 
@@ -110,13 +111,13 @@ inline double StereoCameraModel::baseline() const
 
 inline double StereoCameraModel::getZ(double disparity) const
 {
-  assert(initialized_);
+  assert( initialized() );
   return -right_.Tx() / disparity;
 }
 
 inline double StereoCameraModel::getDisparity(double Z) const
 {
-  assert(initialized_);
+  assert( initialized() );
   return -right_.Tx() / Z;
 }
 

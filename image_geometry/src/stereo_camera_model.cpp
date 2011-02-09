@@ -1,25 +1,20 @@
 #include "image_geometry/stereo_camera_model.h"
-#include <stdexcept>
 
 namespace image_geometry {
 
 StereoCameraModel::StereoCameraModel()
-  : initialized_(false),
-    Q_(4, 4, 0.0)
+  : Q_(4, 4, 0.0)
 {
   Q_(0,0) = Q_(1,1) = 1.0;
 }
 
 StereoCameraModel::StereoCameraModel(const StereoCameraModel& other)
-  : initialized_(false),
-    left_(other.left_), right_(other.right_),
+  : left_(other.left_), right_(other.right_),
     Q_(4, 4, 0.0)
 {
   Q_(0,0) = Q_(1,1) = 1.0;
-  if (other.initialized_) {
+  if (other.initialized())
     updateQ();
-    initialized_ = true;
-  }
 }
 
 void StereoCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& left,
@@ -33,12 +28,9 @@ void StereoCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& left,
   assert( left_.fx() == right_.fx() );
   assert( left_.fy() == right_.fy() );
   assert( left_.cy() == right_.cy() );
-  assert( left_.cx() == right_.cx() ); /// @todo Cx may differ for verged cameras, support that case.
-  /// @todo Check that translations in P make sense
+  // cx may differ for verged cameras
 
   updateQ();
-
-  initialized_ = true;
 }
 
 void StereoCameraModel::fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& left,
@@ -75,7 +67,7 @@ void StereoCameraModel::updateQ()
 void StereoCameraModel::projectDisparityTo3d(const cv::Point2d& left_uv_rect, float disparity,
                                              cv::Point3d& xyz) const
 {
-  assert(initialized_);
+  assert( initialized() );
 
   // Do the math inline:
   // [X Y Z W]^T = Q * [u v d 1]^T
@@ -92,7 +84,7 @@ const double StereoCameraModel::MISSING_Z = 10000.;
 void StereoCameraModel::projectDisparityImageTo3d(const cv::Mat& disparity, cv::Mat& point_cloud,
                                                   bool handleMissingValues) const
 {
-  assert(initialized_);
+  assert( initialized() );
 
   cv::reprojectImageTo3D(disparity, point_cloud, Q_, handleMissingValues);
 }

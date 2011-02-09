@@ -172,7 +172,8 @@ cv::Size PinholeCameraModel::reducedResolution() const
 {
   assert( initialized() );
 
-  /// @todo Implement
+  cv::Rect roi = rectifiedRoi();
+  return cv::Size(roi.width, roi.height);
 }
 
 cv::Rect PinholeCameraModel::rawRoi() const

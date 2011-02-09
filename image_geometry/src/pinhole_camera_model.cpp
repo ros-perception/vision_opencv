@@ -1,7 +1,6 @@
 #include "image_geometry/pinhole_camera_model.h"
 #include <sensor_msgs/distortion_models.h>
 #include <boost/make_shared.hpp>
-#include <stdexcept>
 
 namespace image_geometry {
 
@@ -180,7 +179,7 @@ void PinholeCameraModel::rectifyImage(const cv::Mat& raw, cv::Mat& rectified, in
       break;
     default:
       assert(cache_->distortion_state == UNKNOWN);
-      throw std::runtime_error("Cannot call rectifyImage when distortion is unknown.");
+      throw Exception("Cannot call rectifyImage when distortion is unknown.");
   }
 }
 
@@ -188,7 +187,7 @@ void PinholeCameraModel::unrectifyImage(const cv::Mat& rectified, cv::Mat& raw, 
 {
   assert( initialized() );
 
-  throw std::runtime_error("[image_geometry] PinholeCameraModel::unrectifyImage is unimplemented.");
+  throw Exception("PinholeCameraModel::unrectifyImage is unimplemented.");
   // Similar to rectifyImage, but need to build separate set of inverse maps (raw->rectified)...
   // - Build src_pt Mat with all the raw pixel coordinates (or do it one row at a time)
   // - Do cv::undistortPoints(src_pt, dst_pt, K_, D_, R_, P_)
@@ -206,7 +205,7 @@ void PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw, cv::Point2d& uv
     return;
   }
   if (cache_->distortion_state == UNKNOWN) {
-    throw std::runtime_error("Cannot call rectifyPoint when distortion is unknown.");
+    throw Exception("Cannot call rectifyPoint when distortion is unknown.");
   }
   assert(cache_->distortion_state == CALIBRATED);
 
@@ -227,7 +226,7 @@ void PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect, cv::Point2d&
     return;
   }
   if (cache_->distortion_state == UNKNOWN) {
-    throw std::runtime_error("Cannot call unrectifyPoint when distortion is unknown.");
+    throw Exception("Cannot call unrectifyPoint when distortion is unknown.");
   }
   assert(cache_->distortion_state == CALIBRATED);
 
@@ -283,10 +282,8 @@ void PinholeCameraModel::initUndistortMaps() const
     if (roi.x != 0 || roi.y != 0 ||
         roi.height != (int)cam_info_.height ||
         roi.width != (int)cam_info_.height) {
-      
-      //roi_undistort_map_x_ = undistort_map_x_(roi) - cv::Scalar(roi.x);
-      //cv::subtract(undistort_map_x_(roi), cv::Scalar(roi.x), roi_undistort_map_x_);
-      //cv::subtract(undistort_map_y_(roi), cv::Scalar(roi.y), roi_undistort_map_y_);
+
+      // map1 contains integer (x,y) offsets
       cache_->current_map1 = cache_->full_map1(roi) - cv::Scalar(roi.x, roi.y);
       cache_->current_map2 = cache_->full_map2(roi);
     }

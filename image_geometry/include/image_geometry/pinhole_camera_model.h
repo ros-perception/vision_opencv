@@ -165,6 +165,16 @@ public:
   const cv::Mat_<double>& projectionMatrix() const;
 
   /**
+   * \brief Returns the original camera matrix for full resolution.
+   */
+  const cv::Mat_<double>& fullIntrinsicMatrix() const;
+
+  /**
+   * \brief Returns the projection matrix for full resolution.
+   */
+  const cv::Mat_<double>& fullProjectionMatrix() const;
+
+  /**
    * \brief Returns the focal length (pixels) in x direction of the rectified image.
    */
   double fx() const;
@@ -289,6 +299,8 @@ inline const cv::Mat_<double>& PinholeCameraModel::intrinsicMatrix() const  { re
 inline const cv::Mat_<double>& PinholeCameraModel::distortionCoeffs() const { return D_; }
 inline const cv::Mat_<double>& PinholeCameraModel::rotationMatrix() const   { return R_; }
 inline const cv::Mat_<double>& PinholeCameraModel::projectionMatrix() const { return P_; }
+inline const cv::Mat_<double>& PinholeCameraModel::fullIntrinsicMatrix() const  { return K_full_; }
+inline const cv::Mat_<double>& PinholeCameraModel::fullProjectionMatrix() const { return P_full_; }
 
 inline double PinholeCameraModel::fx() const { return P_(0,0); }
 inline double PinholeCameraModel::fy() const { return P_(1,1); }

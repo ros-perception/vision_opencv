@@ -28,12 +28,12 @@ public:
   /**
    * \brief Set the camera parameters from the sensor_msgs/CameraInfo message.
    */
-  void fromCameraInfo(const sensor_msgs::CameraInfo& msg);
+  bool fromCameraInfo(const sensor_msgs::CameraInfo& msg);
 
   /**
    * \brief Set the camera parameters from the sensor_msgs/CameraInfo message.
    */
-  void fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& msg);
+  bool fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& msg);
 
   /**
    * \brief Get the name of the camera coordinate frame in tf.

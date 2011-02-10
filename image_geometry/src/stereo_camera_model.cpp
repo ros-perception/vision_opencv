@@ -17,11 +17,10 @@ StereoCameraModel::StereoCameraModel(const StereoCameraModel& other)
     updateQ();
 }
 
-void StereoCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& left,
+bool StereoCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& left,
                                        const sensor_msgs::CameraInfo& right)
 {
-  left_.fromCameraInfo(left);
-  right_.fromCameraInfo(right);
+  bool changed = left_.fromCameraInfo(left) || right_.fromCameraInfo(right);
 
   // Note: don't require identical time stamps to allow imperfectly synced stereo.
   assert( left_.tfFrame() == right_.tfFrame() );
@@ -30,13 +29,16 @@ void StereoCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& left,
   assert( left_.cy() == right_.cy() );
   // cx may differ for verged cameras
 
-  updateQ();
+  if (changed)
+    updateQ();
+
+  return changed;
 }
 
-void StereoCameraModel::fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& left,
+bool StereoCameraModel::fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& left,
                                        const sensor_msgs::CameraInfoConstPtr& right)
 {
-  fromCameraInfo(*left, *right);
+  return fromCameraInfo(*left, *right);
 }
 
 void StereoCameraModel::updateQ()

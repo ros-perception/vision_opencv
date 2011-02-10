@@ -59,7 +59,7 @@ bool updateMat(const MatT& new_mat, MatT& my_mat, cv::Mat_<double>& cv_mat, int 
   return true;
 }
 
-void PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
+bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
 {
   // Create our repository of cached data (rectification maps, etc.)
   if (!cache_)
@@ -150,11 +150,13 @@ void PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
       P_(1,3) *= scale_y;
     }
   }
+
+  return reduced_dirty;
 }
 
-void PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& msg)
+bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& msg)
 {
-  fromCameraInfo(*msg);
+  return fromCameraInfo(*msg);
 }
 
 void PinholeCameraModel::project3dToPixel(const cv::Point3d& xyz, cv::Point2d& uv_rect) const

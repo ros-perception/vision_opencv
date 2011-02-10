@@ -19,13 +19,13 @@ public:
   /**
    * \brief Set the camera parameters from the sensor_msgs/CameraInfo messages.
    */
-  void fromCameraInfo(const sensor_msgs::CameraInfo& left,
+  bool fromCameraInfo(const sensor_msgs::CameraInfo& left,
                       const sensor_msgs::CameraInfo& right);
 
   /**
    * \brief Set the camera parameters from the sensor_msgs/CameraInfo messages.
    */
-  void fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& left,
+  bool fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& left,
                       const sensor_msgs::CameraInfoConstPtr& right);
 
   /**

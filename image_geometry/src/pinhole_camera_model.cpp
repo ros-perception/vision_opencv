@@ -173,7 +173,39 @@ cv::Size PinholeCameraModel::reducedResolution() const
   assert( initialized() );
 
   cv::Rect roi = rectifiedRoi();
-  return cv::Size(roi.width, roi.height);
+  return cv::Size(roi.width / binningX(), roi.height / binningY());
+}
+
+cv::Point2d PinholeCameraModel::toFullResolution(const cv::Point2d& uv_reduced) const
+{
+  cv::Rect roi = rectifiedRoi();
+  return cv::Point2d(uv_reduced.x * binningX() + roi.x,
+                     uv_reduced.y * binningY() + roi.y);
+}
+
+cv::Rect PinholeCameraModel::toFullResolution(const cv::Rect& roi_reduced) const
+{
+  cv::Rect roi = rectifiedRoi();
+  return cv::Rect(roi_reduced.x * binningX() + roi.x,
+                  roi_reduced.y * binningY() + roi.y,
+                  roi_reduced.width  * binningX(),
+                  roi_reduced.height * binningY());
+}
+
+cv::Point2d PinholeCameraModel::toReducedResolution(const cv::Point2d& uv_full) const
+{
+  cv::Rect roi = rectifiedRoi();
+  return cv::Point2d((uv_full.x - roi.x) / binningX(),
+                     (uv_full.y - roi.y) / binningY());
+}
+
+cv::Rect PinholeCameraModel::toReducedResolution(const cv::Rect& roi_full) const
+{
+  cv::Rect roi = rectifiedRoi();
+  return cv::Rect((roi_full.x - roi.x) / binningX(),
+                  (roi_full.y - roi.y) / binningY(),
+                  roi_full.width  / binningX(),
+                  roi_full.height / binningY());
 }
 
 cv::Rect PinholeCameraModel::rawRoi() const

@@ -62,6 +62,14 @@ public:
    */
   cv::Size reducedResolution() const;
 
+  cv::Point2d toFullResolution(const cv::Point2d& uv_reduced) const;
+
+  cv::Rect toFullResolution(const cv::Rect& roi_reduced) const;
+
+  cv::Point2d toReducedResolution(const cv::Point2d& uv_full) const;
+
+  cv::Rect toReducedResolution(const cv::Rect& roi_full) const;
+
   /**
    * \brief The current raw ROI, as used for capture by the camera driver.
    */

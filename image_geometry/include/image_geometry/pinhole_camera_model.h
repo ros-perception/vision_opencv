@@ -3,10 +3,15 @@
 
 #include <sensor_msgs/CameraInfo.h>
 #include <opencv/cv.h>
+#include <stdexcept>
 
 namespace image_geometry {
 
-/// @todo Exception class
+class Exception : public std::runtime_error
+{
+public:
+  Exception(const std::string& description) : std::runtime_error(description) {}
+};
 
 /**
  * \brief Simplifies interpreting images geometrically using the parameters from
@@ -23,12 +28,12 @@ public:
   /**
    * \brief Set the camera parameters from the sensor_msgs/CameraInfo message.
    */
-  void fromCameraInfo(const sensor_msgs::CameraInfo& msg);
+  bool fromCameraInfo(const sensor_msgs::CameraInfo& msg);
 
   /**
    * \brief Set the camera parameters from the sensor_msgs/CameraInfo message.
    */
-  void fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& msg);
+  bool fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& msg);
 
   /**
    * \brief Get the name of the camera coordinate frame in tf.
@@ -39,6 +44,44 @@ public:
    * \brief Get the time stamp associated with this camera model.
    */
   ros::Time stamp() const;
+
+  /**
+   * \brief The resolution at which the camera was calibrated.
+   *
+   * The maximum resolution at which the camera can be used with the current
+   * calibration; normally this is the same as the imager resolution.
+   */
+  cv::Size fullResolution() const;
+
+  /**
+   * \brief The resolution of the current rectified image.
+   *
+   * The size of the rectified image associated with the latest CameraInfo, as
+   * reduced by binning/ROI and affected by distortion. If binning and ROI are
+   * not in use, this is the same as fullResolution().
+   */
+  cv::Size reducedResolution() const;
+
+  cv::Point2d toFullResolution(const cv::Point2d& uv_reduced) const;
+
+  cv::Rect toFullResolution(const cv::Rect& roi_reduced) const;
+
+  cv::Point2d toReducedResolution(const cv::Point2d& uv_full) const;
+
+  cv::Rect toReducedResolution(const cv::Rect& roi_full) const;
+
+  /**
+   * \brief The current raw ROI, as used for capture by the camera driver.
+   */
+  cv::Rect rawRoi() const;
+
+  /**
+   * \brief The current rectified ROI, which best fits the raw ROI.
+   */
+  cv::Rect rectifiedRoi() const;
+
+  /// @todo Hide or group deprecated overloads in Doxygen
+  void project3dToPixel(const cv::Point3d& xyz, cv::Point2d& uv_rect) const ROS_DEPRECATED;
   
   /**
    * \brief Project a 3d point to rectified pixel coordinates.
@@ -46,9 +89,11 @@ public:
    * This is the inverse of projectPixelTo3dRay().
    *
    * \param xyz 3d point in the camera coordinate frame
-   * \param[out] uv_rect Rectified pixel coordinates
+   * \return (u,v) in rectified pixel coordinates
    */
-  void project3dToPixel(const cv::Point3d& xyz, cv::Point2d& uv_rect) const;
+  cv::Point2d project3dToPixel(const cv::Point3d& xyz) const;
+
+  void projectPixelTo3dRay(const cv::Point2d& uv_rect, cv::Point3d& ray) const ROS_DEPRECATED;
 
   /**
    * \brief Project a rectified pixel to a 3d ray.
@@ -56,10 +101,12 @@ public:
    * Returns the unit vector in the camera coordinate frame in the direction of rectified
    * pixel (u,v) in the image plane. This is the inverse of project3dToPixel().
    *
+   * In 1.4.x, the vector has z = 1.0. Previously, this function returned a unit vector.
+   *
    * \param uv_rect Rectified pixel coordinates
-   * \param[out] ray 3d ray passing through (u,v).
+   * \return 3d ray passing through (u,v)
    */
-  void projectPixelTo3dRay(const cv::Point2d& uv_rect, cv::Point3d& ray) const;
+  cv::Point3d projectPixelTo3dRay(const cv::Point2d& uv_rect) const;
 
   /**
    * \brief Rectify a raw camera image.
@@ -73,16 +120,30 @@ public:
   void unrectifyImage(const cv::Mat& rectified, cv::Mat& raw,
                       int interpolation = CV_INTER_LINEAR) const;
 
+  void rectifyPoint(const cv::Point2d& uv_raw, cv::Point2d& uv_rect) const ROS_DEPRECATED;
+  
   /**
    * \brief Compute the rectified image coordinates of a pixel in the raw image.
    */
-  void rectifyPoint(const cv::Point2d& uv_raw, cv::Point2d& uv_rect) const;
+  cv::Point2d rectifyPoint(const cv::Point2d& uv_raw) const;
 
+  void unrectifyPoint(const cv::Point2d& uv_rect, cv::Point2d& uv_raw) const ROS_DEPRECATED;
+  
   /**
    * \brief Compute the raw image coordinates of a pixel in the rectified image.
    */
-  void unrectifyPoint(const cv::Point2d& uv_rect, cv::Point2d& uv_raw) const;
+  cv::Point2d unrectifyPoint(const cv::Point2d& uv_rect) const;
 
+  /**
+   * \brief Compute the rectified ROI best fitting a raw ROI.
+   */
+  cv::Rect rectifyRoi(const cv::Rect& roi_raw) const;
+
+  /**
+   * \brief Compute the raw ROI best fitting a rectified ROI.
+   */
+  cv::Rect unrectifyRoi(const cv::Rect& roi_rect) const;
+  
   /**
    * \brief Returns the original camera matrix.
    */
@@ -102,6 +163,16 @@ public:
    * \brief Returns the projection matrix.
    */
   const cv::Mat_<double>& projectionMatrix() const;
+
+  /**
+   * \brief Returns the original camera matrix for full resolution.
+   */
+  const cv::Mat_<double>& fullIntrinsicMatrix() const;
+
+  /**
+   * \brief Returns the projection matrix for full resolution.
+   */
+  const cv::Mat_<double>& fullProjectionMatrix() const;
 
   /**
    * \brief Returns the focal length (pixels) in x direction of the rectified image.
@@ -133,16 +204,15 @@ public:
    */
   double Ty() const;
 
-  /// @todo Deprecate height(), width()
   /**
    * \brief Returns the image height.
    */
-  uint32_t height() const;
+  uint32_t height() const ROS_DEPRECATED;
 
   /**
    * \brief Returns the image width.
    */
-  uint32_t width() const;
+  uint32_t width() const ROS_DEPRECATED;
 
   /**
    * \brief Returns the number of columns in each bin.
@@ -195,33 +265,33 @@ public:
   double getDeltaY(double deltaV, double Z) const;
   
 protected:
-  bool initialized_; /// @todo This can go away once PIMPL being used
-  
   sensor_msgs::CameraInfo cam_info_;
-  cv::Mat_<double> D_, R_; // Unaffected by binning, ROI
-  cv::Mat_<double> K_, P_; // Describe current image
+  cv::Mat_<double> D_, R_;           // Unaffected by binning, ROI
+  cv::Mat_<double> K_, P_;           // Describe current image (includes binning, ROI)
   cv::Mat_<double> K_full_, P_full_; // Describe full-res image, needed for full maps
 
-  enum DistortionState { NONE, CALIBRATED, UNKNOWN } distortion_state_;
+  // Use PIMPL here so we can change internals in patch updates if needed
+  struct Cache;
+  boost::shared_ptr<Cache> cache_; // Holds cached data for internal use
 
-  mutable bool full_maps_dirty_, current_maps_dirty_;
-  mutable cv::Mat full_map1_, full_map2_;
-  mutable cv::Mat current_map1_, current_map2_;
+  void initRectificationMaps() const;
 
-  void initUndistortMaps() const;
+  bool initialized() const { return cache_; }
+
+  friend class StereoCameraModel;
 };
 
 
 /* Trivial inline functions */
 inline std::string PinholeCameraModel::tfFrame() const
 {
-  assert(initialized_);
+  assert( initialized() );
   return cam_info_.header.frame_id;
 }
 
 inline ros::Time PinholeCameraModel::stamp() const
 {
-  assert(initialized_);
+  assert( initialized() );
   return cam_info_.header.stamp;
 }
 
@@ -229,6 +299,8 @@ inline const cv::Mat_<double>& PinholeCameraModel::intrinsicMatrix() const  { re
 inline const cv::Mat_<double>& PinholeCameraModel::distortionCoeffs() const { return D_; }
 inline const cv::Mat_<double>& PinholeCameraModel::rotationMatrix() const   { return R_; }
 inline const cv::Mat_<double>& PinholeCameraModel::projectionMatrix() const { return P_; }
+inline const cv::Mat_<double>& PinholeCameraModel::fullIntrinsicMatrix() const  { return K_full_; }
+inline const cv::Mat_<double>& PinholeCameraModel::fullProjectionMatrix() const { return P_full_; }
 
 inline double PinholeCameraModel::fx() const { return P_(0,0); }
 inline double PinholeCameraModel::fy() const { return P_(1,1); }
@@ -244,25 +316,25 @@ inline uint32_t PinholeCameraModel::binningY() const { return cam_info_.binning_
 
 inline double PinholeCameraModel::getDeltaU(double deltaX, double Z) const
 {
-  assert(initialized_);
+  assert( initialized() );
   return fx() * deltaX / Z;
 }
 
 inline double PinholeCameraModel::getDeltaV(double deltaY, double Z) const
 {
-  assert(initialized_);
+  assert( initialized() );
   return fy() * deltaY / Z;
 }
 
 inline double PinholeCameraModel::getDeltaX(double deltaU, double Z) const
 {
-  assert(initialized_);
+  assert( initialized() );
   return Z * deltaU / fx();
 }
 
 inline double PinholeCameraModel::getDeltaY(double deltaV, double Z) const
 {
-  assert(initialized_);
+  assert( initialized() );
   return Z * deltaV / fy();
 }
 

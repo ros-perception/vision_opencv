@@ -19,13 +19,13 @@ public:
   /**
    * \brief Set the camera parameters from the sensor_msgs/CameraInfo messages.
    */
-  void fromCameraInfo(const sensor_msgs::CameraInfo& left,
+  bool fromCameraInfo(const sensor_msgs::CameraInfo& left,
                       const sensor_msgs::CameraInfo& right);
 
   /**
    * \brief Set the camera parameters from the sensor_msgs/CameraInfo messages.
    */
-  void fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& left,
+  bool fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& left,
                       const sensor_msgs::CameraInfoConstPtr& right);
 
   /**
@@ -85,12 +85,13 @@ public:
    */
   double getDisparity(double Z) const;
 
-private:
-  bool initialized_;
+protected:
   PinholeCameraModel left_, right_;
   cv::Mat_<double> Q_;
 
   void updateQ();
+
+  bool initialized() const { return left_.initialized() && right_.initialized(); }
 };
 
 
@@ -110,13 +111,13 @@ inline double StereoCameraModel::baseline() const
 
 inline double StereoCameraModel::getZ(double disparity) const
 {
-  assert(initialized_);
+  assert( initialized() );
   return -right_.Tx() / disparity;
 }
 
 inline double StereoCameraModel::getDisparity(double Z) const
 {
-  assert(initialized_);
+  assert( initialized() );
   return -right_.Tx() / Z;
 }
 

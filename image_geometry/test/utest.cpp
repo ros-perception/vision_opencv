@@ -62,9 +62,9 @@ TEST_F(PinholeTest, projectPoint)
     cv::Point2d uv(100, 100);
     cv::Point3d xyz;
     model_.projectPixelTo3dRay(uv, xyz);
-    EXPECT_DOUBLE_EQ(-0.501371686835080932, xyz.x);
-    EXPECT_DOUBLE_EQ(-0.333142973423770972, xyz.y);
-    EXPECT_DOUBLE_EQ(0.798525009563579191, xyz.z);
+    EXPECT_NEAR(-0.62787224048135637, xyz.x, 1e-8);
+    EXPECT_NEAR(-0.41719792045817677, xyz.y, 1e-8);
+    EXPECT_DOUBLE_EQ(1.0, xyz.z);
   }
 
   // Principal point should project straight out.

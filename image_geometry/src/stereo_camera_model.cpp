@@ -20,7 +20,9 @@ StereoCameraModel::StereoCameraModel(const StereoCameraModel& other)
 bool StereoCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& left,
                                        const sensor_msgs::CameraInfo& right)
 {
-  bool changed = left_.fromCameraInfo(left) || right_.fromCameraInfo(right);
+  bool changed_left  = left_.fromCameraInfo(left);
+  bool changed_right = right_.fromCameraInfo(right);
+  bool changed = changed_left || changed_right;
 
   // Note: don't require identical time stamps to allow imperfectly synced stereo.
   assert( left_.tfFrame() == right_.tfFrame() );

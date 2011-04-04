@@ -202,7 +202,7 @@ void CvImage::toImageMsg(sensor_msgs::Image& ros_image) const
 CvImagePtr toCvCopy(const sensor_msgs::ImageConstPtr& source,
                     const std::string& encoding)
 {
-  return toCvCopy(*source);
+  return toCvCopy(*source, encoding);
 }
 
 CvImagePtr toCvCopy(const sensor_msgs::Image& source,

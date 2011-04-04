@@ -162,8 +162,16 @@ CvImagePtr toCvCopyImpl(const cv::Mat& source,
     if (conversion_code == SAME_FORMAT)
     {
       // Same number of channels, but different bit depth
-      /// @todo Should do scaling, e.g. for MONO16 -> MONO8
-      source.convertTo(ptr->image, getCvType(dst_encoding));
+      double alpha = 1.0;
+      int src_depth = enc::bitDepth(src_encoding);
+      int dst_depth = enc::bitDepth(dst_encoding);
+      // Do scaling between CV_8U [0,255] and CV_16U [0,65535] images.
+      // Currently that should only happen for MONO8 <-> MONO16 conversions.
+      if (src_depth == 8 && dst_depth == 16)
+        alpha = 65535. / 255.;
+      else if (src_depth == 16 && dst_depth == 8)
+        alpha = 255. / 65535.;
+      source.convertTo(ptr->image, getCvType(dst_encoding), alpha);
     }
     else
     {

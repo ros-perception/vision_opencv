@@ -9,6 +9,8 @@ enum DistortionState { NONE, CALIBRATED, UNKNOWN };
 struct PinholeCameraModel::Cache
 {
   DistortionState distortion_state;
+
+  cv::Mat_<double> K_binned, P_binned; // Binning applied, but not cropping
   
   mutable bool full_maps_dirty;
   mutable cv::Mat full_map1, full_map2;
@@ -128,23 +130,25 @@ bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
     // ROI is in full image coordinates, so change it first
     if (adjust_roi) {
       // Move principal point by the offset
+      /// @todo Adjust P by rectified ROI instead
       K_(0,2) -= roi.x_offset;
       K_(1,2) -= roi.y_offset;
       P_(0,2) -= roi.x_offset;
       P_(1,2) -= roi.y_offset;
     }
 
-    if (adjust_binning) {
-      // Rescale all values
+    if (binning_x > 1) {
       double scale_x = 1.0 / binning_x;
-      double scale_y = 1.0 / binning_y;
       K_(0,0) *= scale_x;
       K_(0,2) *= scale_x;
-      K_(1,1) *= scale_y;
-      K_(1,2) *= scale_y;
       P_(0,0) *= scale_x;
       P_(0,2) *= scale_x;
       P_(0,3) *= scale_x;
+    }
+    if (binning_y > 1) {
+      double scale_y = 1.0 / binning_y;
+      K_(1,1) *= scale_y;
+      K_(1,2) *= scale_y;
       P_(1,1) *= scale_y;
       P_(1,2) *= scale_y;
       P_(1,3) *= scale_y;
@@ -414,9 +418,44 @@ cv::Rect PinholeCameraModel::unrectifyRoi(const cv::Rect& roi_rect) const
 
 void PinholeCameraModel::initRectificationMaps() const
 {
+  /// @todo For large binning settings, can drop extra rows/cols at bottom/right boundary.
+  /// Make sure we're handling that 100% correctly.
+  
   if (cache_->full_maps_dirty) {
-    // m1type=CV_16SC2 to use fast fixed-point maps
-    cv::initUndistortRectifyMap(K_full_, D_, R_, P_full_, fullResolution(),
+    // Create the full-size map at the binned resolution
+    /// @todo Should binned resolution, K, P be part of public API?
+    cv::Size binned_resolution = fullResolution();
+    binned_resolution.width  /= binningX();
+    binned_resolution.height /= binningY();
+
+    cv::Mat_<double> K_binned, P_binned;
+    if (binningX() == 1 && binningY() == 1) {
+      K_binned = K_full_;
+      P_binned = P_full_;
+    }
+    else {
+      K_full_.copyTo(K_binned);
+      P_full_.copyTo(P_binned);
+      if (binningX() > 1) {
+        double scale_x = 1.0 / binningX();
+        K_binned(0,0) *= scale_x;
+        K_binned(0,2) *= scale_x;
+        P_binned(0,0) *= scale_x;
+        P_binned(0,2) *= scale_x;
+        P_binned(0,3) *= scale_x;
+      }
+      if (binningY() > 1) {
+        double scale_y = 1.0 / binningY();
+        K_binned(1,1) *= scale_y;
+        K_binned(1,2) *= scale_y;
+        P_binned(1,1) *= scale_y;
+        P_binned(1,2) *= scale_y;
+        P_binned(1,3) *= scale_y;
+      }
+    }
+    
+    // Note: m1type=CV_16SC2 to use fast fixed-point maps (see cv::remap)
+    cv::initUndistortRectifyMap(K_binned, D_, R_, P_binned, binned_resolution,
                                 CV_16SC2, cache_->full_map1, cache_->full_map2);
     cache_->full_maps_dirty = false;
   }
@@ -427,9 +466,14 @@ void PinholeCameraModel::initRectificationMaps() const
                  cam_info_.roi.width, cam_info_.roi.height);
     if (roi.x != 0 || roi.y != 0 ||
         roi.height != (int)cam_info_.height ||
-        roi.width != (int)cam_info_.height) {
+        roi.width  != (int)cam_info_.width) {
 
-      // map1 contains integer (x,y) offsets
+      // map1 contains integer (x,y) offsets, which we adjust by the ROI offset
+      // map2 contains LUT index for subpixel interpolation, which we can leave as-is
+      roi.x /= binningX();
+      roi.y /= binningY();
+      roi.width  /= binningX();
+      roi.height /= binningY();
       cache_->reduced_map1 = cache_->full_map1(roi) - cv::Scalar(roi.x, roi.y);
       cache_->reduced_map2 = cache_->full_map2(roi);
     }

@@ -311,8 +311,8 @@ inline double PinholeCameraModel::Ty() const { return P_(1,3); }
 inline uint32_t PinholeCameraModel::height() const { return cam_info_.height; }
 inline uint32_t PinholeCameraModel::width() const  { return cam_info_.width; }
 
-inline uint32_t PinholeCameraModel::binningX() const { return cam_info_.binning_x ? cam_info_.binning_x : 1; }
-inline uint32_t PinholeCameraModel::binningY() const { return cam_info_.binning_y ? cam_info_.binning_y : 1; }
+inline uint32_t PinholeCameraModel::binningX() const { return cam_info_.binning_x; }
+inline uint32_t PinholeCameraModel::binningY() const { return cam_info_.binning_y; }
 
 inline double PinholeCameraModel::getDeltaU(double deltaX, double Z) const
 {

@@ -19,6 +19,7 @@ CMAKE_ARGS = -D CMAKE_BUILD_TYPE=RELEASE \
              -D WITH_FFMPEG=OFF \
              -D WITH_XINE=OFF \
              -D WITH_1394=OFF \
+             -D WITH_V4L=OFF \
              -D BUILD_DOXYGEN_DOCS=OFF
 
 installed: wiped $(SVN_DIR) patched

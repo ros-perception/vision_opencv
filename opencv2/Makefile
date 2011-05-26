@@ -4,7 +4,7 @@ all: installed
 
 SVN_DIR = build/opencv-svn
 SVN_URL = https://code.ros.org/svn/opencv/branches/2.2/opencv
-SVN_REVISION = -r4812
+SVN_REVISION = -r5206
 SVN_PATCH = pythontest.patch
 include $(shell rospack find mk)/svn_checkout.mk
 
@@ -19,6 +19,7 @@ CMAKE_ARGS = -D CMAKE_BUILD_TYPE=RELEASE \
              -D WITH_FFMPEG=OFF \
              -D WITH_XINE=OFF \
              -D WITH_1394=OFF \
+             -D WITH_V4L=OFF \
              -D BUILD_DOXYGEN_DOCS=OFF
 
 installed: wiped $(SVN_DIR) patched

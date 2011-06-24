@@ -34,7 +34,6 @@
 
 #include <gtest/gtest.h>
 
-#include <opencv/cxtypes.h> 
 #include "opencv/cxcore.h"  
 #include "opencv/cvwimage.h"
 #include "opencv/cv.h"

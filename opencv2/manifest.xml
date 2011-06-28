@@ -27,6 +27,6 @@ Image messages and OpenCV images.
 <rosdep name="graphicsmagick"/>
 <rosdep name="gtk2"/>
 
-<rosdep name="opencv-2.3"/>
+<rosdep name="opencv2.3"/>
 
 </package>

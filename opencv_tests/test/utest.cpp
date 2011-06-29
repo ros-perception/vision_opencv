@@ -115,7 +115,7 @@ TEST(OpencvTests, testCase_decode_8u)
 
 TEST(OpencvTests, testCase_decode_16u)
 {
-  IplImage *original = cvCreateImage(cvSize(640, 480), IPL_DEPTH_8U, 1);
+  IplImage *original = cvCreateImage(cvSize(640, 480), IPL_DEPTH_16U, 1);
   CvRNG r = cvRNG(77);
   cvRandArr(&r, original, CV_RAND_UNI, cvScalar(0,0,0,0), cvScalar(255,255,255,255));
 

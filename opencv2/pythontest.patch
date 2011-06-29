@@ -1,9 +1,0 @@
-Index: tests/python/test.py
-===================================================================
---- tests/python/test.py	(revision 2380)
-+++ tests/python/test.py	(working copy)
-@@ -1,3 +1,4 @@
-+import roslib; roslib.load_manifest('opencv2')
- import unittest
- import random
- import time

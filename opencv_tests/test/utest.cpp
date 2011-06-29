@@ -64,9 +64,9 @@ TEST(OpencvTests, testCase_encode_decode)
 
           int success;
           success = img_bridge_.fromIpltoRosImage(original, image_message);
-          ASSERT_TRUE(success);
+          EXPECT_TRUE(success);
           success = img_bridge_.fromImage(image_message);
-          ASSERT_TRUE(success);
+          EXPECT_TRUE(success);
           IplImage *final = img_bridge_.toIpl();
 
           // cvSaveImage("final.png", final);
@@ -94,22 +94,22 @@ TEST(OpencvTests, testCase_decode_8u)
 
   int success;
   success = img_bridge_.fromIpltoRosImage(original, image_message);
-  ASSERT_TRUE(success);
+  EXPECT_TRUE(success);
 
   success = img_bridge_.fromImage(image_message, "passthrough");
-  ASSERT_TRUE(success);
+  EXPECT_TRUE(success);
   EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 1);
 
   success = img_bridge_.fromImage(image_message, "mono8");
-  ASSERT_TRUE(success);
+  EXPECT_TRUE(success);
   EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 1);
 
   success = img_bridge_.fromImage(image_message, "rgb8");
-  ASSERT_TRUE(success);
+  EXPECT_TRUE(success);
   EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 3);
 
   success = img_bridge_.fromImage(image_message, "bgr8");
-  ASSERT_TRUE(success);
+  EXPECT_TRUE(success);
   EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 3);
 }
 
@@ -124,10 +124,10 @@ TEST(OpencvTests, testCase_decode_16u)
 
   int success;
   success = img_bridge_.fromIpltoRosImage(original, image_message);
-  ASSERT_TRUE(success);
+  EXPECT_TRUE(success);
 
   success = img_bridge_.fromImage(image_message, "mono16");
-  ASSERT_TRUE(success);
+  EXPECT_TRUE(success);
   printf("%d\n", cvGetElemType(img_bridge_.toIpl()));
   EXPECT_TRUE(cvGetElemType(img_bridge_.toIpl()) == CV_16UC1);
 }
@@ -143,22 +143,22 @@ TEST(OpencvTests, testCase_decode_8uc3)
 
   int success;
   success = img_bridge_.fromIpltoRosImage(original, image_message);
-  ASSERT_TRUE(success);
+  EXPECT_TRUE(success);
 
   success = img_bridge_.fromImage(image_message, "passthrough");
-  ASSERT_TRUE(success);
+  EXPECT_TRUE(success);
   EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 3);
 
   success = img_bridge_.fromImage(image_message, "mono8");
-  ASSERT_TRUE(success);
+  EXPECT_TRUE(success);
   EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 1);
 
   success = img_bridge_.fromImage(image_message, "rgb8");
-  ASSERT_TRUE(success);
+  EXPECT_TRUE(success);
   EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 3);
 
   success = img_bridge_.fromImage(image_message, "bgr8");
-  ASSERT_TRUE(success);
+  EXPECT_TRUE(success);
   EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 3);
 }
 
@@ -194,11 +194,12 @@ TEST(OpencvTests, testCase_16u_bgr)
 
   int success;
   success = img_bridge_.fromImage(*image_message, "mono16");
-  ASSERT_TRUE(success);
+  EXPECT_TRUE(success);
   EXPECT_TRUE(cvGetElemType(img_bridge_.toIpl()) == CV_16UC1);
 
+  //why would this work? its mono16 -> bgr8...
   success = img_bridge_.fromImage(*image_message, "bgr8");
-  ASSERT_TRUE(success);
+  EXPECT_TRUE(success);
   EXPECT_TRUE(cvGetElemType(img_bridge_.toIpl()) == CV_8UC3);
 }
 

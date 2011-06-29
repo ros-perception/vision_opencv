@@ -18,7 +18,7 @@ Image messages and OpenCV images.
 <review status="3rdparty" notes=""/>
 <url>http://opencv.willowgarage.com</url>
 <export>
-  <cpp cflags="`pkg-config opencv --cflags`" lflags="`pkg-config opencv --libs`"/>
+  <cpp cflags="`pkg-config opencv-2.3.1 --cflags`" lflags="`pkg-config opencv-2.3.1 --libs`"/>
 </export>
 <versioncontrol type="svn" url="https://code.ros.org/svn/opencv"/>
 

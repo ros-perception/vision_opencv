@@ -16,3 +16,7 @@ jasper:
   macports: jasper
   arch: jasper
   gentoo: jasper
+opencv2.3:
+  ubuntu: libopencv2.3-dev
+  debian: libopencv2.3-dev
+

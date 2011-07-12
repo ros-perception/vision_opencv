@@ -61,7 +61,7 @@ namespace sensor_msgs
     IplImage* rosimg_;
     IplImage* cvtimg_;
 
-    CvBridge() : img_(0), rosimg_(0), cvtimg_(0)
+    ROS_DEPRECATED CvBridge() : img_(0), rosimg_(0), cvtimg_(0)
     {
       rosimg_ = cvCreateImageHeader( cvSize(0,0), IPL_DEPTH_8U, 1 );
     }
@@ -300,13 +300,11 @@ namespace sensor_msgs
     /**
      * Converts an OpenCV IPL Image into a ROS Image that can be sent 'over the wire'.
      *
-     * This method will be deprecated and removed in a future release.  Use method cvToImgMsg instead. 
-     *
      * \param source    The original Ipl Image that we want to copy from
      * \param dest      The ROS Image message that we want to copy to
      * \param encoding  image encoding.  See method cvToImgMsg for details.
      */
-    static bool fromIpltoRosImage(const IplImage* source, sensor_msgs::Image& dest, std::string encoding = "passthrough")
+    ROS_DEPRECATED static bool fromIpltoRosImage(const IplImage* source, sensor_msgs::Image& dest, std::string encoding = "passthrough")
     {
       CvMat header, *cvm;
 
@@ -404,7 +402,7 @@ namespace sensor_msgs
 
         This function returns a sensor_msgs::Image message on success, or raises CvBridgeException on failure.
      */
-    static sensor_msgs::Image::Ptr cvToImgMsg(const IplImage* source, std::string encoding = "passthrough")
+    ROS_DEPRECATED static sensor_msgs::Image::Ptr cvToImgMsg(const IplImage* source, std::string encoding = "passthrough")
     {
       sensor_msgs::Image::Ptr rosimg(new sensor_msgs::Image);
       if (!fromIpltoRosImage(source, *rosimg, encoding))

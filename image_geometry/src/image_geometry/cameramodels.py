@@ -3,6 +3,7 @@ import array
 import cv
 import sensor_msgs.msg
 import math
+import copy
 
 def mkmat(rows, cols, L):
     mat = cv.CreateMat(rows, cols, cv.CV_64FC1)
@@ -20,10 +21,13 @@ class PinholeCameraModel:
         self.D = None
         self.R = None
         self.P = None
+        self.full_K = None
+        self.full_P = None
         self.width = None
         self.height = None
         self.binning_x = None
         self.binning_y = None
+        self.raw_roi = None
         self.tf_frame = None
         self.stamp = None
 
@@ -39,15 +43,32 @@ class PinholeCameraModel:
             self.D = mkmat(len(msg.D), 1, msg.D)
         else:
             self.D = None
-        self.D = mkmat(4, 1, msg.D[:4])
         self.R = mkmat(3, 3, msg.R)
         self.P = mkmat(3, 4, msg.P)
+        self.full_K = mkmat(3, 3, msg.K)
+        self.full_P = mkmat(3, 4, msg.P)
         self.width = msg.width
         self.height = msg.height
         self.binning_x = max(1, msg.binning_x)
         self.binning_y = max(1, msg.binning_y)
+        self.raw_roi = copy.copy(msg.roi)
+        # ROI all zeros is considered the same as full resolution
+        if (self.raw_roi.x_offset == 0 and self.raw_roi.y_offset == 0 and
+            self.raw_roi.width == 0 and self.raw_roi.height == 0):
+            self.raw_roi.width = self.width
+            self.raw_roi.height = self.height
         self.tf_frame = msg.header.frame_id
         self.stamp = msg.header.stamp
+
+        # Adjust K and P for binning and ROI
+        self.K[0,0] /= self.binning_x
+        self.K[1,1] /= self.binning_y
+        self.K[0,2] = (self.K[0,2] - self.raw_roi.x_offset) / self.binning_x
+        self.K[1,2] = (self.K[1,2] - self.raw_roi.y_offset) / self.binning_y
+        self.P[0,0] /= self.binning_x
+        self.P[1,1] /= self.binning_y
+        self.P[0,2] = (self.P[0,2] - self.raw_roi.x_offset) / self.binning_x
+        self.P[1,2] = (self.P[1,2] - self.raw_roi.y_offset) / self.binning_y
 
     def rectifyImage(self, raw, rectified):
         """
@@ -191,6 +212,12 @@ class PinholeCameraModel:
     def projectionMatrix(self):
         """ Returns :math:`P` """
         return self.P
+    def fullIntrinsicMatrix(self):
+        """ Return the original camera matrix for full resolution """
+        return self.full_K
+    def fullProjectionMatrix(self):
+        """ Return the projection matrix for full resolution """
+        return self.full_P
 
     def cx(self):
         """ Returns x center """

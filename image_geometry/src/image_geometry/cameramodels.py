@@ -16,7 +16,16 @@ class PinholeCameraModel:
     """
 
     def __init__(self):
-        pass
+        self.K = None
+        self.D = None
+        self.R = None
+        self.P = None
+        self.width = None
+        self.height = None
+        self.binning_x = None
+        self.binning_y = None
+        self.tf_frame = None
+        self.stamp = None
 
     def fromCameraInfo(self, msg):
         """
@@ -35,10 +44,10 @@ class PinholeCameraModel:
         self.P = mkmat(3, 4, msg.P)
         self.width = msg.width
         self.height = msg.height
-
-        self.mapx = cv.CreateImage((self.width, self.height), cv.IPL_DEPTH_32F, 1)
-        self.mapy = cv.CreateImage((self.width, self.height), cv.IPL_DEPTH_32F, 1)
-        cv.InitUndistortMap(self.K, self.D, self.mapx, self.mapy)
+        self.binning_x = max(1, msg.binning_x)
+        self.binning_y = max(1, msg.binning_y)
+        self.tf_frame = msg.header.frame_id
+        self.stamp = msg.header.stamp
 
     def rectifyImage(self, raw, rectified):
         """
@@ -50,6 +59,9 @@ class PinholeCameraModel:
         Applies the rectification specified by camera parameters :math:`K` and and :math:`D` to image `raw` and writes the resulting image `rectified`.
         """
 
+        self.mapx = cv.CreateImage((self.width, self.height), cv.IPL_DEPTH_32F, 1)
+        self.mapy = cv.CreateImage((self.width, self.height), cv.IPL_DEPTH_32F, 1)
+        cv.InitUndistortMap(self.K, self.D, self.mapx, self.mapy)
         cv.Remap(raw, rectified, self.mapx, self.mapy)
         
     def rectifyPoint(self, uv_raw):
@@ -67,13 +79,6 @@ class PinholeCameraModel:
         dst = cv.CloneMat(src)
         cv.UndistortPoints(src, dst, self.K, self.D, self.R, self.P)
         return dst[0,0]
-
-    def tfFrame(self):
-        """
-        Returns the tf frame name - a string - of the 3d points.  This is
-        the frame of the :class:`sensor_msgs.msg.CameraInfo` message.
-        """
-        pass
 
     def project3dToPixel(self, point):
         """

@@ -205,6 +205,14 @@ class PinholeCameraModel:
         """ Returns y focal length """
         return self.P[1,1]
 
+    def Tx(self):
+        """ Return the x-translation term of the projection matrix """
+        return self.P[0,3]
+
+    def Ty(self):
+        """ Return the y-translation term of the projection matrix """
+        return self.P[1,3]
+
 class StereoCameraModel:
     """
     An idealized stereo camera.

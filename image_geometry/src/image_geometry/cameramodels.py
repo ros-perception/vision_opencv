@@ -3,6 +3,7 @@ import array
 import cv
 import sensor_msgs.msg
 import math
+import copy
 
 def mkmat(rows, cols, L):
     mat = cv.CreateMat(rows, cols, cv.CV_64FC1)
@@ -16,7 +17,19 @@ class PinholeCameraModel:
     """
 
     def __init__(self):
-        pass
+        self.K = None
+        self.D = None
+        self.R = None
+        self.P = None
+        self.full_K = None
+        self.full_P = None
+        self.width = None
+        self.height = None
+        self.binning_x = None
+        self.binning_y = None
+        self.raw_roi = None
+        self.tf_frame = None
+        self.stamp = None
 
     def fromCameraInfo(self, msg):
         """
@@ -26,15 +39,36 @@ class PinholeCameraModel:
         Set the camera parameters from the :class:`sensor_msgs.msg.CameraInfo` message.
         """
         self.K = mkmat(3, 3, msg.K)
-        self.D = mkmat(4, 1, msg.D[:4])
+        if msg.D:
+            self.D = mkmat(len(msg.D), 1, msg.D)
+        else:
+            self.D = None
         self.R = mkmat(3, 3, msg.R)
         self.P = mkmat(3, 4, msg.P)
+        self.full_K = mkmat(3, 3, msg.K)
+        self.full_P = mkmat(3, 4, msg.P)
         self.width = msg.width
         self.height = msg.height
+        self.binning_x = max(1, msg.binning_x)
+        self.binning_y = max(1, msg.binning_y)
+        self.raw_roi = copy.copy(msg.roi)
+        # ROI all zeros is considered the same as full resolution
+        if (self.raw_roi.x_offset == 0 and self.raw_roi.y_offset == 0 and
+            self.raw_roi.width == 0 and self.raw_roi.height == 0):
+            self.raw_roi.width = self.width
+            self.raw_roi.height = self.height
+        self.tf_frame = msg.header.frame_id
+        self.stamp = msg.header.stamp
 
-        self.mapx = cv.CreateImage((self.width, self.height), cv.IPL_DEPTH_32F, 1)
-        self.mapy = cv.CreateImage((self.width, self.height), cv.IPL_DEPTH_32F, 1)
-        cv.InitUndistortMap(self.K, self.D, self.mapx, self.mapy)
+        # Adjust K and P for binning and ROI
+        self.K[0,0] /= self.binning_x
+        self.K[1,1] /= self.binning_y
+        self.K[0,2] = (self.K[0,2] - self.raw_roi.x_offset) / self.binning_x
+        self.K[1,2] = (self.K[1,2] - self.raw_roi.y_offset) / self.binning_y
+        self.P[0,0] /= self.binning_x
+        self.P[1,1] /= self.binning_y
+        self.P[0,2] = (self.P[0,2] - self.raw_roi.x_offset) / self.binning_x
+        self.P[1,2] = (self.P[1,2] - self.raw_roi.y_offset) / self.binning_y
 
     def rectifyImage(self, raw, rectified):
         """
@@ -46,6 +80,9 @@ class PinholeCameraModel:
         Applies the rectification specified by camera parameters :math:`K` and and :math:`D` to image `raw` and writes the resulting image `rectified`.
         """
 
+        self.mapx = cv.CreateImage((self.width, self.height), cv.IPL_DEPTH_32F, 1)
+        self.mapy = cv.CreateImage((self.width, self.height), cv.IPL_DEPTH_32F, 1)
+        cv.InitUndistortMap(self.K, self.D, self.mapx, self.mapy)
         cv.Remap(raw, rectified, self.mapx, self.mapy)
         
     def rectifyPoint(self, uv_raw):
@@ -63,13 +100,6 @@ class PinholeCameraModel:
         dst = cv.CloneMat(src)
         cv.UndistortPoints(src, dst, self.K, self.D, self.R, self.P)
         return dst[0,0]
-
-    def tfFrame(self):
-        """
-        Returns the tf frame name - a string - of the 3d points.  This is
-        the frame of the :class:`sensor_msgs.msg.CameraInfo` message.
-        """
-        pass
 
     def project3dToPixel(self, point):
         """
@@ -182,6 +212,12 @@ class PinholeCameraModel:
     def projectionMatrix(self):
         """ Returns :math:`P` """
         return self.P
+    def fullIntrinsicMatrix(self):
+        """ Return the original camera matrix for full resolution """
+        return self.full_K
+    def fullProjectionMatrix(self):
+        """ Return the projection matrix for full resolution """
+        return self.full_P
 
     def cx(self):
         """ Returns x center """
@@ -195,6 +231,14 @@ class PinholeCameraModel:
     def fy(self):
         """ Returns y focal length """
         return self.P[1,1]
+
+    def Tx(self):
+        """ Return the x-translation term of the projection matrix """
+        return self.P[0,3]
+
+    def Ty(self):
+        """ Return the y-translation term of the projection matrix """
+        return self.P[1,3]
 
 class StereoCameraModel:
     """

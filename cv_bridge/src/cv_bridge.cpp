@@ -48,14 +48,22 @@ int getCvType(const std::string& encoding)
   if (encoding == enc::MONO8)  return CV_8UC1;
   if (encoding == enc::RGB8)   return CV_8UC3;
   if (encoding == enc::MONO16) return CV_16UC1;
+  if (encoding == enc::BGR16)  return CV_16UC3;
+  if (encoding == enc::RGB16)  return CV_16UC3;
   if (encoding == enc::BGRA8)  return CV_8UC4;
   if (encoding == enc::RGBA8)  return CV_8UC4;
+  if (encoding == enc::BGRA16) return CV_16UC4;
+  if (encoding == enc::RGBA16) return CV_16UC4;
 
   // For bayer, return one-channel
   if (encoding == enc::BAYER_RGGB8) return CV_8UC1;
   if (encoding == enc::BAYER_BGGR8) return CV_8UC1;
   if (encoding == enc::BAYER_GBRG8) return CV_8UC1;
   if (encoding == enc::BAYER_GRBG8) return CV_8UC1;
+  if (encoding == enc::BAYER_RGGB16) return CV_16UC1;
+  if (encoding == enc::BAYER_BGGR16) return CV_16UC1;
+  if (encoding == enc::BAYER_GBRG16) return CV_16UC1;
+  if (encoding == enc::BAYER_GRBG16) return CV_16UC1;
 
   // Check all the generic content encodings
 #define CHECK_ENCODING(code)                            \
@@ -92,8 +100,12 @@ Format getFormat(const std::string& encoding)
   if (encoding == enc::MONO8)  return GRAY;
   if (encoding == enc::RGB8)   return RGB;
   if (encoding == enc::MONO16) return GRAY;
+  if (encoding == enc::BGR16)  return BGR;
+  if (encoding == enc::RGB16)  return RGB;
   if (encoding == enc::BGRA8)  return BGRA;
   if (encoding == enc::RGBA8)  return RGBA;
+  if (encoding == enc::BGRA16) return BGRA;
+  if (encoding == enc::RGBA16) return RGBA;
 
   // We don't support conversions to/from other types
   return INVALID;
@@ -166,7 +178,6 @@ CvImagePtr toCvCopyImpl(const cv::Mat& source,
       int src_depth = enc::bitDepth(src_encoding);
       int dst_depth = enc::bitDepth(dst_encoding);
       // Do scaling between CV_8U [0,255] and CV_16U [0,65535] images.
-      // Currently that should only happen for MONO8 <-> MONO16 conversions.
       if (src_depth == 8 && dst_depth == 16)
         alpha = 65535. / 255.;
       else if (src_depth == 16 && dst_depth == 8)

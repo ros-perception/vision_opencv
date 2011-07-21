@@ -11,4 +11,5 @@
   <depend stack="common_msgs" /> <!-- sensor_msgs -->
   <depend stack="ros" />
   <depend stack="ros_comm" /> <!-- rostest, rospy, roscpp -->
+  <depend stack="geometry" /> <!-- rostest, rospy, roscpp -->
 </stack>

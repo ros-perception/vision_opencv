@@ -15,9 +15,9 @@
   </export>
   <depend package="rospy"/>
   <depend package="roscpp"/>
-  <depend package="opencv2"/>
   <depend package="sensor_msgs"/>
   <platform os="ubuntu" version="9.04"/>
   <platform os="ubuntu" version="9.10"/>
   <platform os="ubuntu" version="10.04"/>
+  <rosdep name="opencv2.3"/>
 </package>

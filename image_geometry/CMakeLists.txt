@@ -29,9 +29,17 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
+find_package(OpenCV 2.3.1 REQUIRED)
+
 rosbuild_add_library(${PROJECT_NAME} src/pinhole_camera_model.cpp src/stereo_camera_model.cpp)
+target_link_libraries(${PROJECT_NAME} 
+  ${OpenCV_LIBS} 
+  )
 
 rosbuild_add_pyunit(test/directed.py)
 
 rosbuild_add_gtest(test/utest test/utest.cpp)
-target_link_libraries(test/utest ${PROJECT_NAME})
+target_link_libraries(test/utest
+  ${PROJECT_NAME}
+  ${OpenCV_LIBS}
+  )

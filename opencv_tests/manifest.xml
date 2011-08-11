@@ -8,7 +8,6 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://pr.willowgarage.com/wiki/opencv_tests</url>
-  <depend package="opencv2"/>
   <depend package="cv_bridge"/>
   <depend package="rostest"/>
   <depend package="rospy"/>
@@ -17,6 +16,7 @@
   <platform os="ubuntu" version="9.04"/>
   <platform os="ubuntu" version="9.10"/>
   <platform os="ubuntu" version="10.04"/>
+  <rosdep name="opencv2.3"/>
 </package>
 
 

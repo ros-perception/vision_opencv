@@ -33,6 +33,8 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 include(CMakeDetermineSystem)
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
 
+find_package(OpenCV 2.3.1 EXACT REQUIRED)
+
 rosbuild_add_gtest(test/utest test/utest.cpp)
 rosbuild_add_pyunit(test/enumerants.py)
 

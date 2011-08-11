@@ -18,5 +18,14 @@ jasper:
   gentoo: jasper
 opencv2.3:
   ubuntu: libopencv2.3-dev
-  debian: libopencv2.3-dev
+  ubuntu:
+    lucid:
+      apt:
+        packages: [libopencv2.3-dev=2.3.1+svn6421+trunk-2~lucid]
+    maverick:
+      apt:
+        packages: [libopencv2.3-dev=2.3.1+svn6421+trunk-2~maverick]
+    natty:
+      apt:
+        packages: [libopencv2.3-dev=2.3.1+svn6421+trunk-2~natty]
 

@@ -9,7 +9,9 @@
   <review status="reviewed" notes=""/>
   <url>http://ros.org/wiki/vision_opencv</url>
   <depend stack="common_msgs" /> <!-- sensor_msgs -->
+  <depend stack="geometry" /> <!-- tf, tf_conversions -->
+  <depend stack="orocos_kinematics_dynamics" /> <!-- kdl -->
   <depend stack="ros" />
-  <depend stack="ros_comm" /> <!-- rostest, rospy, roscpp -->
+  <depend stack="ros_comm" /> <!-- rostest, rospy, roscpp, message_filters -->
 
 </stack>

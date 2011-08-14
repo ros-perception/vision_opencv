@@ -1,7 +1,9 @@
 <package>
 <description brief="The Open Source Computer Vision Library 2.0">
 
-Deprecated!!!! FIXME
+Deprecated. This package now forwards opencv pkgconfig flags through the manifest,
+do not depend on this feature.  Transistion you build files to use cmake's
+find_package infrastructure for opencv.
 
 This package contains the latest code from the Open Source Computer Vision
 Library (opencv).  This ROS package does not modify OpenCV in any way;
@@ -22,11 +24,10 @@ Image messages and OpenCV images.
 </export>
 <versioncontrol type="svn" url="https://code.ros.org/svn/opencv"/>
 
-<rosdep name="ffmpeg"/>
-<rosdep name="jasper"/>
-<rosdep name="graphicsmagick"/>
-<rosdep name="gtk2"/>
-
+<platform os="ubuntu" version="9.04"/>
+<platform os="ubuntu" version="9.10"/>
+<platform os="ubuntu" version="10.04"/>
+  
 <rosdep name="opencv2.3"/>
 
 </package>

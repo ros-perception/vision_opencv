@@ -16,8 +16,11 @@
   <depend package="rospy"/>
   <depend package="roscpp"/>
   <depend package="sensor_msgs"/>
+  <depend package="opencv2" /> <!-- Still needs this, so that client code gets the cflags exported by opencv2's manifest-->
+  
   <platform os="ubuntu" version="9.04"/>
   <platform os="ubuntu" version="9.10"/>
   <platform os="ubuntu" version="10.04"/>
   <rosdep name="opencv2.3"/>
+  
 </package>

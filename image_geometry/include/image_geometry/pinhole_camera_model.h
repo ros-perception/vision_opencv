@@ -2,7 +2,7 @@
 #define IMAGE_GEOMETRY_PINHOLE_CAMERA_MODEL_H
 
 #include <sensor_msgs/CameraInfo.h>
-#include <opencv/cv.h>
+#include <opencv2/core/core.hpp>
 #include <stdexcept>
 
 namespace image_geometry {

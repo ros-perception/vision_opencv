@@ -36,6 +36,7 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux")
 find_package(OpenCV 2.3.1 EXACT REQUIRED)
 
 rosbuild_add_gtest(test/utest test/utest.cpp)
+target_link_libraries(test/utest ${OpenCV_LIBS})
 rosbuild_add_pyunit(test/enumerants.py)
 
 endif(CMAKE_SYSTEM_NAME MATCHES "Linux")

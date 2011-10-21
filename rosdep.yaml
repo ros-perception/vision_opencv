@@ -4,20 +4,29 @@ ffmpeg:
   macports: ffmpeg
   arch: ffmpeg
   gentoo: ffmpeg
+  osxbrew:
+    homebrew:
+      packages: [ ffmpeg  ]
 graphicsmagick:
   ubuntu: libgraphicsmagick++1-dev
   debian: libgraphicsmagick++1-dev
   macports: GraphicsMagick
   arch: graphicsmagick
   gentoo: imagemagick
+  osxbrew:
+    homebrew:
+      packages: [ graphicsmagick ]
 jasper:
   ubuntu: libjasper-dev
   debian: libjasper-dev
   macports: jasper
   arch: jasper
   gentoo: jasper
+  osxbrew:
+    homebrew:
+      packages: [ jasper  ]
+      args: [ --universal  ]
 opencv2.3:
-  ubuntu: libopencv2.3-dev
   ubuntu:
     lucid:
       apt:

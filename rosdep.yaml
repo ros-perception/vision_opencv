@@ -30,4 +30,4 @@ opencv2.3:
         packages: [libopencv2.3-dev=2.3.1+svn6514+branch23-1~natty]
     oneiric:
       apt:
-        packages: [libopencv2.3-dev=2.3.1+svn6514+branch23-2~oneiric]
+        packages: [libopencv2.3-dev=2.3.1+svn6514+branch23-3~oneiric]

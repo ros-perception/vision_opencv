@@ -21,6 +21,8 @@ Image messages and OpenCV images.
 <url>http://opencv.willowgarage.com</url>
 <export>
   <cpp cflags="`pkg-config opencv-2.3.1 --cflags`" lflags="`pkg-config opencv-2.3.1 --libs`"/>
+  <!-- On OS X there is a cmake Findopencv.cmake so pkg-config isn't necessary -->
+  <cpp os="osx" cflags="`pkg-config opencv --cflags`" lflags="`pkg-config opencv --libs`"/>
 </export>
 <versioncontrol type="svn" url="https://code.ros.org/svn/opencv"/>
 

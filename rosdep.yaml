@@ -30,13 +30,13 @@ opencv2.3:
   ubuntu:
     lucid:
       apt:
-        packages: [libopencv2.3-dev=2.3.1+svn6514+branch23-4~lucid]
+        packages: [libopencv2.3-dev=2.3.1+svn6514+branch23-5~lucid]
     maverick:
       apt:
-        packages: [libopencv2.3-dev=2.3.1+svn6514+branch23-4~maverick]
+        packages: [libopencv2.3-dev=2.3.1+svn6514+branch23-5~maverick]
     natty:
       apt:
-        packages: [libopencv2.3-dev=2.3.1+svn6514+branch23-4~natty]
+        packages: [libopencv2.3-dev=2.3.1+svn6514+branch23-5~natty]
     oneiric:
       apt:
-        packages: [libopencv2.3-dev=2.3.1+svn6514+branch23-4~oneiric]
+        packages: [libopencv2.3-dev=2.3.1+svn6514+branch23-5~oneiric]

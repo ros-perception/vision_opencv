@@ -18,3 +18,9 @@ rosbuild_add_library(${PROJECT_NAME} src/cv_bridge.cpp)
 target_link_libraries(${PROJECT_NAME} 
   ${OpenCV_LIBS} 
   )
+
+rosbuild_add_gtest(test/utest test/utest.cpp)
+target_link_libraries(test/utest
+  ${PROJECT_NAME}
+  ${OpenCV_LIBS}
+  )

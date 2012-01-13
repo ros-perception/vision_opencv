@@ -62,6 +62,20 @@ public:
   std_msgs::Header header; //!< ROS header
   std::string encoding;    //!< Image encoding ("mono8", "bgr8", etc.)
   cv::Mat image;           //!< Image data for use with OpenCV
+
+  /**
+   * \brief Empty constructor.
+   */
+  CvImage() {}
+
+  /**
+   * \brief Constructor.
+   */
+  CvImage(const std_msgs::Header& header, const std::string& encoding,
+          const cv::Mat& image = cv::Mat())
+    : header(header), encoding(encoding), image(image)
+  {
+  }
   
   /**
    * \brief Convert this message to a ROS sensor_msgs::Image message.

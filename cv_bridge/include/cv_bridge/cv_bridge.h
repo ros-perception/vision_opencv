@@ -36,6 +36,7 @@
 #define CV_BRIDGE_CV_BRIDGE_H
 
 #include <sensor_msgs/Image.h>
+#include <ros/static_assert.h>
 #include <opencv2/core/core.hpp>
 #include <stdexcept>
 

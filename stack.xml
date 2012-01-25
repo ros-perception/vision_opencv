@@ -1,10 +1,11 @@
 <stack>
   <description brief="opencv">
 
-    opencv c++ and python libraries.
+    Packages for interfacing ROS with OpenCV, a library of programming
+    functions for real time computer vision.
 
   </description>
-  <author>James Bowman</author>
+  <author>Maintained by Vincent Rabaud, Ethan Rublee</author>
   <license>BSD</license>  
   <review status="reviewed" notes=""/>
   <url>http://ros.org/wiki/vision_opencv</url>

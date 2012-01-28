@@ -33,7 +33,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 include(CMakeDetermineSystem)
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
 
-find_package(OpenCV 2.3.1 EXACT REQUIRED)
+find_package(OpenCV 2.3.2 EXACT REQUIRED)
 
 rosbuild_add_gtest(test/utest test/utest.cpp)
 target_link_libraries(test/utest ${OpenCV_LIBS})

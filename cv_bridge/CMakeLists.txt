@@ -11,7 +11,7 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 
 rosbuild_init()
 
-find_package(OpenCV 2.3.1 REQUIRED)
+find_package(OpenCV 2.3.2 REQUIRED)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 rosbuild_add_library(${PROJECT_NAME} src/cv_bridge.cpp)

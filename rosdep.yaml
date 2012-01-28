@@ -26,7 +26,7 @@ jasper:
     homebrew:
       packages: [ jasper  ]
       args: [ --universal  ]
-opencv:
+opencv2:
   ubuntu:
     lucid:
       apt:

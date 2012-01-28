@@ -26,25 +26,11 @@ jasper:
     homebrew:
       packages: [ jasper  ]
       args: [ --universal  ]
-opencv2.3:
-  ubuntu:
-    lucid:
-      apt:
-        packages: [libopencv2.3-dev=2.3.1+svn6514+branch23-9~lucid]
-    maverick:
-      apt:
-        packages: [libopencv2.3-dev=2.3.1+svn6514+branch23-9~maverick]
-    natty:
-      apt:
-        packages: [libopencv2.3-dev=2.3.1+svn6514+branch23-9~natty]
-    oneiric:
-      apt:
-        packages: [libopencv2.3-dev=2.3.1+svn6514+branch23-9~oneiric]
 opencv:
   ubuntu:
     lucid:
       apt:
-        packages: [ros-fuerte-opencv]
+        packages: [ros-fuerte-opencv2]
     oneiric:
       apt:
-        packages: [ros-fuerte-opencv]
+        packages: [ros-fuerte-opencv2]

@@ -40,3 +40,11 @@ opencv2.3:
     oneiric:
       apt:
         packages: [libopencv2.3-dev=2.3.1+svn6514+branch23-9~oneiric]
+opencv:
+  ubuntu:
+    lucid:
+      apt:
+        packages: [ros-fuerte-opencv]
+    oneiric:
+      apt:
+        packages: [ros-fuerte-opencv]

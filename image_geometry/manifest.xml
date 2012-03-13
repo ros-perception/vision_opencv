@@ -10,7 +10,8 @@
   <review status="Doc reviewed" notes="Jan 11, 2010"/>
   <url>http://www.ros.org/wiki/image_geometry</url>
   <export>
-    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -limage_geometry"/>
+    <cpp cflags="`pkg-config opencv --cflags` -I${prefix}/include"
+	 lflags="`pkg-config opencv --libs` -Wl,-rpath,${prefix}/lib -L${prefix}/lib -limage_geometry"/>
     <rosdoc config="rosdoc.yaml" />
   </export>
   <depend package="rospy"/>

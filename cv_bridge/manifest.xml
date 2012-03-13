@@ -5,13 +5,14 @@
     Image messages and OpenCV images.
 
   </description>
-  <author>James Bowman, Patrick Mihelich</author>
+  <author>Patrick Mihelich, James Bowman</author>
   <license>BSD</license>
   <review status="Doc reviewed" notes="Feb 1, 2011"/>
   <url>http://www.ros.org/wiki/cv_bridge</url>
 
   <export>
-    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lcv_bridge"/>
+    <cpp cflags="`pkg-config opencv --cflags` -I${prefix}/include"
+	 lflags="`pkg-config opencv --libs` -Wl,-rpath,${prefix}/lib -L${prefix}/lib -lcv_bridge"/>
     <rosdoc config="rosdoc.yaml" />
   </export>
 

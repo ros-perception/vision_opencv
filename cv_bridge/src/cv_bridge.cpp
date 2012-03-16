@@ -211,10 +211,26 @@ void CvImage::toImageMsg(sensor_msgs::Image& ros_image) const
   ros_image.width = image.cols;
   ros_image.encoding = encoding;
   ros_image.is_bigendian = false;
-  ros_image.step = image.step;
-  size_t size = image.step * image.rows;
+  ros_image.step = image.cols * image.elemSize();
+  size_t size = ros_image.step * image.rows;
   ros_image.data.resize(size);
-  memcpy((char*)(&ros_image.data[0]), image.data, size);
+
+  if (image.isContinuous())
+  {
+    memcpy((char*)(&ros_image.data[0]), image.data, size);
+  }
+  else
+  {
+    // Copy by row by row
+    uchar* ros_data_ptr = (uchar*)(&ros_image.data[0]);
+    uchar* cv_data_ptr = image.data;
+    for (int i = 0; i < image.rows; ++i)
+    {
+      memcpy(ros_data_ptr, cv_data_ptr, ros_image.step);
+      ros_data_ptr += ros_image.step;
+      cv_data_ptr += image.step;
+    }
+  }
 }
 
 // Deep copy data, returnee is mutable

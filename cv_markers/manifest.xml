@@ -15,6 +15,7 @@
   <depend package="message_filters"/>
   <depend package="tf_conversions"/>
   <depend package="kdl"/>
+  <depend package="opencv2" />
   
   <platform os="ubuntu" version="9.04"/>
   <platform os="ubuntu" version="9.10"/>

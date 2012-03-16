@@ -1,0 +1,35 @@
+<package>
+<description brief="The Open Source Computer Vision Library 2.0">
+
+Deprecated. This package now forwards opencv pkgconfig flags through the manifest,
+do not depend on this feature.  Transistion you build files to use cmake's
+find_package infrastructure for opencv.
+
+This package contains the latest code from the Open Source Computer Vision
+Library (opencv).  This ROS package does not modify OpenCV in any way;
+it simply provides a convenient way to download and compile the library
+in a way that can be managed by the ROS dependency system.
+
+Note: The cv_bridge package in the vision_opencv stack eases conversion between ROS
+Image messages and OpenCV images.
+
+
+</description>
+<author>Gary Bradski and many others. See web page for a full contributor list. ROS package maintained by James Bowman.</author>
+<license>BSD</license>
+<review status="3rdparty" notes=""/>
+<url>http://opencv.willowgarage.com</url>
+<export>
+  <cpp cflags="`pkg-config opencv --cflags`" lflags="`pkg-config opencv --libs`"/>
+  <!-- On OS X there is a cmake Findopencv.cmake so pkg-config isn't necessary -->
+  <cpp os="osx" cflags="`pkg-config opencv --cflags`" lflags="`pkg-config opencv --libs`"/>
+</export>
+<versioncontrol type="svn" url="https://code.ros.org/svn/opencv"/>
+
+<platform os="ubuntu" version="9.04"/>
+<platform os="ubuntu" version="9.10"/>
+<platform os="ubuntu" version="10.04"/>
+  
+<rosdep name="opencv2"/>
+
+</package>

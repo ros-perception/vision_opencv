@@ -12,7 +12,8 @@
   <depend package="rostest"/>
   <depend package="rospy"/>
   <depend package="sensor_msgs"/>
-  
+  <depend package="opencv2" />
+
   <platform os="ubuntu" version="9.04"/>
   <platform os="ubuntu" version="9.10"/>
   <platform os="ubuntu" version="10.04"/>

@@ -16,7 +16,7 @@ rosbuild_init()
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-find_package(OpenCV 2.3.2 REQUIRED)
+find_package(OpenCV REQUIRED)
 
 rosbuild_add_library(${PROJECT_NAME} src/pinhole_camera_model.cpp src/stereo_camera_model.cpp)
 target_link_libraries(${PROJECT_NAME} 

@@ -337,41 +337,16 @@ cv::Point2d PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect) const
     throw Exception("Cannot call unrectifyPoint when distortion is unknown.");
   assert(cache_->distortion_state == CALIBRATED);
 
-  /// @todo Make this just call projectPixelTo3dRay followed by cv::projectPoints. But
-  /// cv::projectPoints requires 32-bit float, which is annoying.
+  // Convert to a ray
+  cv::Point3d ray = projectPixelTo3dRay(uv_rect);
 
-  // Formulae from docs for cv::initUndistortRectifyMap,
-  // http://opencv.willowgarage.com/documentation/cpp/camera_calibration_and_3d_reconstruction.html
+  // Project the ray on the image
+  cv::Mat r_vec, t_vec = cv::Mat_<double>::zeros(3, 1);
+  cv::Rodrigues(R_.t(), r_vec);
+  std::vector<cv::Point2d> image_point;
+  cv::projectPoints(std::vector<cv::Point3d>(1, ray), r_vec, t_vec, K_, D_, image_point);
 
-  // x <- (u - c'x) / f'x
-  // y <- (v - c'y) / f'y
-  // c'x, f'x, etc. (primed) come from "new camera matrix" P[0:3, 0:3].
-  double x = (uv_rect.x - cx() - Tx()) / fx();
-  double y = (uv_rect.y - cy() - Ty()) / fy();
-  // [X Y W]^T <- R^-1 * [x y 1]^T
-  double X = R_(0,0)*x + R_(1,0)*y + R_(2,0);
-  double Y = R_(0,1)*x + R_(1,1)*y + R_(2,1);
-  double W = R_(0,2)*x + R_(1,2)*y + R_(2,2);
-  // x' <- X/W, y' <- Y/W
-  double xp = X / W;
-  double yp = Y / W;
-  // x'' <- x'(1+k1*r^2+k2*r^4+k3*r^6) + 2p1*x'*y' + p2(r^2+2x'^2)
-  // y'' <- y'(1+k1*r^2+k2*r^4+k3*r^6) + p1(r^2+2y'^2) + 2p2*x'*y'
-  // where r^2 = x'^2 + y'^2
-  double r2 = xp*xp + yp*yp;
-  double r4 = r2*r2;
-  double r6 = r4*r2;
-  double a1 = 2*xp*yp;
-  double k1 = D_(0,0), k2 = D_(0,1), p1 = D_(0,2), p2 = D_(0,3), k3 = D_(0,4);
-  double barrel_correction = 1 + k1*r2 + k2*r4 + k3*r6;
-  if (D_.cols == 8)
-    barrel_correction /= (1.0 + D_(0,5)*r2 + D_(0,6)*r4 + D_(0,7)*r6);
-  double xpp = xp*barrel_correction + p1*a1 + p2*(r2+2*(xp*xp));
-  double ypp = yp*barrel_correction + p1*(r2+2*(yp*yp)) + p2*a1;
-  // map_x(u,v) <- x''fx + cx
-  // map_y(u,v) <- y''fy + cy
-  // cx, fx, etc. come from original camera matrix K.
-  return cv::Point2d(xpp*K_(0,0) + K_(0,2), ypp*K_(1,1) + K_(1,2));
+  return image_point[0];
 }
 
 cv::Rect PinholeCameraModel::rectifyRoi(const cv::Rect& roi_raw) const

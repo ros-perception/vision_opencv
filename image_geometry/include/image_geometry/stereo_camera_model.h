@@ -112,13 +112,13 @@ inline double StereoCameraModel::baseline() const
 inline double StereoCameraModel::getZ(double disparity) const
 {
   assert( initialized() );
-  return -right_.Tx() / disparity;
+  return -right_.Tx() / (disparity - (left().cx() - right().cx()));
 }
 
 inline double StereoCameraModel::getDisparity(double Z) const
 {
   assert( initialized() );
-  return -right_.Tx() / Z;
+  return -right_.Tx() / Z + (left().cx() - right().cx()); ;
 }
 
 } //namespace image_geometry

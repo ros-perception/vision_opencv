@@ -65,7 +65,7 @@ void StereoCameraModel::updateQ()
   Q_(0,3) = -right_.cx();
   Q_(1,3) = -right_.cy();
   Q_(2,3) = right_.fx();
-  //Q_(3,3) = (right_.cx() - left_.cx()) / Tx; // zero when disparities are pre-adjusted
+  Q_(3,3) = (right_.cx() - left_.cx()) / Tx; // zero when disparities are pre-adjusted
 }
 
 void StereoCameraModel::projectDisparityTo3d(const cv::Point2d& left_uv_rect, float disparity,

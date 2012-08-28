@@ -82,9 +82,6 @@ public:
    */
   cv::Rect rectifiedRoi() const;
 
-  /// @todo Hide or group deprecated overloads in Doxygen
-  void project3dToPixel(const cv::Point3d& xyz, cv::Point2d& uv_rect) const ROS_DEPRECATED;
-  
   /**
    * \brief Project a 3d point to rectified pixel coordinates.
    *
@@ -94,8 +91,6 @@ public:
    * \return (u,v) in rectified pixel coordinates
    */
   cv::Point2d project3dToPixel(const cv::Point3d& xyz) const;
-
-  void projectPixelTo3dRay(const cv::Point2d& uv_rect, cv::Point3d& ray) const ROS_DEPRECATED;
 
   /**
    * \brief Project a rectified pixel to a 3d ray.
@@ -122,15 +117,11 @@ public:
   void unrectifyImage(const cv::Mat& rectified, cv::Mat& raw,
                       int interpolation = CV_INTER_LINEAR) const;
 
-  void rectifyPoint(const cv::Point2d& uv_raw, cv::Point2d& uv_rect) const ROS_DEPRECATED;
-  
   /**
    * \brief Compute the rectified image coordinates of a pixel in the raw image.
    */
   cv::Point2d rectifyPoint(const cv::Point2d& uv_raw) const;
 
-  void unrectifyPoint(const cv::Point2d& uv_rect, cv::Point2d& uv_raw) const ROS_DEPRECATED;
-  
   /**
    * \brief Compute the raw image coordinates of a pixel in the rectified image.
    */
@@ -205,16 +196,6 @@ public:
    * \brief Returns the y-translation term of the projection matrix.
    */
   double Ty() const;
-
-  /**
-   * \brief Returns the image height.
-   */
-  uint32_t height() const ROS_DEPRECATED;
-
-  /**
-   * \brief Returns the image width.
-   */
-  uint32_t width() const ROS_DEPRECATED;
 
   /**
    * \brief Returns the number of columns in each bin.
@@ -310,8 +291,6 @@ inline double PinholeCameraModel::cx() const { return P_(0,2); }
 inline double PinholeCameraModel::cy() const { return P_(1,2); }
 inline double PinholeCameraModel::Tx() const { return P_(0,3); }
 inline double PinholeCameraModel::Ty() const { return P_(1,3); }
-inline uint32_t PinholeCameraModel::height() const { return cam_info_.height; }
-inline uint32_t PinholeCameraModel::width() const  { return cam_info_.width; }
 
 inline uint32_t PinholeCameraModel::binningX() const { return cam_info_.binning_x; }
 inline uint32_t PinholeCameraModel::binningY() const { return cam_info_.binning_y; }

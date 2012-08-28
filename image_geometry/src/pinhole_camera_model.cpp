@@ -163,11 +163,6 @@ bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& m
   return fromCameraInfo(*msg);
 }
 
-void PinholeCameraModel::project3dToPixel(const cv::Point3d& xyz, cv::Point2d& uv_rect) const
-{
-  uv_rect = project3dToPixel(xyz);
-}
-
 cv::Size PinholeCameraModel::fullResolution() const
 {
   assert( initialized() );
@@ -251,11 +246,6 @@ cv::Point2d PinholeCameraModel::project3dToPixel(const cv::Point3d& xyz) const
   return uv_rect;
 }
 
-void PinholeCameraModel::projectPixelTo3dRay(const cv::Point2d& uv_rect, cv::Point3d& ray) const
-{
-  ray = projectPixelTo3dRay(uv_rect);
-}
-
 cv::Point3d PinholeCameraModel::projectPixelTo3dRay(const cv::Point2d& uv_rect) const
 {
   assert( initialized() );
@@ -299,11 +289,6 @@ void PinholeCameraModel::unrectifyImage(const cv::Mat& rectified, cv::Mat& raw, 
   // Need interpolation argument. Same caching behavior?
 }
 
-void PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw, cv::Point2d& uv_rect) const
-{
-  uv_rect = rectifyPoint(uv_raw);
-}
-
 cv::Point2d PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw) const
 {
   assert( initialized() );
@@ -320,11 +305,6 @@ cv::Point2d PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw) const
   cv::Mat dst_pt(1, 1, CV_32FC2, &rect32.x);
   cv::undistortPoints(src_pt, dst_pt, K_, D_, R_, P_);
   return rect32;
-}
-
-void PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect, cv::Point2d& uv_raw) const
-{
-  uv_raw = unrectifyPoint(uv_rect);
 }
 
 cv::Point2d PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect) const

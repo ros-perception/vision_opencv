@@ -8,6 +8,8 @@ catkin_python_setup()
 
 foreach(subdir
     cv_bridge
+    image_geometry
+    opencv_tests
     )
   add_subdirectory(${subdir})
 endforeach()

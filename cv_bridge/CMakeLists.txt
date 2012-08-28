@@ -7,7 +7,7 @@ include_directories(include)
 
 find_package(OpenCV REQUIRED)
 
-rosbuild_add_library(${PROJECT_NAME} SHARED src/cv_bridge.cpp)
+add_library(${PROJECT_NAME} SHARED src/cv_bridge.cpp)
 target_link_libraries(${PROJECT_NAME}  ${OpenCV_LIBS})
 
 install(
@@ -21,9 +21,8 @@ install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION lib
   )
 
-#initialize_tests()
-add_gtest(test/utest test/utest.cpp)
-target_link_libraries(test/utest
+add_gtest(${PROJECT_NAME}-utest test/utest.cpp)
+target_link_libraries(${PROJECT_NAME}-utest
   ${PROJECT_NAME}
   ${OpenCV_LIBS}
   )

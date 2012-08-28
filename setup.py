@@ -12,9 +12,14 @@ for tagname in ['name', 'version', 'author', 'url', 'license']:
         print >> sys.stderr, 'Could not extract %s from your stack.xml:\n%s' % (tagname, e)
         sys.exit(-1)
 
-setup(packages=['cv_bridge'],
-      package_dir= {
-          'cv_bridge' : 'cv_bridge/src/cv_bridge'
-          },
-      **stackinfo
-      )
+setup(
+    packages = [
+        'cv_bridge',
+        'image_geometry'
+        ],
+    package_dir = {
+        'cv_bridge' : 'cv_bridge/src/cv_bridge',
+        'image_geometry' : 'image_geometry/src/image_geometry'
+        },
+    **stackinfo
+    )

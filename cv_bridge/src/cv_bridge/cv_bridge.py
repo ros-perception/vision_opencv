@@ -51,7 +51,11 @@ class CvBridge:
         if encoding in channeltypes:
             return channeltypes[encoding]
         else:
-            return eval("cv.CV_%s" % encoding)
+            try:
+                return eval("cv.CV_%s" % encoding)
+            except AttributeError:
+                print 'Unknown OpenCV format %s' % encoding
+                raise
 
     def encoding_as_fmt(self, encoding):
         source_channels = cv.CV_MAT_CN(self.encoding_as_cvtype(encoding))

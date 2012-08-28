@@ -65,6 +65,9 @@ int getCvType(const std::string& encoding)
   if (encoding == enc::BAYER_GBRG16) return CV_16UC1;
   if (encoding == enc::BAYER_GRBG16) return CV_16UC1;
 
+  // Miscellaneous
+  if (encoding == enc::YUV422) return CV_8UC3;
+
   // Check all the generic content encodings
 #define CHECK_ENCODING(code)                            \
   if (encoding == enc::TYPE_##code) return CV_##code    \

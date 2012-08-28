@@ -1,6 +1,6 @@
 <stack>
   <name>vision_opencv</name>
-  <version>1.9.0</version>
+  <version>1.9.1</version>
   <description brief="opencv">
     Packages for interfacing ROS with OpenCV, a library of programming
     functions for real time computer vision.
@@ -19,10 +19,6 @@
   <build_depends>opencv2</build_depends>
   <build_depends>ros</build_depends>
   <build_depends>ros_comm</build_depends> <!-- rostest, rospy, roscpp, message_filters -->
-  <!-- 
-       <depend stack="orocos_kinematics_dynamics" /> 
-       disabled for now, since i've only catkinized cv_bridge and it doesn't need kdl -->
-
 
   <depends>common_msgs</depends>
   <depends>geometry</depends>

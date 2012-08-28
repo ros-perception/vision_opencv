@@ -6,11 +6,6 @@ catkin_stack()
 
 catkin_python_setup()
 
-foreach(subdir
-    cv_bridge
-    image_geometry
-    opencv_tests
-    #cv_markers - can't catkinize this yet since it depends on kdl, which isn't catkinized -jbinney
-    )
-  add_subdirectory(${subdir})
-endforeach()
+add_subdirectory(cv_bridge)
+add_subdirectory(image_geometry)
+add_subdirectory(opencv_tests)

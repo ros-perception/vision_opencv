@@ -39,7 +39,7 @@
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
 
-#include "cv_bridge/CvBridge.h"
+#include "cv_bridge/cv_bridge.h"
 #include "sensor_msgs/Image.h"
 
 #define FIXME_HACKISH_RELEASE_ELECTRIC 0

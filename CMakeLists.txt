@@ -10,6 +10,7 @@ foreach(subdir
     cv_bridge
     image_geometry
     opencv_tests
+    #cv_markers - can't catkinize this yet since it depends on kdl, which isn't catkinized -jbinney
     )
   add_subdirectory(${subdir})
 endforeach()

@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
+project(vision_opencv)
 
-# find_package(catkin REQUIRED)
-# catkin_stack(ros_comm)
+find_package(catkin REQUIRED)
+catkin_stack()
 
-# optional find_package(... [REQUIRED])
-
-# optional catkin_python_setup()
+catkin_python_setup()
 
 foreach(subdir
     cv_bridge

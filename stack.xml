@@ -1,6 +1,6 @@
 <stack>
   <name>vision_opencv</name>
-  <version>0.0.1</version> <!-- not sure what this should be -jbinney -->
+  <version>1.10</version>
   <description brief="opencv">
     Packages for interfacing ROS with OpenCV, a library of programming
     functions for real time computer vision.

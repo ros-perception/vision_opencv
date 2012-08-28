@@ -1,18 +1,33 @@
 <stack>
+  <name>vision_opencv</name>
+  <version>0.0.1</version> <!-- not sure what this should be -jbinney -->
   <description brief="opencv">
-
     Packages for interfacing ROS with OpenCV, a library of programming
     functions for real time computer vision.
-
   </description>
   <author>Maintained by Vincent Rabaud, Ethan Rublee</author>
+  <copyright>Willow Garage</copyright>
   <license>BSD</license>  
   <review status="reviewed" notes=""/>
   <url>http://ros.org/wiki/vision_opencv</url>
-  <depend stack="common_msgs" /> <!-- sensor_msgs -->
-  <depend stack="geometry" /> <!-- tf, tf_conversions -->
-  <depend stack="orocos_kinematics_dynamics" /> <!-- kdl -->
-  <depend stack="ros" />
-  <depend stack="ros_comm" /> <!-- rostest, rospy, roscpp, message_filters -->
+
+  <build_depends>catkin</build_depends>
+  <build_depends>common_msgs</build_depends> <!-- sensor_msgs -->
+  <build_depends>geometry</build_depends> <!-- tf, tf_conversions -->
+  <build_depends>ros</build_depends>
+  <build_depends>ros_comm</build_depends> <!-- rostest, rospy, roscpp, message_filters -->
+  <!-- 
+       <depend stack="orocos_kinematics_dynamics" /> 
+       disabled for now, since i've only catkinized cv_bridge and it doesn't need kdl -->
+
+
+  <depends>common_msgs</depends>
+  <depends>geometry</depends>
+  <depends>ros</depends>
+  <depends>ros_comm</depends>
+
+
+
+
 
 </stack>

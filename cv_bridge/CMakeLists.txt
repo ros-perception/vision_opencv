@@ -26,3 +26,8 @@ target_link_libraries(${PROJECT_NAME}-utest
   ${PROJECT_NAME}
   ${OpenCV_LIBS}
   )
+
+catkin_project(${PROJECT_NAME}
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME}
+)

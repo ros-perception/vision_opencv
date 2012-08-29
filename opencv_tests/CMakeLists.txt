@@ -14,7 +14,4 @@ target_link_libraries(${PROJECT_NAME}-utest ${OpenCV_LIBS})
 
 endif(CMAKE_SYSTEM_NAME MATCHES "Linux")
 
-
-
-
-
+catkin_project(${PROJECT_NAME})

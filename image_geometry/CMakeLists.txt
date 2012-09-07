@@ -1,33 +1,32 @@
 project(image_geometry)
-
-find_package(ROS REQUIRED roscpp sensor_msgs)
-include_directories(${ROS_INCLUDE_DIRS})
-
-include_directories(include)
+catkin_project(${PROJECT_NAME} INCLUDE_DIRS include
+                               LIBRARIES ${PROJECT_NAME}
+)
 
 find_package(OpenCV REQUIRED)
+find_package(catkin REQUIRED roscpp sensor_msgs)
 
+include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS}
+                           ${roscpp_INCLUDE_DIRS}
+                           ${sensor_msgs_INCLUDE_DIRS}
+)
+include_directories(include)
+
+# add a library
 add_library(${PROJECT_NAME} src/pinhole_camera_model.cpp src/stereo_camera_model.cpp)
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES})
 
-# add_pyunit doesn't seem to exist yet, even though the catkin docs say it should -jbinney
-#add_pyunit(test/directed.py)
+catkin_add_nosetests(test/directed.py)
 
-add_gtest(${PROJECT_NAME}-utest test/utest.cpp)
+catkin_add_gtest(${PROJECT_NAME}-utest test/utest.cpp)
 target_link_libraries(${PROJECT_NAME}-utest ${PROJECT_NAME} ${OpenCV_LIBS})
 
-install(
-  DIRECTORY include/
-  DESTINATION include
+install(DIRECTORY include
+        DESTINATION ${CATKIN_PROJECT_INCLUDE_DESTINATION}
 )
 
 install(TARGETS ${PROJECT_NAME}
-  RUNTIME DESTINATION bin
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  )
-
-catkin_project(${PROJECT_NAME}
-  INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME}
+        RUNTIME DESTINATION ${CATKIN_PROJECT_BIN_DESTINATION}
+        ARCHIVE DESTINATION ${CATKIN_PROJECT_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PROJECT_LIB_DESTINATION}
 )

@@ -7,4 +7,4 @@ include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS})
 catkin_add_gtest(${PROJECT_NAME}-utest test/utest.cpp)
 target_link_libraries(${PROJECT_NAME}-utest ${OpenCV_LIBRARIES})
 
-rosbuild_add_pyunit(test/enumerants.py)
+catkin_add_nosetests(test/enumerants.py)

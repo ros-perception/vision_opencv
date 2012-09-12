@@ -21,8 +21,8 @@ catkin_add_nosetests(test/directed.py)
 catkin_add_gtest(${PROJECT_NAME}-utest test/utest.cpp)
 target_link_libraries(${PROJECT_NAME}-utest ${PROJECT_NAME} ${OpenCV_LIBS})
 
-install(DIRECTORY include
-        DESTINATION ${CATKIN_PROJECT_INCLUDE_DESTINATION}
+install(DIRECTORY include/
+        DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
 )
 
 install(TARGETS ${PROJECT_NAME}

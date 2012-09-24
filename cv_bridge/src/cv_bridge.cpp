@@ -110,6 +110,30 @@ Format getFormat(const std::string& encoding)
   if (encoding == enc::BGRA16) return BGRA;
   if (encoding == enc::RGBA16) return RGBA;
 
+  if (encoding == enc::TYPE_8UC1) return GRAY;
+  if (encoding == enc::TYPE_8SC1) return GRAY;
+  if (encoding == enc::TYPE_16UC1) return GRAY;
+  if (encoding == enc::TYPE_16SC1) return GRAY;
+  if (encoding == enc::TYPE_32SC1) return GRAY;
+  if (encoding == enc::TYPE_32FC1) return GRAY;
+  if (encoding == enc::TYPE_64FC1) return GRAY;
+
+  if (encoding == enc::TYPE_8UC3) return RGB;
+  if (encoding == enc::TYPE_8SC3) return RGB;
+  if (encoding == enc::TYPE_16UC3) return RGB;
+  if (encoding == enc::TYPE_16SC3) return RGB;
+  if (encoding == enc::TYPE_32SC3) return RGB;
+  if (encoding == enc::TYPE_32FC3) return RGB;
+  if (encoding == enc::TYPE_64FC2) return RGB;
+
+  if (encoding == enc::TYPE_8UC4) return RGBA;
+  if (encoding == enc::TYPE_8SC4) return RGBA;
+  if (encoding == enc::TYPE_16UC4) return RGBA;
+  if (encoding == enc::TYPE_16SC4) return RGBA;
+  if (encoding == enc::TYPE_32SC4) return RGBA;
+  if (encoding == enc::TYPE_32FC4) return RGBA;
+  if (encoding == enc::TYPE_64FC4) return RGBA;
+
   // We don't support conversions to/from other types
   return INVALID;
 }

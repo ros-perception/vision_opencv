@@ -31,12 +31,13 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 ## Tests are failing on OSX for an unknown reason
 include(CMakeDetermineSystem)
-if(CMAKE_SYSTEM_NAME MATCHES "Linux")
 
 find_package(OpenCV REQUIRED)
-
 rosbuild_add_gtest(test/utest test/utest.cpp)
 target_link_libraries(test/utest ${OpenCV_LIBS})
-rosbuild_add_pyunit(test/enumerants.py)
 
-endif(CMAKE_SYSTEM_NAME MATCHES "Linux")
+# add tests for the C++ API
+rosbuild_add_gtest(test/utest2 test/utest2.cpp)
+target_link_libraries(test/utest2 ${OpenCV_LIBS})
+
+rosbuild_add_pyunit(test/enumerants.py)

@@ -197,7 +197,8 @@ CvImageConstPtr toCvShare(const sensor_msgs::Image& source,
                           const std::string& encoding = std::string());
 
 /**
- * \brief Convert a CvImage to another encoding.
+ * \brief Convert a CvImage to another encoding. When going from a 8U to a 16U (and vice-versa),
+ *        the image is not just converted, it is also rescaled
  */
 CvImagePtr cvtColor(const CvImageConstPtr& source,
                     const std::string& encoding);

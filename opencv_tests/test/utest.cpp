@@ -42,8 +42,6 @@
 #include "cv_bridge/CvBridge.h"
 #include "sensor_msgs/Image.h"
 
-#define FIXME_HACKISH_RELEASE_ELECTRIC 0
-
 TEST(OpencvTests, testCase_encode_decode)
 {
   int fmts[] = { IPL_DEPTH_8U, -1, IPL_DEPTH_8S, IPL_DEPTH_16U, IPL_DEPTH_16S, IPL_DEPTH_32S, IPL_DEPTH_32F, IPL_DEPTH_64F, -1 };
@@ -53,12 +51,8 @@ TEST(OpencvTests, testCase_encode_decode)
       for (int fi = 0; fmts[fi] != -1; fi++) {
         for (int channels = 1; channels <= 4; channels++) {
           IplImage *original = cvCreateImage(cvSize(w, h), fmts[fi], channels);
-#if 0 // XXX OpenCV bug, change this when opencv_latest next moves
           CvRNG r = cvRNG(77);
           cvRandArr(&r, original, CV_RAND_UNI, cvScalar(0,0,0,0), cvScalar(255,255,255,255));
-#else
-          cvSet(original, cvScalar(1,2,3,4));
-#endif
 
           sensor_msgs::Image image_message;
           sensor_msgs::CvBridge img_bridge_;
@@ -113,7 +107,7 @@ TEST(OpencvTests, testCase_decode_8u)
   EXPECT_TRUE(success);
   EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 3);
 }
-#if FIXME_HACKISH_RELEASE_ELECTRIC
+
 TEST(OpencvTests, testCase_decode_16u)
 {
   IplImage *original = cvCreateImage(cvSize(640, 480), IPL_DEPTH_16U, 1);
@@ -132,7 +126,6 @@ TEST(OpencvTests, testCase_decode_16u)
   printf("%d\n", cvGetElemType(img_bridge_.toIpl()));
   EXPECT_TRUE(cvGetElemType(img_bridge_.toIpl()) == CV_16UC1);
 }
-#endif
 
 TEST(OpencvTests, testCase_decode_8uc3)
 {
@@ -184,7 +177,6 @@ TEST(OpencvTests, testCase_new_methods)
   }
 }
 
-#if FIXME_HACKISH_RELEASE_ELECTRIC
 TEST(OpencvTests, testCase_16u_bgr)
 {
   int channels = 1;
@@ -205,7 +197,6 @@ TEST(OpencvTests, testCase_16u_bgr)
   EXPECT_TRUE(success);
   EXPECT_TRUE(cvGetElemType(img_bridge_.toIpl()) == CV_8UC3);
 }
-#endif
 
 int main(int argc, char **argv)
 {

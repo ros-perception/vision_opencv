@@ -124,7 +124,7 @@ Format getFormat(const std::string& encoding)
   if (encoding == enc::TYPE_16SC3) return RGB;
   if (encoding == enc::TYPE_32SC3) return RGB;
   if (encoding == enc::TYPE_32FC3) return RGB;
-  if (encoding == enc::TYPE_64FC2) return RGB;
+  if (encoding == enc::TYPE_64FC3) return RGB;
 
   if (encoding == enc::TYPE_8UC4) return RGBA;
   if (encoding == enc::TYPE_8SC4) return RGBA;

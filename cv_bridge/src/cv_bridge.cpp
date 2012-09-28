@@ -34,10 +34,13 @@
 
 #include <map>
 
-#include <cv_bridge/cv_bridge.h>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <sensor_msgs/image_encodings.h>
 #include <boost/make_shared.hpp>
+
+#include <opencv2/imgproc/imgproc.hpp>
+
+#include <sensor_msgs/image_encodings.h>
+
+#include <cv_bridge/cv_bridge.h>
 
 namespace enc = sensor_msgs::image_encodings;
 
@@ -68,7 +71,7 @@ int getCvType(const std::string& encoding)
   if (encoding == enc::BAYER_GRBG16) return CV_16UC1;
 
   // Miscellaneous
-  if (encoding == enc::YUV422) return CV_8UC3;
+  if (encoding == enc::YUV422) return CV_8UC2;
 
   // Check all the generic content encodings
 #define CHECK_ENCODING(code)                            \
@@ -111,30 +114,7 @@ Format getFormat(const std::string& encoding)
   if (encoding == enc::RGBA8)  return RGBA;
   if (encoding == enc::BGRA16) return BGRA;
   if (encoding == enc::RGBA16) return RGBA;
-
-  if (encoding == enc::TYPE_8UC1) return GRAY;
-  if (encoding == enc::TYPE_8SC1) return GRAY;
-  if (encoding == enc::TYPE_16UC1) return GRAY;
-  if (encoding == enc::TYPE_16SC1) return GRAY;
-  if (encoding == enc::TYPE_32SC1) return GRAY;
-  if (encoding == enc::TYPE_32FC1) return GRAY;
-  if (encoding == enc::TYPE_64FC1) return GRAY;
-
-  if (encoding == enc::TYPE_8UC3) return RGB;
-  if (encoding == enc::TYPE_8SC3) return RGB;
-  if (encoding == enc::TYPE_16UC3) return RGB;
-  if (encoding == enc::TYPE_16SC3) return RGB;
-  if (encoding == enc::TYPE_32SC3) return RGB;
-  if (encoding == enc::TYPE_32FC3) return RGB;
-  if (encoding == enc::TYPE_64FC3) return RGB;
-
-  if (encoding == enc::TYPE_8UC4) return RGBA;
-  if (encoding == enc::TYPE_8SC4) return RGBA;
-  if (encoding == enc::TYPE_16UC4) return RGBA;
-  if (encoding == enc::TYPE_16SC4) return RGBA;
-  if (encoding == enc::TYPE_32SC4) return RGBA;
-  if (encoding == enc::TYPE_32FC4) return RGBA;
-  if (encoding == enc::TYPE_64FC4) return RGBA;
+  if (encoding == enc::YUV422) return YUV422;
 
   // We don't support conversions to/from other types
   return INVALID;
@@ -188,7 +168,31 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
 {
   Format src_format = getFormat(src_encoding);
   Format dst_format = getFormat(dst_encoding);
+  bool is_src_color_format = sensor_msgs::image_encodings::isColor(src_encoding) || sensor_msgs::image_encodings::isMono(src_encoding);
+  bool is_dst_color_format = sensor_msgs::image_encodings::isColor(dst_encoding) || sensor_msgs::image_encodings::isMono(dst_encoding);
+  bool is_num_channels_the_same = (sensor_msgs::image_encodings::numChannels(src_encoding) == sensor_msgs::image_encodings::numChannels(dst_encoding));
 
+  // If we have no color info in the source, we can only convert to the same format which
+  // was resolved in the previous condition. Otherwise, fail
+  if (!is_src_color_format) {
+    if (is_dst_color_format)
+      throw Exception("[" + src_encoding + "] is not a color format. but [" + dst_encoding +
+                      "] is. The conversion does not make sense");
+    if (!is_num_channels_the_same)
+      throw Exception("[" + src_encoding + "] and [" + dst_encoding + "] do not have the same number of channel");
+    return std::vector<int>(1, SAME_FORMAT);
+  }
+
+  // If we are converting from a color type to a non color type, we can only do so if we stick
+  // to the number of channels
+  if (!is_dst_color_format) {
+    if (!is_num_channels_the_same)
+      throw Exception("[" + src_encoding + "] is a color format but [" + dst_encoding + "] " +
+                      "is not so they must have the same OpenCV type, CV_8UC3, CV16UC1 ....");
+    return std::vector<int>(1, SAME_FORMAT);
+  }
+
+  // If we are converting from a color type to another type, then everything is fine
   static const std::map<std::pair<Format, Format>, std::vector<int> > CONVERSION_CODES = getConversionCodes();
 
   std::pair<Format, Format> key(src_format, dst_format);

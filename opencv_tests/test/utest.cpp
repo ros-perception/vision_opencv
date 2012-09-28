@@ -72,43 +72,71 @@ TEST(OpencvTests, testCase_encode_decode)
 {
   std::vector<std::string> encodings = getEncodings();
   for(size_t i=0; i<encodings.size(); ++i) {
-    std::string encoding1 = encodings[i];
-    cv::Mat image_original(cv::Size(400, 400), cv_bridge::getCvType(encoding1));
+    std::string src_encoding = encodings[i];
+    bool is_src_color_format = isColor(src_encoding) || isMono(src_encoding);
+    cv::Mat image_original(cv::Size(400, 400), cv_bridge::getCvType(src_encoding));
     cv::RNG r(77);
     r.fill(image_original, cv::RNG::UNIFORM, 0, 255);
 
     sensor_msgs::Image image_message;
-    cv_bridge::CvImage image_bridge(std_msgs::Header(), encoding1, image_original);
+    cv_bridge::CvImage image_bridge(std_msgs::Header(), src_encoding, image_original);
 
     // Convert to a sensor_msgs::Image
     sensor_msgs::ImagePtr image_msg = image_bridge.toImageMsg();
 
     for(size_t j=0; j<encodings.size(); ++j) {
-      std::string encoding2 = encodings[j];
-      // It makes sense you cannot convert to a different number of channels and back
-      // TODO Actually, that should be a < but we can't with the TYPE_8UC1 conversions: waiting for Groovy
-      if (numChannels(encoding1) != numChannels(encoding2)) {
-        //EXPECT_THROW(cvtColor(cv_bridge::toCvShare(image_msg, encoding2), encoding1));
-        continue;
+      std::string dst_encoding = encodings[j];
+      bool is_dst_color_format = isColor(dst_encoding) || isMono(dst_encoding);
+      bool is_num_channels_the_same = (numChannels(src_encoding) == numChannels(dst_encoding));
+
+      cv_bridge::CvImageConstPtr cv_image;
+      cv::Mat image_back;
+      // If the first type does not contain any color information
+      if (!is_src_color_format) {
+        // Converting from a non color type to a color type does no make sense
+        if (is_dst_color_format) {
+          EXPECT_THROW(cv_bridge::toCvShare(image_msg, dst_encoding), cv_bridge::Exception);
+          continue;
+        }
+        // We can only convert non-color types with the same number of channels
+        if (!is_num_channels_the_same) {
+          EXPECT_THROW(cv_bridge::toCvShare(image_msg, dst_encoding), cv_bridge::Exception);
+          continue;
+        }
+        cv_image = cv_bridge::toCvShare(image_msg, dst_encoding);
+      } else {
+        // If we are converting to a non-color, you cannot convert to a different number of channels
+        if (!is_dst_color_format) {
+          if (!is_num_channels_the_same) {
+            EXPECT_THROW(cv_bridge::toCvShare(image_msg, dst_encoding), cv_bridge::Exception);
+            continue;
+          }
+          cv_image = cv_bridge::toCvShare(image_msg, dst_encoding);
+          // We cannot convert from non-color to color
+          EXPECT_THROW(cvtColor(cv_image, src_encoding)->image, cv_bridge::Exception);
+          continue;
+        }
+        // We do not support conversion to YUV422 for now, except from YUV422
+        if ((dst_encoding == YUV422) && (src_encoding != YUV422)) {
+          EXPECT_THROW(cv_bridge::toCvShare(image_msg, dst_encoding), cv_bridge::Exception);
+          continue;
+        }
+
+        cv_image = cv_bridge::toCvShare(image_msg, dst_encoding);
+
+        // We do not support conversion to YUV422 for now, except from YUV422
+        if ((src_encoding == YUV422) && (dst_encoding != YUV422)) {
+          EXPECT_THROW(cvtColor(cv_image, src_encoding)->image, cv_bridge::Exception);
+          continue;
+        }
       }
-      // Same if they are of different signs
-      if (isUnsigned(encoding1) != isUnsigned(encoding2))
-        continue;
-      // Same if one is a color encoding and not the other one
-      // TODO: that should throw but we'll wait for Groovy
-      if (isColor(encoding1) != isColor(encoding2))
-        continue;
-      // Because of the scaling, we cannot test 16-8 conversion here
-      if (bitDepth(encoding1)==16 && bitDepth(encoding2)==8)
-        continue;
-      // We do not support conversion to YUV422 for now
-      if (encoding2 == YUV422)
-        continue;
-
       // And convert back to a cv::Mat
-      cv::Mat image_back = cvtColor(cv_bridge::toCvShare(image_msg, encoding2), encoding1)->image;
-
-      EXPECT_LT(cv::norm(image_original, image_back)/image_original.cols/image_original.rows, 0.5) << "problem converting from " << encoding1 << " to " << encoding2 << " and back.";
+      image_back = cvtColor(cv_image, src_encoding)->image;
+      
+      // If the number of channels,s different some information got lost at some point, so no possible test
+      if (!is_num_channels_the_same)
+        continue;
+      EXPECT_LT(cv::norm(image_original, image_back)/image_original.cols/image_original.rows, 0.5) << "problem converting from " << src_encoding << " to " << dst_encoding << " and back.";
     }
   }
 }

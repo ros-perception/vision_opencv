@@ -6,20 +6,18 @@ from xml.etree.ElementTree import ElementTree
 stackinfo = {}
 for tagname in ['name', 'version', 'author', 'url', 'license']:
     try:
-        root = ElementTree(None, 'stack.xml')
+        root = ElementTree(None, 'package.xml')
         stackinfo[tagname] = root.findtext(tagname)
     except Exception, e:
-        print >> sys.stderr, 'Could not extract %s from your stack.xml:\n%s' % (tagname, e)
+        print >> sys.stderr, 'Could not extract %s from your package.xml:\n%s' % (tagname, e)
         sys.exit(-1)
 
 setup(
     packages = [
         'cv_bridge',
-        'image_geometry'
         ],
     package_dir = {
-        'cv_bridge' : 'cv_bridge/src/cv_bridge',
-        'image_geometry' : 'image_geometry/src/image_geometry'
+        'cv_bridge' : 'src/cv_bridge',
         },
     **stackinfo
     )

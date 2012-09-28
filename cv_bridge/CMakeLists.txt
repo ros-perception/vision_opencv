@@ -1,14 +1,13 @@
 project(cv_bridge)
-catkin_project(${PROJECT_NAME} INCLUDE_DIRS include
-                               LIBRARIES ${PROJECT_NAME}
+catkin_package(INCLUDE_DIRS include
+               LIBRARIES ${PROJECT_NAME}
 )
 
 
 find_package(OpenCV REQUIRED)
-find_package(catkin REQUIRED roscpp sensor_msgs)
+find_package(catkin REQUIRED sensor_msgs)
 
 include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS}
-                           ${roscpp_INCLUDE_DIRS}
                            ${sensor_msgs_INCLUDE_DIRS}
 )
 include_directories(include)
@@ -22,9 +21,9 @@ install(DIRECTORY include/
 )
 
 install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION ${CATKIN_PROJECT_BIN_DESTINATION}
-        ARCHIVE DESTINATION ${CATKIN_PROJECT_LIB_DESTINATION}
-        LIBRARY DESTINATION ${CATKIN_PROJECT_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
 # add a test

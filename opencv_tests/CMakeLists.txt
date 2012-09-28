@@ -1,5 +1,5 @@
 project(opencv_tests)
-catkin_project(${PROJECT_NAME})
+catkin_package()
 
 find_package(OpenCV REQUIRED)
 include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS})

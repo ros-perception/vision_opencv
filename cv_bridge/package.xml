@@ -1,0 +1,23 @@
+<package>
+  <name>cv_bridge</name>
+  <version>1.9.5</version>
+  <description>
+    This contains CvBridge, which converts between ROS
+    Image messages and OpenCV images.
+  </description>
+  <author>Patrick Mihelich</author>
+  <author>James Bowman</author>
+  <maintainer email="vrabaud@willowgarage.com">Vincent Rabaud</maintainer>
+  <copyright>Willow Garage</copyright>
+  <license>BSD</license>
+  <url>http://www.ros.org/wiki/cv_bridge</url>
+
+  <export>
+    <rosdoc config="rosdoc.yaml" />
+  </export>
+
+  <build_depend>opencv2</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+
+  <run_depend>opencv2</run_depend>
+</package>

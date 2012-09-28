@@ -1,4 +1,6 @@
 <package>
+  <name>image_geometry</name>
+  <version>1.9.5</version>
   <description>
     `image_geometry` contains C++ and Python libraries for interpreting images
     geometrically. It interfaces the calibration parameters in sensor_msgs/CameraInfo
@@ -6,21 +8,19 @@
     interfaces ROS sensor_msgs/Image with OpenCV data types.
   </description>
   <author>Patrick Mihelich</author>
+  <maintainer email="vrabaud@willowgarage.com">Vincent Rabaud</maintainer>
+  <copyright>Willow Garage</copyright>
   <license>BSD</license>
-  <review status="Doc reviewed" notes="Jan 11, 2010"/>
   <url>http://www.ros.org/wiki/image_geometry</url>
+
   <export>
-    <cpp cflags="`pkg-config opencv --cflags` -I${prefix}/include"
-	 lflags="`pkg-config opencv --libs` -Wl,-rpath,${prefix}/lib -L${prefix}/lib -limage_geometry"/>
     <rosdoc config="rosdoc.yaml" />
   </export>
-  <depend package="rospy"/>
-  <depend package="roscpp"/>
-  <depend package="sensor_msgs"/>
-  
-  <platform os="ubuntu" version="9.04"/>
-  <platform os="ubuntu" version="9.10"/>
-  <platform os="ubuntu" version="10.04"/>
-  <rosdep name="opencv2"/>
-  
+
+  <build_depend>langs-dev</build_depend>
+  <build_depend>opencv2</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+
+  <run_depend>langs</run_depend>
+  <run_depend>opencv2</run_depend>
 </package>

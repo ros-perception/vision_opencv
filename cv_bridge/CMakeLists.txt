@@ -26,8 +26,8 @@ install(TARGETS ${PROJECT_NAME}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
-# add a test
-catkin_add_gtest(${PROJECT_NAME}-utest test/utest.cpp)
+# add the tests
+catkin_add_gtest(${PROJECT_NAME}-utest test/utest.cpp test/utest2.cpp)
 target_link_libraries(${PROJECT_NAME}-utest ${PROJECT_NAME}
                                             ${OpenCV_LIBRARIES}
 )

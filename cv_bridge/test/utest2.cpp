@@ -140,9 +140,3 @@ TEST(OpencvTests, testCase_encode_decode)
     }
   }
 }
-
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

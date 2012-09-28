@@ -18,7 +18,9 @@
 
   <build_depend>catkin</build_depend>
   <build_depend>opencv2</build_depend>
+  <build_depend>rosconsole</build_depend>
   <build_depend>sensor_msgs</build_depend>
 
   <run_depend>opencv2</run_depend>
+  <run_depend>rosconsole</run_depend>
 </package>

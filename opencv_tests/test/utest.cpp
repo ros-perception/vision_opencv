@@ -32,180 +32,86 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
 
+#include <string>
+#include <vector>
 #include <gtest/gtest.h>
 
-#include "opencv/cxcore.h"  
-#include "opencv/cvwimage.h"
-#include "opencv/cv.h"
-#include "opencv/highgui.h"
+#include "opencv2/core/core.hpp"  
 
 #include "cv_bridge/cv_bridge.h"
-#include "sensor_msgs/Image.h"
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/image_encodings.h>
 
-#define FIXME_HACKISH_RELEASE_ELECTRIC 0
+using namespace sensor_msgs::image_encodings;
+
+bool isUnsigned(const std::string & encoding) {
+  return encoding == RGB8 || encoding == RGBA8 || encoding == RGB16 || encoding == RGBA16 || encoding == BGR8 || encoding == BGRA8 || encoding == BGR16 || encoding == BGRA16 || encoding == MONO8 || encoding == MONO16 ||
+                           encoding == MONO8 || encoding == MONO16 || encoding == TYPE_8UC1 || encoding == TYPE_8UC2 || encoding == TYPE_8UC3 || encoding == TYPE_8UC4 ||
+                           encoding == TYPE_16UC1 || encoding == TYPE_16UC2 || encoding == TYPE_16UC3 || encoding == TYPE_16UC4;
+                           //BAYER_RGGB8, BAYER_BGGR8, BAYER_GBRG8, BAYER_GRBG8, BAYER_RGGB16, BAYER_BGGR16, BAYER_GBRG16, BAYER_GRBG16,
+                           //YUV422
+}
+std::vector<std::string>
+getEncodings() {
+// TODO for Groovy, the following types should be uncommented
+std::string encodings[] = { RGB8, RGBA8, RGB16, RGBA16, BGR8, BGRA8, BGR16, BGRA16, MONO8, MONO16,
+                           TYPE_8UC1, /*TYPE_8UC2,*/ TYPE_8UC3, TYPE_8UC4,
+                           TYPE_8SC1, /*TYPE_8SC2,*/ TYPE_8SC3, TYPE_8SC4,
+                           TYPE_16UC1, /*TYPE_16UC2,*/ TYPE_16UC3, TYPE_16UC4,
+                           TYPE_16SC1, /*TYPE_16SC2,*/ TYPE_16SC3, TYPE_16SC4,
+                           TYPE_32SC1, /*TYPE_32SC2,*/ TYPE_32SC3, TYPE_32SC4,
+                           TYPE_32FC1, /*TYPE_32FC2,*/ TYPE_32FC3, TYPE_32FC4,
+                           TYPE_64FC1, /*TYPE_64FC2,*/ TYPE_64FC3, TYPE_64FC4,
+                           //BAYER_RGGB8, BAYER_BGGR8, BAYER_GBRG8, BAYER_GRBG8, BAYER_RGGB16, BAYER_BGGR16, BAYER_GBRG16, BAYER_GRBG16,
+                           YUV422
+                         };
+return std::vector<std::string>(encodings, encodings+47-8-7);
+}
 
 TEST(OpencvTests, testCase_encode_decode)
 {
-  int fmts[] = { IPL_DEPTH_8U, -1, IPL_DEPTH_8S, IPL_DEPTH_16U, IPL_DEPTH_16S, IPL_DEPTH_32S, IPL_DEPTH_32F, IPL_DEPTH_64F, -1 };
+  std::vector<std::string> encodings = getEncodings();
+  for(size_t i=0; i<encodings.size(); ++i) {
+    std::string encoding1 = encodings[i];
+    cv::Mat image_original(cv::Size(400, 400), cv_bridge::getCvType(encoding1));
+    cv::RNG r(77);
+    r.fill(image_original, cv::RNG::UNIFORM, 0, 255);
 
-  for (int w = 100; w < 800; w += 100) {
-    for (int h = 100; h < 800; h += 100) {
-      for (int fi = 0; fmts[fi] != -1; fi++) {
-        for (int channels = 1; channels <= 4; channels++) {
-          IplImage *original = cvCreateImage(cvSize(w, h), fmts[fi], channels);
-#if 0 // XXX OpenCV bug, change this when opencv_latest next moves
-          CvRNG r = cvRNG(77);
-          cvRandArr(&r, original, CV_RAND_UNI, cvScalar(0,0,0,0), cvScalar(255,255,255,255));
-#else
-          cvSet(original, cvScalar(1,2,3,4));
-#endif
+    sensor_msgs::Image image_message;
+    cv_bridge::CvImage image_bridge(std_msgs::Header(), encoding1, image_original);
 
-          sensor_msgs::Image image_message;
-          sensor_msgs::CvBridge img_bridge_;
+    // Convert to a sensor_msgs::Image
+    sensor_msgs::ImagePtr image_msg = image_bridge.toImageMsg();
 
-          int success;
-          success = img_bridge_.fromIpltoRosImage(original, image_message);
-          EXPECT_TRUE(success);
-          success = img_bridge_.fromImage(image_message);
-          EXPECT_TRUE(success);
-          IplImage *final = img_bridge_.toIpl();
-
-          // cvSaveImage("final.png", final);
-          IplImage *diff = cvCloneImage(original);
-          cvAbsDiff(original, final, diff);
-          CvScalar sum = cvSum(diff);
-          for (int c = 0; c < channels; c++) {
-            EXPECT_TRUE(sum.val[c] == 0);
-          }
-        }
+    for(size_t j=0; j<encodings.size(); ++j) {
+      std::string encoding2 = encodings[j];
+      // It makes sense you cannot convert to a different number of channels and back
+      // TODO Actually, that should be a < but we can't with the TYPE_8UC1 conversions: waiting for Groovy
+      if (numChannels(encoding1) != numChannels(encoding2)) {
+        //EXPECT_THROW(cvtColor(cv_bridge::toCvShare(image_msg, encoding2), encoding1));
+        continue;
       }
+      // Same if they are of different signs
+      if (isUnsigned(encoding1) != isUnsigned(encoding2))
+        continue;
+      // Same if one is a color encoding and not the other one
+      // TODO: that should throw but we'll wait for Groovy
+      if (isColor(encoding1) != isColor(encoding2))
+        continue;
+      // Because of the scaling, we cannot test 16-8 conversion here
+      if (bitDepth(encoding1)==16 && bitDepth(encoding2)==8)
+        continue;
+      // We do not support conversion to YUV422 for now
+      if (encoding2 == YUV422)
+        continue;
+
+      // And convert back to a cv::Mat
+      cv::Mat image_back = cvtColor(cv_bridge::toCvShare(image_msg, encoding2), encoding1)->image;
+
+      EXPECT_LT(cv::norm(image_original, image_back)/image_original.cols/image_original.rows, 0.5) << "problem converting from " << encoding1 << " to " << encoding2 << " and back.";
     }
   }
 }
-
-
-TEST(OpencvTests, testCase_decode_8u)
-{
-  IplImage *original = cvCreateImage(cvSize(640, 480), IPL_DEPTH_8U, 1);
-  CvRNG r = cvRNG(77);
-  cvRandArr(&r, original, CV_RAND_UNI, cvScalar(0,0,0,0), cvScalar(255,255,255,255));
-
-  sensor_msgs::Image image_message;
-  sensor_msgs::CvBridge img_bridge_;
-
-  int success;
-  success = img_bridge_.fromIpltoRosImage(original, image_message);
-  EXPECT_TRUE(success);
-
-  success = img_bridge_.fromImage(image_message, "passthrough");
-  EXPECT_TRUE(success);
-  EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 1);
-
-  success = img_bridge_.fromImage(image_message, "mono8");
-  EXPECT_TRUE(success);
-  EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 1);
-
-  success = img_bridge_.fromImage(image_message, "rgb8");
-  EXPECT_TRUE(success);
-  EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 3);
-
-  success = img_bridge_.fromImage(image_message, "bgr8");
-  EXPECT_TRUE(success);
-  EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 3);
-}
-#if FIXME_HACKISH_RELEASE_ELECTRIC
-TEST(OpencvTests, testCase_decode_16u)
-{
-  IplImage *original = cvCreateImage(cvSize(640, 480), IPL_DEPTH_16U, 1);
-  CvRNG r = cvRNG(77);
-  cvRandArr(&r, original, CV_RAND_UNI, cvScalar(0,0,0,0), cvScalar(255,255,255,255));
-
-  sensor_msgs::Image image_message;
-  sensor_msgs::CvBridge img_bridge_;
-
-  int success;
-  success = img_bridge_.fromIpltoRosImage(original, image_message);
-  EXPECT_TRUE(success);
-
-  success = img_bridge_.fromImage(image_message, "mono16");
-  EXPECT_TRUE(success);
-  printf("%d\n", cvGetElemType(img_bridge_.toIpl()));
-  EXPECT_TRUE(cvGetElemType(img_bridge_.toIpl()) == CV_16UC1);
-}
-#endif
-
-TEST(OpencvTests, testCase_decode_8uc3)
-{
-  IplImage *original = cvCreateImage(cvSize(640, 480), IPL_DEPTH_8U, 3);
-  CvRNG r = cvRNG(77);
-  cvRandArr(&r, original, CV_RAND_UNI, cvScalar(0,0,0,0), cvScalar(255,255,255,255));
-
-  sensor_msgs::Image image_message;
-  sensor_msgs::CvBridge img_bridge_;
-
-  int success;
-  success = img_bridge_.fromIpltoRosImage(original, image_message);
-  EXPECT_TRUE(success);
-
-  success = img_bridge_.fromImage(image_message, "passthrough");
-  EXPECT_TRUE(success);
-  EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 3);
-
-  success = img_bridge_.fromImage(image_message, "mono8");
-  EXPECT_TRUE(success);
-  EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 1);
-
-  success = img_bridge_.fromImage(image_message, "rgb8");
-  EXPECT_TRUE(success);
-  EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 3);
-
-  success = img_bridge_.fromImage(image_message, "bgr8");
-  EXPECT_TRUE(success);
-  EXPECT_TRUE(CV_MAT_CN(cvGetElemType(img_bridge_.toIpl())) == 3);
-}
-
-TEST(OpencvTests, testCase_new_methods)
-{
-  int channels = 3;
-  IplImage *original = cvCreateImage(cvSize(640, 480), IPL_DEPTH_8U, channels);
-  CvRNG r = cvRNG(77);
-  cvRandArr(&r, original, CV_RAND_UNI, cvScalar(0,0,0,0), cvScalar(255,255,255,255));
-
-  sensor_msgs::CvBridge img_bridge_;
-  sensor_msgs::Image::Ptr rosimg = img_bridge_.cvToImgMsg(original);
-
-  IplImage *final = img_bridge_.imgMsgToCv(rosimg);
-
-  IplImage *diff = cvCloneImage(original);
-  cvAbsDiff(original, final, diff);
-  CvScalar sum = cvSum(diff);
-  for (int c = 0; c < channels; c++) {
-    EXPECT_TRUE(sum.val[c] == 0);
-  }
-}
-
-#if FIXME_HACKISH_RELEASE_ELECTRIC
-TEST(OpencvTests, testCase_16u_bgr)
-{
-  int channels = 1;
-  IplImage *original = cvCreateImage(cvSize(640, 480), IPL_DEPTH_16U, channels);
-  CvRNG r = cvRNG(77);
-  cvRandArr(&r, original, CV_RAND_UNI, cvScalar(0,0,0,0), cvScalar(255,255,255,255));
-
-  sensor_msgs::CvBridge img_bridge_;
-  sensor_msgs::Image::Ptr image_message = img_bridge_.cvToImgMsg(original, "mono16");
-
-  int success;
-  success = img_bridge_.fromImage(*image_message, "mono16");
-  EXPECT_TRUE(success);
-  EXPECT_TRUE(cvGetElemType(img_bridge_.toIpl()) == CV_16UC1);
-
-  //why would this work? its mono16 -> bgr8...
-  success = img_bridge_.fromImage(*image_message, "bgr8");
-  EXPECT_TRUE(success);
-  EXPECT_TRUE(cvGetElemType(img_bridge_.toIpl()) == CV_8UC3);
-}
-#endif
 
 int main(int argc, char **argv)
 {

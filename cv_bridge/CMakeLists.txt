@@ -1,4 +1,7 @@
+cmake_minimum_required(VERSION 2.8)
 project(cv_bridge)
+
+find_package(catkin REQUIRED)
 catkin_package(INCLUDE_DIRS include
                LIBRARIES ${PROJECT_NAME}
 )

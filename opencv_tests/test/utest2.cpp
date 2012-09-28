@@ -91,12 +91,12 @@ TEST(OpencvTests, testCase_encode_decode)
         //EXPECT_THROW(cvtColor(cv_bridge::toCvShare(image_msg, encoding2), encoding1));
         continue;
       }
-      // Same if they are of different signs
-      if (isUnsigned(encoding1) != isUnsigned(encoding2))
-        continue;
       // Same if one is a color encoding and not the other one
       // TODO: that should throw but we'll wait for Groovy
       if (isColor(encoding1) != isColor(encoding2))
+        continue;
+      // Same if they are of different signs
+      if ((isUnsigned(encoding1) != isUnsigned(encoding2)) && (!isColor(encoding1)))
         continue;
       // Because of the scaling, we cannot test 16-8 conversion here
       if (bitDepth(encoding1)==16 && bitDepth(encoding2)==8)
@@ -104,8 +104,14 @@ TEST(OpencvTests, testCase_encode_decode)
       // We do not support conversion to YUV422 for now
       if (encoding2 == YUV422)
         continue;
+      // We cannot convert to YUV422 so we just perform the first conversion, not the back
+      if (encoding1 == YUV422) {
+        cv_bridge::toCvShare(image_msg, encoding2);
+        continue;
+      }
 
       // And convert back to a cv::Mat
+      std::cout << encoding1 << " " << encoding2 << std::endl;
       cv::Mat image_back = cvtColor(cv_bridge::toCvShare(image_msg, encoding2), encoding1)->image;
 
       EXPECT_LT(cv::norm(image_original, image_back)/image_original.cols/image_original.rows, 0.5) << "problem converting from " << encoding1 << " to " << encoding2 << " and back.";

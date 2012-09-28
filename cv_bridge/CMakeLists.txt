@@ -6,11 +6,13 @@ catkin_package(INCLUDE_DIRS include
                LIBRARIES ${PROJECT_NAME}
 )
 
+catkin_python_setup()
 
 find_package(OpenCV REQUIRED)
-find_package(catkin REQUIRED sensor_msgs)
+find_package(catkin REQUIRED rosconsole sensor_msgs)
 
 include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS}
+                           ${rosconsole_INCLUDE_DIRS}
                            ${sensor_msgs_INCLUDE_DIRS}
 )
 include_directories(include)

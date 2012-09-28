@@ -32,6 +32,8 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
 
+#include <map>
+
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <sensor_msgs/image_encodings.h>
@@ -65,6 +67,9 @@ int getCvType(const std::string& encoding)
   if (encoding == enc::BAYER_GBRG16) return CV_16UC1;
   if (encoding == enc::BAYER_GRBG16) return CV_16UC1;
 
+  // Miscellaneous
+  if (encoding == enc::YUV422) return CV_8UC3;
+
   // Check all the generic content encodings
 #define CHECK_ENCODING(code)                            \
   if (encoding == enc::TYPE_##code) return CV_##code    \
@@ -92,7 +97,7 @@ int getCvType(const std::string& encoding)
 
 /// @cond DOXYGEN_IGNORE
 
-enum Format { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA };
+enum Format { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, YUV422 };
 
 Format getFormat(const std::string& encoding)
 {
@@ -121,7 +126,7 @@ Format getFormat(const std::string& encoding)
   if (encoding == enc::TYPE_16SC3) return RGB;
   if (encoding == enc::TYPE_32SC3) return RGB;
   if (encoding == enc::TYPE_32FC3) return RGB;
-  if (encoding == enc::TYPE_64FC2) return RGB;
+  if (encoding == enc::TYPE_64FC3) return RGB;
 
   if (encoding == enc::TYPE_8UC4) return RGBA;
   if (encoding == enc::TYPE_8SC4) return RGBA;
@@ -137,34 +142,61 @@ Format getFormat(const std::string& encoding)
 
 static const int SAME_FORMAT = -1;
 
-int getConversionCode(Format src_format, Format dst_format)
+/** Return a lit of OpenCV conversion codes to get from one Format to the other
+ * The key is a pair: <FromFormat, ToFormat> and the value a succession of OpenCV code conversion
+ * It's not efficient code but it is only called once and the structure is small enough
+ */
+std::map<std::pair<Format, Format>, std::vector<int> > getConversionCodes() {
+  std::map<std::pair<Format, Format>, std::vector<int> > res;
+  for(int i=0; i<=5; ++i)
+    res[std::pair<Format, Format>(Format(i),Format(i))].push_back(SAME_FORMAT);
+  res[std::make_pair(GRAY, RGB)].push_back(CV_GRAY2RGB);
+  res[std::make_pair(GRAY, BGR)].push_back(CV_GRAY2BGR);
+  res[std::make_pair(GRAY, RGBA)].push_back(CV_GRAY2RGBA);
+  res[std::make_pair(GRAY, BGRA)].push_back(CV_GRAY2BGRA);
+
+  res[std::make_pair(RGB, GRAY)].push_back(CV_RGB2GRAY);
+  res[std::make_pair(RGB, BGR)].push_back(CV_RGB2BGR);
+  res[std::make_pair(RGB, RGBA)].push_back(CV_RGB2RGBA);
+  res[std::make_pair(RGB, BGRA)].push_back(CV_RGB2BGRA);
+
+  res[std::make_pair(BGR, GRAY)].push_back(CV_BGR2GRAY);
+  res[std::make_pair(BGR, RGB)].push_back(CV_BGR2RGB);
+  res[std::make_pair(BGR, RGBA)].push_back(CV_BGR2RGBA);
+  res[std::make_pair(BGR, BGRA)].push_back(CV_BGR2BGRA);
+
+  res[std::make_pair(RGBA, GRAY)].push_back(CV_RGBA2GRAY);
+  res[std::make_pair(RGBA, RGB)].push_back(CV_RGBA2RGB);
+  res[std::make_pair(RGBA, BGR)].push_back(CV_RGBA2BGR);
+  res[std::make_pair(RGBA, BGRA)].push_back(CV_RGBA2BGRA);
+
+  res[std::make_pair(BGRA, GRAY)].push_back(CV_BGRA2GRAY);
+  res[std::make_pair(BGRA, RGB)].push_back(CV_BGRA2RGB);
+  res[std::make_pair(BGRA, BGR)].push_back(CV_BGRA2BGR);
+  res[std::make_pair(BGRA, RGBA)].push_back(CV_BGRA2RGBA);
+
+  res[std::make_pair(YUV422, GRAY)].push_back(CV_YUV2GRAY_UYVY);
+  res[std::make_pair(YUV422, RGB)].push_back(CV_YUV2RGB_UYVY);
+  res[std::make_pair(YUV422, BGR)].push_back(CV_YUV2BGR_UYVY);
+  res[std::make_pair(YUV422, RGBA)].push_back(CV_YUV2RGBA_UYVY);
+  res[std::make_pair(YUV422, BGRA)].push_back(CV_YUV2BGRA_UYVY);
+
+  return res;
+}
+
+const std::vector<int> getConversionCode(std::string src_encoding, std::string dst_encoding)
 {
-  static const int CONVERSION_CODES[] = { SAME_FORMAT,
-                                          CV_GRAY2RGB,
-                                          CV_GRAY2BGR,
-                                          CV_GRAY2RGBA,
-                                          CV_GRAY2BGRA,
-                                          CV_RGB2GRAY,
-                                          SAME_FORMAT,
-                                          CV_RGB2BGR,
-                                          CV_RGB2RGBA,
-                                          CV_RGB2BGRA,
-                                          CV_BGR2GRAY,
-                                          CV_BGR2RGB,
-                                          SAME_FORMAT,
-                                          CV_BGR2RGBA,
-                                          CV_BGR2BGRA,
-                                          CV_RGBA2GRAY,
-                                          CV_RGBA2RGB,
-                                          CV_RGBA2BGR,
-                                          SAME_FORMAT,
-                                          CV_RGBA2BGRA,
-                                          CV_BGRA2GRAY,
-                                          CV_BGRA2RGB,
-                                          CV_BGRA2BGR,
-                                          CV_BGRA2RGBA,
-                                          SAME_FORMAT };
-  return CONVERSION_CODES[src_format*5 + dst_format];
+  Format src_format = getFormat(src_encoding);
+  Format dst_format = getFormat(dst_encoding);
+
+  static const std::map<std::pair<Format, Format>, std::vector<int> > CONVERSION_CODES = getConversionCodes();
+
+  std::pair<Format, Format> key(src_format, dst_format);
+  std::map<std::pair<Format, Format>, std::vector<int> >::const_iterator val = CONVERSION_CODES.find(key);
+  if (val == CONVERSION_CODES.end())
+    throw Exception("Unsupported conversion from [" + src_encoding +
+                      "] to [" + dst_encoding + "]");
+  return val->second;
 }
 
 // Internal, used by toCvCopy and cvtColor
@@ -188,31 +220,32 @@ CvImagePtr toCvCopyImpl(const cv::Mat& source,
   else
   {
     // Convert the source data to the desired encoding
-    Format src_format = getFormat(src_encoding);
-    Format dst_format = getFormat(dst_encoding);
-    if (src_format == INVALID || dst_format == INVALID)
-      throw Exception("Unsupported conversion from [" + src_encoding +
-                      "] to [" + dst_encoding + "]");
-
-    int conversion_code = getConversionCode(src_format, dst_format);
-    if (conversion_code == SAME_FORMAT)
-    {
-      // Same number of channels, but different bit depth
-      double alpha = 1.0;
-      int src_depth = enc::bitDepth(src_encoding);
-      int dst_depth = enc::bitDepth(dst_encoding);
-      // Do scaling between CV_8U [0,255] and CV_16U [0,65535] images.
-      if (src_depth == 8 && dst_depth == 16)
-        alpha = 65535. / 255.;
-      else if (src_depth == 16 && dst_depth == 8)
-        alpha = 255. / 65535.;
-      source.convertTo(ptr->image, getCvType(dst_encoding), alpha);
+    const std::vector<int> conversion_codes = getConversionCode(src_encoding, dst_encoding);
+    cv::Mat image1 = source;
+    cv::Mat image2;
+    for(size_t i=0; i<conversion_codes.size(); ++i) {
+      int conversion_code = conversion_codes[i];
+      if (conversion_code == SAME_FORMAT)
+      {
+        // Same number of channels, but different bit depth
+        double alpha = 1.0;
+        int src_depth = enc::bitDepth(src_encoding);
+        int dst_depth = enc::bitDepth(dst_encoding);
+        // Do scaling between CV_8U [0,255] and CV_16U [0,65535] images.
+        if (src_depth == 8 && dst_depth == 16)
+          alpha = 65535. / 255.;
+        else if (src_depth == 16 && dst_depth == 8)
+          alpha = 255. / 65535.;
+        image1.convertTo(image2, getCvType(dst_encoding), alpha);
+      }
+      else
+      {
+        // Perform color conversion
+        cv::cvtColor(image1, image2, conversion_code);
+      }
+      image1 = image2;
     }
-    else
-    {
-      // Perform color conversion
-      cv::cvtColor(source, ptr->image, conversion_code);
-    }
+    ptr->image = image2;
     ptr->encoding = dst_encoding;
   }
 

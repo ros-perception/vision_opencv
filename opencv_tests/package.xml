@@ -1,6 +1,6 @@
 <package>
   <name>opencv_tests</name>
-  <version>1.9.6</version>
+  <version>1.9.7</version>
   <description brief="opencv_tests">
      opencv_tests
   </description>
@@ -9,6 +9,7 @@
   <license>BSD</license>
   <url>http://pr.willowgarage.com/wiki/opencv_tests</url>
 
+  <build_depend>catkin</build_depend>
   <build_depend>cv_bridge</build_depend>
   <build_depend>ros</build_depend>
   <build_depend>sensor_msgs</build_depend>

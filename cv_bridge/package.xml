@@ -16,6 +16,7 @@
     <rosdoc config="rosdoc.yaml" />
   </export>
 
+  <build_depend>catkin</build_depend>
   <build_depend>opencv2</build_depend>
   <build_depend>sensor_msgs</build_depend>
 

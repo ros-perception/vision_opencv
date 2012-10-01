@@ -2,7 +2,11 @@ cmake_minimum_required(VERSION 2.8)
 project(image_geometry)
 
 find_package(catkin REQUIRED)
-catkin_package(INCLUDE_DIRS include
+
+find_package(catkin REQUIRED sensor_msgs)
+find_package(OpenCV REQUIRED)
+catkin_package(DEPENDS OpenCV sensor_msgs
+               INCLUDE_DIRS include
                LIBRARIES ${PROJECT_NAME}
 )
 

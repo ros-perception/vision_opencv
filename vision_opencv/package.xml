@@ -1,0 +1,22 @@
+<package>
+  <name>vision_opencv</name>
+  <version>1.9.9</version>
+  <description></description>
+  <author>Patrick Mihelich</author>
+  <author>James Bowman</author>
+  <maintainer email="vrabaud@willowgarage.com">Vincent Rabaud</maintainer>
+  <license>BSD</license>
+  
+  <url type="website">http://www.ros.org/wiki/vision_opencv</url>
+  <url type="bugtracker">https://github.com/ros-perception/vision_opencv/issues</url>
+  <url type="repository">https://github.com/ros-perception/vision_opencv</url>
+  
+  <!-- Old stack contents -->
+  <run_depend>cv_bridge</run_depend>
+  <run_depend>image_geometry</run_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+
+</package>

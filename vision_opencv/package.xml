@@ -1,7 +1,7 @@
 <package>
   <name>vision_opencv</name>
   <version>1.9.9</version>
-  <description></description>
+  <description>Packages for interfacing ROS with OpenCV, a library of programming functions for real time computer vision.</description>
   <author>Patrick Mihelich</author>
   <author>James Bowman</author>
   <maintainer email="vrabaud@willowgarage.com">Vincent Rabaud</maintainer>

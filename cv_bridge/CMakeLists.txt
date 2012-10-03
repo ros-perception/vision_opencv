@@ -27,7 +27,7 @@ include_directories(include)
 add_library(${PROJECT_NAME} SHARED src/cv_bridge.cpp)
 target_link_libraries(${PROJECT_NAME}  ${OpenCV_LIBS})
 
-install(DIRECTORY include/${PROJECT_NAME}
+install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 

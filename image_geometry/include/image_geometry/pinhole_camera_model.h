@@ -265,7 +265,12 @@ public:
    * \param Z      Z (depth), in Cartesian space
    */
   double getDeltaY(double deltaV, double Z) const;
-  
+
+  /**
+   * \brief Returns true if the camera has been initialized
+   */
+  bool initialized() const { return cache_; }
+
 protected:
   sensor_msgs::CameraInfo cam_info_;
   cv::Mat_<double> D_, R_;           // Unaffected by binning, ROI
@@ -277,8 +282,6 @@ protected:
   boost::shared_ptr<Cache> cache_; // Holds cached data for internal use
 
   void initRectificationMaps() const;
-
-  bool initialized() const { return cache_; }
 
   friend class StereoCameraModel;
 };

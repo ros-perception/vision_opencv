@@ -85,13 +85,16 @@ public:
    */
   double getDisparity(double Z) const;
 
+
+  /**
+   * \brief Returns true if the camera has been initialized
+   */
+  bool initialized() const { return left_.initialized() && right_.initialized(); }
 protected:
   PinholeCameraModel left_, right_;
   cv::Mat_<double> Q_;
 
   void updateQ();
-
-  bool initialized() const { return left_.initialized() && right_.initialized(); }
 };
 
 

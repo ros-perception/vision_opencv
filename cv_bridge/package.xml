@@ -8,9 +8,10 @@
   <author>Patrick Mihelich</author>
   <author>James Bowman</author>
   <maintainer email="vrabaud@willowgarage.com">Vincent Rabaud</maintainer>
-  <copyright>Willow Garage</copyright>
   <license>BSD</license>
-  <url>http://www.ros.org/wiki/cv_bridge</url>
+  <url type="website">http://www.ros.org/wiki/cv_bridge</url>
+  <url type="repository">https://github.com/ros-perception/vision_opencv</url>
+  <url type="bugtracker">https://github.com/ros-perception/vision_opencv/issues</url>
 
   <export>
     <rosdoc config="rosdoc.yaml" />

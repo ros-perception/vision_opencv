@@ -1,5 +1,4 @@
 import roslib
-roslib.load_manifest('opencv_tests')
 import rostest
 import rospy
 import unittest

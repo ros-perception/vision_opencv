@@ -100,21 +100,21 @@ int getCvType(const std::string& encoding)
 
 /// @cond DOXYGEN_IGNORE
 
-enum Format { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, YUV422 };
+enum Format { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, YUV422, BAYER_RGGB, BAYER_BGGR, BAYER_GBRG, BAYER_GRBG};
 
 Format getFormat(const std::string& encoding)
 {
-  if (encoding == enc::BGR8)   return BGR;
-  if (encoding == enc::MONO8)  return GRAY;
-  if (encoding == enc::RGB8)   return RGB;
-  if (encoding == enc::MONO16) return GRAY;
-  if (encoding == enc::BGR16)  return BGR;
-  if (encoding == enc::RGB16)  return RGB;
-  if (encoding == enc::BGRA8)  return BGRA;
-  if (encoding == enc::RGBA8)  return RGBA;
-  if (encoding == enc::BGRA16) return BGRA;
-  if (encoding == enc::RGBA16) return RGBA;
+  if ((encoding == enc::MONO8) || (encoding == enc::MONO16)) return GRAY;
+  if ((encoding == enc::BGR8) || (encoding == enc::BGR16))  return BGR;
+  if ((encoding == enc::RGB8) || (encoding == enc::RGB16))  return RGB;
+  if ((encoding == enc::BGRA8) || (encoding == enc::BGRA16))  return BGRA;
+  if ((encoding == enc::RGBA8) || (encoding == enc::RGBA16))  return RGBA;
   if (encoding == enc::YUV422) return YUV422;
+
+  if ((encoding == enc::BAYER_RGGB8) || (encoding == enc::BAYER_RGGB16)) return BAYER_RGGB;
+  if ((encoding == enc::BAYER_BGGR8) || (encoding == enc::BAYER_BGGR16)) return BAYER_BGGR;
+  if ((encoding == enc::BAYER_GBRG8) || (encoding == enc::BAYER_GBRG16)) return BAYER_GBRG;
+  if ((encoding == enc::BAYER_GRBG8) || (encoding == enc::BAYER_GRBG16)) return BAYER_GRBG;
 
   // We don't support conversions to/from other types
   return INVALID;
@@ -161,6 +161,18 @@ std::map<std::pair<Format, Format>, std::vector<int> > getConversionCodes() {
   res[std::make_pair(YUV422, RGBA)].push_back(CV_YUV2RGBA_UYVY);
   res[std::make_pair(YUV422, BGRA)].push_back(CV_YUV2BGRA_UYVY);
 
+  res[std::make_pair(BAYER_RGGB, RGB)].push_back(CV_BayerBG2RGB);
+  res[std::make_pair(BAYER_RGGB, BGR)].push_back(CV_BayerBG2BGR);
+  
+  res[std::make_pair(BAYER_BGGR, RGB)].push_back(CV_BayerRG2RGB);
+  res[std::make_pair(BAYER_BGGR, BGR)].push_back(CV_BayerRG2BGR);
+
+  res[std::make_pair(BAYER_GBRG, RGB)].push_back(CV_BayerGR2RGB);
+  res[std::make_pair(BAYER_GBRG, BGR)].push_back(CV_BayerGR2BGR);
+
+  res[std::make_pair(BAYER_GRBG, RGB)].push_back(CV_BayerGB2RGB);
+  res[std::make_pair(BAYER_GRBG, BGR)].push_back(CV_BayerGB2BGR);
+
   return res;
 }
 
@@ -168,8 +180,12 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
 {
   Format src_format = getFormat(src_encoding);
   Format dst_format = getFormat(dst_encoding);
-  bool is_src_color_format = sensor_msgs::image_encodings::isColor(src_encoding) || sensor_msgs::image_encodings::isMono(src_encoding);
-  bool is_dst_color_format = sensor_msgs::image_encodings::isColor(dst_encoding) || sensor_msgs::image_encodings::isMono(dst_encoding);
+  bool is_src_color_format = sensor_msgs::image_encodings::isColor(src_encoding) ||
+                             sensor_msgs::image_encodings::isMono(src_encoding) ||
+                             sensor_msgs::image_encodings::isBayer(src_encoding);
+  bool is_dst_color_format = sensor_msgs::image_encodings::isColor(dst_encoding) ||
+                             sensor_msgs::image_encodings::isMono(dst_encoding) ||
+                             sensor_msgs::image_encodings::isBayer(dst_encoding);
   bool is_num_channels_the_same = (sensor_msgs::image_encodings::numChannels(src_encoding) == sensor_msgs::image_encodings::numChannels(dst_encoding));
 
   // If we have no color info in the source, we can only convert to the same format which

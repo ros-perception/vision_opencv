@@ -1,22 +1,19 @@
 cmake_minimum_required(VERSION 2.8)
 project(image_geometry)
 
-find_package(catkin REQUIRED)
-
 find_package(catkin REQUIRED sensor_msgs)
 find_package(OpenCV REQUIRED)
-catkin_package(DEPENDS OpenCV sensor_msgs
+
+catkin_package(CATKIN_DEPENDS sensor_msgs
+               DEPENDS OpenCV
                INCLUDE_DIRS include
                LIBRARIES ${PROJECT_NAME}
 )
 
 catkin_python_setup()
 
-find_package(OpenCV REQUIRED)
-find_package(catkin REQUIRED sensor_msgs)
-
-include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS}
-                           ${sensor_msgs_INCLUDE_DIRS}
+include_directories(SYSTEM ${catkin_INCLUDE_DIRS}
+                           ${OpenCV_INCLUDE_DIRS}
 )
 include_directories(include)
 
@@ -24,13 +21,8 @@ include_directories(include)
 add_library(${PROJECT_NAME} src/pinhole_camera_model.cpp src/stereo_camera_model.cpp)
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES})
 
-catkin_add_nosetests(test/directed.py)
-
-catkin_add_gtest(${PROJECT_NAME}-utest test/utest.cpp)
-target_link_libraries(${PROJECT_NAME}-utest ${PROJECT_NAME} ${OpenCV_LIBS})
-
-install(DIRECTORY include/
-        DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+install(DIRECTORY include/${PROJECT_NAME}/
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/
 )
 
 install(TARGETS ${PROJECT_NAME}
@@ -38,3 +30,6 @@ install(TARGETS ${PROJECT_NAME}
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
+
+# add tests
+add_subdirectory(test)

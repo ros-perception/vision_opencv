@@ -136,7 +136,12 @@ public:
    * \brief Compute the raw ROI best fitting a rectified ROI.
    */
   cv::Rect unrectifyRoi(const cv::Rect& roi_rect) const;
-  
+
+  /**
+   * \brief Returns the camera info message held internally
+   */
+  const sensor_msgs::CameraInfo& cameraInfo() const;
+
   /**
    * \brief Returns the original camera matrix.
    */
@@ -281,6 +286,7 @@ inline ros::Time PinholeCameraModel::stamp() const
   return cam_info_.header.stamp;
 }
 
+inline const sensor_msgs::CameraInfo& PinholeCameraModel::cameraInfo() const  { return cam_info_; }
 inline const cv::Mat_<double>& PinholeCameraModel::intrinsicMatrix() const  { return K_; }
 inline const cv::Mat_<double>& PinholeCameraModel::distortionCoeffs() const { return D_; }
 inline const cv::Mat_<double>& PinholeCameraModel::rotationMatrix() const   { return R_; }

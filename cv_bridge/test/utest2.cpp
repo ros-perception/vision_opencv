@@ -73,7 +73,7 @@ TEST(OpencvTests, testCase_encode_decode)
   std::vector<std::string> encodings = getEncodings();
   for(size_t i=0; i<encodings.size(); ++i) {
     std::string src_encoding = encodings[i];
-    bool is_src_color_format = isColor(src_encoding) || isMono(src_encoding);
+    bool is_src_color_format = isColor(src_encoding) || isMono(src_encoding) || (src_encoding == sensor_msgs::image_encodings::YUV422);
     cv::Mat image_original(cv::Size(400, 400), cv_bridge::getCvType(src_encoding));
     cv::RNG r(77);
     r.fill(image_original, cv::RNG::UNIFORM, 0, 255);
@@ -86,7 +86,7 @@ TEST(OpencvTests, testCase_encode_decode)
 
     for(size_t j=0; j<encodings.size(); ++j) {
       std::string dst_encoding = encodings[j];
-      bool is_dst_color_format = isColor(dst_encoding) || isMono(dst_encoding);
+      bool is_dst_color_format = isColor(dst_encoding) || isMono(dst_encoding) || (dst_encoding == sensor_msgs::image_encodings::YUV422);
       bool is_num_channels_the_same = (numChannels(src_encoding) == numChannels(dst_encoding));
 
       cv_bridge::CvImageConstPtr cv_image;

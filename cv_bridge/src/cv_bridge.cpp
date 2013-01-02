@@ -182,10 +182,12 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
   Format dst_format = getFormat(dst_encoding);
   bool is_src_color_format = sensor_msgs::image_encodings::isColor(src_encoding) ||
                              sensor_msgs::image_encodings::isMono(src_encoding) ||
-                             sensor_msgs::image_encodings::isBayer(src_encoding);
+                             sensor_msgs::image_encodings::isBayer(src_encoding) ||
+                             (src_encoding == sensor_msgs::image_encodings::YUV422);
   bool is_dst_color_format = sensor_msgs::image_encodings::isColor(dst_encoding) ||
                              sensor_msgs::image_encodings::isMono(dst_encoding) ||
-                             sensor_msgs::image_encodings::isBayer(dst_encoding);
+                             sensor_msgs::image_encodings::isBayer(dst_encoding) ||
+                             (dst_encoding == sensor_msgs::image_encodings::YUV422);
   bool is_num_channels_the_same = (sensor_msgs::image_encodings::numChannels(src_encoding) == sensor_msgs::image_encodings::numChannels(dst_encoding));
 
   // If we have no color info in the source, we can only convert to the same format which

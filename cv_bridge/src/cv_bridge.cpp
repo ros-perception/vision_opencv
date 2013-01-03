@@ -161,15 +161,20 @@ std::map<std::pair<Format, Format>, std::vector<int> > getConversionCodes() {
   res[std::make_pair(YUV422, RGBA)].push_back(CV_YUV2RGBA_UYVY);
   res[std::make_pair(YUV422, BGRA)].push_back(CV_YUV2BGRA_UYVY);
 
+  // Deal with Bayer
+  res[std::make_pair(BAYER_RGGB, GRAY)].push_back(CV_BayerBG2GRAY);
   res[std::make_pair(BAYER_RGGB, RGB)].push_back(CV_BayerBG2RGB);
   res[std::make_pair(BAYER_RGGB, BGR)].push_back(CV_BayerBG2BGR);
-  
+
+  res[std::make_pair(BAYER_BGGR, GRAY)].push_back(CV_BayerRG2GRAY);
   res[std::make_pair(BAYER_BGGR, RGB)].push_back(CV_BayerRG2RGB);
   res[std::make_pair(BAYER_BGGR, BGR)].push_back(CV_BayerRG2BGR);
 
+  res[std::make_pair(BAYER_GBRG, GRAY)].push_back(CV_BayerGR2GRAY);
   res[std::make_pair(BAYER_GBRG, RGB)].push_back(CV_BayerGR2RGB);
   res[std::make_pair(BAYER_GBRG, BGR)].push_back(CV_BayerGR2BGR);
 
+  res[std::make_pair(BAYER_GRBG, GRAY)].push_back(CV_BayerGB2GRAY);
   res[std::make_pair(BAYER_GRBG, RGB)].push_back(CV_BayerGB2RGB);
   res[std::make_pair(BAYER_GRBG, BGR)].push_back(CV_BayerGB2BGR);
 

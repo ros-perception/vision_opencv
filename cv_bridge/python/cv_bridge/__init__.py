@@ -1,1 +1,1 @@
-from cv_bridge import *
+from .cv_bridge import CvBridge, CvBridgeError

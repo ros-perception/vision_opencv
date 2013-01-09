@@ -38,19 +38,9 @@ class CvBridge:
                 self.cvtype_names[eval("cv.CV_%s" % nm)] = nm
 
     def encoding_as_cvtype(self, encoding):
-        channeltypes = {
-          "rgb8" : cv.CV_8UC3,
-          "bgr8" : cv.CV_8UC3,
-          "rgba8" : cv.CV_8UC4,
-          "bgra8" : cv.CV_8UC4,
-          "mono8" : cv.CV_8UC1,
-          "mono16" : cv.CV_16UC1
-        }
+        from cv_bridge.boost.cv_bridge_boost import cvGetType
 
-        if encoding in channeltypes:
-            return channeltypes[encoding]
-        else:
-            return eval("cv.CV_%s" % encoding)
+        return cvGetType(encoding)
 
     def encoding_as_fmt(self, encoding):
         source_channels = cv.CV_MAT_CN(self.encoding_as_cvtype(encoding))
@@ -99,7 +89,7 @@ class CvBridge:
            ``CV_16UC1``
                 for "mono16"
 
-        This function returns an OpenCV :ctype:`IplImage` message on success, or raises :exc:`opencv_latest.cv_bridge.CvBridgeError` on failure.
+        This function returns an OpenCV :ctype:`IplImage` message on success, or raises :exc:`cv_bridge.CvBridgeError` on failure.
         """
 
         source_type = self.encoding_as_cvtype(img_msg.encoding)
@@ -114,7 +104,6 @@ class CvBridge:
         sourcefmt = self.encoding_as_fmt(img_msg.encoding)
         destfmt = self.encoding_as_fmt(desired_encoding)
 
-        source_type = self.encoding_as_cvtype(img_msg.encoding)
         destination_type = self.encoding_as_cvtype(desired_encoding)
         if sourcefmt == destfmt and source_type == destination_type:
             return im

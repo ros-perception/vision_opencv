@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(cv_bridge)
 
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED python)
 find_package(OpenCV REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS rosconsole sensor_msgs)
@@ -19,20 +19,13 @@ include_directories(SYSTEM ${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 include_directories(include ${catkin_INCLUDE_DIRS})
 link_directories(${OpenCV_LIB_DIR})
 
-# add library
-add_library(${PROJECT_NAME} SHARED src/cv_bridge.cpp)
-add_dependencies(${PROJECT_NAME} sensor_msgs_gencpp)
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${catkin_LIBRARIES})
+add_subdirectory(python)
+add_subdirectory(src)
 
+# install the include folder
 install(
   DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-)
-
-install(TARGETS ${PROJECT_NAME}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
 # add the tests

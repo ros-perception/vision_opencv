@@ -38,9 +38,9 @@ class CvBridge:
                 self.cvtype_names[eval("cv.CV_%s" % nm)] = nm
 
     def encoding_as_cvtype(self, encoding):
-        from cv_bridge.boost.cv_bridge_boost import cvGetType
+        from cv_bridge.boost.cv_bridge_boost import getCvType
 
-        return cvGetType(encoding)
+        return getCvType(encoding)
 
     def encoding_as_fmt(self, encoding):
         source_channels = cv.CV_MAT_CN(self.encoding_as_cvtype(encoding))
@@ -73,7 +73,7 @@ class CvBridge:
 
         :rtype: :ctype:`IplImage`
         :raises CvBridgeError: when conversion is not possible.
-            
+
         If desired_encoding is ``"passthrough"``, then the returned image has the same format as img_msg.
         Otherwise desired_encoding must be one of the strings "rgb8", "bgr8", "rgba8", "bgra8", "mono8" or "mono16",
         in which case this method converts the image using
@@ -148,7 +148,7 @@ class CvBridge:
 
         :rtype:           A sensor_msgs.msg.Image message
         :raises CvBridgeError: when the ``cvim`` has a type that is incompatible with ``encoding``
-            
+
         If encoding is ``"passthrough"``, then the message has the same encoding as the image's OpenCV type.
         Otherwise encoding must be one of the strings "rgb8", "bgr8", "rgba8", "bgra8", "mono8" or "mono16",
         in which case the OpenCV image must have the appropriate type:

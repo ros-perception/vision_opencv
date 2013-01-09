@@ -21,17 +21,10 @@ link_directories(${OpenCV_LIB_DIR})
 
 add_subdirectory(python)
 add_subdirectory(src)
+add_subdirectory(test)
 
 # install the include folder
 install(
   DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-)
-
-# add the tests
-catkin_add_gtest(${PROJECT_NAME}-utest test/utest.cpp test/utest2.cpp)
-target_link_libraries(${PROJECT_NAME}-utest
-  ${PROJECT_NAME}
-  ${OpenCV_LIBRARIES}
-  ${catkin_LIBRARIES}
 )

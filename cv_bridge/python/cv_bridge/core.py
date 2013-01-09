@@ -40,21 +40,12 @@ class CvBridge:
     def encoding_as_cvtype(self, encoding):
         from cv_bridge.boost.cv_bridge_boost import getCvType
 
-        return getCvType(encoding)
+        try:
+            res = getCvType(encoding)
+        except RuntimeError as e:
+            raise CvBridgeError(e)
 
-    def encoding_as_fmt(self, encoding):
-        source_channels = cv.CV_MAT_CN(self.encoding_as_cvtype(encoding))
-        if source_channels == 1:
-          fmt = "GRAY"
-        elif "rgb8" == encoding:
-          fmt = "RGB"
-        elif "rgba8" == encoding:
-          fmt = "RGBA"
-        elif source_channels == 3:
-          fmt = "BGR"
-        elif source_channels == 4:
-          fmt = "BGRA"
-        return fmt
+        return res
 
     def imgmsg_to_cv(self, img_msg, desired_encoding = "passthrough"):
         """
@@ -64,30 +55,13 @@ class CvBridge:
         :param desired_encoding:  The encoding of the image data, one of the following strings:
 
            * ``"passthrough"``
-           * ``"rgb8"``
-           * ``"rgba8"``
-           * ``"bgr8"``
-           * ``"bgra8"``
-           * ``"mono8"``
-           * ``"mono16"``
+           * one of the standard strings in sensor_msgs/image_encodings.h
 
         :rtype: :ctype:`IplImage`
         :raises CvBridgeError: when conversion is not possible.
 
         If desired_encoding is ``"passthrough"``, then the returned image has the same format as img_msg.
-        Otherwise desired_encoding must be one of the strings "rgb8", "bgr8", "rgba8", "bgra8", "mono8" or "mono16",
-        in which case this method converts the image using
-        :func:`CvtColor`
-        (if necessary) and the returned image has a type as follows:
-
-           ``CV_8UC3``
-                for "rgb8", "bgr8"
-           ``CV_8UC4``
-                for "rgba8", "bgra8"
-           ``CV_8UC1``
-                for "mono8"
-           ``CV_16UC1``
-                for "mono16"
+        Otherwise desired_encoding must be one of the standard image encodings
 
         This function returns an OpenCV :ctype:`IplImage` message on success, or raises :exc:`cv_bridge.CvBridgeError` on failure.
         """
@@ -99,37 +73,14 @@ class CvBridge:
         if desired_encoding == "passthrough":
             return im
 
-        # Might need to do a conversion.  sourcefmt and destfmt can be
-        # one of GRAY, RGB, BGR, RGBA, BGRA.
-        sourcefmt = self.encoding_as_fmt(img_msg.encoding)
-        destfmt = self.encoding_as_fmt(desired_encoding)
+        from cv_bridge.boost.cv_bridge_boost import cvtColor
 
-        destination_type = self.encoding_as_cvtype(desired_encoding)
-        if sourcefmt == destfmt and source_type == destination_type:
-            return im
+        try:
+            res = cvtColor(im, img_msg.encoding, desired_encoding)
+        except RuntimeError as e:
+            raise CvBridgeError(e)
 
-        # First want to make sure that source depth matches destination depth
-        if source_type != destination_type:
-            # im2 is the intermediate image. It has the same # channels as source_type,
-            # but the depth of destination_type.
-
-            # XXX - these macros were missing from OpenCV Python, so roll our own here:
-            CV_CN_SHIFT = 3
-            def CV_MAKETYPE(depth,cn):
-                return cv.CV_MAT_DEPTH(depth) + ((cn - 1) << CV_CN_SHIFT)
-
-            im2_type = CV_MAKETYPE(destination_type, cv.CV_MAT_CN(source_type))
-            im2 = cv.CreateMat(img_msg.height, img_msg.width, im2_type)
-            cv.ConvertScale(im, im2)
-        else:
-            im2 = im
-
-        if sourcefmt != destfmt:
-            im3 = cv.CreateMat(img_msg.height, img_msg.width, destination_type)
-            cv.CvtColor(im2, im3, eval("cv.CV_%s2%s" % (sourcefmt, destfmt)))
-        else:
-            im3 = im2
-        return im3
+        return res
 
     def cv_to_imgmsg(self, cvim, encoding = "passthrough"):
         """
@@ -139,28 +90,13 @@ class CvBridge:
         :param encoding:  The encoding of the image data, one of the following strings:
 
            * ``"passthrough"``
-           * ``"rgb8"``
-           * ``"rgba8"``
-           * ``"bgr8"``
-           * ``"bgra8"``
-           * ``"mono8"``
-           * ``"mono16"``
+           * one of the standard strings in sensor_msgs/image_encodings.h
 
         :rtype:           A sensor_msgs.msg.Image message
         :raises CvBridgeError: when the ``cvim`` has a type that is incompatible with ``encoding``
 
         If encoding is ``"passthrough"``, then the message has the same encoding as the image's OpenCV type.
-        Otherwise encoding must be one of the strings "rgb8", "bgr8", "rgba8", "bgra8", "mono8" or "mono16",
-        in which case the OpenCV image must have the appropriate type:
-
-           ``CV_8UC3``
-                for "rgb8", "bgr8"
-           ``CV_8UC4``
-                for "rgba8", "bgra8"
-           ``CV_8UC1``
-                for "mono8"
-           ``CV_16UC1``
-                for "mono16"
+        Otherwise desired_encoding must be one of the standard image encodings
 
         This function returns a sensor_msgs::Image message on success, or raises :exc:`opencv_latest.cv_bridge.CvBridgeError` on failure.
         """

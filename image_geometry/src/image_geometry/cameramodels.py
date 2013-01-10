@@ -119,7 +119,7 @@ class PinholeCameraModel:
         if w != 0:
             return (x / w, y / w)
         else:
-            return (0.0, 0.0)
+            return (float('nan'), float('nan'))
 
     def projectPixelTo3dRay(self, uv):
         """

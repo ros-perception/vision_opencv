@@ -24,7 +24,7 @@ target_link_libraries(${PROJECT_NAME}_boost ${Boost_LIBRARIES}
 )
 
 set_target_properties(${PROJECT_NAME}_boost PROPERTIES
-                      LIBRARY_OUTPUT_DIRECTORY ${CATKIN_BUILD_PREFIX}/${CATKIN_GLOBAL_PYTHON_DESTINATION}/${PROJECT_NAME}/boost/
+                      LIBRARY_OUTPUT_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_PYTHON_DESTINATION}/${PROJECT_NAME}/boost/
                       PREFIX ""
 )
 

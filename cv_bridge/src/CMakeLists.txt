@@ -20,6 +20,7 @@ include_directories(SYSTEM ${PYTHON_INCLUDE_PATH}
 add_library(${PROJECT_NAME}_boost module.cpp)
 target_link_libraries(${PROJECT_NAME}_boost ${Boost_LIBRARIES}
                                             ${catkin_LIBRARIES}
+                                            ${PYTHON_LIBRARIES}
                                             ${PROJECT_NAME}
 )
 

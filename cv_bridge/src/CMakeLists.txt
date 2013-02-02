@@ -1,13 +1,9 @@
 # add library
 add_library(${PROJECT_NAME} cv_bridge.cpp)
 add_dependencies(${PROJECT_NAME} sensor_msgs_gencpp)
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 
-install(TARGETS ${PROJECT_NAME}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-)
+install(TARGETS ${PROJECT_NAME} DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 
 # add a Boost Python library
 set(Python_ADDITIONAL_VERSIONS 2.7)
@@ -29,3 +25,4 @@ set_target_properties(${PROJECT_NAME}_boost PROPERTIES
                       PREFIX ""
 )
 
+install(TARGETS ${PROJECT_NAME}_boost DESTINATION ${CATKIN_PACKAGE_PYTHON_DESTINATION}/boost/)

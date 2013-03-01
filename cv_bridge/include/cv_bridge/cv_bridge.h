@@ -141,6 +141,9 @@ CvImagePtr toCvCopy(const sensor_msgs::ImageConstPtr& source,
  *
  * If \a encoding is the empty string (the default), the returned CvImage has the same encoding
  * as \a source.
+ * If the source is 8bit and the encoding 16 or vice-versa, a scaling is applied (65535/255 and
+ * 255/65535 respectively). Otherwise, no scaling is applied and the rules from the convertTo OpenCV
+ * function are applied (capping): http://docs.opencv.org/modules/core/doc/basic_structures.html#mat-convertto
  */
 CvImagePtr toCvCopy(const sensor_msgs::Image& source,
                     const std::string& encoding = std::string());
@@ -197,7 +200,7 @@ CvImageConstPtr toCvShare(const sensor_msgs::Image& source,
                           const std::string& encoding = std::string());
 
 /**
- * \brief Convert a CvImage to another encoding.
+ * \brief Convert a CvImage to another encoding using the same rules as toCvCopy
  */
 CvImagePtr cvtColor(const CvImageConstPtr& source,
                     const std::string& encoding);

@@ -223,6 +223,12 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
   if (val == CONVERSION_CODES.end())
     throw Exception("Unsupported conversion from [" + src_encoding +
                       "] to [" + dst_encoding + "]");
+
+  // And deal with depth differences
+  std::vector<int> res = val->second;
+  if (enc::bitDepth(src_encoding) != enc::bitDepth(dst_encoding))
+    res.push_back(SAME_FORMAT);
+
   return val->second;
 }
 
@@ -260,10 +266,11 @@ CvImagePtr toCvCopyImpl(const cv::Mat& source,
         int dst_depth = enc::bitDepth(dst_encoding);
         // Do scaling between CV_8U [0,255] and CV_16U [0,65535] images.
         if (src_depth == 8 && dst_depth == 16)
-          alpha = 65535. / 255.;
+          image1.convertTo(image2, getCvType(dst_encoding), 65535. / 255.);
         else if (src_depth == 16 && dst_depth == 8)
-          alpha = 255. / 65535.;
-        image1.convertTo(image2, getCvType(dst_encoding), alpha);
+          image1.convertTo(image2, getCvType(dst_encoding), 255. / 65535.);
+        else
+          image1.convertTo(image2, getCvType(dst_encoding));
       }
       else
       {

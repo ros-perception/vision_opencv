@@ -1,6 +1,6 @@
 <package>
   <name>cv_bridge</name>
-  <version>1.10.6</version>
+  <version>1.10.7</version>
   <description>
     This contains CvBridge, which converts between ROS
     Image messages and OpenCV images.

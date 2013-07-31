@@ -3,9 +3,6 @@
    name: C++ API
    output_dir: c++
    file_patterns: '*.c *.cpp *.h *.cc *.hh *.dox'
-# - builder: sphinx
-#   name: Python API
-#   output_dir: python
- - builder: external
-   external_url: http://www.ros.org/doc/api/cv_bridge/html/python-permanent/
-   external_label: Python API
+ - builder: sphinx
+   name: Python API
+   output_dir: python

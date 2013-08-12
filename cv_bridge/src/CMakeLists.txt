@@ -24,5 +24,9 @@ set_target_properties(${PROJECT_NAME}_boost PROPERTIES
                       LIBRARY_OUTPUT_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_PYTHON_DESTINATION}/${PROJECT_NAME}/boost/
                       PREFIX ""
 )
+if(APPLE)
+  set_target_properties(${PROJECT_NAME}_boost PROPERTIES
+                        SUFFIX ".so")
+endif()
 
 install(TARGETS ${PROJECT_NAME}_boost DESTINATION ${CATKIN_PACKAGE_PYTHON_DESTINATION}/boost/)

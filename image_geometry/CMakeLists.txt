@@ -33,4 +33,6 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 # add tests
-add_subdirectory(test)
+if(CAKTIN_ENABLE_TESTING)
+  add_subdirectory(test)
+endif()

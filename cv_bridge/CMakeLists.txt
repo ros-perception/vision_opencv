@@ -21,7 +21,9 @@ link_directories(${OpenCV_LIB_DIR})
 
 add_subdirectory(python)
 add_subdirectory(src)
-add_subdirectory(test)
+if(CATKIN_ENABLE_TESTING)
+  add_subdirectory(test)
+endif()
 
 # install the include folder
 install(

@@ -53,7 +53,7 @@ bool update(const T& new_val, T& my_val)
 template<typename MatT>
 bool updateMat(const MatT& new_mat, MatT& my_mat, cv::Mat_<double>& cv_mat, int rows, int cols)
 {
-  if (my_mat == new_mat)
+  if ((my_mat == new_mat) && (my_mat.size() == cv_mat.rows*cv_mat.cols))
     return false;
   my_mat = new_mat;
   // D may be empty if camera is uncalibrated or distortion model is non-standard

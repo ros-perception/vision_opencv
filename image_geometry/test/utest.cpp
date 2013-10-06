@@ -148,6 +148,19 @@ TEST_F(PinholeTest, getDeltas)
   EXPECT_NEAR(model_.getDeltaY(dv, Z), xyz1.y - xyz0.y, 1e-4);
 }
 
+TEST_F(PinholeTest, initialization)
+{
+
+    sensor_msgs::CameraInfo info;
+    image_geometry::PinholeCameraModel camera;
+
+    camera.fromCameraInfo(info);
+
+    EXPECT_EQ(camera.initialized(), 1);
+    EXPECT_EQ(camera.projectionMatrix().rows, 3);
+    EXPECT_EQ(camera.projectionMatrix().cols, 4);
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);

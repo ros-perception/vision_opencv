@@ -232,6 +232,29 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
   return val->second;
 }
 
+cv::Mat matFromImage(const sensor_msgs::Image& source)
+{
+  int source_type = getCvType(source.encoding);
+
+  if (source.height > source.step)
+  {
+    std::stringstream ss;
+    ss << "Image is wrongly formed: height > step   or  " << source.height << " > " << source.step;
+    throw Exception(ss.str());
+  }
+
+  if (source.height * source.step != source.data.size())
+  {
+    std::stringstream ss;
+    ss << "Image is wrongly formed: height * step != size  or  " << source.height << " * " <<
+              source.step << " != " << source.data.size();
+    throw Exception(ss.str());
+  }
+
+  return cv::Mat(source.height, source.width, source_type,
+                       const_cast<uchar*>(&source.data[0]), source.step);
+}
+
 // Internal, used by toCvCopy and cvtColor
 CvImagePtr toCvCopyImpl(const cv::Mat& source,
                         const std_msgs::Header& src_header,
@@ -335,11 +358,7 @@ CvImagePtr toCvCopy(const sensor_msgs::Image& source,
                     const std::string& encoding)
 {
   // Construct matrix pointing to source data
-  int source_type = getCvType(source.encoding);
-  const cv::Mat tmp((int)source.height, (int)source.width, source_type,
-                    const_cast<uint8_t*>(&source.data[0]), (size_t)source.step);
-
-  return toCvCopyImpl(tmp, source.header, source.encoding, encoding);
+  return toCvCopyImpl(matFromImage(source), source.header, source.encoding, encoding);
 }
 
 // Share const data, returnee is immutable
@@ -360,9 +379,7 @@ CvImageConstPtr toCvShare(const sensor_msgs::Image& source,
   ptr->header = source.header;
   ptr->encoding = source.encoding;
   ptr->tracked_object_ = tracked_object;
-  int type = getCvType(source.encoding);
-  ptr->image = cv::Mat(source.height, source.width, type,
-                       const_cast<uchar*>(&source.data[0]), source.step);
+  ptr->image = matFromImage(source);
   return ptr;
 }
 

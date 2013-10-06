@@ -19,6 +19,24 @@ TEST(CvBridgeTest, NonContinuous)
   EXPECT_EQ(msg->step, 6);
 }
 
+TEST(CvBridgeTest, initialization)
+{
+  sensor_msgs::Image image;
+  cv_bridge::CvImagePtr cv_ptr;
+
+  image.encoding = "bgr8";
+  image.height = 200;
+  image.width = 200;
+
+  try {
+    cv_ptr = cv_bridge::toCvCopy(image, "mono8");
+    // Before the fix, it would never get here, as it would segfault
+    EXPECT_EQ(1, 0);
+  } catch (cv_bridge::Exception& e) {
+    EXPECT_EQ(1, 1);
+  }
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);

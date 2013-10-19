@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 project(cv_bridge)
 
+find_package(catkin REQUIRED COMPONENTS rosconsole sensor_msgs)
+
 find_package(Boost REQUIRED python)
 find_package(OpenCV REQUIRED)
-
-find_package(catkin REQUIRED COMPONENTS rosconsole sensor_msgs)
 
 catkin_package(
   INCLUDE_DIRS include

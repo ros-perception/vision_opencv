@@ -235,11 +235,14 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
 cv::Mat matFromImage(const sensor_msgs::Image& source)
 {
   int source_type = getCvType(source.encoding);
+  int byte_depth = enc::bitDepth(source.encoding) / 8;
+  int num_channels = enc::numChannels(source.encoding);
 
-  if (source.height > source.step)
+  if (source.step != source.width * byte_depth * num_channels)
   {
     std::stringstream ss;
-    ss << "Image is wrongly formed: height > step   or  " << source.height << " > " << source.step;
+    ss << "Image is wrongly formed: step != width * byte_depth * num_channels  or  " << source.step << " != " <<
+        source.width << " * " << byte_depth << " * " << num_channels;
     throw Exception(ss.str());
   }
 

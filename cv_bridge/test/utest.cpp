@@ -35,6 +35,14 @@ TEST(CvBridgeTest, initialization)
   } catch (cv_bridge::Exception& e) {
     EXPECT_EQ(1, 1);
   }
+
+  // Check some normal images with different ratios
+  for(int height = 100; height <= 300; ++height) {
+    image.encoding = sensor_msgs::image_encodings::RGB8;
+    image.step = image.width*3;
+    image.data.resize(image.height*image.step);
+    cv_ptr = cv_bridge::toCvCopy(image, "mono8");
+  }
 }
 
 int main(int argc, char** argv)

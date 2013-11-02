@@ -55,10 +55,10 @@ class TestEnumerants(unittest.TestCase):
 
         for w in range(100, 800, 100):
             for h in range(100, 800, 100):
-                for f in  [ cv.IPL_DEPTH_8U ]:
+                for f in fmts:
                     for channels in (1,2,3,4):
                         original = cv.CreateImage((w, h), f, channels)
-                        cv.Set(original, (1,2,3,4));
+                        cv.Set(original, (1,2,3,4))
                         rosmsg = cvb_en.cv_to_imgmsg(original)
                         newimg = cvb_de.imgmsg_to_cv(rosmsg)
                         self.assert_(cv.GetElemType(original) == cv.GetElemType(newimg))

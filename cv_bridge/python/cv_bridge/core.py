@@ -168,8 +168,8 @@ class CvBridge:
             # Verify that the supplied encoding is compatible with the type of the OpenCV image
             if self.encoding_as_cvtype(encoding) != cv.GetElemType(cvim):
               raise CvBridgeError, "encoding specified as %s, but image has incompatible type %s" % (encoding, self.cvtype_to_name[cv.GetElemType(cvim)])
-        img_msg.step = img_msg.width * cv.CV_MAT_CN(cv.GetElemType(cvim))
         img_msg.data = cvim.tostring()
+        img_msg.step = len(img_msg.data) / img_msg.height
         return img_msg
 
 
@@ -240,5 +240,5 @@ class CvBridge:
             if self.cvtype_to_name[self.encoding_as_cvtype(encoding)] != cv_type_with_channels:
               raise CvBridgeError, "encoding specified as %s, but image has incompatible type %s" % (encoding, cv_type_with_channels)
         img_msg.data = cvim.tostring()
-        img_msg.step = len(img_msg.data) / img_msg.width
+        img_msg.step = len(img_msg.data) / img_msg.height
         return img_msg

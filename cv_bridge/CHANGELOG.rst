@@ -1,3 +1,4 @@
-1.10.11 (forthcoming)
----------------------
+1.10.12 (2013-11-22)
+--------------------
+- fix #27 and #28 for non-aligned images (thx @jensenb !)
 - fix #26 for support of numpy cv2 API

@@ -238,10 +238,10 @@ cv::Mat matFromImage(const sensor_msgs::Image& source)
   int byte_depth = enc::bitDepth(source.encoding) / 8;
   int num_channels = enc::numChannels(source.encoding);
 
-  if (source.step != source.width * byte_depth * num_channels)
+  if (source.step < source.width * byte_depth * num_channels)
   {
     std::stringstream ss;
-    ss << "Image is wrongly formed: step != width * byte_depth * num_channels  or  " << source.step << " != " <<
+    ss << "Image is wrongly formed: step < width * byte_depth * num_channels  or  " << source.step << " != " <<
         source.width << " * " << byte_depth << " * " << num_channels;
     throw Exception(ss.str());
   }

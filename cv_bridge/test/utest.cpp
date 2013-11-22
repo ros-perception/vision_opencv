@@ -2,6 +2,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include <gtest/gtest.h>
 
+
 // Tests conversion of non-continuous cv::Mat. #5206
 TEST(CvBridgeTest, NonContinuous)
 {
@@ -43,6 +44,41 @@ TEST(CvBridgeTest, initialization)
     image.data.resize(image.height*image.step);
     cv_ptr = cv_bridge::toCvCopy(image, "mono8");
   }
+}
+
+TEST(CvBridgeTest, imageMessageStep)
+{
+  // Test 1: image step is padded
+  sensor_msgs::Image image;
+  cv_bridge::CvImagePtr cv_ptr;
+
+  image.encoding = "mono8";
+  image.height = 220;
+  image.width = 200;
+  image.is_bigendian = false;
+  image.step = 208;
+
+  image.data.resize(image.height*image.step);
+
+  ASSERT_NO_THROW(cv_ptr = cv_bridge::toCvCopy(image, "mono8"));
+  ASSERT_EQ(220, cv_ptr->image.rows);
+  ASSERT_EQ(200, cv_ptr->image.cols);
+  //OpenCV copyTo argument removes the stride
+  ASSERT_EQ(200, cv_ptr->image.step[0]);
+
+  //Test 2: image step is invalid
+  image.step = 199;
+
+  ASSERT_THROW(cv_ptr = cv_bridge::toCvCopy(image, "mono8"), cv_bridge::Exception);
+
+  //Test 3: image step == image.width * element size * number of channels
+  image.step = 200;
+  image.data.resize(image.height*image.step);
+
+  ASSERT_NO_THROW(cv_ptr = cv_bridge::toCvCopy(image, "mono8"));
+  ASSERT_EQ(220, cv_ptr->image.rows);
+  ASSERT_EQ(200, cv_ptr->image.cols);
+  ASSERT_EQ(200, cv_ptr->image.step[0]);
 }
 
 int main(int argc, char** argv)

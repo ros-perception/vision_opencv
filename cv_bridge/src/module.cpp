@@ -322,7 +322,7 @@ cvtColor2Wrap(bp::object obj_in, const std::string & encoding_in, const std::str
 
   cv::Mat mat = cv_bridge::cvtColor(cv_image, encoding_out)->image;
 
-  long int dims[] = {mat.rows, mat.cols, mat.channels()};
+  npy_intp dims[] = {mat.rows, mat.cols, mat.channels()};
 
   PyObject *res = 0 ;
   if (mat.depth() == CV_8U)

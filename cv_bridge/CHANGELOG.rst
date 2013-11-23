@@ -1,3 +1,7 @@
+1.10.14 (2013-11-23)
+--------------------
+- fix compilation on OSX
+
 1.10.13 (2013-11-23)
 --------------------
 - fix compilation on older NumPy

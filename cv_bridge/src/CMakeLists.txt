@@ -12,7 +12,7 @@ find_package(PythonLibs REQUIRED)
 
 #Get the numpy include directory from its python module
 if(NOT PYTHON_NUMPY_INCLUDE_DIR)
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import numpy; print numpy.get_include()"
+    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import numpy; print(numpy.get_include())"
                     RESULT_VARIABLE PYTHON_NUMPY_PROCESS
                     OUTPUT_VARIABLE PYTHON_NUMPY_INCLUDE_DIR
                     OUTPUT_STRIP_TRAILING_WHITESPACE)

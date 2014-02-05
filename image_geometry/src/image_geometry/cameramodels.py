@@ -82,7 +82,7 @@ class PinholeCameraModel:
 
         self.mapx = cv.CreateImage((self.width, self.height), cv.IPL_DEPTH_32F, 1)
         self.mapy = cv.CreateImage((self.width, self.height), cv.IPL_DEPTH_32F, 1)
-        cv.InitUndistortMap(self.K, self.D, self.mapx, self.mapy)
+        cv.InitUndistortRectifyMap(self.K, self.D, self.R, self.P, self.mapx, self.mapy)
         cv.Remap(raw, rectified, self.mapx, self.mapy)
         
     def rectifyPoint(self, uv_raw):

@@ -33,6 +33,13 @@ PinholeCameraModel::PinholeCameraModel()
 {
 }
 
+PinholeCameraModel& PinholeCameraModel::operator=(const PinholeCameraModel& other)
+{
+  if (other.initialized())
+    this->fromCameraInfo(other.cameraInfo());
+  return *this;
+}
+
 PinholeCameraModel::PinholeCameraModel(const PinholeCameraModel& other)
 {
   if (other.initialized())

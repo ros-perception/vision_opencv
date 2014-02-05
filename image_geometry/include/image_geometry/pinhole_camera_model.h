@@ -27,6 +27,8 @@ public:
 
   PinholeCameraModel(const PinholeCameraModel& other);
 
+  PinholeCameraModel& operator=(const PinholeCameraModel& other);
+
   /**
    * \brief Set the camera parameters from the sensor_msgs/CameraInfo message.
    */

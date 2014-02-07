@@ -16,6 +16,8 @@ public:
 
   StereoCameraModel(const StereoCameraModel& other);
 
+  StereoCameraModel& operator=(const StereoCameraModel& other);
+
   /**
    * \brief Set the camera parameters from the sensor_msgs/CameraInfo messages.
    */

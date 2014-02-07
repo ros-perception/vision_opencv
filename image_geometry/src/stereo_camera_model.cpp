@@ -17,6 +17,13 @@ StereoCameraModel::StereoCameraModel(const StereoCameraModel& other)
     updateQ();
 }
 
+StereoCameraModel& StereoCameraModel::operator=(const StereoCameraModel& other)
+{
+  if (other.initialized())
+    this->fromCameraInfo(other.left_.cameraInfo(), other.right_.cameraInfo());
+  return *this;
+}
+
 bool StereoCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& left,
                                        const sensor_msgs::CameraInfo& right)
 {

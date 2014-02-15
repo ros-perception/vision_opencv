@@ -3,14 +3,14 @@
 namespace image_geometry {
 
 StereoCameraModel::StereoCameraModel()
-  : Q_(4, 4, 0.0)
+  : Q_(0.0)
 {
   Q_(0,0) = Q_(1,1) = 1.0;
 }
 
 StereoCameraModel::StereoCameraModel(const StereoCameraModel& other)
   : left_(other.left_), right_(other.right_),
-    Q_(4, 4, 0.0)
+    Q_(0.0)
 {
   Q_(0,0) = Q_(1,1) = 1.0;
   if (other.initialized())

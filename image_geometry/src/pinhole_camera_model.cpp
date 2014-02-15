@@ -68,6 +68,17 @@ bool updateMat(const MatT& new_mat, MatT& my_mat, cv::Mat_<double>& cv_mat, int 
   return true;
 }
 
+template<typename MatT, typename MatU>
+bool updateMat(const MatT& new_mat, MatT& my_mat, MatU& cv_mat)
+{
+  if ((my_mat == new_mat) && (my_mat.size() == cv_mat.rows*cv_mat.cols))
+    return false;
+  my_mat = new_mat;
+  // D may be empty if camera is uncalibrated or distortion model is non-standard
+  cv_mat = MatU(&my_mat[0]);
+  return true;
+}
+
 bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
 {
   // Create our repository of cached data (rectification maps, etc.)
@@ -95,9 +106,9 @@ bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
   full_dirty |= update(msg.width,  cam_info_.width);
   full_dirty |= update(msg.distortion_model, cam_info_.distortion_model);
   full_dirty |= updateMat(msg.D, cam_info_.D, D_, 1, msg.D.size());
-  full_dirty |= updateMat(msg.K, cam_info_.K, K_full_, 3, 3);
-  full_dirty |= updateMat(msg.R, cam_info_.R, R_, 3, 3);
-  full_dirty |= updateMat(msg.P, cam_info_.P, P_full_, 3, 4);
+  full_dirty |= updateMat(msg.K, cam_info_.K, K_full_);
+  full_dirty |= updateMat(msg.R, cam_info_.R, R_);
+  full_dirty |= updateMat(msg.P, cam_info_.P, P_full_);
   full_dirty |= update(binning_x, cam_info_.binning_x);
   full_dirty |= update(binning_y, cam_info_.binning_y);
 
@@ -131,8 +142,8 @@ bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
     P_ = P_full_;
   }
   else {
-    K_full_.copyTo(K_);
-    P_full_.copyTo(P_);
+    K_ = K_full_;
+    P_ = P_full_;
 
     // ROI is in full image coordinates, so change it first
     if (adjust_roi) {
@@ -390,14 +401,15 @@ void PinholeCameraModel::initRectificationMaps() const
     binned_resolution.width  /= binningX();
     binned_resolution.height /= binningY();
 
-    cv::Mat_<double> K_binned, P_binned;
+    cv::Matx33d K_binned;
+    cv::Matx34d P_binned;
     if (binningX() == 1 && binningY() == 1) {
       K_binned = K_full_;
       P_binned = P_full_;
     }
     else {
-      K_full_.copyTo(K_binned);
-      P_full_.copyTo(P_binned);
+      K_binned = K_full_;
+      P_binned = P_full_;
       if (binningX() > 1) {
         double scale_x = 1.0 / binningX();
         K_binned(0,0) *= scale_x;

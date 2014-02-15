@@ -66,7 +66,7 @@ public:
   /**
    * \brief Returns the disparity reprojection matrix.
    */
-  const cv::Mat_<double>& reprojectionMatrix() const;
+  const cv::Matx44d& reprojectionMatrix() const;
 
   /**
    * \brief Returns the horizontal baseline in world coordinates.
@@ -93,7 +93,7 @@ public:
   bool initialized() const { return left_.initialized() && right_.initialized(); }
 protected:
   PinholeCameraModel left_, right_;
-  cv::Mat_<double> Q_;
+  cv::Matx44d Q_;
 
   void updateQ();
 };
@@ -105,7 +105,7 @@ inline const PinholeCameraModel& StereoCameraModel::right() const { return right
 
 inline std::string StereoCameraModel::tfFrame() const { return left_.tfFrame(); }
 
-inline const cv::Mat_<double>& StereoCameraModel::reprojectionMatrix() const { return Q_; }
+inline const cv::Matx44d& StereoCameraModel::reprojectionMatrix() const { return Q_; }
 
 inline double StereoCameraModel::baseline() const
 {

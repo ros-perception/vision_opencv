@@ -147,7 +147,7 @@ public:
   /**
    * \brief Returns the original camera matrix.
    */
-  const cv::Mat_<double>& intrinsicMatrix() const;
+  const cv::Matx33d& intrinsicMatrix() const;
 
   /**
    * \brief Returns the distortion coefficients.
@@ -157,22 +157,22 @@ public:
   /**
    * \brief Returns the rotation matrix.
    */
-  const cv::Mat_<double>& rotationMatrix() const;
+  const cv::Matx33d& rotationMatrix() const;
 
   /**
    * \brief Returns the projection matrix.
    */
-  const cv::Mat_<double>& projectionMatrix() const;
+  const cv::Matx34d& projectionMatrix() const;
 
   /**
    * \brief Returns the original camera matrix for full resolution.
    */
-  const cv::Mat_<double>& fullIntrinsicMatrix() const;
+  const cv::Matx33d& fullIntrinsicMatrix() const;
 
   /**
    * \brief Returns the projection matrix for full resolution.
    */
-  const cv::Mat_<double>& fullProjectionMatrix() const;
+  const cv::Matx34d& fullProjectionMatrix() const;
 
   /**
    * \brief Returns the focal length (pixels) in x direction of the rectified image.
@@ -261,9 +261,12 @@ public:
 
 protected:
   sensor_msgs::CameraInfo cam_info_;
-  cv::Mat_<double> D_, R_;           // Unaffected by binning, ROI
-  cv::Mat_<double> K_, P_;           // Describe current image (includes binning, ROI)
-  cv::Mat_<double> K_full_, P_full_; // Describe full-res image, needed for full maps
+  cv::Mat_<double> D_;           // Unaffected by binning, ROI
+  cv::Matx33d R_;           // Unaffected by binning, ROI
+  cv::Matx33d K_;           // Describe current image (includes binning, ROI)
+  cv::Matx34d P_;           // Describe current image (includes binning, ROI)
+  cv::Matx33d K_full_; // Describe full-res image, needed for full maps
+  cv::Matx34d P_full_; // Describe full-res image, needed for full maps
 
   // Use PIMPL here so we can change internals in patch updates if needed
   struct Cache;
@@ -289,12 +292,12 @@ inline ros::Time PinholeCameraModel::stamp() const
 }
 
 inline const sensor_msgs::CameraInfo& PinholeCameraModel::cameraInfo() const  { return cam_info_; }
-inline const cv::Mat_<double>& PinholeCameraModel::intrinsicMatrix() const  { return K_; }
+inline const cv::Matx33d& PinholeCameraModel::intrinsicMatrix() const  { return K_; }
 inline const cv::Mat_<double>& PinholeCameraModel::distortionCoeffs() const { return D_; }
-inline const cv::Mat_<double>& PinholeCameraModel::rotationMatrix() const   { return R_; }
-inline const cv::Mat_<double>& PinholeCameraModel::projectionMatrix() const { return P_; }
-inline const cv::Mat_<double>& PinholeCameraModel::fullIntrinsicMatrix() const  { return K_full_; }
-inline const cv::Mat_<double>& PinholeCameraModel::fullProjectionMatrix() const { return P_full_; }
+inline const cv::Matx33d& PinholeCameraModel::rotationMatrix() const   { return R_; }
+inline const cv::Matx34d& PinholeCameraModel::projectionMatrix() const { return P_; }
+inline const cv::Matx33d& PinholeCameraModel::fullIntrinsicMatrix() const  { return K_full_; }
+inline const cv::Matx34d& PinholeCameraModel::fullProjectionMatrix() const { return P_full_; }
 
 inline double PinholeCameraModel::fx() const { return P_(0,0); }
 inline double PinholeCameraModel::fy() const { return P_(1,1); }

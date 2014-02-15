@@ -6,9 +6,8 @@ target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 
 # add a Boost Python library
-set(Python_ADDITIONAL_VERSIONS 2.7)
 find_package(PythonInterp REQUIRED)
-find_package(PythonLibs REQUIRED)
+find_package(PythonLibs "${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
 
 #Get the numpy include directory from its python module
 if(NOT PYTHON_NUMPY_INCLUDE_DIR)
@@ -29,6 +28,10 @@ include_directories(SYSTEM ${PYTHON_INCLUDE_PATH}
                            ${Boost_INCLUDE_DIRS}
                            ${PYTHON_NUMPY_INCLUDE_DIR} # cv_bridge module uses NumPy functions
 )
+
+if (PYTHON_VERSION_MAJOR VERSION_EQUAL 3)
+  add_definitions(-DPYTHON3)
+endif()
 
 add_library(${PROJECT_NAME}_boost module.cpp)
 target_link_libraries(${PROJECT_NAME}_boost ${Boost_LIBRARIES}

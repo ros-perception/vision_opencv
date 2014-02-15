@@ -3,7 +3,6 @@ PKG = 'image_geometry'
 roslib.load_manifest(PKG)
 import rostest
 import rospy
-import cv
 import unittest
 import sensor_msgs.msg
 

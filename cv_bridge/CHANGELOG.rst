@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.0 (2014-02-15)
+-------------------
 * remove deprecated API and fixes `#33 <https://github.com/ros-perception/vision_opencv/issues/33>`_
 * fix OpenCV dependencies
 * Contributors: Vincent Rabaud

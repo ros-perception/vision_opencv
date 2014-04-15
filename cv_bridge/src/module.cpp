@@ -274,8 +274,6 @@ cvtColor2Wrap(bp::object obj_in, const std::string & encoding_in, const std::str
 
   std::memcpy(PyArray_DATA((PyArrayObject*)res), mat.data, mat.step*mat.rows);
 
-  Py_INCREF(res);
-
   return bp::object(boost::python::handle<>(res));
 }
 

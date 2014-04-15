@@ -38,6 +38,8 @@ class TestEnumerants(unittest.TestCase):
 
         bridge_ = CvBridge()
         cvim = bridge_.imgmsg_to_cv2(img_msg, "rgb8")
+        import sys
+        self.assertRaises(sys.getrefcount(cvim) == 2)
 
         # A 3 channel image cannot be sent as an rgba8
         self.assertRaises(CvBridgeError, lambda: bridge_.cv2_to_imgmsg(cvim, "rgba8"))

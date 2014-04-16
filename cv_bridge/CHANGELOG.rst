@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.1 (2014-04-16)
+-------------------
 * fixes `#34 <https://github.com/ros-perception/vision_opencv/issues/34>`_
 * Contributors: Vincent Rabaud
 

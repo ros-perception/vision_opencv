@@ -2,6 +2,11 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* remove references to 1.11.* as it creates errors on teh farm
+* Contributors: Vincent Rabaud
+
 1.10.16 (2014-04-16)
 --------------------
 

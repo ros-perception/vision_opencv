@@ -21,12 +21,14 @@
 
   <build_depend>boost</build_depend>
   <build_depend>libopencv-dev</build_depend>
+  <build_depend>python</build_depend>
   <build_depend>python-opencv</build_depend>
   <build_depend>rosconsole</build_depend>
   <build_depend>sensor_msgs</build_depend>
 
   <run_depend>boost</run_depend>
   <run_depend>libopencv-dev</run_depend>
+  <run_depend>python</run_depend>
   <run_depend>python-opencv</run_depend>
   <run_depend>rosconsole</run_depend>
   <run_depend>sensor_msgs</run_depend>

@@ -2,6 +2,11 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add depend on python for cv_bridge
+* Contributors: Scott K Logan
+
 1.11.1 (2014-04-16)
 -------------------
 * fixes `#34 <https://github.com/ros-perception/vision_opencv/issues/34>`_

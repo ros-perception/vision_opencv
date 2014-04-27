@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.2 (2014-04-28)
+-------------------
 * Add depend on python for cv_bridge
 * Contributors: Scott K Logan
 

@@ -257,7 +257,7 @@ public:
   /**
    * \brief Returns true if the camera has been initialized
    */
-  bool initialized() const { return cache_; }
+  bool initialized() const { return (bool)cache_; }
 
 protected:
   sensor_msgs::CameraInfo cam_info_;

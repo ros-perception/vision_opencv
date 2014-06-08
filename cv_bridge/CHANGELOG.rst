@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.3 (2014-06-08)
+-------------------
 * Correct dependency from non-existent package to cv_bridge
 * Contributors: Isaac Isao Saito
 

@@ -2,8 +2,8 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.3 (2014-06-08)
+-------------------
 * pinhole_camera_model: fix implicit shared_ptr cast to bool for C++11
   In C++11 boost::shared_ptr does not provide the implicit bool conversion
   operator anymore, so make the cast in pinhole_camera_model.h explicit.

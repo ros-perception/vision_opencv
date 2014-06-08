@@ -2,6 +2,11 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Correct dependency from non-existent package to cv_bridge
+* Contributors: Isaac Isao Saito
+
 1.11.2 (2014-04-28)
 -------------------
 * Add depend on python for cv_bridge

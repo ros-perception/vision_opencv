@@ -31,14 +31,11 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import roslib
-roslib.load_manifest('opencv_tests')
-
 import sys
 import time
 import math
 import rospy
-import cv
+import cv2
 
 import sensor_msgs.msg
 from cv_bridge import CvBridge
@@ -53,8 +50,8 @@ class source:
     time.sleep(1.0)
     cvb = CvBridge()
     while not rospy.core.is_shutdown():
-      cvim = cv.LoadImage(self.filenames[0])
-      self.pub.publish(cvb.cv_to_imgmsg(cvim))
+      cvim = cv2.imload(self.filenames[0])
+      self.pub.publish(cvb.cv2_to_imgmsg(cvim))
       self.filenames = self.filenames[1:] + [self.filenames[0]]
       time.sleep(1)
 

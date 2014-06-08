@@ -2,8 +2,8 @@
 Changelog for package opencv_tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.10.18 (2014-06-08)
+--------------------
 * remove references to cv (use cv2)
 * Correct dependency from non-existent package to cv_bridge
 * Contributors: Isaac Isao Saito, Vincent Rabaud

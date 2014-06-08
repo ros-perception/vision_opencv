@@ -6,8 +6,6 @@ The program finds faces in a camera image or video stream and displays a red box
 Original C implementation by:  ?
 Python implementation by: Roman Stanchak, James Bowman
 """
-import roslib
-roslib.load_manifest('opencv_tests')
 
 import sys
 import os
@@ -16,7 +14,8 @@ from optparse import OptionParser
 import rospy
 import sensor_msgs.msg
 from cv_bridge import CvBridge
-import cv
+import cv2
+import numpy
 
 # Parameters for haar detection
 # From the API:
@@ -34,46 +33,43 @@ haar_flags = 0
 
 if __name__ == '__main__':
 
-    pkgdir = roslib.packages.get_pkg_dir("opencv2")
-    haarfile = os.path.join(pkgdir, "opencv/share/opencv/haarcascades/haarcascade_frontalface_alt.xml")
+    haarfile = '/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml'
 
-    parser = OptionParser(usage = "usage: %prog [options] [filename|camera_index]")
+    parser = OptionParser(usage = "usage: %prog [options]")
     parser.add_option("-c", "--cascade", action="store", dest="cascade", type="str", help="Haar cascade file, default %default", default = haarfile)
+    parser.add_option("-t", "--topic", action="store", dest="topic", type="str", help="Topic to find a face on, default %default", default = '/camera/rgb/image_raw')
     (options, args) = parser.parse_args()
 
-    cascade = cv.Load(options.cascade)
+    cascade = cv2.CascadeClassifier()
+    cascade.load(options.cascade)
     br = CvBridge()
 
     def detect_and_draw(imgmsg):
-        img = br.imgmsg_to_cv(imgmsg, "bgr8")
+        img = br.imgmsg_to_cv2(imgmsg, "bgr8")
         # allocate temporary images
-        gray = cv.CreateImage((img.width,img.height), 8, 1)
-        small_img = cv.CreateImage((cv.Round(img.width / image_scale),
-                       cv.Round (img.height / image_scale)), 8, 1)
+        new_size = (int(img.shape[1] / image_scale), int(img.shape[0] / image_scale))
 
         # convert color input image to grayscale
-        cv.CvtColor(img, gray, cv.CV_BGR2GRAY)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         # scale input image for faster processing
-        cv.Resize(gray, small_img, cv.CV_INTER_LINEAR)
+        small_img = cv2.resize(gray, new_size, interpolation = cv2.INTER_LINEAR)
 
-        cv.EqualizeHist(small_img, small_img)
+        small_img = cv2.equalizeHist(small_img)
 
         if(cascade):
-            faces = cv.HaarDetectObjects(small_img, cascade, cv.CreateMemStorage(0),
-                                         haar_scale, min_neighbors, haar_flags, min_size)
-            if faces:
-                for ((x, y, w, h), n) in faces:
-                    # the input to cv.HaarDetectObjects was resized, so scale the 
+            faces = cascade.detectMultiScale(small_img, haar_scale, min_neighbors, haar_flags, min_size)
+            if faces is not None:
+                for (x, y, w, h) in faces:
+                    # the input to detectMultiScale was resized, so scale the 
                     # bounding box of each face and convert it to two CvPoints
                     pt1 = (int(x * image_scale), int(y * image_scale))
                     pt2 = (int((x + w) * image_scale), int((y + h) * image_scale))
-                    cv.Rectangle(img, pt1, pt2, cv.RGB(255, 0, 0), 3, 8, 0)
+                    cv2.rectangle(img, pt1, pt2, (255, 0, 0), 3, 8, 0)
 
-        cv.ShowImage("result", img)
-        cv.WaitKey(6)
+        cv2.imshow("result", img)
+        cv2.waitKey(6)
 
     rospy.init_node('rosfacedetect')
-    image_topic = rospy.resolve_name("image")
-    rospy.Subscriber(image_topic, sensor_msgs.msg.Image, detect_and_draw)
+    rospy.Subscriber(options.topic, sensor_msgs.msg.Image, detect_and_draw)
     rospy.spin()

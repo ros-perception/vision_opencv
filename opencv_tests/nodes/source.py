@@ -31,14 +31,12 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import roslib
-roslib.load_manifest('opencv_tests')
-
 import sys
 import time
 import math
 import rospy
-import cv
+import numpy
+import cv2
 
 import sensor_msgs.msg
 from cv_bridge import CvBridge
@@ -52,7 +50,7 @@ class source:
     time.sleep(1.0)
     started = time.time()
     counter = 0
-    cvim = cv.CreateImage((640,480), cv.IPL_DEPTH_8U, 1)
+    cvim = numpy.zeros((480, 640, 1), numpy.uint8)
     ball_xv = 10
     ball_yv = 10
     ball_x = 100
@@ -62,8 +60,8 @@ class source:
 
     while not rospy.core.is_shutdown():
 
-      cv.Set(cvim, 0)
-      cv.Circle(cvim, (ball_x, ball_y), 10, 255, -1)
+      cvim.fill(0)
+      cv2.circle(cvim, (ball_x, ball_y), 10, 255, -1)
 
       ball_x += ball_xv
       ball_y += ball_yv
@@ -72,7 +70,7 @@ class source:
       if ball_y in [10, 470]:
         ball_yv = -ball_yv
 
-      self.pub.publish(cvb.cv_to_imgmsg(cvim))
+      self.pub.publish(cvb.cv2_to_imgmsg(cvim))
 
       time.sleep(0.03)
 

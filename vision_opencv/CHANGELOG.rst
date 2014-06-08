@@ -2,6 +2,9 @@
 Changelog for package vision_opencv
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.10.17 (2014-04-18)
 --------------------
 * remove references to 1.11.* as it creates errors on teh farm

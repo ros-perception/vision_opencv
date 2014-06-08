@@ -40,7 +40,7 @@ import warnings
 
 class CvBridgeError(TypeError):
     """
-    This is the error raised by :class:`opencv_latest.cv_bridge.CvBridge` methods when they fail.
+    This is the error raised by :class:`cv_bridge.CvBridge` methods when they fail.
     """
     pass
 
@@ -148,7 +148,7 @@ class CvBridge:
         If encoding is ``"passthrough"``, then the message has the same encoding as the image's OpenCV type.
         Otherwise desired_encoding must be one of the standard image encodings
 
-        This function returns a sensor_msgs::Image message on success, or raises :exc:`opencv_latest.cv_bridge.CvBridgeError` on failure.
+        This function returns a sensor_msgs::Image message on success, or raises :exc:`cv_bridge.CvBridgeError` on failure.
         """
         import cv2
         img_msg = sensor_msgs.msg.Image()

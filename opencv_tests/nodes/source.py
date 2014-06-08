@@ -41,7 +41,7 @@ import rospy
 import cv
 
 import sensor_msgs.msg
-from opencv_latest.cv_bridge import CvBridge
+from cv_bridge import CvBridge
 
 class source:
 

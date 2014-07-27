@@ -2,6 +2,9 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.11.3 (2014-06-08)
 -------------------
 * pinhole_camera_model: fix implicit shared_ptr cast to bool for C++11

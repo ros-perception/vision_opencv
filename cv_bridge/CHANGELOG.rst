@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.4 (2014-07-27)
+-------------------
 * Fix `#42 <https://github.com/ros-perception/vision_opencv/issues/42>`_
 * Contributors: Libor Wagner
 

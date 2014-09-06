@@ -22,7 +22,7 @@ public:
 class PinholeCameraModel
 {
 public:
-  
+
   PinholeCameraModel();
 
   PinholeCameraModel(const PinholeCameraModel& other);
@@ -111,13 +111,13 @@ public:
    * \brief Rectify a raw camera image.
    */
   void rectifyImage(const cv::Mat& raw, cv::Mat& rectified,
-                    int interpolation = CV_INTER_LINEAR) const;
+                    int interpolation = cv::INTER_LINEAR) const;
 
   /**
    * \brief Apply camera distortion to a rectified image.
    */
   void unrectifyImage(const cv::Mat& rectified, cv::Mat& raw,
-                      int interpolation = CV_INTER_LINEAR) const;
+                      int interpolation = cv::INTER_LINEAR) const;
 
   /**
    * \brief Compute the rectified image coordinates of a pixel in the raw image.
@@ -213,7 +213,7 @@ public:
    * \brief Returns the number of rows in each bin.
    */
   uint32_t binningY() const;
-  
+
   /**
    * \brief Compute delta u, given Z and delta X in Cartesian space.
    *

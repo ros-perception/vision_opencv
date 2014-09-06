@@ -42,6 +42,8 @@
 
 #include <cv_bridge/cv_bridge.h>
 
+#include <opencv2/imgproc/types_c.h>
+
 namespace enc = sensor_msgs::image_encodings;
 
 namespace cv_bridge {
@@ -265,11 +267,11 @@ CvImagePtr toCvCopyImpl(const cv::Mat& source,
                         const std::string& dst_encoding)
 {
   /// @todo Handle endianness - e.g. 16-bit dc1394 camera images are big-endian
-  
+
   // Copy metadata
   CvImagePtr ptr = boost::make_shared<CvImage>();
   ptr->header = src_header;
-  
+
   // Copy to new buffer if same encoding requested
   if (dst_encoding.empty() || dst_encoding == src_encoding)
   {

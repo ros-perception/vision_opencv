@@ -41,6 +41,8 @@
 
 #include <opencv2/core/core.hpp>
 
+#include <opencv2/imgproc/types_c.h>
+
 PyObject *mod_opencv;
 
 using namespace cv;
@@ -144,18 +146,18 @@ void NumpyAllocator::deallocate( int* refcount, uchar* datastart, uchar* data )
     Py_DECREF(o);
 }
 
-// Declare the object
-NumpyAllocator g_numpyAllocator;
-
 int convert_to_CvMat2(const PyObject* o, cv::Mat& m)
 {
+    // Declare the object
+    NumpyAllocator *g_numpyAllocator;
+    
     // to avoid PyArray_Check() to crash even with valid array
     doImport( );
 
     if(!o || o == Py_None)
     {
         if( !m.data )
-            m.allocator = &g_numpyAllocator;
+            m.allocator = g_numpyAllocator;
         return true;
     }
 
@@ -227,16 +229,16 @@ int convert_to_CvMat2(const PyObject* o, cv::Mat& m)
 
     if( m.data )
     {
-        m.refcount = refcountFromPyObject(o);
+        //m.refcount = refcountFromPyObject(o);
         m.addref(); // protect the original numpy array from deallocation
         // (since Mat destructor will decrement the reference counter)
     };
-    m.allocator = &g_numpyAllocator;
+    m.allocator = g_numpyAllocator;
 
     if( transposed )
     {
         cv::Mat tmp;
-        tmp.allocator = &g_numpyAllocator;
+        tmp.allocator = g_numpyAllocator;
         transpose(m, tmp);
         m = tmp;
     }

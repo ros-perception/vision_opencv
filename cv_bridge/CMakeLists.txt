@@ -5,6 +5,9 @@ find_package(catkin REQUIRED COMPONENTS rosconsole sensor_msgs)
 
 find_package(Boost REQUIRED python)
 find_package(OpenCV REQUIRED)
+if (OpenCV_VERSION VERSION_EQUAL "3")
+  add_definitions("-DOPENCV3=1")
+endif()
 
 catkin_package(
   INCLUDE_DIRS include

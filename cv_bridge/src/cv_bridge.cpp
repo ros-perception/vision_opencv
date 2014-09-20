@@ -130,6 +130,55 @@ std::map<std::pair<Format, Format>, std::vector<int> > getConversionCodes() {
   std::map<std::pair<Format, Format>, std::vector<int> > res;
   for(int i=0; i<=5; ++i)
     res[std::pair<Format, Format>(Format(i),Format(i))].push_back(SAME_FORMAT);
+#if OPENCV3
+  res[std::make_pair(GRAY, RGB)].push_back(cv::COLOR_GRAY2RGB);
+  res[std::make_pair(GRAY, BGR)].push_back(cv::COLOR_GRAY2BGR);
+  res[std::make_pair(GRAY, RGBA)].push_back(cv::COLOR_GRAY2RGBA);
+  res[std::make_pair(GRAY, BGRA)].push_back(cv::COLOR_GRAY2BGRA);
+
+  res[std::make_pair(RGB, GRAY)].push_back(cv::COLOR_RGB2GRAY);
+  res[std::make_pair(RGB, BGR)].push_back(cv::COLOR_RGB2BGR);
+  res[std::make_pair(RGB, RGBA)].push_back(cv::COLOR_RGB2RGBA);
+  res[std::make_pair(RGB, BGRA)].push_back(cv::COLOR_RGB2BGRA);
+
+  res[std::make_pair(BGR, GRAY)].push_back(cv::COLOR_BGR2GRAY);
+  res[std::make_pair(BGR, RGB)].push_back(cv::COLOR_BGR2RGB);
+  res[std::make_pair(BGR, RGBA)].push_back(cv::COLOR_BGR2RGBA);
+  res[std::make_pair(BGR, BGRA)].push_back(cv::COLOR_BGR2BGRA);
+
+  res[std::make_pair(RGBA, GRAY)].push_back(cv::COLOR_RGBA2GRAY);
+  res[std::make_pair(RGBA, RGB)].push_back(cv::COLOR_RGBA2RGB);
+  res[std::make_pair(RGBA, BGR)].push_back(cv::COLOR_RGBA2BGR);
+  res[std::make_pair(RGBA, BGRA)].push_back(cv::COLOR_RGBA2BGRA);
+
+  res[std::make_pair(BGRA, GRAY)].push_back(cv::COLOR_BGRA2GRAY);
+  res[std::make_pair(BGRA, RGB)].push_back(cv::COLOR_BGRA2RGB);
+  res[std::make_pair(BGRA, BGR)].push_back(cv::COLOR_BGRA2BGR);
+  res[std::make_pair(BGRA, RGBA)].push_back(cv::COLOR_BGRA2RGBA);
+
+  res[std::make_pair(YUV422, GRAY)].push_back(cv::COLOR_YUV2GRAY_UYVY);
+  res[std::make_pair(YUV422, RGB)].push_back(cv::COLOR_YUV2RGB_UYVY);
+  res[std::make_pair(YUV422, BGR)].push_back(cv::COLOR_YUV2BGR_UYVY);
+  res[std::make_pair(YUV422, RGBA)].push_back(cv::COLOR_YUV2RGBA_UYVY);
+  res[std::make_pair(YUV422, BGRA)].push_back(cv::COLOR_YUV2BGRA_UYVY);
+
+  // Deal with Bayer
+  res[std::make_pair(BAYER_RGGB, GRAY)].push_back(cv::COLOR_BayerBG2GRAY);
+  res[std::make_pair(BAYER_RGGB, RGB)].push_back(cv::COLOR_BayerBG2RGB);
+  res[std::make_pair(BAYER_RGGB, BGR)].push_back(cv::COLOR_BayerBG2BGR);
+
+  res[std::make_pair(BAYER_BGGR, GRAY)].push_back(cv::COLOR_BayerRG2GRAY);
+  res[std::make_pair(BAYER_BGGR, RGB)].push_back(cv::COLOR_BayerRG2RGB);
+  res[std::make_pair(BAYER_BGGR, BGR)].push_back(cv::COLOR_BayerRG2BGR);
+
+  res[std::make_pair(BAYER_GBRG, GRAY)].push_back(cv::COLOR_BayerGR2GRAY);
+  res[std::make_pair(BAYER_GBRG, RGB)].push_back(cv::COLOR_BayerGR2RGB);
+  res[std::make_pair(BAYER_GBRG, BGR)].push_back(cv::COLOR_BayerGR2BGR);
+
+  res[std::make_pair(BAYER_GRBG, GRAY)].push_back(cv::COLOR_BayerGB2GRAY);
+  res[std::make_pair(BAYER_GRBG, RGB)].push_back(cv::COLOR_BayerGB2RGB);
+  res[std::make_pair(BAYER_GRBG, BGR)].push_back(cv::COLOR_BayerGB2BGR);
+#else
   res[std::make_pair(GRAY, RGB)].push_back(CV_GRAY2RGB);
   res[std::make_pair(GRAY, BGR)].push_back(CV_GRAY2BGR);
   res[std::make_pair(GRAY, RGBA)].push_back(CV_GRAY2RGBA);
@@ -177,6 +226,7 @@ std::map<std::pair<Format, Format>, std::vector<int> > getConversionCodes() {
   res[std::make_pair(BAYER_GRBG, GRAY)].push_back(CV_BayerGB2GRAY);
   res[std::make_pair(BAYER_GRBG, RGB)].push_back(CV_BayerGB2RGB);
   res[std::make_pair(BAYER_GRBG, BGR)].push_back(CV_BayerGB2BGR);
+#endif
 
   return res;
 }

@@ -2,6 +2,12 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* get code to work with OpenCV3
+  actually fixes `#46 <https://github.com/ros-perception/vision_opencv/issues/46>`_ properly
+* Contributors: Vincent Rabaud
+
 1.11.4 (2014-07-27)
 -------------------
 * Fix `#42 <https://github.com/ros-perception/vision_opencv/issues/42>`_

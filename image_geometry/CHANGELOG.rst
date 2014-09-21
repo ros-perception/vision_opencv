@@ -2,8 +2,8 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.5 (2014-09-21)
+-------------------
 * get code to work with OpenCV3
   actually fixes `#46 <https://github.com/ros-perception/vision_opencv/issues/46>`_ properly
 * Contributors: Vincent Rabaud

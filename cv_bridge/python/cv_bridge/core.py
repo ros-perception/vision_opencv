@@ -231,7 +231,10 @@ class CvBridge:
         img_msg = sensor_msgs.msg.Image()
         img_msg.height = cvim.shape[0]
         img_msg.width = cvim.shape[1]
-        cv_type_with_channels = self.numpy_type_to_cvtype_with_channels(cvim.dtype, cvim.shape[2])
+        if len(cvim.shape) < 3:
+            cv_type_with_channels = self.numpy_type_to_cvtype_with_channels(cvim.dtype, 1)
+        else:
+            cv_type_with_channels = self.numpy_type_to_cvtype_with_channels(cvim.dtype, cvim.shape[2])
         if encoding == "passthrough":
             img_msg.encoding = cv_type_with_channels
         else:

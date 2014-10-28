@@ -78,12 +78,19 @@ class TestEnumerants(unittest.TestCase):
         for w in range(100, 800, 100):
             for h in range(100, 800, 100):
                 for f in fmts:
-                    for channels in (1,2,3,4):
-                        original = np.uint8(np.random.randint(0, 255, size=(h, w, channels)))
+                    for channels in ([],1,2,3,4):
+                        if channels == []:
+                            original = np.uint8(np.random.randint(0, 255, size=(h, w)))
+                        else:
+                            original = np.uint8(np.random.randint(0, 255, size=(h, w, channels)))
                         rosmsg = cvb_en.cv2_to_imgmsg(original)
                         newimg = cvb_de.imgmsg_to_cv2(rosmsg)
                         self.assert_(original.dtype == newimg.dtype)
-                        self.assert_(original.shape == newimg.shape)
+                        if channels == []:
+                            self.assert_(original.shape[:2] == newimg.shape[:2])
+                            self.assert_(1 == newimg.shape[2])
+                        else:
+                            self.assert_(original.shape == newimg.shape)
                         self.assert_(len(original.tostring()) == len(newimg.tostring()))
 
     def test_mono16_cv1(self):

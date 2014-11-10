@@ -113,11 +113,17 @@ class CvBridge:
         Otherwise desired_encoding must be one of the standard image encodings
 
         This function returns an OpenCV :ctype:`cv::Mat` message on success, or raises :exc:`cv_bridge.CvBridgeError` on failure.
+
+        If the image only has one channel, the shape has size 2 (width and height)
         """
         import cv2
         import numpy as np
         dtype, n_channels = self.encoding_to_dtype_with_channels(img_msg.encoding)
-        im = np.ndarray(shape=(img_msg.height, img_msg.width, n_channels),
+        if n_channels == 1:
+            im = np.ndarray(shape=(img_msg.height, img_msg.width),
+                           dtype=dtype, buffer=img_msg.data)
+        else:
+            im = np.ndarray(shape=(img_msg.height, img_msg.width, n_channels),
                            dtype=dtype, buffer=img_msg.data)
 
         if desired_encoding == "passthrough":

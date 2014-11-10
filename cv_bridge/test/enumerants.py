@@ -47,9 +47,9 @@ class TestEnumerants(unittest.TestCase):
                         rosmsg = cvb_en.cv2_to_imgmsg(original)
                         newimg = cvb_de.imgmsg_to_cv2(rosmsg)
                         self.assert_(original.dtype == newimg.dtype)
-                        if channels == []:
+                        if channels == 1:
+                            # in that case, a gray image has a shape of size 2
                             self.assert_(original.shape[:2] == newimg.shape[:2])
-                            self.assert_(1 == newimg.shape[2])
                         else:
                             self.assert_(original.shape == newimg.shape)
                         self.assert_(len(original.tostring()) == len(newimg.tostring()))

@@ -87,7 +87,7 @@ class PinholeCameraModel:
                            dtype='float32')
         cv2.initUndistortRectifyMap(self.K, self.D, self.R, self.P, self.mapx, self.mapy)
         cv2.remap(raw, rectified, self.mapx, self.mapy)
-        
+
     def rectifyPoint(self, uv_raw):
         """
         :param uv_raw:    pixel coordinates
@@ -265,7 +265,7 @@ class StereoCameraModel:
         # [ Fx, 0,  Cx,  Fx*-Tx ]
         # [ 0,  Fy, Cy,  0      ]
         # [ 0,  0,  1,   0      ]
-        
+
         fx = self.right.P[0, 0]
         fy = self.right.P[1, 1]
         cx = self.right.P[0, 2]
@@ -318,7 +318,7 @@ class StereoCameraModel:
         Returns the 3D point (x, y, z) for the given pixel position,
         using the cameras' :math:`P` matrices.
         This is the inverse of :meth:`project3dToPixel`.
-        
+
         Note that a disparity of zero implies that the 3D point is at infinity.
         """
         src = mkmat(4, 1, [left_uv[0], left_uv[1], disparity, 1.0])

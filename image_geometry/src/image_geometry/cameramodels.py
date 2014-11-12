@@ -242,6 +242,12 @@ class PinholeCameraModel:
         """ Return the y-translation term of the projection matrix """
         return self.P[1,3]
 
+    def tfFrame(self):
+        """ Returns the tf frame name - a string - of the camera.
+        This is the frame of the :class:`sensor_msgs.msg.CameraInfo` message.
+        """
+        return self.tf_frame
+
 class StereoCameraModel:
     """
     An idealized stereo camera.

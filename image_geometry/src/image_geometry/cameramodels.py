@@ -81,9 +81,9 @@ class PinholeCameraModel:
         Applies the rectification specified by camera parameters :math:`K` and and :math:`D` to image `raw` and writes the resulting image `rectified`.
         """
 
-        self.mapx = np.ndarray(shape=(self.height, self.width, 1),
+        self.mapx = numpy.ndarray(shape=(self.height, self.width, 1),
                            dtype='float32')
-        self.mapy = np.ndarray(shape=(self.height, self.width, 1),
+        self.mapy = numpy.ndarray(shape=(self.height, self.width, 1),
                            dtype='float32')
         cv2.initUndistortRectifyMap(self.K, self.D, self.R, self.P, self.mapx, self.mapy)
         cv2.remap(raw, rectified, self.mapx, self.mapy)

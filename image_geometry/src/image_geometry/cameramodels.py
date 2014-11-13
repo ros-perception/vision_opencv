@@ -85,8 +85,9 @@ class PinholeCameraModel:
                            dtype='float32')
         self.mapy = numpy.ndarray(shape=(self.height, self.width, 1),
                            dtype='float32')
-        cv2.initUndistortRectifyMap(self.K, self.D, self.R, self.P, self.mapx, self.mapy)
-        cv2.remap(raw, rectified, self.mapx, self.mapy)
+        cv2.initUndistortRectifyMap(self.K, self.D, self.R, self.P,
+                (self.width, self.height), cv2.CV_32FC1, self.mapx, self.mapy)
+        cv2.remap(raw, self.mapx, self.mapy, cv2.INTER_CUBIC, rectified)
 
     def rectifyPoint(self, uv_raw):
         """

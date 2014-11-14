@@ -81,13 +81,14 @@ class PinholeCameraModel:
         Applies the rectification specified by camera parameters :math:`K` and and :math:`D` to image `raw` and writes the resulting image `rectified`.
         """
 
-        self.mapx = np.ndarray(shape=(self.height, self.width, 1),
+        self.mapx = numpy.ndarray(shape=(self.height, self.width, 1),
                            dtype='float32')
-        self.mapy = np.ndarray(shape=(self.height, self.width, 1),
+        self.mapy = numpy.ndarray(shape=(self.height, self.width, 1),
                            dtype='float32')
-        cv2.initUndistortRectifyMap(self.K, self.D, self.R, self.P, self.mapx, self.mapy)
-        cv2.remap(raw, rectified, self.mapx, self.mapy)
-        
+        cv2.initUndistortRectifyMap(self.K, self.D, self.R, self.P,
+                (self.width, self.height), cv2.CV_32FC1, self.mapx, self.mapy)
+        cv2.remap(raw, self.mapx, self.mapy, cv2.INTER_CUBIC, rectified)
+
     def rectifyPoint(self, uv_raw):
         """
         :param uv_raw:    pixel coordinates
@@ -242,6 +243,12 @@ class PinholeCameraModel:
         """ Return the y-translation term of the projection matrix """
         return self.P[1,3]
 
+    def tfFrame(self):
+        """ Returns the tf frame name - a string - of the camera.
+        This is the frame of the :class:`sensor_msgs.msg.CameraInfo` message.
+        """
+        return self.tf_frame
+
 class StereoCameraModel:
     """
     An idealized stereo camera.
@@ -265,7 +272,7 @@ class StereoCameraModel:
         # [ Fx, 0,  Cx,  Fx*-Tx ]
         # [ 0,  Fy, Cy,  0      ]
         # [ 0,  0,  1,   0      ]
-        
+
         fx = self.right.P[0, 0]
         fy = self.right.P[1, 1]
         cx = self.right.P[0, 2]
@@ -318,7 +325,7 @@ class StereoCameraModel:
         Returns the 3D point (x, y, z) for the given pixel position,
         using the cameras' :math:`P` matrices.
         This is the inverse of :meth:`project3dToPixel`.
-        
+
         Note that a disparity of zero implies that the 3D point is at infinity.
         """
         src = mkmat(4, 1, [left_uv[0], left_uv[1], disparity, 1.0])

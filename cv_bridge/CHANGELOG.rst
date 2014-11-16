@@ -2,6 +2,12 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* chnage the behavior when there is only one channel
+* cleanup tests
+* Contributors: Vincent Rabaud
+
 1.11.5 (2014-09-21)
 -------------------
 * get code to work with OpenCV3

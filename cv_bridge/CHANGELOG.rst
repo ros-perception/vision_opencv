@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.6 (2014-11-16)
+-------------------
 * chnage the behavior when there is only one channel
 * cleanup tests
 * Contributors: Vincent Rabaud

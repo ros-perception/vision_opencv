@@ -2,8 +2,8 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.6 (2014-11-16)
+-------------------
 * Fixes in image_geometry for Python cv2 API
 * Fixed typo: np -> numpy
 * Added missing tfFrame method to Python PinholeCameraModel.

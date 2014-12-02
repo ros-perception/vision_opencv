@@ -55,24 +55,61 @@ void StereoCameraModel::updateQ()
   // Update variable fields of reprojection matrix
   /*
     From Springer Handbook of Robotics, p. 524:
-        [ Fx 0  Cx -FxTx ]
-    P = [ 0  Fy Cy   0   ]
-        [ 0  0  1    0   ]
+
+         [ Fx    0  Cx   0   ]
+    P  = [ 0     Fy Cy   0   ]
+         [ 0     0  1    0   ]
+
+         [ Fx    0  Cx' -FxTx ]
+    P' = [ 0     Fy Cy   0    ]
+         [ 0     0  1    0    ]
+    where primed parameters are from the left projection matrix, unprimed from the right.
+
+    [u   v 1]^T = P  * [x y z 1]^T
+    [u-d v 1]^T = P' * [x y z 1]^T
+
+    Combining the two equations above results in the following equation
+
+    [u v u-d 1]^T = [ Fx   0    Cx   0    ] * [ x y z 1]^T
+                    [ 0    Fy   Cy   0    ]
+                    [ Fx   0    Cx'  FxTx ]
+                    [ 0    0    1    0    ]
+
+    Subtracting the 3rd from from the first and inverting the expression
+    results in the following equation.
+
+    [x y z 1]^T = Q * [u v d 1]^T
+
+    Where Q is defined as
+
+    Q = [ FyTx  0     0   -FyCxTx     ]
+        [ 0     FxTx  0   -FxCyTx     ]
+        [ 0     0     0    FxFyTx     ]
+        [ 0     0     -Fy  Fy(Cx-Cx') ]
+
+   Using the assumption Fx = Fy Q can be simplified to the following. But for
+   compatibility with stereo cameras with different focal lengths we will use
+   the full Q matrix.
 
         [ 1 0   0      -Cx      ]
     Q = [ 0 1   0      -Cy      ]
         [ 0 0   0       Fx      ]
         [ 0 0 -1/Tx (Cx-Cx')/Tx ]
-    where primed parameters are from the left projection matrix, unprimed from the right.
 
     Disparity = x_left - x_right
+
+    For compatibility with stereo cameras with different focal lengths we will use
+    the full Q matrix.
+
    */
-  double Tx = baseline();
-  Q_(3,2) = 1.0 / Tx;
-  Q_(0,3) = -right_.cx();
-  Q_(1,3) = -right_.cy();
-  Q_(2,3) = right_.fx();
-  Q_(3,3) = (right_.cx() - left_.cx()) / Tx; // zero when disparities are pre-adjusted
+  double Tx = -baseline(); // The baseline member negates our Tx. Undo this negation
+  Q_(0,0) =  left_.fy() * Tx;
+  Q_(0,3) = -left_.fy() * left_.cx() * Tx;
+  Q_(1,1) =  left_.fx() * Tx;
+  Q_(1,3) = -left_.fx() * left_.cy() * Tx;
+  Q_(2,3) =  left_.fx() * left_.fy() * Tx;
+  Q_(3,2) = -left_.fy();
+  Q_(3,3) =  left_.fy() * (left_.cx() - right_.cx()); // zero when disparities are pre-adjusted
 }
 
 void StereoCameraModel::projectDisparityTo3d(const cv::Point2d& left_uv_rect, float disparity,

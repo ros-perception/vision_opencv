@@ -60,7 +60,7 @@ void StereoCameraModel::updateQ()
     P  = [ 0     Fy Cy   0   ]
          [ 0     0  1    0   ]
 
-         [ Fx    0  Cx' -FxTx ]
+         [ Fx    0  Cx' FxTx ]
     P' = [ 0     Fy Cy   0    ]
          [ 0     0  1    0    ]
     where primed parameters are from the left projection matrix, unprimed from the right.

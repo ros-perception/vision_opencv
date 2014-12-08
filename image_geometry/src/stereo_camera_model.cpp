@@ -122,7 +122,7 @@ void StereoCameraModel::projectDisparityTo3d(const cv::Point2d& left_uv_rect, fl
   // Point = (X/W, Y/W, Z/W)
   // cv::perspectiveTransform could be used but with more overhead.
   double u = left_uv_rect.x, v = left_uv_rect.y;
-  cv::Point3d XYZ(u + Q_(0,3), v + Q_(1,3), Q_(2,3));
+  cv::Point3d XYZ( (Q_(0,0) * u) + Q_(0,3), (Q_(1,1) * v) + Q_(1,3), Q_(2,3));
   double W = Q_(3,2)*disparity + Q_(3,3);
   xyz = XYZ * (1.0/W);
 }

@@ -2,8 +2,8 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.7 (2014-12-14)
+-------------------
 * Merge pull request `#53 <https://github.com/ros-perception/vision_opencv/issues/53>`_ from carnegieroboticsllc/patch-1
   Update stereo_camera_model.cpp
 * Updated inline math for reprojecting a single disparity

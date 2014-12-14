@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.7 (2014-12-14)
+-------------------
 * check that the type is indeed a Numpy one
   This is in response to `#51 <https://github.com/ros-perception/vision_opencv/issues/51>`_
 * Contributors: Vincent Rabaud

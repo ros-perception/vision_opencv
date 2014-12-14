@@ -157,6 +157,9 @@ class CvBridge:
         This function returns a sensor_msgs::Image message on success, or raises :exc:`cv_bridge.CvBridgeError` on failure.
         """
         import cv2
+        import numpy as np
+        if not isinstance(cvim, (np.ndarray, np.generic) ):
+            raise TypeError('Your input type is not a numpy array')
         img_msg = sensor_msgs.msg.Image()
         img_msg.height = cvim.shape[0]
         img_msg.width = cvim.shape[1]

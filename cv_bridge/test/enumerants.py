@@ -54,6 +54,13 @@ class TestEnumerants(unittest.TestCase):
                             self.assert_(original.shape == newimg.shape)
                         self.assert_(len(original.tostring()) == len(newimg.tostring()))
 
+    def test_numpy_types(self):
+        import cv2
+        import numpy as np
+        bridge_ = CvBridge()
+        self.assertRaises(TypeError, lambda: bridge_.cv2_to_imgmsg(1, "rgba8"))
+        self.assertRaises(TypeError, lambda: bridge_.cv2_to_imgmsg(cv2.cv(), "rgba8"))
+
     def test_mono16_cv2(self):
         import numpy as np
         br = CvBridge()

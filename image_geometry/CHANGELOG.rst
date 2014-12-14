@@ -2,6 +2,16 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#53 <https://github.com/ros-perception/vision_opencv/issues/53>`_ from carnegieroboticsllc/patch-1
+  Update stereo_camera_model.cpp
+* Updated inline math for reprojecting a single disparity
+* Update stereo_camera_model.cpp
+  Correct slight error in the Q matrix derivation
+* Updated Q matrix to account for cameras with different Fx and Fy values
+* Contributors: Carnegie Robotics LLC, Matt Alvarado, Vincent Rabaud
+
 1.11.6 (2014-11-16)
 -------------------
 * Fixes in image_geometry for Python cv2 API

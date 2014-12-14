@@ -2,6 +2,12 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* check that the type is indeed a Numpy one
+  This is in response to `#51 <https://github.com/ros-perception/vision_opencv/issues/51>`_
+* Contributors: Vincent Rabaud
+
 1.11.6 (2014-11-16)
 -------------------
 * chnage the behavior when there is only one channel

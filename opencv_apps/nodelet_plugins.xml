@@ -1,0 +1,71 @@
+<library path="lib/libopencv_apps">
+
+  <class name="edge_detection/edge_detection" type="edge_detection::EdgeDetectionNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet to find edges</description>
+  </class>
+
+  <class name="hough_lines/hough_lines" type="hough_lines::HoughLinesNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet to find lines</description>
+  </class>
+
+  <class name="hough_circles/hough_circles" type="hough_circles::HoughCirclesNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet to find circles</description>
+  </class>
+
+  <class name="find_contours/find_contours" type="find_contours::FindContoursNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet to find contours</description>
+  </class>
+
+  <class name="convex_hull/convex_hull" type="convex_hull::ConvexHullNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet to find convex hulls</description>
+  </class>
+
+  <class name="general_contours/general_contours" type="general_contours::GeneralContoursNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet to creating bounding boxes and circles for contours</description>
+  </class>
+
+  <class name="contour_moments/contour_moments" type="contour_moments::ContourMomentsNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet to find image moments</description>
+  </class>
+
+  <class name="face_detection/face_detection" type="face_detection::FaceDetectionNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet to find faces</description>
+  </class>
+
+  <class name="goodfeature_track/goodfeature_track" type="goodfeature_track::GoodfeatureTrackNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet for detecting corners using Shi-Tomasi method</description>
+  </class>
+
+  <class name="camshift/camshift" type="camshift::CamShiftNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet to show mean-shift based tracking</description>
+  </class>
+
+  <class name="fback_flow/fback_flow" type="fback_flow::FBackFlowNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet to demonstrates dense optical flow algorithm by Gunnar Farneback</description>
+  </class>
+
+  <class name="lk_flow/lk_flow" type="lk_flow::LKFlowNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet to calculate Lukas-Kanade optical flow</description>
+  </class>
+
+  <class name="people_detect/people_detect" type="people_detect::PeopleDetectNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet to demonstrate the use of the HoG descriptor</description>
+  </class>
+
+  <class name="phase_corr/phase_corr" type="phase_corr::PhaseCorrNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet to demonstrate the use of phaseCorrelate</description>
+  </class>
+
+  <class name="segment_objects/segment_objects" type="segment_objects::SegmentObjectsNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet to demonstrate a simple method of connected components clean up of background subtraction</description>
+  </class>
+
+  <class name="simple_flow/simple_flow" type="simple_flow::SimpleFlowNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet of SimpleFlow optical flow algorithm</description>
+  </class>
+
+  <class name="watershed_segmentation/watershed_segmentation" type="watershed_segmentation::WatershedSegmentationNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet to demonstrate the famous watershed segmentation algorithm in OpenCV: watershed()</description>
+  </class>
+
+</library>

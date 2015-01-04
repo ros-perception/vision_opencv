@@ -145,8 +145,13 @@ class PhaseCorrNodelet : public nodelet::Nodelet
       {
         // draw a circle and line indicating the shift direction...
         cv::Point center(curr.cols >> 1, curr.rows >> 1);
+#if OPENCV3
+        cv::circle(frame, center, (int)radius, cv::Scalar(0, 255, 0), 3, cv::LINE_AA);
+        cv::line(frame, center, cv::Point(center.x + (int)shift.x, center.y + (int)shift.y), cv::Scalar(0, 255, 0), 3, cv::LINE_AA);
+#else
         cv::circle(frame, center, (int)radius, cv::Scalar(0, 255, 0), 3, CV_AA);
         cv::line(frame, center, cv::Point(center.x + (int)shift.x, center.y + (int)shift.y), cv::Scalar(0, 255, 0), 3, CV_AA);
+#endif
 
         //
         shift_msg.point.x = shift.x;

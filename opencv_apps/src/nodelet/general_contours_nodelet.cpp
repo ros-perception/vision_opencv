@@ -54,6 +54,10 @@
 #include "opencv_apps/RotatedRectArray.h"
 #include "opencv_apps/RotatedRectArrayStamped.h"
 
+#if OPENCV3
+#include <opencv2/imgproc/types_c.h>
+#endif
+
 namespace general_contours {
 class GeneralContoursNodelet : public nodelet::Nodelet
 {
@@ -148,8 +152,8 @@ class GeneralContoursNodelet : public nodelet::Nodelet
       cv::findContours( threshold_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
 
       /// Find the rotated rectangles and ellipses for each contour
-      cv::vector<cv::RotatedRect> minRect( contours.size() );
-      cv::vector<cv::RotatedRect> minEllipse( contours.size() );
+      std::vector<cv::RotatedRect> minRect( contours.size() );
+      std::vector<cv::RotatedRect> minEllipse( contours.size() );
 
       for( size_t i = 0; i < contours.size(); i++ )
       { minRect[i] = cv::minAreaRect( cv::Mat(contours[i]) );

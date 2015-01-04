@@ -54,6 +54,12 @@
 #include "opencv_apps/ContourArray.h"
 #include "opencv_apps/ContourArrayStamped.h"
 
+#if OPENCV3
+#include <opencv2/imgproc/types_c.h>
+#include <opencv2/imgproc/imgproc_c.h>
+#include <opencv2/video.hpp>
+#endif
+
 namespace segment_objects {
 class SegmentObjectsNodelet : public nodelet::Nodelet
 {
@@ -76,7 +82,11 @@ class SegmentObjectsNodelet : public nodelet::Nodelet
   std::string window_name_;
   static bool need_config_update_;
 
-  cv::BackgroundSubtractorMOG bgsubtractor;
+#if OPENCV3
+  cv::Ptr<cv::BackgroundSubtractorMOG2> bgsubtractor;
+#else
+  cv::BackgroundSubtractorMOG2 bgsubtractor;
+#endif
   bool update_bg_model = true;
 
   void reconfigureCallback(segment_objects::SegmentObjectsConfig &new_config, uint32_t level)
@@ -135,7 +145,11 @@ class SegmentObjectsNodelet : public nodelet::Nodelet
         }
       }
 
+#if OPENCV3
+      bgsubtractor->apply(frame, bgmask, update_bg_model ? -1 : 0);
+#else
       bgsubtractor(frame, bgmask, update_bg_model ? -1 : 0);
+#endif
       //refineSegments(tmp_frame, bgmask, out_frame);
       int niters = 3;
 
@@ -277,7 +291,11 @@ public:
     prev_stamp_ = ros::Time(0, 0);
 
     window_name_ = "segmented";
+#if OPENCV3
+    bgsubtractor = cv::createBackgroundSubtractorMOG2();
+#else
     bgsubtractor.set("noiseSigma", 10);
+#endif
 
     image_transport::SubscriberStatusCallback img_connect_cb    = boost::bind(&SegmentObjectsNodelet::img_connectCb, this, _1);
     image_transport::SubscriberStatusCallback img_disconnect_cb = boost::bind(&SegmentObjectsNodelet::img_disconnectCb, this, _1);

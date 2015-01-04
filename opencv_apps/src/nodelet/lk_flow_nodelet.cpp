@@ -147,7 +147,11 @@ class LKFlowNodelet : public nodelet::Nodelet
       }
 
       // Do the work
+#if OPENCV3
+      cv::TermCriteria termcrit(cv::TermCriteria::MAX_ITER + cv::TermCriteria::EPS, 20, 0.03);
+#else
       cv::TermCriteria termcrit(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS, 20, 0.03);
+#endif
       cv::Size subPixWinSize(10,10), winSize(31,31);
 
       cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
@@ -207,7 +211,7 @@ class LKFlowNodelet : public nodelet::Nodelet
         {
           std::vector<cv::Point2f> tmp;
           tmp.push_back(point);
-          cv::cornerSubPix( gray, tmp, winSize, cvSize(-1,-1), termcrit);
+          cv::cornerSubPix( gray, tmp, winSize, cv::Size(-1,-1), termcrit);
           points[1].push_back(tmp[0]);
           addRemovePt = false;
         }

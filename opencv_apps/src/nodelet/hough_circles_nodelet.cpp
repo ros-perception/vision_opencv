@@ -53,6 +53,10 @@
 #include "opencv_apps/CircleArray.h"
 #include "opencv_apps/CircleArrayStamped.h"
 
+#if OPENCV3
+#include <opencv2/imgproc/types_c.h>
+#endif
+
 namespace hough_circles {
 class HoughCirclesNodelet : public nodelet::Nodelet
 {
@@ -163,6 +167,7 @@ class HoughCirclesNodelet : public nodelet::Nodelet
       std::vector<cv::Vec3f> circles;
       // runs the actual detection
       cv::HoughCircles( src_gray, circles, CV_HOUGH_GRADIENT, 1, src_gray.rows/8, canny_threshold_, accumulator_threshold_, 0, 0 );
+
 
       // clone the colour, input image for displaying purposes
       for( size_t i = 0; i < circles.size(); i++ )

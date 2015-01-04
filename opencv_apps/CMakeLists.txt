@@ -3,6 +3,16 @@ project(opencv_apps)
 
 find_package(catkin REQUIRED COMPONENTS cv_bridge dynamic_reconfigure message_generation image_transport nodelet roscpp)
 
+find_package(OpenCV REQUIRED)
+if (OpenCV_VERSION VERSION_EQUAL "3")
+  add_definitions("-DOPENCV3=1")
+  set(${PROJECT_NAME}_EXTRA_CFG)
+  set(${PROJECT_NAME}_EXTRA_FILES)
+else()
+  set(${PROJECT_NAME}_EXTRA_CFG cfg/SimpleFlow.cfg)
+  set(${PROJECT_NAME}_EXTRA_FILES src/nodelet/simple_flow_nodelet.cpp)
+endif()
+
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
   cfg/EdgeDetection.cfg cfg/HoughLines.cfg cfg/HoughCircles.cfg
@@ -16,8 +26,8 @@ generate_dynamic_reconfigure_options(
   cfg/PeopleDetect.cfg
   cfg/PhaseCorr.cfg
   cfg/SegmentObjects.cfg
-  cfg/SimpleFlow.cfg
   cfg/WatershedSegmentation.cfg
+  ${${PROJECT_NAME}_EXTRA_CFG}
   )
 
 ## Generate messages in the 'msg' folder
@@ -64,8 +74,6 @@ generate_messages(
 )
 
 catkin_package()
-
-find_package(OpenCV REQUIRED)
 
 include_directories( ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
@@ -155,7 +163,7 @@ add_library(${PROJECT_NAME} SHARED
   # rgbdodometry.cpp
   src/nodelet/segment_objects_nodelet.cpp
   ## select3dobj.cpp
-  src/nodelet/simple_flow_nodelet.cpp
+  # src/nodelet/simple_flow_nodelet.cpp
   # squares.cpp
   # starter_imagelist.cpp
   # starter_video.cpp
@@ -169,6 +177,7 @@ add_library(${PROJECT_NAME} SHARED
   # video_homography.cpp
   # videostab.cpp
   src/nodelet/watershed_segmentation_nodelet.cpp
+  ${${PROJECT_NAME}_EXTRA_FILES}
 )
 
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})

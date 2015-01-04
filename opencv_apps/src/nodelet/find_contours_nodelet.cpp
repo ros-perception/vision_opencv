@@ -54,6 +54,10 @@
 #include "opencv_apps/ContourArray.h"
 #include "opencv_apps/ContourArrayStamped.h"
 
+#if OPENCV3
+#include <opencv2/imgproc/types_c.h>
+#endif
+
 namespace find_contours {
 class FindContoursNodelet : public nodelet::Nodelet
 {

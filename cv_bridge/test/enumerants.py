@@ -59,7 +59,8 @@ class TestEnumerants(unittest.TestCase):
         import numpy as np
         bridge_ = CvBridge()
         self.assertRaises(TypeError, lambda: bridge_.cv2_to_imgmsg(1, "rgba8"))
-        self.assertRaises(TypeError, lambda: bridge_.cv2_to_imgmsg(cv2.cv(), "rgba8"))
+        if hasattr(cv2, 'cv'):
+            self.assertRaises(TypeError, lambda: bridge_.cv2_to_imgmsg(cv2.cv(), "rgba8"))
 
     def test_mono16_cv2(self):
         import numpy as np

@@ -75,11 +75,11 @@ class LKFlowNodelet : public nodelet::Nodelet
   std::string window_name_;
   static bool need_config_update_;
 
-  int MAX_COUNT = 500;
-  bool needToInit = true;
-  bool nightMode = false;
+  int MAX_COUNT;
+  bool needToInit;
+  bool nightMode;
   cv::Point2f point;
-  bool addRemovePt = false;
+  bool addRemovePt;
   cv::Mat gray, prevGray;
   std::vector<cv::Point2f> points[2];
 
@@ -328,6 +328,10 @@ public:
     prev_stamp_ = ros::Time(0, 0);
 
     window_name_ = "LK Demo";
+    MAX_COUNT = 500;
+    needToInit = true;
+    nightMode = false;
+    addRemovePt = false;
 
     image_transport::SubscriberStatusCallback img_connect_cb    = boost::bind(&LKFlowNodelet::img_connectCb, this, _1);
     image_transport::SubscriberStatusCallback img_disconnect_cb = boost::bind(&LKFlowNodelet::img_disconnectCb, this, _1);

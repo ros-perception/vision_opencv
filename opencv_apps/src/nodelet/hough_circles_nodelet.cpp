@@ -79,10 +79,10 @@ class HoughCirclesNodelet : public nodelet::Nodelet
   static bool need_config_update_;
 
   // initial and max values of the parameters of interests.
-  int canny_threshold_initial_value_ = 200;
-  int accumulator_threshold_initial_value_ = 50;
-  int max_accumulator_threshold_ = 200;
-  int max_canny_threshold_ = 255;
+  int canny_threshold_initial_value_;
+  int accumulator_threshold_initial_value_;
+  int max_accumulator_threshold_;
+  int max_canny_threshold_;
   int canny_threshold_;
   int accumulator_threshold_;
       
@@ -263,6 +263,10 @@ public:
     prev_stamp_ = ros::Time(0, 0);
 
     window_name_ = "Hough Circle Detection Demo";
+    canny_threshold_initial_value_ = 200;
+    accumulator_threshold_initial_value_ = 50;
+    max_accumulator_threshold_ = 200;
+    max_canny_threshold_ = 255;
 
     //declare and initialize both parameters that are subjects to change
     canny_threshold_ = canny_threshold_initial_value_;

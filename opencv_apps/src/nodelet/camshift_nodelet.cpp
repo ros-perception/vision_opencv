@@ -80,20 +80,20 @@ class CamShiftNodelet : public nodelet::Nodelet
   static int on_mouse_x_;
   static int on_mouse_y_;
 
-  int vmin_ = 10, vmax_ = 256, smin_ = 30;
-  bool backprojMode = false;
-  bool selectObject = false;
-  int trackObject = 0;
-  bool showHist = true;
+  int vmin_, vmax_, smin_;
+  bool backprojMode;
+  bool selectObject;
+  int trackObject;
+  bool showHist;
   cv::Point origin;
   cv::Rect selection;
-  bool paused = false;
+  bool paused;
 
   cv::Rect trackWindow;
-  int hsize = 16;
-  float hranges[2] = {0,180};
-  const float* phranges = hranges;
-  cv::Mat hist, histimg = cv::Mat::zeros(200, 320, CV_8UC3);
+  int hsize;
+  float hranges[2];
+  const float* phranges;
+  cv::Mat hist, histimg;
   //cv::Mat hsv;
   
   static void onMouse( int event, int x, int y, int, void* )
@@ -416,6 +416,19 @@ public:
 
     window_name_ = "CamShift Demo";
     histogram_name_ = "Histogram";
+
+    vmin_ = 10; vmax_ = 256; smin_ = 30;
+    backprojMode = false;
+    selectObject = false;
+    trackObject = 0;
+    showHist = true;
+    paused = false;
+
+    hsize = 16;
+    hranges[0] = 0;
+    hranges[1] = 180;
+    phranges = hranges;
+    histimg = cv::Mat::zeros(200, 320, CV_8UC3);
 
     image_transport::SubscriberStatusCallback img_connect_cb    = boost::bind(&CamShiftNodelet::img_connectCb, this, _1);
     image_transport::SubscriberStatusCallback img_disconnect_cb = boost::bind(&CamShiftNodelet::img_disconnectCb, this, _1);

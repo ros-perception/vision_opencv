@@ -87,7 +87,7 @@ class SegmentObjectsNodelet : public nodelet::Nodelet
 #else
   cv::BackgroundSubtractorMOG2 bgsubtractor;
 #endif
-  bool update_bg_model = true;
+  bool update_bg_model;
 
   void reconfigureCallback(segment_objects::SegmentObjectsConfig &new_config, uint32_t level)
   {
@@ -291,6 +291,8 @@ public:
     prev_stamp_ = ros::Time(0, 0);
 
     window_name_ = "segmented";
+    update_bg_model = true;
+
 #if OPENCV3
     bgsubtractor = cv::createBackgroundSubtractorMOG2();
 #else

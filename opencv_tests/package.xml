@@ -11,13 +11,5 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>cv_bridge</build_depend>
-  <build_depend>ros</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-
   <run_depend>cv_bridge</run_depend>
-
-  <test_depend>rospy</test_depend>
-  <test_depend>rostest</test_depend>
-  <test_depend>rosunit</test_depend>
 </package>

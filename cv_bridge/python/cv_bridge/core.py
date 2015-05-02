@@ -30,13 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import roslib
-import rostest
-import rospy
-import unittest
-
 import sensor_msgs.msg
-import warnings
 
 class CvBridgeError(TypeError):
     """

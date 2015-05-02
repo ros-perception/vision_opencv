@@ -32,4 +32,6 @@
   <run_depend>python-opencv</run_depend>
   <run_depend>rosconsole</run_depend>
   <run_depend>sensor_msgs</run_depend>
+
+  <test_depend>rostest</test_depend>
 </package>

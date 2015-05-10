@@ -3,9 +3,6 @@ project(image_geometry)
 
 find_package(catkin REQUIRED sensor_msgs)
 find_package(OpenCV REQUIRED)
-if (OpenCV_VERSION VERSION_EQUAL "3")
-  add_definitions("-DOPENCV3=1")
-endif()
 
 catkin_package(CATKIN_DEPENDS sensor_msgs
                DEPENDS OpenCV

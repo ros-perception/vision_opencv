@@ -20,7 +20,7 @@ class TestDirected(unittest.TestCase):
         print ci
         cam = PinholeCameraModel()
         cam.fromCameraInfo(ci)
-        #print cam.rectifyPoint((0, 0))
+        print cam.rectifyPoint((0, 0))
 
         print cam.project3dToPixel((0,0,0))
 

@@ -100,9 +100,8 @@ class PinholeCameraModel:
         """
 
         src = mkmat(1, 2, list(uv_raw))
-        src.resize((2, 1))
-        dst = src.copy()
-        cv2.undistortPoints(src, dst, self.K, self.D, self.R, self.P)
+        src.resize((1,1,2))
+        dst = cv2.undistortPoints(src, self.K, self.D, R=self.R, P=self.P)
         return dst[0,0]
 
     def project3dToPixel(self, point):

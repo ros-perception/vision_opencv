@@ -2,6 +2,11 @@
 Changelog for package opencv_tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* simplify dependencies
+* Contributors: Vincent Rabaud
+
 1.11.7 (2014-12-14)
 -------------------
 

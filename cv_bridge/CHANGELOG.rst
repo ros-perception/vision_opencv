@@ -2,6 +2,14 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Simplify some OpenCV3 distinction
+* fix tests
+* fix test under OpenCV3
+* Remove Python for Android
+* Contributors: Gary Servin, Vincent Rabaud
+
 1.11.7 (2014-12-14)
 -------------------
 * check that the type is indeed a Numpy one

@@ -166,7 +166,7 @@ class FBackFlowNodelet : public nodelet::Nodelet
 
 
       // Publish the image.
-      sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(msg->header, msg->encoding,frame).toImageMsg();
+      sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(msg->header, msg->encoding, cflow).toImageMsg();
       img_pub_.publish(out_img);
       msg_pub_.publish(flows_msg);
     }

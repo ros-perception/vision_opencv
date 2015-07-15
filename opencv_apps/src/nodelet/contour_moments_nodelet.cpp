@@ -54,10 +54,6 @@
 #include "opencv_apps/MomentArray.h"
 #include "opencv_apps/MomentArrayStamped.h"
 
-#if OPENCV3
-#include <opencv2/imgproc/types_c.h>
-#endif
-
 namespace contour_moments {
 class ContourMomentsNodelet : public nodelet::Nodelet
 {

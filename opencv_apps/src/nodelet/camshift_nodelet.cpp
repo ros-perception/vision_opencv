@@ -190,20 +190,12 @@ class CamShiftNodelet : public nodelet::Nodelet
 
         switch( event )
         {
-#if OPENCV3
           case cv::EVENT_LBUTTONDOWN:
-#else
-          case CV_EVENT_LBUTTONDOWN:
-#endif
             origin = cv::Point(x,y);
             selection = cv::Rect(x,y,0,0);
             selectObject = true;
             break;
-#if OPENCV3
           case cv::EVENT_LBUTTONUP:
-#else
-          case CV_EVENT_LBUTTONUP:
-#endif
             selectObject = false;
             if( selection.width > 0 && selection.height > 0 )
               trackObject = -1;
@@ -231,11 +223,7 @@ class CamShiftNodelet : public nodelet::Nodelet
           {
             cv::Mat roi(hue, selection), maskroi(mask, selection);
             cv::calcHist(&roi, 1, 0, maskroi, hist, 1, &hsize, &phranges);
-#if OPENCV3
             cv::normalize(hist, hist, 0, 255, cv::NORM_MINMAX);
-#else
-            cv::normalize(hist, hist, 0, 255, CV_MINMAX);
-#endif
             std::vector<float> hist_value;
             hist_value.resize(hsize);
             for(int i = 0; i < hsize; i ++) { hist_value[i] = hist.at<float>(i);}
@@ -249,11 +237,7 @@ class CamShiftNodelet : public nodelet::Nodelet
             cv::Mat buf(1, hsize, CV_8UC3);
             for( int i = 0; i < hsize; i++ )
               buf.at<cv::Vec3b>(i) = cv::Vec3b(cv::saturate_cast<uchar>(i*180./hsize), 255, 255);
-#if OPENCV3
             cv::cvtColor(buf, buf, cv::COLOR_HSV2BGR);
-#else
-            cv::cvtColor(buf, buf, CV_HSV2BGR);
-#endif
 
             for( int i = 0; i < hsize; i++ )
             {
@@ -267,11 +251,7 @@ class CamShiftNodelet : public nodelet::Nodelet
           cv::calcBackProject(&hue, 1, 0, hist, backproj, &phranges);
           backproj &= mask;
           cv::RotatedRect trackBox = cv::CamShift(backproj, trackWindow,
-#if OPENCV3
                                                   cv::TermCriteria( cv::TermCriteria::EPS + cv::TermCriteria::MAX_ITER, 10, 1 ));
-#else
-                                                  cv::TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
-#endif
           if( trackWindow.area() <= 1 )
           {
             int cols = backproj.cols, rows = backproj.rows, r = (MIN(cols, rows) + 5)/6;
@@ -284,7 +264,7 @@ class CamShiftNodelet : public nodelet::Nodelet
 
           if( backprojMode )
             cv::cvtColor( backproj, frame, cv::COLOR_GRAY2BGR );
-#if OPENCV3
+#ifndef CV_VERSION_EPOCH
           cv::ellipse( frame, trackBox, cv::Scalar(0,0,255), 3, cv::LINE_AA );
 #else
           cv::ellipse( frame, trackBox, cv::Scalar(0,0,255), 3, CV_AA );
@@ -468,11 +448,7 @@ public:
       cv::Mat buf(1, hsize, CV_8UC3);
       for( int i = 0; i < hsize; i++ )
         buf.at<cv::Vec3b>(i) = cv::Vec3b(cv::saturate_cast<uchar>(i*180./hsize), 255, 255);
-#if OPENCV3
       cv::cvtColor(buf, buf, cv::COLOR_HSV2BGR);
-#else
-      cv::cvtColor(buf, buf, CV_HSV2BGR);
-#endif
       
       for( int i = 0; i < hsize; i++ )
       {

@@ -121,7 +121,7 @@ class FaceDetectionNodelet : public nodelet::Nodelet
       cv::cvtColor( frame, frame_gray, cv::COLOR_BGR2GRAY );
       cv::equalizeHist( frame_gray, frame_gray );
       //-- Detect faces
-#if OPENCV3
+#ifndef CV_VERSION_EPOCH
       face_cascade_.detectMultiScale( frame_gray, faces, 1.1, 2, 0, cv::Size(30, 30) );
 #else
       face_cascade_.detectMultiScale( frame_gray, faces, 1.1, 2, 0 | CV_HAAR_SCALE_IMAGE, cv::Size(30, 30) );
@@ -141,7 +141,7 @@ class FaceDetectionNodelet : public nodelet::Nodelet
         std::vector<cv::Rect> eyes;
 
         //-- In each face, detect eyes
-#if OPENCV3
+#ifndef CV_VERSION_EPOCH
         eyes_cascade_.detectMultiScale( faceROI, eyes, 1.1, 2, 0, cv::Size(30, 30) );
 #else
         eyes_cascade_.detectMultiScale( faceROI, eyes, 1.1, 2, 0 | CV_HAAR_SCALE_IMAGE, cv::Size(30, 30) );

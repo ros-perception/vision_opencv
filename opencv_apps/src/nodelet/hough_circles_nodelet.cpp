@@ -53,10 +53,6 @@
 #include "opencv_apps/CircleArray.h"
 #include "opencv_apps/CircleArrayStamped.h"
 
-#if OPENCV3
-#include <opencv2/imgproc/types_c.h>
-#endif
-
 namespace hough_circles {
 class HoughCirclesNodelet : public nodelet::Nodelet
 {

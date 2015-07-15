@@ -54,12 +54,6 @@
 #include "opencv_apps/ContourArray.h"
 #include "opencv_apps/ContourArrayStamped.h"
 
-#if OPENCV3
-#include <opencv2/imgproc/types_c.h>
-#include <opencv2/imgproc/imgproc_c.h>
-#include <opencv2/video.hpp>
-#endif
-
 namespace segment_objects {
 class SegmentObjectsNodelet : public nodelet::Nodelet
 {
@@ -82,7 +76,7 @@ class SegmentObjectsNodelet : public nodelet::Nodelet
   std::string window_name_;
   static bool need_config_update_;
 
-#if OPENCV3
+#ifndef CV_VERSION_EPOCH
   cv::Ptr<cv::BackgroundSubtractorMOG2> bgsubtractor;
 #else
   cv::BackgroundSubtractorMOG2 bgsubtractor;
@@ -145,7 +139,7 @@ class SegmentObjectsNodelet : public nodelet::Nodelet
         }
       }
 
-#if OPENCV3
+#ifndef CV_VERSION_EPOCH
       bgsubtractor->apply(frame, bgmask, update_bg_model ? -1 : 0);
 #else
       bgsubtractor(frame, bgmask, update_bg_model ? -1 : 0);
@@ -293,7 +287,7 @@ public:
     window_name_ = "segmented";
     update_bg_model = true;
 
-#if OPENCV3
+#ifndef CV_VERSION_EPOCH
     bgsubtractor = cv::createBackgroundSubtractorMOG2();
 #else
     bgsubtractor.set("noiseSigma", 10);

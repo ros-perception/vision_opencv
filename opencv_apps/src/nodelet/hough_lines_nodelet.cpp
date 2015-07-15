@@ -146,11 +146,7 @@ class HoughLinesNodelet : public nodelet::Nodelet
       }
 
       /// Initialize
-#if OPENCV3
       cv::cvtColor( edges, frame, cv::COLOR_GRAY2BGR );
-#else
-      cv::cvtColor( edges, frame, CV_GRAY2BGR );
-#endif
 
       switch (config_.hough_type) {
         case hough_lines::HoughLines_Standard_Hough_Transform:
@@ -170,7 +166,7 @@ class HoughLinesNodelet : public nodelet::Nodelet
               
               cv::Point pt1( cvRound(x0 + alpha*(-sin_t)), cvRound(y0 + alpha*cos_t) );
               cv::Point pt2( cvRound(x0 - alpha*(-sin_t)), cvRound(y0 - alpha*cos_t) );
-#if OPENCV3
+#ifndef CV_VERSION_EPOCH
               cv::line( frame, pt1, pt2, cv::Scalar(255,0,0), 3, cv::LINE_AA);
 #else
               cv::line( frame, pt1, pt2, cv::Scalar(255,0,0), 3, CV_AA);
@@ -197,7 +193,7 @@ class HoughLinesNodelet : public nodelet::Nodelet
             for( size_t i = 0; i < p_lines.size(); i++ )
             {
               cv::Vec4i l = p_lines[i];
-#if OPENCV3
+#ifndef CV_VERSION_EPOCH
               cv::line( frame, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(255,0,0), 3, cv::LINE_AA);
 #else
               cv::line( frame, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(255,0,0), 3, CV_AA);

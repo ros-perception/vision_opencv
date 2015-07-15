@@ -147,11 +147,7 @@ class LKFlowNodelet : public nodelet::Nodelet
       }
 
       // Do the work
-#if OPENCV3
       cv::TermCriteria termcrit(cv::TermCriteria::MAX_ITER + cv::TermCriteria::EPS, 20, 0.03);
-#else
-      cv::TermCriteria termcrit(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS, 20, 0.03);
-#endif
       cv::Size subPixWinSize(10,10), winSize(31,31);
 
       cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);

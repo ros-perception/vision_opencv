@@ -5,7 +5,6 @@ find_package(catkin REQUIRED COMPONENTS cv_bridge dynamic_reconfigure message_ge
 
 find_package(OpenCV REQUIRED)
 if (OpenCV_VERSION VERSION_EQUAL "3")
-  add_definitions("-DOPENCV3=1")
   set(${PROJECT_NAME}_EXTRA_CFG)
   set(${PROJECT_NAME}_EXTRA_FILES)
 else()

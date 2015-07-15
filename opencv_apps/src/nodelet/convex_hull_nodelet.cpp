@@ -54,10 +54,6 @@
 #include "opencv_apps/ContourArray.h"
 #include "opencv_apps/ContourArrayStamped.h"
 
-#if OPENCV3
-#include <opencv2/imgproc/types_c.h>
-#endif
-
 namespace convex_hull {
 class ConvexHullNodelet : public nodelet::Nodelet
 {

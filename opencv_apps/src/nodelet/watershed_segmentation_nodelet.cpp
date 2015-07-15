@@ -48,10 +48,6 @@
 #include <dynamic_reconfigure/server.h>
 #include "opencv_apps/WatershedSegmentationConfig.h"
 
-#if OPENCV3
-#include <opencv2/imgproc/types_c.h>
-#endif
-
 namespace watershed_segmentation {
 class WatershedSegmentationNodelet : public nodelet::Nodelet
 {
@@ -161,23 +157,11 @@ class WatershedSegmentationNodelet : public nodelet::Nodelet
 
           if( x < 0 || x >= frame.cols || y < 0 || y >= frame.rows )
             return;
-#if OPENCV3
           if( event == cv::EVENT_LBUTTONUP || !(flags & cv::EVENT_FLAG_LBUTTON) )
-#else
-          if( event == CV_EVENT_LBUTTONUP || !(flags & CV_EVENT_FLAG_LBUTTON) )
-#endif
             prevPt = cv::Point(-1,-1);
-#if OPENCV3
           else if( event == cv::EVENT_LBUTTONDOWN )
-#else
-          else if( event == CV_EVENT_LBUTTONDOWN )
-#endif
             prevPt = cv::Point(x,y);
-#if OPENCV3
           else if( event == cv::EVENT_MOUSEMOVE && (flags & cv::EVENT_FLAG_LBUTTON) )
-#else
-          else if( event == CV_EVENT_MOUSEMOVE && (flags & CV_EVENT_FLAG_LBUTTON) )
-#endif
           {
             cv::Point pt(x, y);
             if( prevPt.x < 0 )

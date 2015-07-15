@@ -54,10 +54,6 @@
 #include "opencv_apps/RotatedRectArray.h"
 #include "opencv_apps/RotatedRectArrayStamped.h"
 
-#if OPENCV3
-#include <opencv2/imgproc/types_c.h>
-#endif
-
 namespace general_contours {
 class GeneralContoursNodelet : public nodelet::Nodelet
 {

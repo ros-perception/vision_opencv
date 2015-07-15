@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.8 (2015-07-15)
+-------------------
 * Simplify some OpenCV3 distinction
 * fix tests
 * fix test under OpenCV3

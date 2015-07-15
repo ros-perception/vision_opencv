@@ -2,8 +2,8 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.8 (2015-07-15)
+-------------------
 * fixes `#62 <https://github.com/ros-perception/vision_opencv/issues/62>`_, bug in Python rectifyPoint old opencv1 API
 * Simplify some OpenCV3 distinction
 * Contributors: Basheer Subei, Vincent Rabaud

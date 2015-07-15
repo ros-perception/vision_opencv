@@ -2,8 +2,8 @@
 Changelog for package opencv_apps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.8 (2015-07-15)
+-------------------
 * simplify the OpenCV3 compatibility
 * fix image output of fback_flow
 * fix error: ISO C++ forbids initialization of member for gcc 4.6

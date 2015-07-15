@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>opencv_apps</name>
-  <version>1.11.7</version>
+  <version>1.11.8</version>
   <description>The opencv_apps package, most of code is taken from https://github.com/Itseez/opencv/tree/master/samples/cpp</description>
 
   <maintainer email="kei.okada@gmail.com">Kei Okada</maintainer>

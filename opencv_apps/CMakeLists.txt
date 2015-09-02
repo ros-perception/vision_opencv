@@ -102,6 +102,8 @@ add_library(${PROJECT_NAME} SHARED
   # calibration_artificial.cpp
   # calibration.cpp
   src/nodelet/camshift_nodelet.cpp
+  src/nodelet/simple_example_nodelet.cpp
+  src/nodelet/simple_compressed_example_nodelet.cpp
   # chamfer.cpp
   # connected_components.cpp
   # contours2.cpp
@@ -229,6 +231,14 @@ add_executable(camshift_exe src/node/camshift.cpp)
 SET_TARGET_PROPERTIES(camshift_exe PROPERTIES OUTPUT_NAME camshift)
 target_link_libraries(camshift_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
+add_executable(simple_example_exe src/node/simple_example.cpp)
+SET_TARGET_PROPERTIES(simple_example_exe PROPERTIES OUTPUT_NAME simple_example)
+target_link_libraries(simple_example_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(simple_compressed_example_exe src/node/simple_compressed_example.cpp)
+SET_TARGET_PROPERTIES(simple_compressed_example_exe PROPERTIES OUTPUT_NAME simple_compressed_example)
+target_link_libraries(simple_compressed_example_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
 add_executable(fback_flow_exe src/node/fback_flow.cpp)
 SET_TARGET_PROPERTIES(fback_flow_exe PROPERTIES OUTPUT_NAME fback_flow)
 target_link_libraries(fback_flow_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
@@ -278,7 +288,7 @@ target_link_libraries(watershed_segmentation_exe ${catkin_LIBRARIES} ${OpenCV_LI
 
 
 install(TARGETS edge_detection_exe hough_lines_exe hough_circles_exe face_detection_exe goodfeature_track_exe
-  camshift_exe fback_flow_exe lk_flow_exe people_detect_exe phase_corr_exe segment_objects_exe watershed_segmentation_exe
+  camshift_exe simple_example_exe simple_compressed_example_exe fback_flow_exe lk_flow_exe people_detect_exe phase_corr_exe segment_objects_exe watershed_segmentation_exe
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 install(FILES nodelet_plugins.xml

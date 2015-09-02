@@ -63,6 +63,14 @@
   <class name="simple_flow/simple_flow" type="simple_flow::SimpleFlowNodelet" base_class_type="nodelet::Nodelet">
     <description>Nodelet of SimpleFlow optical flow algorithm</description>
   </class>
+  
+ <class name="simple_example/simple_example" type="simple_example::SimpleExampleNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet of Simple Example from wiki</description>
+  </class>
+  
+   <class name="simple_compressed_example/simple_compressed_example" type="simple_compressed_example::SimpleCompressedExampleNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet of Simple Example from wiki</description>
+  </class>
 
   <class name="watershed_segmentation/watershed_segmentation" type="watershed_segmentation::WatershedSegmentationNodelet" base_class_type="nodelet::Nodelet">
     <description>Nodelet to demonstrate the famous watershed segmentation algorithm in OpenCV: watershed()</description>

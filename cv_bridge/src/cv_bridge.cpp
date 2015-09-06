@@ -2,6 +2,7 @@
 * Software License Agreement (BSD License)
 *
 *  Copyright (c) 2011, Willow Garage, Inc.
+*  Copyright (c) 2015, Tal Regev.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -37,6 +38,8 @@
 #include <boost/make_shared.hpp>
 
 #include <opencv2/imgproc/imgproc.hpp>
+
+#include <opencv2/highgui/highgui.hpp>
 
 #include <sensor_msgs/image_encodings.h>
 
@@ -100,9 +103,9 @@ int getCvType(const std::string& encoding)
 
 /// @cond DOXYGEN_IGNORE
 
-enum Format { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, YUV422, BAYER_RGGB, BAYER_BGGR, BAYER_GBRG, BAYER_GRBG};
+enum Encoding { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, YUV422, BAYER_RGGB, BAYER_BGGR, BAYER_GBRG, BAYER_GRBG};
 
-Format getFormat(const std::string& encoding)
+Encoding getEncoding(const std::string& encoding)
 {
   if ((encoding == enc::MONO8) || (encoding == enc::MONO16)) return GRAY;
   if ((encoding == enc::BGR8) || (encoding == enc::BGR16))  return BGR;
@@ -126,10 +129,10 @@ static const int SAME_FORMAT = -1;
  * The key is a pair: <FromFormat, ToFormat> and the value a succession of OpenCV code conversion
  * It's not efficient code but it is only called once and the structure is small enough
  */
-std::map<std::pair<Format, Format>, std::vector<int> > getConversionCodes() {
-  std::map<std::pair<Format, Format>, std::vector<int> > res;
+std::map<std::pair<Encoding, Encoding>, std::vector<int> > getConversionCodes() {
+  std::map<std::pair<Encoding, Encoding>, std::vector<int> > res;
   for(int i=0; i<=5; ++i)
-    res[std::pair<Format, Format>(Format(i),Format(i))].push_back(SAME_FORMAT);
+    res[std::pair<Encoding, Encoding>(Encoding(i),Encoding(i))].push_back(SAME_FORMAT);
 
   res[std::make_pair(GRAY, RGB)].push_back(cv::COLOR_GRAY2RGB);
   res[std::make_pair(GRAY, BGR)].push_back(cv::COLOR_GRAY2BGR);
@@ -184,8 +187,8 @@ std::map<std::pair<Format, Format>, std::vector<int> > getConversionCodes() {
 
 const std::vector<int> getConversionCode(std::string src_encoding, std::string dst_encoding)
 {
-  Format src_format = getFormat(src_encoding);
-  Format dst_format = getFormat(dst_encoding);
+  Encoding src_encod = getEncoding(src_encoding);
+  Encoding dst_encod = getEncoding(dst_encoding);
   bool is_src_color_format = sensor_msgs::image_encodings::isColor(src_encoding) ||
                              sensor_msgs::image_encodings::isMono(src_encoding) ||
                              sensor_msgs::image_encodings::isBayer(src_encoding) ||
@@ -217,10 +220,10 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
   }
 
   // If we are converting from a color type to another type, then everything is fine
-  static const std::map<std::pair<Format, Format>, std::vector<int> > CONVERSION_CODES = getConversionCodes();
+  static const std::map<std::pair<Encoding, Encoding>, std::vector<int> > CONVERSION_CODES = getConversionCodes();
 
-  std::pair<Format, Format> key(src_format, dst_format);
-  std::map<std::pair<Format, Format>, std::vector<int> >::const_iterator val = CONVERSION_CODES.find(key);
+  std::pair<Encoding, Encoding> key(src_encod, dst_encod);
+  std::map<std::pair<Encoding, Encoding>, std::vector<int> >::const_iterator val = CONVERSION_CODES.find(key);
   if (val == CONVERSION_CODES.end())
     throw Exception("Unsupported conversion from [" + src_encoding +
                       "] to [" + dst_encoding + "]");
@@ -232,6 +235,8 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
 
   return val->second;
 }
+
+/////////////////////////////////////// Image ///////////////////////////////////////////
 
 cv::Mat matFromImage(const sensor_msgs::Image& source)
 {
@@ -391,6 +396,88 @@ CvImagePtr cvtColor(const CvImageConstPtr& source,
                     const std::string& encoding)
 {
   return toCvCopyImpl(source->image, source->header, source->encoding, encoding);
+}
+
+/////////////////////////////////////// CompressedImage ///////////////////////////////////////////
+
+cv::Mat matFromImage(const sensor_msgs::CompressedImage& source)
+{
+    cv::Mat jpegData(1,source.data.size(),CV_8UC1);
+    jpegData.data     = const_cast<uchar*>(&source.data[0]);
+    cv::InputArray data(jpegData);
+    cv::Mat bgrMat     = cv::imdecode(data,cv::IMREAD_COLOR);
+    return bgrMat;
+}
+
+sensor_msgs::CompressedImagePtr CvImage::toCompressedImageMsg(const std::string& dst_format) const
+{
+  sensor_msgs::CompressedImagePtr ptr = boost::make_shared<sensor_msgs::CompressedImage>();
+  toCompressedImageMsg(*ptr,dst_format);
+  return ptr;
+}
+
+void CvImage::toCompressedImageMsg(sensor_msgs::CompressedImage& ros_image, const std::string& dst_format) const
+{
+  ros_image.header = header;
+  cv::Mat image;
+  if(encoding != enc::BGR8)
+  {
+      CvImagePtr tempThis = boost::make_shared<CvImage>(*this);
+      CvImagePtr temp = cvtColor(tempThis,enc::BGR8);
+      image = temp->image;
+  }
+  else
+  {
+      image = this->image;
+  }
+  std::vector<uchar> buf;
+  if (dst_format.empty() || dst_format == "jpg")
+  {
+      ros_image.format = "jpg";
+      cv::imencode(".jpg", image, buf);
+  }
+
+  if (dst_format == "png")
+  {
+      ros_image.format = "png";
+      cv::imencode(".png", image, buf);
+  }
+
+  //TODO: check this formats (on rviz) and add more formats
+  //from http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
+  if (dst_format == "jp2")
+  {
+      ros_image.format = "jp2";
+      cv::imencode(".jp2", image, buf);
+  }
+
+  if (dst_format == "bmp")
+  {
+      ros_image.format = "bmp";
+      cv::imencode(".bmp", image, buf);
+  }
+
+  if (dst_format == "tif")
+  {
+      ros_image.format = "tif";
+      cv::imencode(".tif", image, buf);
+  }
+
+  ros_image.data = buf;
+}
+
+// Deep copy data, returnee is mutable
+CvImagePtr toCvCopy(const sensor_msgs::CompressedImageConstPtr& source,
+                    const std::string& encoding)
+{
+  return toCvCopy(*source, encoding);
+}
+
+CvImagePtr toCvCopy(const sensor_msgs::CompressedImage& source,
+                    const std::string& encoding)
+{
+  // Construct matrix pointing to source data
+  return toCvCopyImpl(matFromImage(source), source.header, enc::BGR8, encoding);
 }
 
 } //namespace cv_bridge

@@ -1,7 +1,8 @@
 /*********************************************************************
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2011, Willow Garage, Inc.
+*  Copyright (c) 2011, Willow Garage, Inc,
+*  Copyright (c) 2015, Tal Regev.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -36,6 +37,7 @@
 #define CV_BRIDGE_CV_BRIDGE_H
 
 #include <sensor_msgs/Image.h>
+#include <sensor_msgs/CompressedImage.h>
 #include <ros/static_assert.h>
 #include <opencv2/core/core.hpp>
 #include <stdexcept>
@@ -52,6 +54,7 @@ class CvImage;
 
 typedef boost::shared_ptr<CvImage> CvImagePtr;
 typedef boost::shared_ptr<CvImage const> CvImageConstPtr;
+
 
 /**
  * \brief Image message class that is interoperable with sensor_msgs/Image but uses a
@@ -86,12 +89,31 @@ public:
   sensor_msgs::ImagePtr toImageMsg() const;
 
   /**
+   * dst_format is compress the image to desire format.
+   * Default value is empty string that will convert to jpg format.
+   * can be: jpg, jp2, bmp, png, tif at the moment
+   * support this format from opencv:
+   * http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
+   */
+  sensor_msgs::CompressedImagePtr toCompressedImageMsg(const std::string& dst_format = std::string()) const;
+
+  /**
    * \brief Copy the message data to a ROS sensor_msgs::Image message.
    *
    * This overload is intended mainly for aggregate messages such as stereo_msgs::DisparityImage,
    * which contains a sensor_msgs::Image as a data member.
    */
   void toImageMsg(sensor_msgs::Image& ros_image) const;
+
+  /**
+   * dst_format is compress the image to desire format.
+   * Default value is empty string that will convert to jpg format.
+   * can be: jpg, jp2, bmp, png, tif at the moment
+   * support this format from opencv:
+   * http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
+   */
+  void toCompressedImageMsg(sensor_msgs::CompressedImage& ros_image, const std::string& dst_format = std::string()) const;
+
 
   typedef boost::shared_ptr<CvImage> Ptr;
   typedef boost::shared_ptr<CvImage const> ConstPtr;
@@ -106,6 +128,7 @@ protected:
                             const std::string& encoding);
   /// @endcond
 };
+
 
 /**
  * \brief Convert a sensor_msgs::Image message to an OpenCV-compatible CvImage, copying the
@@ -124,6 +147,9 @@ protected:
  * as \a source.
  */
 CvImagePtr toCvCopy(const sensor_msgs::ImageConstPtr& source,
+                    const std::string& encoding = std::string());
+
+CvImagePtr toCvCopy(const sensor_msgs::CompressedImageConstPtr& source,
                     const std::string& encoding = std::string());
 
 /**
@@ -146,6 +172,9 @@ CvImagePtr toCvCopy(const sensor_msgs::ImageConstPtr& source,
  * function are applied (capping): http://docs.opencv.org/modules/core/doc/basic_structures.html#mat-convertto
  */
 CvImagePtr toCvCopy(const sensor_msgs::Image& source,
+                    const std::string& encoding = std::string());
+
+CvImagePtr toCvCopy(const sensor_msgs::CompressedImage& source,
                     const std::string& encoding = std::string());
 
 /**
@@ -213,7 +242,6 @@ CvImagePtr cvtColor(const CvImageConstPtr& source,
 int getCvType(const std::string& encoding);
 
 } // namespace cv_bridge
-
 
 
 // CvImage as a first class message type

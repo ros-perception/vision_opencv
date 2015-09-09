@@ -409,14 +409,50 @@ cv::Mat matFromImage(const sensor_msgs::CompressedImage& source)
     return bgrMat;
 }
 
-sensor_msgs::CompressedImagePtr CvImage::toCompressedImageMsg(const std::string& dst_format) const
+sensor_msgs::CompressedImagePtr CvImage::toCompressedImageMsg(const Format dst_format) const
 {
   sensor_msgs::CompressedImagePtr ptr = boost::make_shared<sensor_msgs::CompressedImage>();
   toCompressedImageMsg(*ptr,dst_format);
   return ptr;
 }
 
-void CvImage::toCompressedImageMsg(sensor_msgs::CompressedImage& ros_image, const std::string& dst_format) const
+std::string getFormat(Format format) {
+
+	switch (format) {
+		case DIP:
+			return "dip";
+		case BMP:
+			return "bmp";
+		case JPG:
+			return "jpg";
+		case JPEG:
+			return "jpeg";
+		case JPE:
+			return "jpe";
+		case JP2:
+			return "jp2";
+		case PNG:
+			return "png";
+		case PBM:
+			return "pbm";
+		case PGM:
+			return "pgm";
+		case PPM:
+			return "ppm";
+		case RAS:
+			return "ras";
+		case SR:
+			return "sr";
+		case TIF:
+			return "tif";
+		case TIFF:
+			return "tiff";
+	}
+
+	throw Exception("Unrecognized image format");
+}
+
+void CvImage::toCompressedImageMsg(sensor_msgs::CompressedImage& ros_image, const Format dst_format) const
 {
   ros_image.header = header;
   cv::Mat image;
@@ -431,37 +467,10 @@ void CvImage::toCompressedImageMsg(sensor_msgs::CompressedImage& ros_image, cons
       image = this->image;
   }
   std::vector<uchar> buf;
-  if (dst_format.empty() || dst_format == "jpg")
-  {
-      ros_image.format = "jpg";
-      cv::imencode(".jpg", image, buf);
-  }
 
-  if (dst_format == "png")
-  {
-      ros_image.format = "png";
-      cv::imencode(".png", image, buf);
-  }
-
-  //TODO: check this formats (on rviz) and add more formats
-  //from http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
-  if (dst_format == "jp2")
-  {
-      ros_image.format = "jp2";
-      cv::imencode(".jp2", image, buf);
-  }
-
-  if (dst_format == "bmp")
-  {
-      ros_image.format = "bmp";
-      cv::imencode(".bmp", image, buf);
-  }
-
-  if (dst_format == "tif")
-  {
-      ros_image.format = "tif";
-      cv::imencode(".tif", image, buf);
-  }
+  std::string format = getFormat(dst_format);
+  ros_image.format = format;
+  cv::imencode("." + format, image, buf);
 
   ros_image.data = buf;
 }

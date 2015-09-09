@@ -64,7 +64,7 @@ public:
   ImageConverter()
   {
       // Subscrive to input video feed and publish output video feed
-    image_sub_ = nh_.subscribe("image", 1,
+    image_sub_ = nh_.subscribe("image/compressed", 1,
             &ImageConverter::imageCb,this);
     image_pub_ = nh_.advertise<sensor_msgs::CompressedImage>("/image_converter/output_video/compressed", 1);
 

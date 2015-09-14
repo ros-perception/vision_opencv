@@ -55,6 +55,16 @@ class CvImage;
 typedef boost::shared_ptr<CvImage> CvImagePtr;
 typedef boost::shared_ptr<CvImage const> CvImageConstPtr;
 
+//from: http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
+typedef enum {
+	BMP, DIP,
+	JPG, JPEG, JPE,
+	JP2,
+	PNG,
+	PBM, PGM, PPM,
+	SR, RAS,
+	TIFF, TIF,
+} Format;
 
 /**
  * \brief Image message class that is interoperable with sensor_msgs/Image but uses a
@@ -95,7 +105,7 @@ public:
    * support this format from opencv:
    * http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
    */
-  sensor_msgs::CompressedImagePtr toCompressedImageMsg(const std::string& dst_format = std::string()) const;
+  sensor_msgs::CompressedImagePtr toCompressedImageMsg(const Format dst_format = JPG) const;
 
   /**
    * \brief Copy the message data to a ROS sensor_msgs::Image message.
@@ -112,7 +122,7 @@ public:
    * support this format from opencv:
    * http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
    */
-  void toCompressedImageMsg(sensor_msgs::CompressedImage& ros_image, const std::string& dst_format = std::string()) const;
+  void toCompressedImageMsg(sensor_msgs::CompressedImage& ros_image, const Format dst_format = JPG) const;
 
 
   typedef boost::shared_ptr<CvImage> Ptr;

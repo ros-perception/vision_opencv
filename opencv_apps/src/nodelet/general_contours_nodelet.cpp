@@ -3,11 +3,11 @@
 *
 *  Copyright (c) 2014, Kei Okada.
 *  All rights reserved.
-* 
+*
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions
 *  are met:
-* 
+*
 *   * Redistributions of source code must retain the above copyright
 *     notice, this list of conditions and the following disclaimer.
 *   * Redistributions in binary form must reproduce the above
@@ -17,7 +17,7 @@
 *   * Neither the name of the Kei Okada nor the names of its
 *     contributors may be used to endorse or promote products derived
 *     from this software without specific prior written permission.
-* 
+*
 *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -99,7 +99,7 @@ class GeneralContoursNodelet : public nodelet::Nodelet
   {
     do_work(msg, cam_info->header.frame_id);
   }
-  
+
   void imageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
     do_work(msg, msg->header.frame_id);
@@ -127,7 +127,11 @@ class GeneralContoursNodelet : public nodelet::Nodelet
       cv::Mat src_gray;
 
       /// Convert image to gray and blur it
-      cv::cvtColor( frame, src_gray, cv::COLOR_RGB2GRAY );
+      if ( frame.channels() > 1 ) {
+        cv::cvtColor( frame, src_gray, cv::COLOR_RGB2GRAY );
+      } else {
+        src_gray = frame;
+      }
       cv::blur( src_gray, src_gray, cv::Size(3,3) );
 
       /// Create window
@@ -279,7 +283,7 @@ public:
     local_nh_.param("debug_view", debug_view_, false);
     subscriber_count_ = 0;
     prev_stamp_ = ros::Time(0, 0);
-    
+
     window_name_ = "Contours";
     threshold_ = 100;
 
@@ -290,7 +294,7 @@ public:
     img_pub_ = image_transport::ImageTransport(local_nh_).advertise("image", 1, img_connect_cb, img_disconnect_cb);
     rects_pub_ = local_nh_.advertise<opencv_apps::RotatedRectArrayStamped>("rectangles", 1, msg_connect_cb, msg_disconnect_cb);
     ellipses_pub_ = local_nh_.advertise<opencv_apps::RotatedRectArrayStamped>("ellipses", 1, msg_connect_cb, msg_disconnect_cb);
-        
+
     if( debug_view_ ) {
       subscriber_count_++;
     }

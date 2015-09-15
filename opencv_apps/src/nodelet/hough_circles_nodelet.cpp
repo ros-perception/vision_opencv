@@ -3,11 +3,11 @@
 *
 *  Copyright (c) 2014, Kei Okada.
 *  All rights reserved.
-* 
+*
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions
 *  are met:
-* 
+*
 *   * Redistributions of source code must retain the above copyright
 *     notice, this list of conditions and the following disclaimer.
 *   * Redistributions in binary form must reproduce the above
@@ -17,7 +17,7 @@
 *   * Neither the name of the Kei Okada nor the names of its
 *     contributors may be used to endorse or promote products derived
 *     from this software without specific prior written permission.
-* 
+*
 *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -81,7 +81,7 @@ class HoughCirclesNodelet : public nodelet::Nodelet
   int max_canny_threshold_;
   int canny_threshold_;
   int accumulator_threshold_;
-      
+
 
   void reconfigureCallback(hough_circles::HoughCirclesConfig &new_config, uint32_t level)
   {
@@ -106,7 +106,7 @@ class HoughCirclesNodelet : public nodelet::Nodelet
   {
     do_work(msg, cam_info->header.frame_id);
   }
-  
+
   void imageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
     do_work(msg, msg->header.frame_id);
@@ -133,7 +133,11 @@ class HoughCirclesNodelet : public nodelet::Nodelet
       std::vector<cv::Rect> faces;
       cv::Mat src_gray, edges;
 
-      cv::cvtColor( frame, src_gray, cv::COLOR_BGR2GRAY );
+      if ( frame.channels() > 1 ) {
+        cv::cvtColor( frame, src_gray, cv::COLOR_BGR2GRAY );
+      } else {
+        src_gray = frame;
+      }
 
       // Reduce the noise so we avoid false circle detection
       cv::GaussianBlur( src_gray, src_gray, cv::Size(9, 9), 2, 2 );
@@ -174,7 +178,7 @@ class HoughCirclesNodelet : public nodelet::Nodelet
         circle( frame, center, 3, cv::Scalar(0,255,0), -1, 8, 0 );
         // circle outline
         circle( frame, center, radius, cv::Scalar(0,0,255), 3, 8, 0 );
-        
+
         opencv_apps::Circle circle_msg;
         circle_msg.center.x = center.x;
         circle_msg.center.y = center.y;
@@ -274,7 +278,7 @@ public:
     ros::SubscriberStatusCallback msg_disconnect_cb = boost::bind(&HoughCirclesNodelet::msg_disconnectCb, this, _1);
     img_pub_ = image_transport::ImageTransport(local_nh_).advertise("image", 1, img_connect_cb, img_disconnect_cb);
     msg_pub_ = local_nh_.advertise<opencv_apps::CircleArrayStamped>("circles", 1, msg_connect_cb, msg_disconnect_cb);
-        
+
     if( debug_view_ ) {
       subscriber_count_++;
     }

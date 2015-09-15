@@ -3,11 +3,11 @@
 *
 *  Copyright (c) 2014, Kei Okada.
 *  All rights reserved.
-* 
+*
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions
 *  are met:
-* 
+*
 *   * Redistributions of source code must retain the above copyright
 *     notice, this list of conditions and the following disclaimer.
 *   * Redistributions in binary form must reproduce the above
@@ -17,7 +17,7 @@
 *   * Neither the name of the Kei Okada nor the names of its
 *     contributors may be used to endorse or promote products derived
 *     from this software without specific prior written permission.
-* 
+*
 *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -106,7 +106,7 @@ class EdgeDetectionNodelet : public nodelet::Nodelet
   {
     do_work(msg, cam_info->header.frame_id);
   }
-  
+
   void imageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
     do_work(msg, msg->header.frame_id);
@@ -130,8 +130,12 @@ class EdgeDetectionNodelet : public nodelet::Nodelet
       cv::GaussianBlur( frame, frame, cv::Size(3,3), 0, 0, cv::BORDER_DEFAULT );
 
       /// Convert it to gray
-      cv::cvtColor( frame, src_gray, cv::COLOR_RGB2GRAY );
-      
+      if ( frame.channels() > 1 ) {
+        cv::cvtColor( frame, src_gray, cv::COLOR_RGB2GRAY );
+      } else {
+        src_gray = frame;
+      }
+
       /// Create window
       if( debug_view_) {
         cv::namedWindow( window_name_, cv::WINDOW_AUTOSIZE );
@@ -149,7 +153,7 @@ class EdgeDetectionNodelet : public nodelet::Nodelet
             int scale = 1;
             int delta = 0;
             int ddepth = CV_16S;
-            
+
             /// Gradient X
             //Scharr( src_gray, grad_x, ddepth, 1, 0, scale, delta, BORDER_DEFAULT );
             cv::Sobel( src_gray, grad_x, ddepth, 1, 0, 3, scale, delta, cv::BORDER_DEFAULT );
@@ -174,7 +178,7 @@ class EdgeDetectionNodelet : public nodelet::Nodelet
             int delta = 0;
             int ddepth = CV_16S;
             /// Apply Laplace function
-            
+
             cv::Laplacian( src_gray, dst, ddepth, kernel_size, scale, delta, cv::BORDER_DEFAULT );
             convertScaleAbs( dst, grad );
 
@@ -196,7 +200,7 @@ class EdgeDetectionNodelet : public nodelet::Nodelet
             cv::Canny( grad, grad, low_threshold_, low_threshold_*ratio, kernel_size );
 
             new_window_name = "Canny Edge Detection Demo";
-            
+
             /// Create a Trackbar for user to enter threshold
             if( debug_view_) {
               if (need_config_update_) {
@@ -300,7 +304,7 @@ public:
     ros::SubscriberStatusCallback msg_disconnect_cb = boost::bind(&EdgeDetectionNodelet::msg_disconnectCb, this, _1);
     img_pub_ = image_transport::ImageTransport(local_nh_).advertise("image", 1, img_connect_cb, img_disconnect_cb);
     //msg_pub_ = local_nh_.advertise<opencv_apps::LineArrayStamped>("lines", 1, msg_connect_cb, msg_disconnect_cb);
-        
+
     if( debug_view_ ) {
       subscriber_count_++;
     }

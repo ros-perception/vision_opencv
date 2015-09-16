@@ -3,11 +3,11 @@
 *
 *  Copyright (c) 2014, Kei Okada.
 *  All rights reserved.
-* 
+*
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions
 *  are met:
-* 
+*
 *   * Redistributions of source code must retain the above copyright
 *     notice, this list of conditions and the following disclaimer.
 *   * Redistributions in binary form must reproduce the above
@@ -17,7 +17,7 @@
 *   * Neither the name of the Kei Okada nor the names of its
 *     contributors may be used to endorse or promote products derived
 *     from this software without specific prior written permission.
-* 
+*
 *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -96,7 +96,7 @@ class FaceDetectionNodelet : public nodelet::Nodelet
   {
     do_work(msg, cam_info->header.frame_id);
   }
-  
+
   void imageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
     do_work(msg, msg->header.frame_id);
@@ -118,7 +118,11 @@ class FaceDetectionNodelet : public nodelet::Nodelet
       std::vector<cv::Rect> faces;
       cv::Mat frame_gray;
 
-      cv::cvtColor( frame, frame_gray, cv::COLOR_BGR2GRAY );
+      if ( frame.channels() > 1 ) {
+        cv::cvtColor( frame, frame_gray, cv::COLOR_BGR2GRAY );
+      } else {
+        frame_gray = frame;
+      }
       cv::equalizeHist( frame_gray, frame_gray );
       //-- Detect faces
 #ifndef CV_VERSION_EPOCH
@@ -245,14 +249,14 @@ public:
     ros::SubscriberStatusCallback msg_disconnect_cb = boost::bind(&FaceDetectionNodelet::msg_disconnectCb, this, _1);
     img_pub_ = image_transport::ImageTransport(local_nh_).advertise("image", 1, img_connect_cb, img_disconnect_cb);
     msg_pub_ = local_nh_.advertise<opencv_apps::FaceArrayStamped>("faces", 1, msg_connect_cb, msg_disconnect_cb);
-        
+
     if( debug_view_ ) {
       subscriber_count_++;
     }
     std::string face_cascade_name, eyes_cascade_name;
     local_nh_.param("face_cascade_name", face_cascade_name, std::string("/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml"));
     local_nh_.param("eyes_cascade_name", eyes_cascade_name, std::string("/usr/share/opencv/haarcascades/haarcascade_eye_tree_eyeglasses.xml"));
-        
+
     if( !face_cascade_.load( face_cascade_name ) ){ NODELET_ERROR("--Error loading %s", face_cascade_name.c_str()); };
     if( !eyes_cascade_.load( eyes_cascade_name ) ){ NODELET_ERROR("--Error loading %s", eyes_cascade_name.c_str()); };
 

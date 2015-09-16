@@ -126,9 +126,13 @@ class FindContoursNodelet : public nodelet::Nodelet
       cv::Mat src_gray;
 
       /// Convert it to gray
-      cv::cvtColor( frame, src_gray, cv::COLOR_RGB2GRAY );
+      if ( frame.channels() > 1 ) {
+        cv::cvtColor( frame, src_gray, cv::COLOR_RGB2GRAY );
+      } else {
+        src_gray = frame;
+      }
       cv::GaussianBlur( src_gray, src_gray, cv::Size(3,3), 0, 0, cv::BORDER_DEFAULT );
-      
+
       /// Create window
       if( debug_view_) {
         cv::namedWindow( window_name_, cv::WINDOW_AUTOSIZE );

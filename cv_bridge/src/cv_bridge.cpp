@@ -370,6 +370,48 @@ CvImagePtr toCvCopy(const sensor_msgs::Image& source,
   return toCvCopyImpl(matFromImage(source), source.header, source.encoding, encoding);
 }
 
+CvImagePtr toCvCopy(const sensor_msgs::ImageConstPtr& source,
+                    bool use_dynamic_range,
+                    const std::string& encoding,
+                    double min_depth_range,
+                    double max_depth_range)
+{
+  try
+  {
+    return cv_bridge::toCvCopy(source, encoding.empty() ? source->encoding : encoding);
+  }
+  catch (cv_bridge::Exception& e)
+  {
+    try
+    {
+      cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(source);
+      if (source->encoding == "CV_8UC3")
+      {
+        return cv_ptr;
+      } else if (source->encoding == "8UC1") {
+        cv::Mat cv_image = cv_ptr->image;
+        cv::cvtColor(cv_image, cv_ptr->image, CV_GRAY2BGR);
+        cv_ptr->encoding = sensor_msgs::image_encodings::BGR8;
+        return cv_ptr;
+      } else if (source->encoding == "16UC1" || source->encoding == "32FC1") {
+        if (use_dynamic_range) cv::minMaxLoc(cv_ptr->image, &min_depth_range, &max_depth_range);
+        if (source->encoding == "16UC1") max_depth_range *= 1000;
+        cv::Mat img_scaled_8u;
+        cv::Mat(cv_ptr->image-min_depth_range).convertTo(img_scaled_8u, CV_8UC1, 255. / (max_depth_range - min_depth_range));
+        cv::cvtColor(img_scaled_8u, cv_ptr->image, CV_GRAY2BGR);
+        cv_ptr->encoding = sensor_msgs::image_encodings::BGR8;
+        return cv_ptr;
+      } else {
+        throw Exception("ImageView.callback_image() could not convert image from '" + source->encoding + "' to 'rgb8' (" + e.what() + ")");
+      }
+    }
+    catch (cv_bridge::Exception& e)
+    {
+      throw Exception("ImageView.callback_image() while trying to convert image from '" + source->encoding + "' to 'rgb8' an exception was thrown (" + e.what() + ")");
+    }
+  }
+}
+
 // Share const data, returnee is immutable
 CvImageConstPtr toCvShare(const sensor_msgs::ImageConstPtr& source,
                           const std::string& encoding)

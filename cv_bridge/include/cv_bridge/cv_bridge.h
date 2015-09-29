@@ -38,8 +38,11 @@
 
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CompressedImage.h>
+#include <sensor_msgs/image_encodings.h>
 #include <ros/static_assert.h>
 #include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/imgproc/types_c.h>
 #include <stdexcept>
 
 namespace cv_bridge {
@@ -186,6 +189,30 @@ CvImagePtr toCvCopy(const sensor_msgs::Image& source,
 
 CvImagePtr toCvCopy(const sensor_msgs::CompressedImage& source,
                     const std::string& encoding = std::string());
+
+/**
+ * \brief Convert a sensor_msgs::Image message to an OpenCV-compatible CvImage.
+ * Supports both color and depth Kinect image formats.
+ *
+ * \param source   A shared_ptr to a sensor_msgs::Image message
+ * \param use_dynamic_range If true, min_depth_range and max_depth_range will be retrieved from the image data
+ * \param encoding The desired encoding of the image data, one of the following strings:
+ *    - \c "mono8"
+ *    - \c "bgr8"
+ *    - \c "bgra8"
+ *    - \c "rgb8"
+ *    - \c "rgba8"
+ *    - \c "mono16"
+ * If \a encoding is the empty string (the default), the returned CvImage has the same encoding
+ * as \a source.
+ * \param min_depth_range Minimum depth range for the Kinect depth image data
+ * \param max_depth_range Maximum depth range for the Kinect depth image data
+ */
+CvImagePtr toCvCopy(const sensor_msgs::ImageConstPtr& source,
+                    bool use_dynamic_range,
+                    const std::string& encoding = std::string(),
+                    double min_depth_range = 0.0,
+                    double max_depth_range = 5.5);
 
 /**
  * \brief Convert an immutable sensor_msgs::Image message to an OpenCV-compatible CvImage, sharing

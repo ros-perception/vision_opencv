@@ -180,8 +180,7 @@ add_library(${PROJECT_NAME} SHARED
   src/nodelet/watershed_segmentation_nodelet.cpp
   ${${PROJECT_NAME}_EXTRA_FILES}
 )
-
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+link_libraries(${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_generate_messages_cpp)
 install(TARGETS ${PROJECT_NAME}
         DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -189,39 +188,30 @@ install(TARGETS ${PROJECT_NAME}
 
 add_executable(edge_detection_exe src/node/edge_detection.cpp)
 SET_TARGET_PROPERTIES(edge_detection_exe PROPERTIES OUTPUT_NAME edge_detection)
-target_link_libraries(edge_detection_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(hough_lines_exe src/node/hough_lines.cpp)
 SET_TARGET_PROPERTIES(hough_lines_exe PROPERTIES OUTPUT_NAME hough_lines)
-target_link_libraries(hough_lines_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(hough_circles_exe src/node/hough_circles.cpp)
 SET_TARGET_PROPERTIES(hough_circles_exe PROPERTIES OUTPUT_NAME hough_circles)
-target_link_libraries(hough_circles_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(find_contours_exe src/node/find_contours.cpp)
 SET_TARGET_PROPERTIES(find_contours_exe PROPERTIES OUTPUT_NAME find_contours)
-target_link_libraries(find_contours_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(convex_hull_exe src/node/convex_hull.cpp)
 SET_TARGET_PROPERTIES(convex_hull_exe PROPERTIES OUTPUT_NAME convex_hull)
-target_link_libraries(convex_hull_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(general_contours_exe src/node/general_contours.cpp)
 SET_TARGET_PROPERTIES(general_contours_exe PROPERTIES OUTPUT_NAME general_contours)
-target_link_libraries(general_contours_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(contour_moments_exe src/node/contour_moments.cpp)
 SET_TARGET_PROPERTIES(contour_moments_exe PROPERTIES OUTPUT_NAME contour_moments)
-target_link_libraries(contour_moments_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(face_detection_exe src/node/face_detection.cpp)
 SET_TARGET_PROPERTIES(face_detection_exe PROPERTIES OUTPUT_NAME face_detection)
-target_link_libraries(face_detection_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(goodfeature_track_exe src/node/goodfeature_track.cpp)
 SET_TARGET_PROPERTIES(goodfeature_track_exe PROPERTIES OUTPUT_NAME goodfeature_track)
-target_link_libraries(goodfeature_track_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
   # bgfg_gmg.cpp
   # bgfg_segm.cpp
@@ -229,19 +219,15 @@ target_link_libraries(goodfeature_track_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARI
 
 add_executable(camshift_exe src/node/camshift.cpp)
 SET_TARGET_PROPERTIES(camshift_exe PROPERTIES OUTPUT_NAME camshift)
-target_link_libraries(camshift_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(simple_example_exe src/node/simple_example.cpp)
 SET_TARGET_PROPERTIES(simple_example_exe PROPERTIES OUTPUT_NAME simple_example)
-target_link_libraries(simple_example_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(simple_compressed_example_exe src/node/simple_compressed_example.cpp)
 SET_TARGET_PROPERTIES(simple_compressed_example_exe PROPERTIES OUTPUT_NAME simple_compressed_example)
-target_link_libraries(simple_compressed_example_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(fback_flow_exe src/node/fback_flow.cpp)
 SET_TARGET_PROPERTIES(fback_flow_exe PROPERTIES OUTPUT_NAME fback_flow)
-target_link_libraries(fback_flow_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
   # fback.cpp
   # hybridtrackingsample.cpp
@@ -253,15 +239,12 @@ target_link_libraries(fback_flow_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(lk_flow_exe src/node/lk_flow.cpp)
 SET_TARGET_PROPERTIES(lk_flow_exe PROPERTIES OUTPUT_NAME lk_flow)
-target_link_libraries(lk_flow_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(people_detect_exe src/node/people_detect.cpp)
 SET_TARGET_PROPERTIES(people_detect_exe PROPERTIES OUTPUT_NAME people_detect)
-target_link_libraries(people_detect_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(phase_corr_exe src/node/phase_corr.cpp)
 SET_TARGET_PROPERTIES(phase_corr_exe PROPERTIES OUTPUT_NAME phase_corr)
-target_link_libraries(phase_corr_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
   # phase_corr.cpp
   # retinaDemo.cpp
@@ -269,13 +252,11 @@ target_link_libraries(phase_corr_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(segment_objects_exe src/node/segment_objects.cpp)
 SET_TARGET_PROPERTIES(segment_objects_exe PROPERTIES OUTPUT_NAME segment_objects)
-target_link_libraries(segment_objects_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
   # select3dobj.cpp
 
 add_executable(simple_flow_exe src/node/simple_flow.cpp)
 SET_TARGET_PROPERTIES(simple_flow_exe PROPERTIES OUTPUT_NAME simple_flow)
-target_link_libraries(simple_flow_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
   # starter_video.cpp
   # videocapture_pvapi.cpp
@@ -284,7 +265,6 @@ target_link_libraries(simple_flow_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(watershed_segmentation_exe src/node/watershed_segmentation.cpp)
 SET_TARGET_PROPERTIES(watershed_segmentation_exe PROPERTIES OUTPUT_NAME watershed_segmentation)
-target_link_libraries(watershed_segmentation_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 
 install(TARGETS edge_detection_exe hough_lines_exe hough_circles_exe face_detection_exe goodfeature_track_exe

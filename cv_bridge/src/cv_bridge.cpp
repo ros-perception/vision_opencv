@@ -491,49 +491,123 @@ CvImagePtr toCvCopy(const sensor_msgs::CompressedImage& source,
   return toCvCopyImpl(matFromImage(source), source.header, enc::BGR8, encoding);
 }
 
-CvImageConstPtr cvtColorForDisplay(const sensor_msgs::ImageConstPtr& source,
-                                   const std::string& encoding,
-                                   bool use_dynamic_image_value,
+CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
+                                   const std::string& encoding_out,
+                                   bool do_dynamic_scaling,
                                    double min_image_value,
                                    double max_image_value)
 {
-  try
-  {
-    return cv_bridge::toCvShare(source, encoding.empty() ? source->encoding : encoding);
-  }
-  catch (cv_bridge::Exception& e)
+  if (!source)
+    throw Exception("cv_bridge.cvtColorForDisplay() called with empty image.");
+  // let's figure out what to do with the empty encoding
+  std::string encoding = encoding_out;
+  if (encoding.empty())
   {
     try
     {
-      if (source->encoding == "CV_8UC3")
+      // If there is a chance we can just share the data, let's try it out
+      if (sensor_msgs::image_encodings::isColor(source->encoding) || sensor_msgs::image_encodings::isMono(source->encoding))
       {
-        return cv_bridge::toCvShare(source);
-      } else if (source->encoding == "8UC1") {
-        cv_bridge::CvImageConstPtr cv_ptr = cv_bridge::toCvShare(source);
-        cv_bridge::CvImagePtr cv_ptr_cvt(new cv_bridge::CvImage());
-        cv::cvtColor(cv_ptr->image, cv_ptr_cvt->image, CV_GRAY2BGR);
-        cv_ptr_cvt->encoding = sensor_msgs::image_encodings::BGR8;
-        cv_ptr_cvt->header = cv_ptr->header;
-        return cv_ptr_cvt;
-      } else if (source->encoding == "16UC1" || source->encoding == "32FC1") {
-        cv_bridge::CvImageConstPtr cv_ptr = cv_bridge::toCvShare(source);
-        if (use_dynamic_image_value) cv::minMaxLoc(cv_ptr->image, &min_image_value, &max_image_value);
-        if (source->encoding == "16UC1") max_image_value *= 1000;
-        cv_bridge::CvImagePtr cv_ptr_cvt(new cv_bridge::CvImage());
-        cv::Mat img_scaled_8u;
-        cv::Mat(cv_ptr->image-min_image_value).convertTo(img_scaled_8u, CV_8UC1, 255.0 / (max_image_value - min_image_value));
-        cv::cvtColor(img_scaled_8u, cv_ptr_cvt->image, CV_GRAY2BGR);
-        cv_ptr_cvt->encoding = sensor_msgs::image_encodings::BGR8;
-        cv_ptr_cvt->header = cv_ptr->header;
-        return cv_ptr_cvt;
-      } else {
-        throw Exception("cv_bridge.cvtColorForDisplay() could not convert image from '" + source->encoding + "' to 'rgb8' (" + e.what() + ")");
+        return source;
+      }
+      // Otherwise, let's decide upon an output format
+      if (sensor_msgs::image_encodings::numChannels(source->encoding) == 1)
+      {
+        if ((sensor_msgs::image_encodings::bitDepth(source->encoding) == 8) ||
+            (sensor_msgs::image_encodings::bitDepth(source->encoding) == 16))
+          encoding = sensor_msgs::image_encodings::MONO8;
+        else
+          throw std::runtime_error("Unsupported depth of the source encoding " + encoding);
+      }
+      else
+      {
+        // We choose BGR by default here as we assume people will use OpenCV
+        if ((sensor_msgs::image_encodings::bitDepth(source->encoding) == 8) ||
+            (sensor_msgs::image_encodings::bitDepth(source->encoding) == 16))
+          encoding = sensor_msgs::image_encodings::BGR8;
+        else
+          throw std::runtime_error("Unsupported depth of the source encoding " + encoding);
       }
     }
-    catch (cv_bridge::Exception& e)
+    // We could have cv_bridge exception or std_runtime_error from sensor_msgs::image_codings routines
+    catch (const std::runtime_error& e)
     {
-      throw Exception("cv_bridge.cvtColorForDisplay() while trying to convert image from '" + source->encoding + "' to 'rgb8' an exception was thrown (" + e.what() + ")");
+      throw Exception("cv_bridge.cvtColorForDisplay() output encoding is empty and cannot be guessed.");
     }
+  }
+  else
+  {
+    if ((!sensor_msgs::image_encodings::isColor(encoding_out) && !sensor_msgs::image_encodings::isMono(encoding_out)) ||
+        (sensor_msgs::image_encodings::bitDepth(encoding) != 8))
+      throw Exception("cv_bridge.cvtColorForDisplay() does not have an output encoding that is color or mono, and has is bit in depth");
+
+  }
+
+  // Perform scaling if asked for
+  if (do_dynamic_scaling)
+  {
+    cv::minMaxLoc(source->image, &min_image_value, &max_image_value);
+    if (min_image_value == max_image_value)
+    {
+      CvImagePtr result(new CvImage());
+      result->header = source->header;
+      result->encoding = encoding;
+      if (sensor_msgs::image_encodings::bitDepth(encoding) == 1)
+      {
+        result->image = cv::Mat(source->image.size(), CV_8UC1);
+        result->image.setTo(255./2.);
+      } else {
+        result->image = cv::Mat(source->image.size(), CV_8UC3);
+        result->image.setTo(cv::Scalar(1., 1., 1.)*255./2.);
+      }
+      return result;
+    }
+  }
+
+  if (min_image_value != max_image_value)
+  {
+    if (sensor_msgs::image_encodings::numChannels(source->encoding) != 1)
+      throw Exception("cv_bridge.cvtColorForDisplay() scaling for images with more than one channel is unsupported");
+    CvImagePtr img_scaled_8u(new CvImage());
+    img_scaled_8u->header = source->header;
+    img_scaled_8u->encoding = sensor_msgs::image_encodings::MONO8;
+    cv::Mat(source->image-min_image_value).convertTo(img_scaled_8u->image, CV_8UC1, 255.0 /
+      (max_image_value - min_image_value));
+    return cvtColor(img_scaled_8u, encoding);
+  }
+
+  // If no color conversion is possible, we must "guess" the input format
+  CvImagePtr source_typed(new CvImage());
+  source_typed->image = source->image;
+  source_typed->header = source->header;
+  source_typed->encoding = source->encoding;
+
+  // If we get the OpenCV format, if we have 1,3 or 4 channels, we are most likely in mono, BGR or BGRA modes
+  if (source->encoding == "CV_8UC1")
+    source_typed->encoding = sensor_msgs::image_encodings::MONO8;
+  else if (source->encoding == "16UC1")
+    source_typed->encoding = sensor_msgs::image_encodings::MONO16;
+  else if (source->encoding == "CV_8UC3")
+    source_typed->encoding = sensor_msgs::image_encodings::BGR8;
+  else if (source->encoding == "CV_8UC4")
+    source_typed->encoding = sensor_msgs::image_encodings::BGRA8;
+  else if (source->encoding == "CV_16UC3")
+    source_typed->encoding = sensor_msgs::image_encodings::BGR8;
+  else if (source->encoding == "CV_16UC4")
+    source_typed->encoding = sensor_msgs::image_encodings::BGRA8;
+
+  // If no conversion is needed, don't convert
+  if (source_typed->encoding == encoding)
+    return source;
+
+  try
+  {
+    // Now that the output is a proper color format, try to see if any conversion is possible
+    return cvtColor(source_typed, encoding);
+  }
+  catch (cv_bridge::Exception& e)
+  {
+    throw Exception("cv_bridge.cvtColorForDisplay() while trying to convert image from '" + source->encoding + "' to '" + encoding + "' an exception was thrown (" + e.what() + ")");
   }
 }
 

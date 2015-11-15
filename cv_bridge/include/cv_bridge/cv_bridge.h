@@ -207,36 +207,6 @@ CvImagePtr toCvCopy(const sensor_msgs::CompressedImage& source,
  *    - \c "rgba8"
  *    - \c "mono16"
  *
- * If \a encoding is the empty string (the default), the returned CvImage has the same encoding.
- * as \a source.
- *
- * \param use_dynamic_image_value If true, min_image_value and max_image_value will be retrieved from the image data.
- * \param min_image_value Minimum image value
- * \param max_image_value Maximum image value
- */
-CvImageConstPtr cvtColorForDisplay(const sensor_msgs::ImageConstPtr& source,
-                                   const std::string& encoding = std::string(),
-                                   bool use_dynamic_image_value = true,
-                                   double min_image_value = 0.0,
-                                   double max_image_value = 5.5);
-
-/**
- * \brief Convert an immutable sensor_msgs::Image message to an OpenCV-compatible CvImage, sharing
- * the image data if possible.
- *
- * If the source encoding and desired encoding are the same, the returned CvImage will share
- * the image data with \a source without copying it. The returned CvImage cannot be modified, as that
- * could modify the \a source data.
- *
- * \param source   A shared_ptr to a sensor_msgs::Image message
- * \param encoding The desired encoding of the image data, one of the following strings:
- *    - \c "mono8"
- *    - \c "bgr8"
- *    - \c "bgra8"
- *    - \c "rgb8"
- *    - \c "rgba8"
- *    - \c "mono16"
- *
  * If \a encoding is the empty string (the default), the returned CvImage has the same encoding
  * as \a source.
  */
@@ -276,6 +246,36 @@ CvImageConstPtr toCvShare(const sensor_msgs::Image& source,
  */
 CvImagePtr cvtColor(const CvImageConstPtr& source,
                     const std::string& encoding);
+
+/**
+ * \brief Convert an immutable sensor_msgs::Image message to an OpenCV-compatible CvImage, sharing
+ * the image data if possible.
+ *
+ * If the source encoding and desired encoding are the same, the returned CvImage will share
+ * the image data with \a source without copying it. The returned CvImage cannot be modified, as that
+ * could modify the \a source data.
+ *
+ * \param source   A shared_ptr to a sensor_msgs::Image message
+ * \param encoding The desired encoding of the image data, one of the following strings:
+ *    - \c "mono8"
+ *    - \c "bgr8"
+ *    - \c "bgra8"
+ *    - \c "rgb8"
+ *    - \c "rgba8"
+ *    - \c "mono16"
+ *
+ * If \a encoding is the empty string (the default), the returned CvImage has the same encoding.
+ * as \a source.
+ *
+ * \param use_dynamic_image_value If true, min_image_value and max_image_value will be retrieved from the image data.
+ * \param min_image_value Minimum image value
+ * \param max_image_value Maximum image value
+ */
+CvImageConstPtr cvtColorForDisplay(const sensor_msgs::ImageConstPtr& source,
+                                   const std::string& encoding = std::string(),
+                                   bool use_dynamic_image_value = true,
+                                   double min_image_value = 0.0,
+                                   double max_image_value = 5.5);
 
 /**
  * \brief Get the OpenCV type enum corresponding to the encoding.

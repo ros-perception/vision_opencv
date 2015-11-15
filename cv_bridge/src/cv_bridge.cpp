@@ -370,52 +370,6 @@ CvImagePtr toCvCopy(const sensor_msgs::Image& source,
   return toCvCopyImpl(matFromImage(source), source.header, source.encoding, encoding);
 }
 
-CvImageConstPtr cvtColorForDisplay(const sensor_msgs::ImageConstPtr& source,
-                                   const std::string& encoding,
-                                   bool use_dynamic_image_value,
-                                   double min_image_value,
-                                   double max_image_value)
-{
-  try
-  {
-    return cv_bridge::toCvShare(source, encoding.empty() ? source->encoding : encoding);
-  }
-  catch (cv_bridge::Exception& e)
-  {
-    try
-    {
-      if (source->encoding == "CV_8UC3")
-      {
-        return cv_bridge::toCvShare(source);
-      } else if (source->encoding == "8UC1") {
-        cv_bridge::CvImageConstPtr cv_ptr = cv_bridge::toCvShare(source);
-        cv_bridge::CvImagePtr cv_ptr_cvt(new cv_bridge::CvImage());
-        cv::cvtColor(cv_ptr->image, cv_ptr_cvt->image, CV_GRAY2BGR);
-        cv_ptr_cvt->encoding = sensor_msgs::image_encodings::BGR8;
-        cv_ptr_cvt->header = cv_ptr->header;
-        return cv_ptr_cvt;
-      } else if (source->encoding == "16UC1" || source->encoding == "32FC1") {
-        cv_bridge::CvImageConstPtr cv_ptr = cv_bridge::toCvShare(source);
-        if (use_dynamic_image_value) cv::minMaxLoc(cv_ptr->image, &min_image_value, &max_image_value);
-        if (source->encoding == "16UC1") max_image_value *= 1000;
-        cv_bridge::CvImagePtr cv_ptr_cvt(new cv_bridge::CvImage());
-        cv::Mat img_scaled_8u;
-        cv::Mat(cv_ptr->image-min_image_value).convertTo(img_scaled_8u, CV_8UC1, 255.0 / (max_image_value - min_image_value));
-        cv::cvtColor(img_scaled_8u, cv_ptr_cvt->image, CV_GRAY2BGR);
-        cv_ptr_cvt->encoding = sensor_msgs::image_encodings::BGR8;
-        cv_ptr_cvt->header = cv_ptr->header;
-        return cv_ptr_cvt;
-      } else {
-        throw Exception("cv_bridge.cvtColorForDisplay() could not convert image from '" + source->encoding + "' to 'rgb8' (" + e.what() + ")");
-      }
-    }
-    catch (cv_bridge::Exception& e)
-    {
-      throw Exception("cv_bridge.cvtColorForDisplay() while trying to convert image from '" + source->encoding + "' to 'rgb8' an exception was thrown (" + e.what() + ")");
-    }
-  }
-}
-
 // Share const data, returnee is immutable
 CvImageConstPtr toCvShare(const sensor_msgs::ImageConstPtr& source,
                           const std::string& encoding)
@@ -533,6 +487,52 @@ CvImagePtr toCvCopy(const sensor_msgs::CompressedImage& source,
 {
   // Construct matrix pointing to source data
   return toCvCopyImpl(matFromImage(source), source.header, enc::BGR8, encoding);
+}
+
+CvImageConstPtr cvtColorForDisplay(const sensor_msgs::ImageConstPtr& source,
+                                   const std::string& encoding,
+                                   bool use_dynamic_image_value,
+                                   double min_image_value,
+                                   double max_image_value)
+{
+  try
+  {
+    return cv_bridge::toCvShare(source, encoding.empty() ? source->encoding : encoding);
+  }
+  catch (cv_bridge::Exception& e)
+  {
+    try
+    {
+      if (source->encoding == "CV_8UC3")
+      {
+        return cv_bridge::toCvShare(source);
+      } else if (source->encoding == "8UC1") {
+        cv_bridge::CvImageConstPtr cv_ptr = cv_bridge::toCvShare(source);
+        cv_bridge::CvImagePtr cv_ptr_cvt(new cv_bridge::CvImage());
+        cv::cvtColor(cv_ptr->image, cv_ptr_cvt->image, CV_GRAY2BGR);
+        cv_ptr_cvt->encoding = sensor_msgs::image_encodings::BGR8;
+        cv_ptr_cvt->header = cv_ptr->header;
+        return cv_ptr_cvt;
+      } else if (source->encoding == "16UC1" || source->encoding == "32FC1") {
+        cv_bridge::CvImageConstPtr cv_ptr = cv_bridge::toCvShare(source);
+        if (use_dynamic_image_value) cv::minMaxLoc(cv_ptr->image, &min_image_value, &max_image_value);
+        if (source->encoding == "16UC1") max_image_value *= 1000;
+        cv_bridge::CvImagePtr cv_ptr_cvt(new cv_bridge::CvImage());
+        cv::Mat img_scaled_8u;
+        cv::Mat(cv_ptr->image-min_image_value).convertTo(img_scaled_8u, CV_8UC1, 255.0 / (max_image_value - min_image_value));
+        cv::cvtColor(img_scaled_8u, cv_ptr_cvt->image, CV_GRAY2BGR);
+        cv_ptr_cvt->encoding = sensor_msgs::image_encodings::BGR8;
+        cv_ptr_cvt->header = cv_ptr->header;
+        return cv_ptr_cvt;
+      } else {
+        throw Exception("cv_bridge.cvtColorForDisplay() could not convert image from '" + source->encoding + "' to 'rgb8' (" + e.what() + ")");
+      }
+    }
+    catch (cv_bridge::Exception& e)
+    {
+      throw Exception("cv_bridge.cvtColorForDisplay() while trying to convert image from '" + source->encoding + "' to 'rgb8' an exception was thrown (" + e.what() + ")");
+    }
+  }
 }
 
 } //namespace cv_bridge

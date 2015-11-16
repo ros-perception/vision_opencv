@@ -127,7 +127,7 @@ bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
   // Figure out how to handle the distortion
   if (cam_info_.distortion_model == sensor_msgs::distortion_models::PLUMB_BOB ||
       cam_info_.distortion_model == sensor_msgs::distortion_models::RATIONAL_POLYNOMIAL) {
-    cache_->distortion_state = (cam_info_.D[0] == 0.0) ? NONE : CALIBRATED;
+    cache_->distortion_state = (cam_info_.D.size() == 0 || (cam_info_.D[0] == 0.0)) ? NONE : CALIBRATED;
   }
   else
     cache_->distortion_state = UNKNOWN;

@@ -76,7 +76,7 @@ TEST(OpencvTests, testCase_encode_decode)
     bool is_src_color_format = isColor(src_encoding) || isMono(src_encoding) || (src_encoding == sensor_msgs::image_encodings::YUV422);
     cv::Mat image_original(cv::Size(400, 400), cv_bridge::getCvType(src_encoding));
     cv::RNG r(77);
-    r.fill(image_original, cv::RNG::UNIFORM, 0, 255);
+    r.fill(image_original, cv::RNG::UNIFORM, 0, 127);
 
     sensor_msgs::Image image_message;
     cv_bridge::CvImage image_bridge(std_msgs::Header(), src_encoding, image_original);
@@ -132,11 +132,19 @@ TEST(OpencvTests, testCase_encode_decode)
       }
       // And convert back to a cv::Mat
       image_back = cvtColor(cv_image, src_encoding)->image;
-      
+
       // If the number of channels,s different some information got lost at some point, so no possible test
       if (!is_num_channels_the_same)
         continue;
-      EXPECT_LT(cv::norm(image_original, image_back)/image_original.cols/image_original.rows, 0.5) << "problem converting from " << src_encoding << " to " << dst_encoding << " and back.";
+      if (bitDepth(src_encoding) >= 32) {
+        // In the case where the input has floats, we will lose precision but no more than 1
+        EXPECT_LT(cv::norm(image_original, image_back, cv::NORM_INF), 1) << "problem converting from " << src_encoding << " to " << dst_encoding << " and back.";
+      } else if ((bitDepth(src_encoding) == 16) && (bitDepth(dst_encoding) == 8)) {
+        // In the case where the input has floats, we will lose precision but no more than 1 * max(127)
+        EXPECT_LT(cv::norm(image_original, image_back, cv::NORM_INF), 128) << "problem converting from " << src_encoding << " to " << dst_encoding << " and back.";
+      } else {
+        EXPECT_EQ(cv::norm(image_original, image_back, cv::NORM_INF), 0) << "problem converting from " << src_encoding << " to " << dst_encoding << " and back.";
+      }
     }
   }
 }

@@ -228,12 +228,12 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
     throw Exception("Unsupported conversion from [" + src_encoding +
                       "] to [" + dst_encoding + "]");
 
-  // And deal with depth differences
+  // And deal with depth differences if the colors are different
   std::vector<int> res = val->second;
-  if (enc::bitDepth(src_encoding) != enc::bitDepth(dst_encoding))
+  if ((enc::bitDepth(src_encoding) != enc::bitDepth(dst_encoding)) && (getEncoding(src_encoding) != getEncoding(dst_encoding)))
     res.push_back(SAME_FORMAT);
 
-  return val->second;
+  return res;
 }
 
 /////////////////////////////////////// Image ///////////////////////////////////////////
@@ -293,16 +293,18 @@ CvImagePtr toCvCopyImpl(const cv::Mat& source,
       if (conversion_code == SAME_FORMAT)
       {
         // Same number of channels, but different bit depth
-        double alpha = 1.0;
         int src_depth = enc::bitDepth(src_encoding);
         int dst_depth = enc::bitDepth(dst_encoding);
+        // Keep the number of channels for now but changed to the final depth
+        int image2_type = CV_MAKETYPE(CV_MAT_DEPTH(getCvType(dst_encoding)), image1.channels());
+
         // Do scaling between CV_8U [0,255] and CV_16U [0,65535] images.
         if (src_depth == 8 && dst_depth == 16)
-          image1.convertTo(image2, getCvType(dst_encoding), 65535. / 255.);
+          image1.convertTo(image2, image2_type, 65535. / 255.);
         else if (src_depth == 16 && dst_depth == 8)
-          image1.convertTo(image2, getCvType(dst_encoding), 255. / 65535.);
+          image1.convertTo(image2, image2_type, 255. / 65535.);
         else
-          image1.convertTo(image2, getCvType(dst_encoding));
+          image1.convertTo(image2, image2_type);
       }
       else
       {

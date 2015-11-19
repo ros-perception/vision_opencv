@@ -229,11 +229,11 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
                       "] to [" + dst_encoding + "]");
 
   // And deal with depth differences
-  std::vector<int> res = val->second;
+  std::vector<int> res;
   if (enc::bitDepth(src_encoding) != enc::bitDepth(dst_encoding))
     res.push_back(SAME_FORMAT);
-
-  return val->second;
+  res.insert(res.end(), val->second.begin(), val->second.end());
+  return res;
 }
 
 /////////////////////////////////////// Image ///////////////////////////////////////////

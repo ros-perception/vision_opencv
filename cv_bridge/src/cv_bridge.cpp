@@ -33,6 +33,8 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
 
+#include "boost/endian/conversion.hpp"
+
 #include <map>
 
 #include <boost/make_shared.hpp>
@@ -238,6 +240,7 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
 
 /////////////////////////////////////// Image ///////////////////////////////////////////
 
+// Converts a ROS Image to a cv::Mat by sharing the data or chaning its endianness if needed
 cv::Mat matFromImage(const sensor_msgs::Image& source)
 {
   int source_type = getCvType(source.encoding);
@@ -260,8 +263,32 @@ cv::Mat matFromImage(const sensor_msgs::Image& source)
     throw Exception(ss.str());
   }
 
-  return cv::Mat(source.height, source.width, source_type,
-                       const_cast<uchar*>(&source.data[0]), source.step);
+  // If the endianness is the same as locally, share the data
+  cv::Mat mat(source.height, source.width, source_type, const_cast<uchar*>(&source.data[0]), source.step);
+  if ((boost::endian::order::native == boost::endian::order::big && source.is_bigendian) ||
+      (boost::endian::order::native == boost::endian::order::little && !source.is_bigendian) ||
+      byte_depth == 1)
+    return mat;
+
+  // Otherwise, reinterpret the data as bytes and switch the channels accordingly
+  mat = cv::Mat(source.height, source.width, CV_MAKETYPE(CV_8U, num_channels*byte_depth),
+                const_cast<uchar*>(&source.data[0]), source.step);
+  cv::Mat mat_swap(source.height, source.width, mat.type());
+
+  std::vector<int> fromTo;
+  fromTo.reserve(num_channels*byte_depth);
+  for(int i = 0; i < num_channels; ++i)
+    for(int j = 0; j < byte_depth; ++j)
+    {
+      fromTo.push_back(byte_depth*i + j);
+      fromTo.push_back(byte_depth*i + byte_depth - 1 - j);
+    }
+  cv::mixChannels(std::vector<cv::Mat>(1, mat), std::vector<cv::Mat>(1, mat_swap), fromTo);
+
+  // Interpret mat_swap back as the proper type
+  mat_swap = cv::Mat(source.height, source.width, source_type, mat_swap.data, mat_swap.step);
+
+  return mat_swap;
 }
 
 // Internal, used by toCvCopy and cvtColor
@@ -270,8 +297,6 @@ CvImagePtr toCvCopyImpl(const cv::Mat& source,
                         const std::string& src_encoding,
                         const std::string& dst_encoding)
 {
-  /// @todo Handle endianness - e.g. 16-bit dc1394 camera images are big-endian
-  
   // Copy metadata
   CvImagePtr ptr = boost::make_shared<CvImage>();
   ptr->header = src_header;
@@ -335,7 +360,7 @@ void CvImage::toImageMsg(sensor_msgs::Image& ros_image) const
   ros_image.height = image.rows;
   ros_image.width = image.cols;
   ros_image.encoding = encoding;
-  ros_image.is_bigendian = false;
+  ros_image.is_bigendian = (boost::endian::order::native == boost::endian::order::big);
   ros_image.step = image.cols * image.elemSize();
   size_t size = ros_image.step * image.rows;
   ros_image.data.resize(size);
@@ -383,7 +408,9 @@ CvImageConstPtr toCvShare(const sensor_msgs::Image& source,
                           const boost::shared_ptr<void const>& tracked_object,
                           const std::string& encoding)
 {
-  if (!encoding.empty() && source.encoding != encoding)
+  // If the encoding different or the endianness different, you have to copy
+  if ((!encoding.empty() && source.encoding != encoding) || (source.is_bigendian &&
+      (boost::endian::order::native != boost::endian::order::big)))
     return toCvCopy(source, encoding);
 
   CvImagePtr ptr = boost::make_shared<CvImage>();

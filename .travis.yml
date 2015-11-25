@@ -1,15 +1,6 @@
-# Travis Continuous Integration Configuration File, based on ..
 sudo: required
 dist: trusty
-language:
-  - cpp
-  - python
-python:
-  - "2.7"
-compiler:
-  - gcc
-virtualenv:
-    system_site_packages: true
+language: generic
 env:
   - OPENCV_VERSION=2 ROS_DISTRO=indigo
   - OPENCV_VERSION=3 ROS_DISTRO=indigo
@@ -18,6 +9,7 @@ before_install:
   # Define some config vars.
   - export ROS_CI_DESKTOP=`lsb_release -cs`  # e.g. [precise|trusty]
   - export CI_SOURCE_PATH=$(pwd)
+  - export REPOSITORY_NAME=${PWD##*/}
   - export ROSINSTALL_FILE=$CI_SOURCE_PATH/dependencies.rosinstall
   - export CATKIN_OPTIONS=$CI_SOURCE_PATH/catkin.options
   - export ROS_PARALLEL_JOBS='-j8 -l6'
@@ -26,7 +18,7 @@ before_install:
   - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
   - sudo apt-get update -qq
   # Install ROS
-  - sudo apt-get install -y python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-catkin
+  - sudo apt-get install -y python-catkin-pkg python-catkin-tools python-rosdep python-wstool ros-$ROS_DISTRO-catkin
   - source /opt/ros/$ROS_DISTRO/setup.bash
   # Setup for rosdep
   - sudo rosdep init
@@ -35,21 +27,12 @@ before_install:
 # Create a catkin workspace with the package under test.
 install:
   - mkdir -p ~/catkin_ws/src
-  - cd ~/catkin_ws/src
-  - catkin_init_workspace
-
-  # Create the devel/setup.bash (run catkin_make with an empty workspace) and
-  # source it to set the path variables.
-  - cd ~/catkin_ws
-  - catkin_make
-  - source devel/setup.bash
 
   # Add the package under test to the workspace.
   - cd ~/catkin_ws/src
   - ln -s $CI_SOURCE_PATH . # Link the repo we are testing to the new workspace
 
-  - if [ $OPENCV_VERSION == 2 ]; then  sed -i 's@libopencv-dev@opencv2@' src/$REPOSITORY_NAME/*/package.xml ; fi
-  - if [ $OPENCV_VERSION == 3 ]; then  sed -i 's@libopencv-dev@opencv3@' src/$REPOSITORY_NAME/*/package.xml ; fi
+  - if [ $OPENCV_VERSION == 3 ]; then  sed -i 's@libopencv-dev@opencv3@' $REPOSITORY_NAME/*/package.xml ; fi
 
 # Install all dependencies, using wstool and rosdep.
 # wstool looks for a ROSINSTALL_FILE defined in before_install.
@@ -62,7 +45,7 @@ before_script:
 
   # package depdencies: install using rosdep.
   - cd ~/catkin_ws
-  - rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
+  - rosdep install -y -r --from-paths src --ignore-src --rosdistro $ROS_DISTRO
 
 # Compile and test.
 script:

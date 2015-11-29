@@ -2,6 +2,16 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* deal with endianness
+* add cvtColorForDisplay
+* Improved efficiency by using toCvShare instead of toCvCopy.
+* Add format enum for easy use and choose format.
+* fix compilation warnings
+* start to extend the cv_bridge with cvCompressedImage class, that will convert from cv::Mat opencv images to CompressedImage ros messages and vice versa
+* Contributors: Carlos Costa, Vincent Rabaud, talregev
+
 1.11.8 (2015-07-15)
 -------------------
 * Simplify some OpenCV3 distinction

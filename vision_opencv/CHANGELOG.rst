@@ -2,6 +2,11 @@
 Changelog for package vision_opencv
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add opencv_apps to vision_opencv dependency
+* Contributors: Ryohei Ueda
+
 1.11.8 (2015-07-15)
 -------------------
 

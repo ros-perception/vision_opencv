@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.9 (2015-11-29)
+-------------------
 * deal with endianness
 * add cvtColorForDisplay
 * Improved efficiency by using toCvShare instead of toCvCopy.

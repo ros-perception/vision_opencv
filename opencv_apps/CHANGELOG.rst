@@ -2,8 +2,8 @@
 Changelog for package opencv_apps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.9 (2015-11-29)
+-------------------
 * Accept grayscale images as input as well
 * Add format enum for easy use and choose format.
 * Contributors: Felix Mauch, talregev

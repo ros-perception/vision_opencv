@@ -79,7 +79,7 @@ class SegmentObjectsNodelet : public nodelet::Nodelet
 #ifndef CV_VERSION_EPOCH
   cv::Ptr<cv::BackgroundSubtractorMOG2> bgsubtractor;
 #else
-  cv::BackgroundSubtractorMOG2 bgsubtractor;
+  cv::BackgroundSubtractorMOG bgsubtractor;
 #endif
   bool update_bg_model;
 

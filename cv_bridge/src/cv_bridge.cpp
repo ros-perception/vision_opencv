@@ -46,6 +46,7 @@
 #include <sensor_msgs/image_encodings.h>
 
 #include <cv_bridge/cv_bridge.h>
+#include <cv_bridge/rgb_colors.h>
 
 namespace enc = sensor_msgs::image_encodings;
 
@@ -534,6 +535,8 @@ CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
         if ((enc::bitDepth(source->encoding) == 8) ||
             (enc::bitDepth(source->encoding) == 16))
           encoding = enc::MONO8;
+        else if (enc::bitDepth(source->encoding) == 32)
+          encoding = enc::BGR8;
         else
           throw std::runtime_error("Unsupported depth of the source encoding " + encoding);
       }
@@ -559,6 +562,31 @@ CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
         (enc::bitDepth(encoding) != 8))
       throw Exception("cv_bridge.cvtColorForDisplay() does not have an output encoding that is color or mono, and has is bit in depth");
 
+  }
+
+  // Convert label to bgr image
+  if (encoding == sensor_msgs::image_encodings::BGR8 &&
+      sensor_msgs::image_encodings::bitDepth(source->encoding) == 32)
+  {
+    CvImagePtr result(new CvImage());
+    result->header = source->header;
+    result->encoding = encoding;
+    result->image = cv::Mat(source->image.rows, source->image.cols, CV_8UC3);
+    for (size_t j = 0; j < source->image.rows; ++j) {
+      for (size_t i = 0; i < source->image.cols; ++i) {
+        int label = source->image.at<int>(j, i);
+        if (label == -1) {  // background label
+          result->image.at<cv::Vec3b>(j, i) = cv::Vec3b(0, 0, 0);
+        }
+        else
+        {
+          cv::Vec3d rgb = rgb_colors::getRGBColor(label);
+          // result image should be BGR
+          result->image.at<cv::Vec3b>(j, i) = cv::Vec3b(int(rgb[2] * 255), int(rgb[1] * 255), int(rgb[0] * 255));
+        }
+      }
+    }
+    return result;
   }
 
   // Perform scaling if asked for

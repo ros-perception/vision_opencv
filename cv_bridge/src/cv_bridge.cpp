@@ -43,6 +43,10 @@
 
 #include <opencv2/highgui/highgui.hpp>
 
+#include <opencv2/contrib/contrib.hpp>
+
+#include <opencv2/core/core.hpp>
+
 #include <sensor_msgs/image_encodings.h>
 
 #include <cv_bridge/cv_bridge.h>
@@ -543,6 +547,8 @@ CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
         if ((sensor_msgs::image_encodings::bitDepth(source->encoding) == 8) ||
             (sensor_msgs::image_encodings::bitDepth(source->encoding) == 16))
           encoding = sensor_msgs::image_encodings::MONO8;
+        else if (sensor_msgs::image_encodings::bitDepth(source->encoding) == 32)
+          encoding = sensor_msgs::image_encodings::BGR8;
         else
           throw std::runtime_error("Unsupported depth of the source encoding " + encoding);
       }
@@ -568,6 +574,19 @@ CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
         (sensor_msgs::image_encodings::bitDepth(encoding) != 8))
       throw Exception("cv_bridge.cvtColorForDisplay() does not have an output encoding that is color or mono, and has is bit in depth");
 
+  }
+
+  // Convert label to bgr image
+  if (encoding == sensor_msgs::image_encodings::BGR8 &&
+      sensor_msgs::image_encodings::bitDepth(source->encoding) == 32)
+  {
+    CvImagePtr result(new CvImage());
+    result->header = source->header;
+    result->encoding = encoding;
+    cv::minMaxLoc(source->image, &min_image_value, &max_image_value);
+    source->image.convertTo(result->image, CV_8UC1, 255 / (max_image_value - min_image_value), -min_image_value);
+    cv::applyColorMap(result->image, result->image, cv::COLORMAP_HSV);
+    return result;
   }
 
   // Perform scaling if asked for

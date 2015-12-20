@@ -528,12 +528,7 @@ CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
   {
     try
     {
-      // If there is a chance we can just share the data, let's try it out
-      if (enc::isColor(source->encoding) || enc::isMono(source->encoding))
-      {
-        return source;
-      }
-      // Otherwise, let's decide upon an output format
+      // Let's decide upon an output format
       if (enc::numChannels(source->encoding) == 1)
       {
         if ((enc::bitDepth(source->encoding) == 8) ||

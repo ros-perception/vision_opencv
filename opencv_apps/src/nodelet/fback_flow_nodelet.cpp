@@ -130,7 +130,7 @@ class FBackFlowNodelet : public nodelet::Nodelet
       if ( frame.channels() > 1 ) {
         cv::cvtColor( frame, gray, cv::COLOR_BGR2GRAY );
       } else {
-        gray = frame;
+        frame.copyTo(gray);
       }
       if( prevgray.data )
       {
@@ -170,7 +170,7 @@ class FBackFlowNodelet : public nodelet::Nodelet
 
 
       // Publish the image.
-      sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(msg->header, msg->encoding, cflow).toImageMsg();
+      sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(msg->header, "bgr8", cflow).toImageMsg();
       img_pub_.publish(out_img);
       msg_pub_.publish(flows_msg);
     }

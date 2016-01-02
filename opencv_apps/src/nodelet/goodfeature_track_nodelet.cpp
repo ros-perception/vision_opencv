@@ -32,7 +32,7 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
 
-// https://github.com/Itseez/opencv/blob/2.4/samples/cpp/tutorial_code/ImgTrans/HoughLines_Demo.cpp
+// http://github.com/Itseez/opencv/blob/master/samples/cpp/tutorial_code/TrackingMotion/goodFeaturesToTrack_Demo.cpp
 /**
  * @function goodFeaturesToTrack_Demo.cpp
  * @brief Demo code for detecting corners using Shi-Tomasi method
@@ -49,6 +49,8 @@
 
 #include <dynamic_reconfigure/server.h>
 #include "opencv_apps/GoodfeatureTrackConfig.h"
+#include "opencv_apps/Point2D.h"
+#include "opencv_apps/Point2DArrayStamped.h"
 
 namespace goodfeature_track {
 class GoodfeatureTrackNodelet : public nodelet::Nodelet
@@ -115,8 +117,8 @@ class GoodfeatureTrackNodelet : public nodelet::Nodelet
       cv::Mat frame = cv_bridge::toCvShare(msg, msg->encoding)->image;
 
       // Messages
-      //opencv_apps::LineArrayStamped lines_msg;
-      //lines_msg.header = msg->header;
+      opencv_apps::Point2DArrayStamped corners_msg;
+      corners_msg.header = msg->header;
 
       // Do the work
       cv::Mat src_gray;
@@ -126,6 +128,7 @@ class GoodfeatureTrackNodelet : public nodelet::Nodelet
         cv::cvtColor( frame, src_gray, cv::COLOR_BGR2GRAY );
       } else {
         src_gray = frame;
+        cv::cvtColor( src_gray, frame, cv::COLOR_GRAY2BGR );
       }
 
       if( debug_view_) {
@@ -176,10 +179,17 @@ class GoodfeatureTrackNodelet : public nodelet::Nodelet
         int c = cv::waitKey(1);
       }
 
+      // Create msgs
+      for( size_t i = 0; i< corners.size(); i++ ) {
+        opencv_apps::Point2D corner;
+        corner.x = corners[i].x;
+        corner.y = corners[i].y;
+        corners_msg.points.push_back(corner);
+      }
       // Publish the image.
-      sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(msg->header, msg->encoding,frame).toImageMsg();
+      sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(msg->header, "bgr8", frame).toImageMsg();
       img_pub_.publish(out_img);
-      //msg_pub_.publish(lines_msg);
+      msg_pub_.publish(corners_msg);
     }
     catch (cv::Exception &e)
     {
@@ -254,7 +264,7 @@ public:
     ros::SubscriberStatusCallback msg_connect_cb    = boost::bind(&GoodfeatureTrackNodelet::msg_connectCb, this, _1);
     ros::SubscriberStatusCallback msg_disconnect_cb = boost::bind(&GoodfeatureTrackNodelet::msg_disconnectCb, this, _1);
     img_pub_ = image_transport::ImageTransport(local_nh_).advertise("image", 1, img_connect_cb, img_disconnect_cb);
-    //msg_pub_ = local_nh_.advertise<opencv_apps::LineArrayStamped>("lines", 1, msg_connect_cb, msg_disconnect_cb);
+    msg_pub_ = local_nh_.advertise<opencv_apps::Point2DArrayStamped>("corners", 1, msg_connect_cb, msg_disconnect_cb);
 
     if( debug_view_ ) {
       subscriber_count_++;

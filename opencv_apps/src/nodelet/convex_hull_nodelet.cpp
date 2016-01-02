@@ -161,7 +161,7 @@ class ConvexHullNodelet : public nodelet::Nodelet
       {
         cv::Scalar color = cv::Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
         cv::drawContours( drawing, contours, (int)i, color, 1, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
-        cv::drawContours( drawing, hull, (int)i, color, 1, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
+        cv::drawContours( drawing, hull, (int)i, color, 4, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
 
         opencv_apps::Contour contour_msg;
         for ( size_t j = 0; j < hull[i].size(); j++ ) {

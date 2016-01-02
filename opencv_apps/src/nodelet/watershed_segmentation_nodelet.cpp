@@ -47,6 +47,10 @@
 
 #include <dynamic_reconfigure/server.h>
 #include "opencv_apps/WatershedSegmentationConfig.h"
+#include "opencv_apps/Contour.h"
+#include "opencv_apps/ContourArray.h"
+#include "opencv_apps/ContourArrayStamped.h"
+#include "opencv_apps/Point2DArray.h"
 
 namespace watershed_segmentation {
 class WatershedSegmentationNodelet : public nodelet::Nodelet
@@ -55,6 +59,7 @@ class WatershedSegmentationNodelet : public nodelet::Nodelet
   image_transport::Subscriber img_sub_;
   image_transport::CameraSubscriber cam_sub_;
   ros::Publisher msg_pub_;
+  ros::Subscriber add_seed_points_sub_;
 
   boost::shared_ptr<image_transport::ImageTransport> it_;
   ros::NodeHandle nh_, local_nh_;
@@ -127,8 +132,8 @@ class WatershedSegmentationNodelet : public nodelet::Nodelet
       cv::Mat frame = cv_bridge::toCvShare(msg, msg->encoding)->image;
 
       // Messages
-      //opencv_apps::LineArrayStamped lines_msg;
-      //lines_msg.header = msg->header;
+      opencv_apps::ContourArrayStamped contours_msg;
+      contours_msg.header = msg->header;
 
       // Do the work
       //std::vector<cv::Rect> faces;
@@ -195,6 +200,16 @@ class WatershedSegmentationNodelet : public nodelet::Nodelet
         NODELET_WARN("compCount is 0");
         return; //continue;
       }
+      for( size_t i = 0; i< contours.size(); i++ ) {
+        opencv_apps::Contour contour_msg;
+        for ( size_t j = 0; j < contours[i].size(); j++ ) {
+          opencv_apps::Point2D point_msg;
+          point_msg.x = contours[i][j].x;
+          point_msg.y = contours[i][j].y;
+          contour_msg.points.push_back(point_msg);
+        }
+        contours_msg.contours.push_back(contour_msg);
+      }
 
       std::vector<cv::Vec3b> colorTab;
       for( i = 0; i < compCount; i++ )
@@ -244,7 +259,7 @@ class WatershedSegmentationNodelet : public nodelet::Nodelet
       // Publish the image.
       sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(msg->header, msg->encoding, wshed).toImageMsg();
       img_pub_.publish(out_img);
-      //msg_pub_.publish(lines_msg);
+      msg_pub_.publish(contours_msg);
     }
     catch (cv::Exception &e)
     {
@@ -252,6 +267,18 @@ class WatershedSegmentationNodelet : public nodelet::Nodelet
     }
 
     prev_stamp_ = msg->header.stamp;
+  }
+
+  void add_seed_point_cb(const opencv_apps::Point2DArray& msg) {
+    if ( msg.points.size() == 0 ) {
+      markerMask = cv::Scalar::all(0);
+    } else {
+      for(size_t i = 0; i < msg.points.size(); i++ ) {
+        cv::Point pt0(msg.points[i].x, msg.points[i].y);
+        cv::Point pt1(pt0.x + 1, pt0.y + 1);
+        cv::line( markerMask, pt0, pt1, cv::Scalar::all(255), 5, 8, 0 );
+      }
+    }
   }
 
   void subscribe()
@@ -311,7 +338,7 @@ public:
     subscriber_count_ = 0;
     prev_stamp_ = ros::Time(0, 0);
 
-    window_name_ = "input";
+    window_name_ = "roughly mark the areas to segment on the image";
     segment_name_ = "watershed transform";
     prevPt.x = -1;
     prevPt.y = -1;
@@ -321,7 +348,8 @@ public:
     ros::SubscriberStatusCallback msg_connect_cb    = boost::bind(&WatershedSegmentationNodelet::msg_connectCb, this, _1);
     ros::SubscriberStatusCallback msg_disconnect_cb = boost::bind(&WatershedSegmentationNodelet::msg_disconnectCb, this, _1);
     img_pub_ = image_transport::ImageTransport(local_nh_).advertise("image", 1, img_connect_cb, img_disconnect_cb);
-    //msg_pub_ = local_nh_.advertise<opencv_apps::LineArrayStamped>("lines", 1, msg_connect_cb, msg_disconnect_cb);
+    msg_pub_ = local_nh_.advertise<opencv_apps::ContourArrayStamped>("contours", 1, msg_connect_cb, msg_disconnect_cb);
+    add_seed_points_sub_ = local_nh_.subscribe("add_seed_points", 1, &WatershedSegmentationNodelet::add_seed_point_cb, this);
         
     if( debug_view_ ) {
       subscriber_count_++;

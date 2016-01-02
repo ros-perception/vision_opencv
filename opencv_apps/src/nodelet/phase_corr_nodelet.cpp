@@ -32,12 +32,7 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
 
-// https://github.com/Itseez/opencv/blob/2.4/samples/cpp/tutorial_code/ImgTrans/HoughLines_Demo.cpp
-/**
- * @file HoughLines_Demo.cpp
- * @brief Demo code for Hough Transform
- * @author OpenCV team
- */
+// https://github.com/Itseez/opencv/blob/master/samples/cpp/phase_corr.cpp
 
 #include <ros/ros.h>
 #include <nodelet/nodelet.h>
@@ -120,7 +115,7 @@ class PhaseCorrNodelet : public nodelet::Nodelet
 
       // Do the work
       if ( frame.channels() > 1 ) {
-        cv::cvtColor( frame, curr, cv::COLOR_RGB2GRAY );
+        cv::cvtColor( frame, curr, cv::COLOR_BGR2GRAY );
       } else {
         curr = frame;
       }
@@ -145,16 +140,16 @@ class PhaseCorrNodelet : public nodelet::Nodelet
       cv::Point2d shift = cv::phaseCorrelate(prev64f, curr64f, hann);
       double radius = cv::sqrt(shift.x*shift.x + shift.y*shift.y);
 
-      if(radius > 5)
+      if(radius > 0)
       {
         // draw a circle and line indicating the shift direction...
         cv::Point center(curr.cols >> 1, curr.rows >> 1);
 #ifndef CV_VERSION_EPOCH
-        cv::circle(frame, center, (int)radius, cv::Scalar(0, 255, 0), 3, cv::LINE_AA);
-        cv::line(frame, center, cv::Point(center.x + (int)shift.x, center.y + (int)shift.y), cv::Scalar(0, 255, 0), 3, cv::LINE_AA);
+        cv::circle(frame, center, (int)(radius*5), cv::Scalar(0, 255, 0), 3, cv::LINE_AA);
+        cv::line(frame, center, cv::Point(center.x + (int)(shift.x*5), center.y + (int)(shift.y*5)), cv::Scalar(0, 255, 0), 3, cv::LINE_AA);
 #else
-        cv::circle(frame, center, (int)radius, cv::Scalar(0, 255, 0), 3, CV_AA);
-        cv::line(frame, center, cv::Point(center.x + (int)shift.x, center.y + (int)shift.y), cv::Scalar(0, 255, 0), 3, CV_AA);
+        cv::circle(frame, center, (int)(radius*5), cv::Scalar(0, 255, 0), 3, CV_AA);
+        cv::line(frame, center, cv::Point(center.x + (int)(shift.x*5), center.y + (int)(shift.y*5)), cv::Scalar(0, 255, 0), 3, CV_AA);
 #endif
 
         //

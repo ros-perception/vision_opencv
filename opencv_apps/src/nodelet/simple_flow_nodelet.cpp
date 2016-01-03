@@ -45,6 +45,9 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/video/tracking.hpp>
+#if CV_MAJOR_VERSION == 3
+#include <opencv2/optflow.hpp>
+#endif
 
 #include <dynamic_reconfigure/server.h>
 #include "opencv_apps/SimpleFlowConfig.h"
@@ -145,7 +148,11 @@ class SimpleFlowNodelet : public nodelet::Nodelet
       }
 
       float start = (float)cv::getTickCount();
+#if CV_MAJOR_VERSION == 3
+      cv::optflow::calcOpticalFlowSF(gray, prevGray,
+#else
       cv::calcOpticalFlowSF(gray, prevGray,
+#endif
                             flow,
                             3, 2, 4, 4.1, 25.5, 18, 55.0, 25.5, 0.35, 18, 55.0, 25.5, 10);
       NODELET_INFO("calcOpticalFlowSF : %lf sec", (cv::getTickCount() - start) / cv::getTickFrequency());

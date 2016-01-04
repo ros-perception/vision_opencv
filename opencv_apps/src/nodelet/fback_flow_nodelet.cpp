@@ -130,7 +130,7 @@ class FBackFlowNodelet : public nodelet::Nodelet
       if ( frame.channels() > 1 ) {
         cv::cvtColor( frame, gray, cv::COLOR_BGR2GRAY );
       } else {
-        gray = frame;
+        frame.copyTo(gray);
       }
       if( prevgray.data )
       {

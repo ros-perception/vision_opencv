@@ -41,6 +41,7 @@ before_script:
   - cd ~/catkin_ws/src
   - wstool init
   - if [[ -f $ROSINSTALL_FILE ]] ; then wstool merge $ROSINSTALL_FILE ; fi
+  - if [ $OPENCV_VERSION == 3 ]; then wstool set -y image_pipeline --git https://github.com/ros-perception/image_pipeline; fi # need to recompile image_proc
   - wstool up
 
   # package depdencies: install using rosdep.

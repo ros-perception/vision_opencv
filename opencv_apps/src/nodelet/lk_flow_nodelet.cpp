@@ -157,7 +157,7 @@ class LKFlowNodelet : public nodelet::Nodelet
       if ( image.channels() > 1 ) {
         cv::cvtColor( image, gray, cv::COLOR_BGR2GRAY );
       } else {
-        gray = image;
+        image.copyTo(gray);
       }
 
       if( nightMode )

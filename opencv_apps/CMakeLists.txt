@@ -4,13 +4,6 @@ project(opencv_apps)
 find_package(catkin REQUIRED COMPONENTS cv_bridge dynamic_reconfigure message_generation image_transport nodelet roscpp)
 
 find_package(OpenCV REQUIRED)
-if (OpenCV_VERSION VERSION_EQUAL "3")
-  set(${PROJECT_NAME}_EXTRA_CFG)
-  set(${PROJECT_NAME}_EXTRA_FILES)
-else()
-  set(${PROJECT_NAME}_EXTRA_CFG cfg/SimpleFlow.cfg)
-  set(${PROJECT_NAME}_EXTRA_FILES src/nodelet/simple_flow_nodelet.cpp)
-endif()
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
@@ -25,8 +18,8 @@ generate_dynamic_reconfigure_options(
   cfg/PeopleDetect.cfg
   cfg/PhaseCorr.cfg
   cfg/SegmentObjects.cfg
+  cfg/SimpleFlow.cfg
   cfg/WatershedSegmentation.cfg
-  ${${PROJECT_NAME}_EXTRA_CFG}
   )
 
 ## Generate messages in the 'msg' folder
@@ -164,7 +157,7 @@ add_library(${PROJECT_NAME} SHARED
   # rgbdodometry.cpp
   src/nodelet/segment_objects_nodelet.cpp
   ## select3dobj.cpp
-  # src/nodelet/simple_flow_nodelet.cpp
+  src/nodelet/simple_flow_nodelet.cpp
   # squares.cpp
   # starter_imagelist.cpp
   # starter_video.cpp
@@ -294,3 +287,9 @@ install(TARGETS edge_detection_exe hough_lines_exe hough_circles_exe face_detect
 install(FILES nodelet_plugins.xml
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
+
+## test
+if(CATKIN_ENABLE_TESTING)
+  find_package(catkin REQUIRED COMPONENTS rostest)
+  add_subdirectory(test)
+endif()

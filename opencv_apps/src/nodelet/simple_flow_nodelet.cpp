@@ -116,7 +116,15 @@ class SimpleFlowNodelet : public nodelet::Nodelet
     try
     {
       // Convert the image into something opencv can handle.
-      cv::Mat frame = cv_bridge::toCvShare(msg, msg->encoding)->image;
+      cv::Mat frame_src = cv_bridge::toCvShare(msg, msg->encoding)->image;
+
+      /// Convert it to gray
+      cv::Mat frame;
+      if ( frame_src.channels() > 1 ) {
+        frame = frame_src;
+      } else {
+        cv::cvtColor( frame_src, frame, cv::COLOR_GRAY2BGR );
+      }
 
       cv::resize(frame, gray, cv::Size(frame.cols/(double)MAX(1,scale_), frame.rows/(double)MAX(1,scale_)), 0, 0, CV_INTER_AREA);
       if(prevGray.empty())
@@ -167,7 +175,7 @@ class SimpleFlowNodelet : public nodelet::Nodelet
       for (int i= 0; i < rows; ++i) {
         for (int j = 0; j < cols; ++j) {
           cv::Vec2f flow_at_point = flow.at<cv::Vec2f>(i, j);
-          cv::line(frame, cv::Point(scale_col*j, scale_row*i), cv::Point(scale_col*(j+flow_at_point[0]), scale_row*(i+flow_at_point[1])), cv::Scalar::all(255), 1, 8, 0 );
+          cv::line(frame, cv::Point(scale_col*j, scale_row*i), cv::Point(scale_col*(j+flow_at_point[0]), scale_row*(i+flow_at_point[1])), cv::Scalar(0,255,0), 1, 8, 0 );
 
           opencv_apps::Flow flow_msg;
           opencv_apps::Point2D point_msg;
@@ -194,7 +202,7 @@ class SimpleFlowNodelet : public nodelet::Nodelet
 
       cv::swap(prevGray, gray);
       // Publish the image.
-      sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(msg->header, msg->encoding, frame).toImageMsg();
+      sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(msg->header, "bgr8", frame).toImageMsg();
       img_pub_.publish(out_img);
       msg_pub_.publish(flows_msg);
     }

@@ -170,7 +170,7 @@ class ContourMomentsNodelet : public nodelet::Nodelet
       printf("\t Info: Area and Contour Length \n");
       for( size_t i = 0; i< contours.size(); i++ )
       {
-        printf(" * Contour[%d] - Area (M_00) = %.2f - Area OpenCV: %.2f - Length: %.2f \n", (int)i, mu[i].m00, cv::contourArea(contours[i]), cv::arcLength( contours[i], true ) );
+        NODELET_INFO(" * Contour[%d] - Area (M_00) = %.2f - Area OpenCV: %.2f - Length: %.2f \n", (int)i, mu[i].m00, cv::contourArea(contours[i]), cv::arcLength( contours[i], true ) );
         cv::Scalar color = cv::Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
         cv::drawContours( drawing, contours, (int)i, color, 2, 8, hierarchy, 0, cv::Point() );
         cv::circle( drawing, mc[i], 4, color, -1, 8, 0 );
@@ -215,7 +215,7 @@ class ContourMomentsNodelet : public nodelet::Nodelet
       }
 
       // Publish the image.
-      sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(msg->header, msg->encoding, drawing).toImageMsg();
+      sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(msg->header, "bgr8", drawing).toImageMsg();
       img_pub_.publish(out_img);
       msg_pub_.publish(moments_msg);
     }
@@ -284,7 +284,7 @@ public:
     subscriber_count_ = 0;
     prev_stamp_ = ros::Time(0, 0);
 
-    window_name_ = "Edge Detection Demo";
+    window_name_ = "Contours";
     low_threshold_ = 100; // only for canny
 
     image_transport::SubscriberStatusCallback img_connect_cb    = boost::bind(&ContourMomentsNodelet::img_connectCb, this, _1);

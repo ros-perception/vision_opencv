@@ -2,6 +2,18 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix OpenCV3 build
+* Describe about converting label to bgr image in cvtColorForDisplay
+* Convert label to BGR image to display
+* Add test for rgb_colors.cpp
+* Add rgb_colors util
+* Update doc for converting to BGR in cvtColorForDisplay
+* Convert to BGR from any encoding
+* Refactor: sensor_msgs::image_encodings -> enc
+* Contributors: Kentaro Wada, Vincent Rabaud
+
 1.11.9 (2015-11-29)
 -------------------
 * deal with endianness

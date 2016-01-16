@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.10 (2016-01-16)
+--------------------
 * fix OpenCV3 build
 * Describe about converting label to bgr image in cvtColorForDisplay
 * Convert label to BGR image to display

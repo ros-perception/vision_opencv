@@ -4,6 +4,10 @@ project(opencv_apps)
 find_package(catkin REQUIRED COMPONENTS cv_bridge dynamic_reconfigure message_generation image_transport nodelet roscpp)
 
 find_package(OpenCV REQUIRED)
+message(STATUS "OpenCV Components: ${OpenCV_LIB_COMPONENTS}")
+if(OpenCV_VERSION VERSION_LESS "3.0" OR TARGET opencv_optflow)
+  set(OPENCV_HAVE_OPTFLOW TRUE)
+endif()
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
@@ -70,6 +74,10 @@ catkin_package()
 include_directories( ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
 ## Declare a cpp library
+if(OPENCV_HAVE_OPTFLOW)
+  list(APPEND ${PROJECT_NAME}_EXTRA_FILES src/nodelet/simple_flow_nodelet.cpp)
+endif()
+
 add_library(${PROJECT_NAME} SHARED
   # https://github.com/Itseez/opencv/blob/2.4/samples/cpp/tutorial_code
   # ImgTrans
@@ -157,7 +165,10 @@ add_library(${PROJECT_NAME} SHARED
   # rgbdodometry.cpp
   src/nodelet/segment_objects_nodelet.cpp
   ## select3dobj.cpp
-  src/nodelet/simple_flow_nodelet.cpp
+###
+### simple flow requires opencv-contrib https://github.com/ros-perception/vision_opencv/issues/108
+###
+###  src/nodelet/simple_flow_nodelet.cpp
   # squares.cpp
   # starter_imagelist.cpp
   # starter_video.cpp
@@ -266,9 +277,12 @@ target_link_libraries(segment_objects_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES
 
   # select3dobj.cpp
 
-add_executable(simple_flow_exe src/node/simple_flow.cpp)
-SET_TARGET_PROPERTIES(simple_flow_exe PROPERTIES OUTPUT_NAME simple_flow)
-target_link_libraries(simple_flow_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+# simple flow requires opencv-contrib https://github.com/ros-perception/vision_opencv/issues/108
+if(OPENCV_HAVE_OPTFLOW)
+  add_executable(simple_flow_exe src/node/simple_flow.cpp)
+  SET_TARGET_PROPERTIES(simple_flow_exe PROPERTIES OUTPUT_NAME simple_flow)
+  target_link_libraries(simple_flow_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+endif()
 
   # starter_video.cpp
   # videocapture_pvapi.cpp

@@ -14,7 +14,7 @@
       <param name="filename_format" value="$(find opencv_apps)/test/lk_flow.png"/>
     </node>
     <node name="lk_flow_initialize" pkg="rosservice" type="rosservice" args="call --wait lk_flow/initialize_points"
-          launch-prefix="watch" />
+          respawn="true" respawn_delay="2" />
     <param name="lk_flow_test/topic" value="lk_flow/flows" />    <!-- opencv_apps/FlowArrayStamped -->
     <test test-name="lk_flow_test" pkg="rostest" type="hztest" name="lk_flow_test" >
       <param name="hz" value="15" />

@@ -30,7 +30,10 @@ add_rostest(test-lk_flow.test ARGS gui:=false)
 add_rostest(test-people_detect.test ARGS gui:=false)
 add_rostest(test-phase_corr.test ARGS gui:=false)
 add_rostest(test-segment_objects.test ARGS gui:=false)
-add_rostest(test-simple_flow.test ARGS gui:=false)
+# simple flow requires opencv-contrib https://github.com/ros-perception/vision_opencv/issues/108
+if(OPENCV_HAVE_OPTFLOW)
+  add_rostest(test-simple_flow.test ARGS gui:=false)
+endif()
 add_rostest(test-watershed_segmentation.test ARGS gui:=false)
 
 

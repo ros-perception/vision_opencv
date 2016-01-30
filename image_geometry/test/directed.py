@@ -1,6 +1,3 @@
-import roslib
-PKG = 'image_geometry'
-roslib.load_manifest(PKG)
 import rostest
 import rospy
 import unittest

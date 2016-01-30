@@ -1,4 +1,3 @@
- - builder: rosmake
  - builder: doxygen
    name: C++ API
    output_dir: c++

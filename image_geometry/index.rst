@@ -7,7 +7,7 @@ parameters from sensor_msgs/CameraInfo.
 .. module:: image_geometry
 
 .. autoclass:: image_geometry.PinholeCameraModel
-      :members: fromCameraInfo, rectifyImage, rectifyPoint, unrectifyPoint, tfFrame, project3dToPixel, projectPixelTo3dRay, distortionCoeffs, intrinsicMatrix, projectionMatrix, rotationMatrix, cx, cy, fx, fy
+      :members: fromCameraInfo, rectifyImage, rectifyPoint, tfFrame, project3dToPixel, projectPixelTo3dRay, distortionCoeffs, intrinsicMatrix, projectionMatrix, rotationMatrix, cx, cy, fx, fy
 
 .. autoclass:: image_geometry.StereoCameraModel
       :members:

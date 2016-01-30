@@ -269,8 +269,7 @@ CvImagePtr cvtColor(const CvImageConstPtr& source,
  *
  * \param source   A shared_ptr to a sensor_msgs::Image message
  * \param encoding Either an encoding string that returns true in sensor_msgs::image_encodings::isColor
- * isMono or the mpty string. If it is the empty string, 
- *
+ * isMono or the empty string as explained above.
  * \param do_dynamic_scaling If true, the image is dynamically scaled between its minimum and maximum value
  * before being converted to its final encoding.
  * \param min_image_value Independently from do_dynamic_scaling, if min_image_value and max_image_value are
@@ -278,7 +277,7 @@ CvImagePtr cvtColor(const CvImageConstPtr& source,
  * \param max_image_value Maximum image value
  */
 CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
-                                   const std::string& encoding_out = std::string(),
+                                   const std::string& encoding = std::string(),
                                    bool do_dynamic_scaling = false,
                                    double min_image_value = 0.0,
                                    double max_image_value = 0.0);

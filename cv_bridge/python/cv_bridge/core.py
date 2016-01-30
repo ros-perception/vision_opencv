@@ -92,21 +92,21 @@ class CvBridge:
 
     def imgmsg_to_cv2(self, img_msg, desired_encoding = "passthrough"):
         """
-        Convert a sensor_msgs::Image message to an OpenCV :ctype:`cv::Mat`.
+        Convert a sensor_msgs::Image message to an OpenCV :cpp:type:`cv::Mat`.
 
-        :param img_msg:   A sensor_msgs::Image message
+        :param img_msg:   A :cpp:type:`sensor_msgs::Image` message
         :param desired_encoding:  The encoding of the image data, one of the following strings:
 
            * ``"passthrough"``
            * one of the standard strings in sensor_msgs/image_encodings.h
 
-        :rtype: :ctype:`cv::Mat`
+        :rtype: :cpp:type:`cv::Mat`
         :raises CvBridgeError: when conversion is not possible.
 
         If desired_encoding is ``"passthrough"``, then the returned image has the same format as img_msg.
         Otherwise desired_encoding must be one of the standard image encodings
 
-        This function returns an OpenCV :ctype:`cv::Mat` message on success, or raises :exc:`cv_bridge.CvBridgeError` on failure.
+        This function returns an OpenCV :cpp:type:`cv::Mat` message on success, or raises :exc:`cv_bridge.CvBridgeError` on failure.
 
         If the image only has one channel, the shape has size 2 (width and height)
         """
@@ -134,9 +134,9 @@ class CvBridge:
 
     def cv2_to_imgmsg(self, cvim, encoding = "passthrough"):
         """
-        Convert an OpenCV :ctype:`cv::Mat` type to a ROS sensor_msgs::Image message.
+        Convert an OpenCV :cpp:type:`cv::Mat` type to a ROS sensor_msgs::Image message.
 
-        :param cvim:      An OpenCV :ctype:`cv::Mat`
+        :param cvim:      An OpenCV :cpp:type:`cv::Mat`
         :param encoding:  The encoding of the image data, one of the following strings:
 
            * ``"passthrough"``

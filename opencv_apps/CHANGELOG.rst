@@ -2,8 +2,8 @@
 Changelog for package opencv_apps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.11 (2016-01-31)
+--------------------
 * check if opencv_contrib is available
 * Use respawn instead of watch
 * Contributors: Kei Okada, trainman419

@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.11 (2016-01-31)
+--------------------
 * clean up the doc files
 * fix a few warnings in doc jobs
 * Contributors: Vincent Rabaud

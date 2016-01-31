@@ -2,6 +2,11 @@
 Changelog for package opencv_tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix a few warnings in doc jobs
+* Contributors: Vincent Rabaud
+
 1.11.10 (2016-01-16)
 --------------------
 

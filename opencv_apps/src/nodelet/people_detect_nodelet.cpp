@@ -39,7 +39,7 @@
  */
 
 #include <ros/ros.h>
-#include <nodelet/nodelet.h>
+#include "opencv_apps/nodelet.h"
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 
@@ -53,7 +53,7 @@
 #include "opencv_apps/RectArrayStamped.h"
 
 namespace people_detect {
-class PeopleDetectNodelet : public nodelet::Nodelet
+class PeopleDetectNodelet : public opencv_apps::Nodelet
 {
   image_transport::Publisher img_pub_;
   image_transport::Subscriber img_sub_;
@@ -61,13 +61,11 @@ class PeopleDetectNodelet : public nodelet::Nodelet
   ros::Publisher msg_pub_;
 
   boost::shared_ptr<image_transport::ImageTransport> it_;
-  ros::NodeHandle nh_, local_nh_;
 
   people_detect::PeopleDetectConfig config_;
   dynamic_reconfigure::Server<people_detect::PeopleDetectConfig> srv;
 
   bool debug_view_;
-  int subscriber_count_;
   ros::Time prev_stamp_;
 
   std::string window_name_;
@@ -78,11 +76,6 @@ class PeopleDetectNodelet : public nodelet::Nodelet
   void reconfigureCallback(people_detect::PeopleDetectConfig &new_config, uint32_t level)
   {
     config_ = new_config;
-    if (subscriber_count_)
-    { // @todo Could do this without an interruption at some point.
-      unsubscribe();
-      subscribe();
-    }
   }
 
   const std::string &frameWithDefault(const std::string &frame, const std::string &image_frame)
@@ -196,65 +189,30 @@ class PeopleDetectNodelet : public nodelet::Nodelet
     cam_sub_.shutdown();
   }
 
-  void img_connectCb(const image_transport::SingleSubscriberPublisher& ssp)
-  {
-    if (subscriber_count_++ == 0) {
-      subscribe();
-    }
-  }
-
-  void img_disconnectCb(const image_transport::SingleSubscriberPublisher&)
-  {
-    subscriber_count_--;
-    if (subscriber_count_ == 0) {
-      unsubscribe();
-    }
-  }
-
-  void msg_connectCb(const ros::SingleSubscriberPublisher& ssp)
-  {
-    if (subscriber_count_++ == 0) {
-      subscribe();
-    }
-  }
-
-  void msg_disconnectCb(const ros::SingleSubscriberPublisher&)
-  {
-    subscriber_count_--;
-    if (subscriber_count_ == 0) {
-      unsubscribe();
-    }
-  }
-
 public:
   virtual void onInit()
   {
-    nh_ = getNodeHandle();
-    it_ = boost::shared_ptr<image_transport::ImageTransport>(new image_transport::ImageTransport(nh_));
-    local_nh_ = ros::NodeHandle("~");
+    Nodelet::onInit();
+    it_ = boost::shared_ptr<image_transport::ImageTransport>(new image_transport::ImageTransport(*nh_));
 
-    local_nh_.param("debug_view", debug_view_, false);
-    subscriber_count_ = 0;
+    pnh_->param("debug_view", debug_view_, false);
+    if (debug_view_) {
+      always_subscribe_ = true;
+    }
     prev_stamp_ = ros::Time(0, 0);
 
     window_name_ = "people detector";
 
-    image_transport::SubscriberStatusCallback img_connect_cb    = boost::bind(&PeopleDetectNodelet::img_connectCb, this, _1);
-    image_transport::SubscriberStatusCallback img_disconnect_cb = boost::bind(&PeopleDetectNodelet::img_disconnectCb, this, _1);
-    ros::SubscriberStatusCallback msg_connect_cb    = boost::bind(&PeopleDetectNodelet::msg_connectCb, this, _1);
-    ros::SubscriberStatusCallback msg_disconnect_cb = boost::bind(&PeopleDetectNodelet::msg_disconnectCb, this, _1);
-    img_pub_ = image_transport::ImageTransport(local_nh_).advertise("image", 1, img_connect_cb, img_disconnect_cb);
-    msg_pub_ = local_nh_.advertise<opencv_apps::RectArrayStamped>("found", 1, msg_connect_cb, msg_disconnect_cb);
-        
-    hog_.setSVMDetector(cv::HOGDescriptor::getDefaultPeopleDetector());
-
-    if( debug_view_ ) {
-      subscriber_count_++;
-    }
-
     dynamic_reconfigure::Server<people_detect::PeopleDetectConfig>::CallbackType f =
       boost::bind(&PeopleDetectNodelet::reconfigureCallback, this, _1, _2);
     srv.setCallback(f);
+
+    hog_.setSVMDetector(cv::HOGDescriptor::getDefaultPeopleDetector());
+    
+    img_pub_ = advertiseImage(*pnh_, "image", 1);
+    msg_pub_ = advertise<opencv_apps::RectArrayStamped>(*pnh_, "found", 1);
+
+    onInitPostProcess();
   }
 };
 bool PeopleDetectNodelet::need_config_update_ = false;

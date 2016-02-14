@@ -40,7 +40,7 @@
  */
 
 #include <ros/ros.h>
-#include <nodelet/nodelet.h>
+#include "opencv_apps/nodelet.h"
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
@@ -56,7 +56,7 @@
 #include "opencv_apps/RotatedRectStamped.h"
 
 namespace camshift {
-class CamShiftNodelet : public nodelet::Nodelet
+class CamShiftNodelet : public opencv_apps::Nodelet
 {
   image_transport::Publisher img_pub_, bproj_pub_;
   image_transport::Subscriber img_sub_;
@@ -64,13 +64,11 @@ class CamShiftNodelet : public nodelet::Nodelet
   ros::Publisher msg_pub_;
 
   boost::shared_ptr<image_transport::ImageTransport> it_;
-  ros::NodeHandle nh_, local_nh_;
 
   camshift::CamShiftConfig config_;
   dynamic_reconfigure::Server<camshift::CamShiftConfig> srv;
 
   bool debug_view_;
-  int subscriber_count_;
   ros::Time prev_stamp_;
 
   std::string window_name_, histogram_name_;
@@ -110,11 +108,6 @@ class CamShiftNodelet : public nodelet::Nodelet
     vmin_ = config_.vmin;
     vmax_ = config_.vmax;
     smin_ = config_.smin;
-    if (subscriber_count_)
-    { // @todo Could do this without an interruption at some point.
-      unsubscribe();
-      subscribe();
-    }
   }
 
   const std::string &frameWithDefault(const std::string &frame, const std::string &image_frame)
@@ -227,7 +220,7 @@ class CamShiftNodelet : public nodelet::Nodelet
             std::vector<float> hist_value;
             hist_value.resize(hsize);
             for(int i = 0; i < hsize; i ++) { hist_value[i] = hist.at<float>(i);}
-            local_nh_.setParam("histogram", hist_value);
+            pnh_->setParam("histogram", hist_value);
 
             trackWindow = selection;
             trackObject = 1;
@@ -353,45 +346,16 @@ class CamShiftNodelet : public nodelet::Nodelet
     cam_sub_.shutdown();
   }
 
-  void img_connectCb(const image_transport::SingleSubscriberPublisher& ssp)
-  {
-    if (subscriber_count_++ == 0) {
-      subscribe();
-    }
-  }
-
-  void img_disconnectCb(const image_transport::SingleSubscriberPublisher&)
-  {
-    subscriber_count_--;
-    if (subscriber_count_ == 0) {
-      unsubscribe();
-    }
-  }
-
-  void msg_connectCb(const ros::SingleSubscriberPublisher& ssp)
-  {
-    if (subscriber_count_++ == 0) {
-      subscribe();
-    }
-  }
-
-  void msg_disconnectCb(const ros::SingleSubscriberPublisher&)
-  {
-    subscriber_count_--;
-    if (subscriber_count_ == 0) {
-      unsubscribe();
-    }
-  }
-
 public:
   virtual void onInit()
   {
-    nh_ = getNodeHandle();
-    it_ = boost::shared_ptr<image_transport::ImageTransport>(new image_transport::ImageTransport(nh_));
-    local_nh_ = ros::NodeHandle("~");
+    Nodelet::onInit();
+    it_ = boost::shared_ptr<image_transport::ImageTransport>(new image_transport::ImageTransport(*nh_));
 
-    local_nh_.param("debug_view", debug_view_, false);
-    subscriber_count_ = 0;
+    pnh_->param("debug_view", debug_view_, false);
+    if (debug_view_) {
+      always_subscribe_ = true;
+    }
     prev_stamp_ = ros::Time(0, 0);
 
     window_name_ = "CamShift Demo";
@@ -410,22 +374,15 @@ public:
     phranges = hranges;
     histimg = cv::Mat::zeros(200, 320, CV_8UC3);
 
-    image_transport::SubscriberStatusCallback img_connect_cb    = boost::bind(&CamShiftNodelet::img_connectCb, this, _1);
-    image_transport::SubscriberStatusCallback img_disconnect_cb = boost::bind(&CamShiftNodelet::img_disconnectCb, this, _1);
-    ros::SubscriberStatusCallback msg_connect_cb    = boost::bind(&CamShiftNodelet::msg_connectCb, this, _1);
-    ros::SubscriberStatusCallback msg_disconnect_cb = boost::bind(&CamShiftNodelet::msg_disconnectCb, this, _1);
-    img_pub_ = image_transport::ImageTransport(local_nh_).advertise("image", 1, img_connect_cb, img_disconnect_cb);
-    bproj_pub_ = image_transport::ImageTransport(local_nh_).advertise("back_project", 1, img_connect_cb, img_disconnect_cb);
-    msg_pub_ = local_nh_.advertise<opencv_apps::RotatedRectStamped>("track_box", 1, msg_connect_cb, msg_disconnect_cb);
-        
-    if( debug_view_ ) {
-      subscriber_count_++;
-    }
-
     dynamic_reconfigure::Server<camshift::CamShiftConfig>::CallbackType f =
       boost::bind(&CamShiftNodelet::reconfigureCallback, this, _1, _2);
     srv.setCallback(f);
 
+    
+    img_pub_ = advertiseImage(*pnh_, "image", 1);
+    bproj_pub_ = advertiseImage(*pnh_, "back_project", 1);
+    msg_pub_ = advertise<opencv_apps::RotatedRectStamped>(*pnh_, "track_box", 1);
+    
     NODELET_INFO("Hot keys: ");
     NODELET_INFO("\tESC - quit the program");
     NODELET_INFO("\tc - stop the tracking");
@@ -435,7 +392,7 @@ public:
     NODELET_INFO("To initialize tracking, select the object with mouse");
 
     std::vector<float> hist_value;
-    local_nh_.getParam("histogram", hist_value);
+    pnh_->getParam("histogram", hist_value);
     if ( hist_value.size() == hsize ) {
       hist.create(hsize, 1, CV_32F);
       for(int i = 0; i < hsize; i ++) { hist.at<float>(i) = hist_value[i];}
@@ -458,7 +415,7 @@ public:
                        cv::Scalar(buf.at<cv::Vec3b>(i)), -1, 8 );
       }
     }
-
+    onInitPostProcess();
   }
 };
 bool CamShiftNodelet::need_config_update_ = false;

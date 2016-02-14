@@ -71,7 +71,7 @@ generate_messages(
 
 catkin_package()
 
-include_directories( ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
 ## Declare a cpp library
 if(OPENCV_HAVE_OPTFLOW)
@@ -79,6 +79,7 @@ if(OPENCV_HAVE_OPTFLOW)
 endif()
 
 add_library(${PROJECT_NAME} SHARED
+  src/nodelet/nodelet.cpp
   # https://github.com/Itseez/opencv/blob/2.4/samples/cpp/tutorial_code
   # ImgTrans
   src/nodelet/edge_detection_nodelet.cpp
@@ -293,7 +294,8 @@ add_executable(watershed_segmentation_exe src/node/watershed_segmentation.cpp)
 SET_TARGET_PROPERTIES(watershed_segmentation_exe PROPERTIES OUTPUT_NAME watershed_segmentation)
 target_link_libraries(watershed_segmentation_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
-
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 install(TARGETS edge_detection_exe hough_lines_exe hough_circles_exe face_detection_exe goodfeature_track_exe
   camshift_exe simple_example_exe simple_compressed_example_exe fback_flow_exe lk_flow_exe people_detect_exe phase_corr_exe segment_objects_exe watershed_segmentation_exe
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

@@ -77,7 +77,7 @@ class CvBridge(object):
     def cvtype2_to_dtype_with_channels(self, cvtype):
         import re
         vals = re.split('(.+)C(.+)', self.cvtype_to_name[cvtype])
-        return self.numpy_type_to_cvtype[vals[1]], eval(vals[2])
+        return self.numpy_type_to_cvtype[vals[1]], int(vals[2])
 
     def encoding_to_cvtype2(self, encoding):
         from cv_bridge.boost.cv_bridge_boost import getCvType

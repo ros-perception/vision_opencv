@@ -64,7 +64,7 @@ class CvBridge(object):
         for t in ["8U", "8S", "16U", "16S", "32S", "32F", "64F" ]:
             for c in [1,2,3,4]:
                 nm = "%sC%d" % (t, c)
-                self.cvtype_to_name[getattr("cv2", "CV_%s" % nm)] = nm
+                self.cvtype_to_name[getattr(cv2, "CV_%s" % nm)] = nm
 
         self.numpy_type_to_cvtype = {'uint8':'8U', 'int8':'8S', 'uint16':'16U',
                                         'int16':'16S', 'int32':'32S', 'float32':'32F',

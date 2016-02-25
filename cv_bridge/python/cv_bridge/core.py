@@ -38,7 +38,7 @@ class CvBridgeError(TypeError):
     """
     pass
 
-class CvBridge:
+class CvBridge(object):
     """
     The CvBridge is an object that converts between OpenCV Images and ROS Image messages.
 
@@ -64,7 +64,7 @@ class CvBridge:
         for t in ["8U", "8S", "16U", "16S", "32S", "32F", "64F" ]:
             for c in [1,2,3,4]:
                 nm = "%sC%d" % (t, c)
-                self.cvtype_to_name[eval("cv2.CV_%s" % nm)] = nm
+                self.cvtype_to_name[getattr(cv2, "CV_%s" % nm)] = nm
 
         self.numpy_type_to_cvtype = {'uint8':'8U', 'int8':'8S', 'uint16':'16U',
                                         'int16':'16S', 'int32':'32S', 'float32':'32F',
@@ -77,7 +77,7 @@ class CvBridge:
     def cvtype2_to_dtype_with_channels(self, cvtype):
         import re
         vals = re.split('(.+)C(.+)', self.cvtype_to_name[cvtype])
-        return self.numpy_type_to_cvtype[vals[1]], eval(vals[2])
+        return self.numpy_type_to_cvtype[vals[1]], int(vals[2])
 
     def encoding_to_cvtype2(self, encoding):
         from cv_bridge.boost.cv_bridge_boost import getCvType
@@ -167,7 +167,7 @@ class CvBridge:
             img_msg.encoding = encoding
             # Verify that the supplied encoding is compatible with the type of the OpenCV image
             if self.cvtype_to_name[self.encoding_to_cvtype2(encoding)] != cv_type:
-              raise CvBridgeError, "encoding specified as %s, but image has incompatible type %s" % (encoding, cv_type)
+                raise CvBridgeError("encoding specified as %s, but image has incompatible type %s" % (encoding, cv_type))
         img_msg.data = cvim.tostring()
         img_msg.step = len(img_msg.data) / img_msg.height
         return img_msg

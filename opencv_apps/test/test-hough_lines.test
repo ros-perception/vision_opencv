@@ -19,7 +19,7 @@
     <param name="standard_hough_lines_test/topic" value="standard_hough_lines/lines" />    <!-- opencv_apps/LineArrayStamped -->
     <test test-name="standard_hough_lines_test" pkg="rostest" type="hztest" name="standard_hough_lines_test" >
       <param name="hz" value="20" />
-      <param name="hzerror" value="15" />
+      <param name="hzerror" value="19" />
       <param name="test_duration" value="5.0" /> 
     </test>
 
@@ -35,7 +35,7 @@
     <param name="probabilistic_hough_lines_test/topic" value="probabilistic_hough_lines/lines" />    <!-- opencv_apps/LineArrayStamped -->
     <test test-name="probabilistic_hough_lines_test" pkg="rostest" type="hztest" name="probabilistic_hough_lines_test" >
       <param name="hz" value="20" />
-      <param name="hzerror" value="15" />
+      <param name="hzerror" value="19" />
       <param name="test_duration" value="5.0" /> 
     </test>
   </group>

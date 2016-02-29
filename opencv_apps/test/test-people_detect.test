@@ -16,7 +16,7 @@
     <param name="people_detect_test/topic" value="people_detect/found" />    <!-- opencv_apps/RectArrayStamped -->
     <test test-name="people_detect_test" pkg="rostest" type="hztest" name="people_detect_test" >
       <param name="hz" value="15" />
-      <param name="hzerror" value="14" />
+      <param name="hzerror" value="14.5" />
       <param name="test_duration" value="5.0" /> 
     </test>
   </group>

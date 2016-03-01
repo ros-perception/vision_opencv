@@ -161,6 +161,97 @@ TEST_F(PinholeTest, initialization)
     EXPECT_EQ(camera.projectionMatrix().cols, 4);
 }
 
+TEST_F(PinholeTest, rectifyIfCalibrated)
+{
+  /// @todo use forward distortion for a better test
+  // Ideally this test would have two images stored on disk
+  // one which is distorted and the other which is rectified,
+  // and then rectification would take place here and the output
+  // image compared to the one on disk (which would mean if
+  // the distortion coefficients above can't change once paired with
+  // an image).
+
+  // Later could incorporate distort code
+  // (https://github.com/lucasw/vimjay/blob/master/src/standalone/distort_image.cpp)
+  // to take any image distort it, then undistort with rectifyImage,
+  // and given the distortion coefficients are consistent the input image
+  // and final output image should be mostly the same (though some
+  // interpolation error
+  // creeps in), except for outside a masked region where information was lost.
+  // The masked region can be generated with a pure white image that
+  // goes through the same process (if it comes out completely black
+  // then the distortion parameters are problematic).
+
+  // For now generate an image and pass the test simply if
+  // the rectified image does not match the distorted image.
+  // Then zero out the first distortion coefficient and run
+  // the test again.
+  // Then zero out all the distortion coefficients and test
+  // that the output image is the same as the input.
+  cv::Mat distorted_image(cv::Size(cam_info_.width, cam_info_.height), CV_8UC3);
+
+  // draw a grid
+  const cv::Scalar color = cv::Scalar(255, 255, 255);
+  // draw the lines thick so the proportion of error due to
+  // interpolation is reduced
+  const int thickness = 7;
+  const int type = 8;
+  for (size_t y = 0; y <= cam_info_.height; y += cam_info_.height/10)
+  {
+    cv::line(distorted_image,
+             cv::Point(0, y), cv::Point(cam_info_.width, y),
+             color, type, thickness);
+  }
+  for (size_t x = 0; x <= cam_info_.width; x += cam_info_.width/10)
+  {
+    // draw the lines thick so the prorportion of interpolation error is reduced
+    cv::line(distorted_image,
+             cv::Point(x, 0), cv::Point(x, cam_info_.height),
+             color, type, thickness);
+  }
+
+  cv::Mat rectified_image;
+  // Just making this number up, maybe ought to be larger
+  // since a completely different image would be on the order of
+  // width * height * 255 = 78e6
+  const double diff_threshold = 10000.0;
+  double error;
+
+  // Test that rectified image is sufficiently different
+  // using default distortion
+  model_.rectifyImage(distorted_image, rectified_image);
+  error = cv::norm(distorted_image, rectified_image, cv::NORM_L1);
+  // Just making this number up, maybe ought to be larger
+  EXPECT_GT(error, diff_threshold);
+
+  // Test that rectified image is sufficiently different
+  // using default distortion but with first element zeroed
+  // out.
+  sensor_msgs::CameraInfo cam_info_2 = cam_info_;
+  cam_info_2.D[0] = 0.0;
+  model_.fromCameraInfo(cam_info_2);
+  model_.rectifyImage(distorted_image, rectified_image);
+  error = cv::norm(distorted_image, rectified_image, cv::NORM_L1);
+  EXPECT_GT(error, diff_threshold);
+
+  // Test that rectified image is the same using zero distortion
+  cam_info_2.D.assign(cam_info_2.D.size(), 0);
+  model_.fromCameraInfo(cam_info_2);
+  model_.rectifyImage(distorted_image, rectified_image);
+  error = cv::norm(distorted_image, rectified_image, cv::NORM_L1);
+  EXPECT_EQ(error, 0);
+
+  // Test that rectified image is the same using empty distortion
+  cam_info_2.D.clear();
+  model_.fromCameraInfo(cam_info_2);
+  model_.rectifyImage(distorted_image, rectified_image);
+  error = cv::norm(distorted_image, rectified_image, cv::NORM_L1);
+  EXPECT_EQ(error, 0);
+
+  // restore original distortion
+  model_.fromCameraInfo(cam_info_);
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);

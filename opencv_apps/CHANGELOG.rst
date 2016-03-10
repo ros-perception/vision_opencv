@@ -2,6 +2,18 @@
 Changelog for package opencv_apps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* relax test condition
+* fix test hz to 5 hz, tested on core i7 3.2G
+* Refactor opencv_apps to remove duplicated codes to handle connection of
+  topics.
+  1. Add opencv_apps::Nodelet class to handle connection and disconnection of
+  topics.
+  2. Update nodelets of opencv_apps to inhereit opencv_apps::Nodelet class
+  to remove duplicated codes.
+* Contributors: Kei Okada, Ryohei Ueda
+
 1.11.11 (2016-01-31)
 --------------------
 * check if opencv_contrib is available

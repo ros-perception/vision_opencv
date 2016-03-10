@@ -2,6 +2,11 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* issue `#117 <https://github.com/ros-perception/vision_opencv/issues/117>`_ pull request `#118 <https://github.com/ros-perception/vision_opencv/issues/118>`_ check all distortion coefficients to see if rectification ought to be done
+* Contributors: Lucas Walter
+
 1.11.11 (2016-01-31)
 --------------------
 * clean up the doc files

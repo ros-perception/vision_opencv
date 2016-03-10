@@ -1,6 +1,6 @@
 <package>
   <name>opencv_tests</name>
-  <version>1.11.11</version>
+  <version>1.11.12</version>
   <description>
     Tests the enumerants of the ROS Image message, and functionally tests the Python and C++ implementations of CvBridge.
   </description>

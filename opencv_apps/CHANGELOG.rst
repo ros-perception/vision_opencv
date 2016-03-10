@@ -2,8 +2,8 @@
 Changelog for package opencv_apps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.12 (2016-03-10)
+--------------------
 * relax test condition
 * fix test hz to 5 hz, tested on core i7 3.2G
 * Refactor opencv_apps to remove duplicated codes to handle connection of

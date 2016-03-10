@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.12 (2016-03-10)
+--------------------
 * Fix my typo
 * Remove another eval
   Because `cvtype2_to_dtype_with_channels('8UCimport os; os.system("rm -rf /")')` should never have a chance of happening.

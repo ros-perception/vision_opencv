@@ -66,10 +66,14 @@ add_message_files(
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
-  geometry_msgs
+  std_msgs
 )
 
-catkin_package()
+catkin_package(CATKIN_DEPENDS std_msgs
+#                DEPENDS OpenCV
+               INCLUDE_DIRS include
+               LIBRARIES ${PROJECT_NAME}
+)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 

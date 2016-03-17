@@ -2,8 +2,8 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.12.0 (2016-03-18)
+-------------------
 * depend on OpenCV3 only
 * Contributors: Vincent Rabaud
 

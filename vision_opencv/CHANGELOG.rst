@@ -2,6 +2,11 @@
 Changelog for package vision_opencv
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* remove opencv_apps from vision_opencv
+* Contributors: Vincent Rabaud
+
 1.11.12 (2016-03-10)
 --------------------
 

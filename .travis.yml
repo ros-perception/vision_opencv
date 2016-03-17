@@ -2,10 +2,8 @@ sudo: required
 dist: trusty
 language: generic
 env:
-  - OPENCV_VERSION=2 ROS_DISTRO=indigo
-  - OPENCV_VERSION=3 ROS_DISTRO=indigo
-  - OPENCV_VERSION=2 ROS_DISTRO=jade
-  - OPENCV_VERSION=3 ROS_DISTRO=jade
+  - ROS_DISTRO=indigo
+  - ROS_DISTRO=jade
 # Install system dependencies, namely ROS.
 before_install:
   # Define some config vars.
@@ -34,8 +32,6 @@ install:
   - cd ~/catkin_ws/src
   - ln -s $CI_SOURCE_PATH . # Link the repo we are testing to the new workspace
 
-  - if [ $OPENCV_VERSION == 3 ]; then  sed -i 's@libopencv-dev@opencv3@' $REPOSITORY_NAME/*/package.xml ; fi
-
 # Install all dependencies, using wstool and rosdep.
 # wstool looks for a ROSINSTALL_FILE defined in before_install.
 before_script:
@@ -43,7 +39,6 @@ before_script:
   - cd ~/catkin_ws/src
   - wstool init
   - if [[ -f $ROSINSTALL_FILE ]] ; then wstool merge $ROSINSTALL_FILE ; fi
-  - if [ $OPENCV_VERSION == 3 ]; then wstool set -y image_pipeline --git https://github.com/ros-perception/image_pipeline; fi # need to recompile image_proc
   - wstool up
 
   # package depdencies: install using rosdep.

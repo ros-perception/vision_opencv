@@ -27,4 +27,5 @@
   <build_export_depend>sensor_msgs</build_export_depend>
 
   <doc_depend>dvipng</doc_depend>
+  <doc_depend>texlive-latex-extra</doc_depend>
 </package>

@@ -300,10 +300,14 @@ target_link_libraries(watershed_segmentation_exe ${catkin_LIBRARIES} ${OpenCV_LI
 
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-install(TARGETS edge_detection_exe hough_lines_exe hough_circles_exe face_detection_exe goodfeature_track_exe
+install(TARGETS edge_detection_exe hough_lines_exe hough_circles_exe find_contours_exe convex_hull_exe general_contours_exe contour_moments_exe face_detection_exe goodfeature_track_exe
   camshift_exe simple_example_exe simple_compressed_example_exe fback_flow_exe lk_flow_exe people_detect_exe phase_corr_exe segment_objects_exe watershed_segmentation_exe
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+if(OPENCV_HAVE_OPTFLOW)
+  install(TARGETS simple_flow_exe
+          DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+endif()
 install(FILES nodelet_plugins.xml
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )

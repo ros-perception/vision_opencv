@@ -52,6 +52,8 @@ class PinholeCameraModel:
         self.height = msg.height
         self.binning_x = max(1, msg.binning_x)
         self.binning_y = max(1, msg.binning_y)
+        self.resolution = (msg.width, msg.height)
+
         self.raw_roi = copy.copy(msg.roi)
         # ROI all zeros is considered the same as full resolution
         if (self.raw_roi.x_offset == 0 and self.raw_roi.y_offset == 0 and
@@ -201,6 +203,10 @@ class PinholeCameraModel:
         """
         fy = self.P[1, 1]
         return Z * deltaV / fy
+
+    def fullResolution(self):
+        """Returns the full resolution of the camera"""
+        return self.resolution
 
     def intrinsicMatrix(self):
         """ Returns :math:`K`, also called camera_matrix in cv docs """

@@ -6,6 +6,7 @@
 
 #include "opencv2/opencv_modules.hpp"
 
+#include "pycompat.hpp"
 
 static PyObject* opencv_error = 0;
 

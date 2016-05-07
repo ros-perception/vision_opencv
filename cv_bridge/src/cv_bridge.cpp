@@ -532,11 +532,12 @@ CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
       // Let's decide upon an output format
       if (enc::numChannels(source->encoding) == 1)
       {
-        if ((enc::bitDepth(source->encoding) == 8) ||
-            (enc::bitDepth(source->encoding) == 16))
-          encoding = enc::MONO8;
-        else if (enc::bitDepth(source->encoding) == 32)
+        if (source->encoding == enc::TYPE_32SC1)
           encoding = enc::BGR8;
+        else if ((enc::bitDepth(source->encoding) == 8) ||
+                 (enc::bitDepth(source->encoding) == 16) ||
+                 (enc::bitDepth(source->encoding) == 32))
+          encoding = enc::MONO8;
         else
           throw std::runtime_error("Unsupported depth of the source encoding " + encoding);
       }
@@ -566,7 +567,7 @@ CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
 
   // Convert label to bgr image
   if (encoding == sensor_msgs::image_encodings::BGR8 &&
-      sensor_msgs::image_encodings::bitDepth(source->encoding) == 32)
+      source->encoding == enc::TYPE_32SC1)
   {
     CvImagePtr result(new CvImage());
     result->header = source->header;

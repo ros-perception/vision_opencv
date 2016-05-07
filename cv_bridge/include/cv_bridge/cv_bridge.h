@@ -247,6 +247,15 @@ CvImageConstPtr toCvShare(const sensor_msgs::Image& source,
 CvImagePtr cvtColor(const CvImageConstPtr& source,
                     const std::string& encoding);
 
+struct CvtColorForDisplayOptions {
+  CvtColorForDisplayOptions() : do_dynamic_scaling(false), min_image_value(0.0), max_image_value(0.0), colormap(-1) {}
+  bool do_dynamic_scaling;
+  double min_image_value;
+  double max_image_value;
+  int colormap;
+};
+
+
 /**
  * \brief Converts an immutable sensor_msgs::Image message to another CvImage for display purposes,
  * using practical conversion rules if needed.
@@ -270,17 +279,17 @@ CvImagePtr cvtColor(const CvImageConstPtr& source,
  * \param source   A shared_ptr to a sensor_msgs::Image message
  * \param encoding Either an encoding string that returns true in sensor_msgs::image_encodings::isColor
  * isMono or the empty string as explained above.
- * \param do_dynamic_scaling If true, the image is dynamically scaled between its minimum and maximum value
+ * \param options (cv_bridge::CvtColorForDisplayOptions) Options to convert the source image with.
+ * - do_dynamic_scaling If true, the image is dynamically scaled between its minimum and maximum value
  * before being converted to its final encoding.
- * \param min_image_value Independently from do_dynamic_scaling, if min_image_value and max_image_value are
+ * - min_image_value Independently from do_dynamic_scaling, if min_image_value and max_image_value are
  * different, the image is scaled between these two values before being converted to its final encoding.
- * \param max_image_value Maximum image value
+ * - max_image_value Maximum image value
+ * - colormap Colormap which the source image converted with.
  */
 CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
                                    const std::string& encoding = std::string(),
-                                   bool do_dynamic_scaling = false,
-                                   double min_image_value = 0.0,
-                                   double max_image_value = 0.0);
+                                   const CvtColorForDisplayOptions options = CvtColorForDisplayOptions());
 
 /**
  * \brief Get the OpenCV type enum corresponding to the encoding.

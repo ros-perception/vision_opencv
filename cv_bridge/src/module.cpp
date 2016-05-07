@@ -63,11 +63,13 @@ cvtColorForDisplayWrap(bp::object obj_in,
 
   cv_bridge::CvImagePtr cv_image(new cv_bridge::CvImage(std_msgs::Header(), encoding_in, mat_in));
 
+  cv_bridge::CvtColorForDisplayOptions options;
+  options.do_dynamic_scaling = do_dynamic_scaling;
+  options.min_image_value = min_image_value;
+  options.max_image_value = max_image_value;
   cv::Mat mat = cv_bridge::cvtColorForDisplay(/*source=*/cv_image,
                                               /*encoding_out=*/encoding_out,
-                                              /*do_dynamic_scaling=*/do_dynamic_scaling,
-                                              /*min_image_value=*/min_image_value,
-                                              /*max_image_value=*/max_image_value)->image;
+                                              /*options=*/options)->image;
 
   return bp::object(boost::python::handle<>(pyopencv_from(mat)));
 }

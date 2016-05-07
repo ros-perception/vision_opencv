@@ -1,2 +1,0 @@
-Rect face
-Rect[] eyes

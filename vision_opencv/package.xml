@@ -16,7 +16,6 @@
   <!-- Old stack contents -->
   <run_depend>cv_bridge</run_depend>
   <run_depend>image_geometry</run_depend>
-  <run_depend>opencv_apps</run_depend>
   <export>
     <metapackage/>
   </export>

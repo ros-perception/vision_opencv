@@ -50,6 +50,30 @@ cvtColor2Wrap(bp::object obj_in, const std::string & encoding_in, const std::str
   return bp::object(boost::python::handle<>(pyopencv_from(mat)));
 }
 
+bp::object
+cvtColorForDisplayWrap(bp::object obj_in,
+                       const std::string & encoding_in,
+                       const std::string & encoding_out,
+                       bool do_dynamic_scaling = false,
+                       double min_image_value = 0.0,
+                       double max_image_value = 0.0) {
+  // Convert the Python input to an image
+  cv::Mat mat_in;
+  convert_to_CvMat2(obj_in.ptr(), mat_in);
+
+  cv_bridge::CvImagePtr cv_image(new cv_bridge::CvImage(std_msgs::Header(), encoding_in, mat_in));
+
+  cv::Mat mat = cv_bridge::cvtColorForDisplay(/*source=*/cv_image,
+                                              /*encoding_out=*/encoding_out,
+                                              /*do_dynamic_scaling=*/do_dynamic_scaling,
+                                              /*min_image_value=*/min_image_value,
+                                              /*max_image_value=*/max_image_value)->image;
+
+  return bp::object(boost::python::handle<>(pyopencv_from(mat)));
+}
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(cvtColorForDisplayWrap_overloads, cvtColorForDisplayWrap, 3, 6)
+
 BOOST_PYTHON_MODULE(cv_bridge_boost)
 {
   do_numpy_import();
@@ -58,4 +82,17 @@ BOOST_PYTHON_MODULE(cv_bridge_boost)
   // Wrap the function to get encodings as OpenCV types
   boost::python::def("getCvType", cv_bridge::getCvType);
   boost::python::def("cvtColor2", cvtColor2Wrap);
+  boost::python::def("cvtColorForDisplay", cvtColorForDisplayWrap,
+                     cvtColorForDisplayWrap_overloads(
+                       boost::python::args("source", "encoding_in", "encoding_out", "do_dynamic_scaling",
+                                           "min_image_value", "max_image_value"),
+                       "Convert image to display with specified encodings.\n\n"
+                       "Args:\n"
+                       "  - source (numpy.ndarray): input image\n"
+                       "  - encoding_in (str): input image encoding\n"
+                       "  - encoding_out (str): encoding to which the image conveted\n"
+                       "  - do_dynamic_scaling (bool): flag to do dynamic scaling with min/max value\n"
+                       "  - min_image_value (float): minimum pixel value for dynamic scaling\n"
+                       "  - max_image_value (float): maximum pixel value for dynamic scaling\n"
+                     ));
 }

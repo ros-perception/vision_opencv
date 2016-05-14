@@ -517,10 +517,11 @@ CvImagePtr toCvCopy(const sensor_msgs::CompressedImage& source,
 
 CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
                                    const std::string& encoding_out,
-                                   bool do_dynamic_scaling,
-                                   double min_image_value,
-                                   double max_image_value)
+                                   const CvtColorForDisplayOptions options)
 {
+  double min_image_value = options.min_image_value;
+  double max_image_value = options.max_image_value;
+
   if (!source)
     throw Exception("cv_bridge.cvtColorForDisplay() called with empty image.");
   // let's figure out what to do with the empty encoding
@@ -532,12 +533,11 @@ CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
       // Let's decide upon an output format
       if (enc::numChannels(source->encoding) == 1)
       {
-        if (source->encoding == enc::TYPE_32SC1)
+        if ((source->encoding == enc::TYPE_32SC1) ||
+            (enc::bitDepth(source->encoding) == 8) ||
+            (enc::bitDepth(source->encoding) == 16) ||
+            (enc::bitDepth(source->encoding) == 32))
           encoding = enc::BGR8;
-        else if ((enc::bitDepth(source->encoding) == 8) ||
-                 (enc::bitDepth(source->encoding) == 16) ||
-                 (enc::bitDepth(source->encoding) == 32))
-          encoding = enc::MONO8;
         else
           throw std::runtime_error("Unsupported depth of the source encoding " + encoding);
       }
@@ -591,7 +591,7 @@ CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
   }
 
   // Perform scaling if asked for
-  if (do_dynamic_scaling)
+  if (options.do_dynamic_scaling)
   {
     cv::minMaxLoc(source->image, &min_image_value, &max_image_value);
     if (min_image_value == max_image_value)
@@ -615,12 +615,19 @@ CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
   {
     if (enc::numChannels(source->encoding) != 1)
       throw Exception("cv_bridge.cvtColorForDisplay() scaling for images with more than one channel is unsupported");
-    CvImagePtr img_scaled_8u(new CvImage());
-    img_scaled_8u->header = source->header;
-    img_scaled_8u->encoding = enc::MONO8;
-    cv::Mat(source->image-min_image_value).convertTo(img_scaled_8u->image, CV_8UC1, 255.0 /
-      (max_image_value - min_image_value));
-    return cvtColor(img_scaled_8u, encoding);
+    CvImagePtr img_scaled(new CvImage());
+    img_scaled->header = source->header;
+    if (options.colormap == -1) {
+      img_scaled->encoding = enc::MONO8;
+      cv::Mat(source->image-min_image_value).convertTo(img_scaled->image, CV_8UC1, 255.0 /
+        (max_image_value - min_image_value));
+    } else {
+      img_scaled->encoding = enc::BGR8;
+      cv::Mat(source->image-min_image_value).convertTo(img_scaled->image, CV_8UC3, 255.0 /
+        (max_image_value - min_image_value));
+      cv::applyColorMap(img_scaled->image, img_scaled->image, options.colormap);
+    }
+    return cvtColor(img_scaled, encoding);
   }
 
   // If no color conversion is possible, we must "guess" the input format

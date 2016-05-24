@@ -32,6 +32,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import sensor_msgs.msg
+import sys
 
 
 class CvBridgeError(TypeError):
@@ -158,12 +159,17 @@ class CvBridge(object):
         import cv2
         import numpy as np
         dtype, n_channels = self.encoding_to_dtype_with_channels(img_msg.encoding)
+        dtype = np.dtype(dtype)
+        dtype = dtype.newbyteorder('>' if img_msg.is_bigendian else '<')
         if n_channels == 1:
             im = np.ndarray(shape=(img_msg.height, img_msg.width),
                            dtype=dtype, buffer=img_msg.data)
         else:
             im = np.ndarray(shape=(img_msg.height, img_msg.width, n_channels),
                            dtype=dtype, buffer=img_msg.data)
+        # If the byt order is different between the message and the system.
+        if img_msg.is_bigendian == (sys.byteorder == 'little'):
+            im = im.byteswap().newbyteorder()
 
         if desired_encoding == "passthrough":
             return im
@@ -250,6 +256,9 @@ class CvBridge(object):
             # Verify that the supplied encoding is compatible with the type of the OpenCV image
             if self.cvtype_to_name[self.encoding_to_cvtype2(encoding)] != cv_type:
                 raise CvBridgeError("encoding specified as %s, but image has incompatible type %s" % (encoding, cv_type))
+        print(cvim.dtype.byteorder)
+        if cvim.dtype.byteorder == '>':
+            img_msg.is_bigendian = True
         img_msg.data = cvim.tostring()
         img_msg.step = len(img_msg.data) / img_msg.height
 

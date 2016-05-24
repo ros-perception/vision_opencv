@@ -2,6 +2,8 @@
 import rostest
 import unittest
 
+import numpy as np
+
 import sensor_msgs.msg
 
 from cv_bridge import CvBridge, CvBridgeError
@@ -28,6 +30,23 @@ class TestEnumerants(unittest.TestCase):
         # but it can be sent as rgb8 and bgr8
         bridge_.cv2_to_imgmsg(cvim, "rgb8")
         bridge_.cv2_to_imgmsg(cvim, "bgr8")
+
+    def test_numpy_types(self):
+        import cv2
+        import numpy as np
+        bridge_ = CvBridge()
+        self.assertRaises(TypeError, lambda: bridge_.cv2_to_imgmsg(1, "rgba8"))
+        if hasattr(cv2, 'cv'):
+            self.assertRaises(TypeError, lambda: bridge_.cv2_to_imgmsg(cv2.cv(), "rgba8"))
+
+class TestConversions(unittest.TestCase):
+
+    def test_mono16_cv2(self):
+        import numpy as np
+        br = CvBridge()
+        im = np.uint8(np.random.randint(0, 255, size=(480, 640, 3)))
+        self.assertRaises(CvBridgeError, lambda: br.imgmsg_to_cv2(br.cv2_to_imgmsg(im), "mono16"))
+        br.imgmsg_to_cv2(br.cv2_to_imgmsg(im,"rgb8"), "mono16")
 
     def test_encode_decode_cv2(self):
         import cv2
@@ -83,19 +102,15 @@ class TestEnumerants(unittest.TestCase):
                             self.assert_(original.shape == newimg.shape)
                         self.assert_(len(original.tostring()) == len(newimg.tostring()))
 
-    def test_numpy_types(self):
-        import cv2
-        import numpy as np
-        bridge_ = CvBridge()
-        self.assertRaises(TypeError, lambda: bridge_.cv2_to_imgmsg(1, "rgba8"))
-        if hasattr(cv2, 'cv'):
-            self.assertRaises(TypeError, lambda: bridge_.cv2_to_imgmsg(cv2.cv(), "rgba8"))
-
-    def test_mono16_cv2(self):
-        import numpy as np
-        br  = CvBridge()
-        im  = np.uint8(np.random.randint(0, 255, size=(480, 640, 3)))
-        msg = br.cv2_to_imgmsg(im)
+    def test_endianness(self):
+        br = CvBridge()
+        dtype = np.dtype('int32')
+        # Set to big endian.
+        dtype = dtype.newbyteorder('>')
+        img = np.random.randint(0, 255, size=(30, 40))
+        msg = br.cv2_to_imgmsg(img.astype(dtype))
+        self.assert_(msg.is_bigendian == True)
+        self.assert_((br.imgmsg_to_cv2(msg) == img).all())
 
 if __name__ == '__main__':
     rostest.unitrun('opencv_tests', 'enumerants', TestEnumerants)

@@ -60,7 +60,7 @@ typedef boost::shared_ptr<CvImage const> CvImageConstPtr;
 
 //from: http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
 typedef enum {
-	BMP, DIP,
+	BMP, DIB,
 	JPG, JPEG, JPE,
 	JP2,
 	PNG,

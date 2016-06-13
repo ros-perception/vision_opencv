@@ -2,6 +2,7 @@
 # Software License Agreement (BSD License)
 #
 # Copyright (c) 2008, Willow Garage, Inc.
+# Copyright (c) 2016, Tal Regev.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,50 +42,54 @@ import cv2
 import sensor_msgs.msg
 from cv_bridge import CvBridge
 
-class source:
 
-  def __init__(self):
-    self.pub = rospy.Publisher("/opencv_tests/images", sensor_msgs.msg.Image)
+# Send black pic with a circle as regular and compressed ros msgs.
+class Source:
 
-  def spin(self):
-    time.sleep(1.0)
-    started = time.time()
-    counter = 0
-    cvim = numpy.zeros((480, 640, 1), numpy.uint8)
-    ball_xv = 10
-    ball_yv = 10
-    ball_x = 100
-    ball_y = 100
+    def __init__(self):
+        self.pub            = rospy.Publisher("/opencv_tests/images", sensor_msgs.msg.Image)
+        self.pub_compressed = rospy.Publisher("/opencv_tests/images/compressed", sensor_msgs.msg.CompressedImage)
 
-    cvb = CvBridge()
+    def spin(self):
+        time.sleep(1.0)
+        started = time.time()
+        counter = 0
+        cvim = numpy.zeros((480, 640, 1), numpy.uint8)
+        ball_xv = 10
+        ball_yv = 10
+        ball_x = 100
+        ball_y = 100
 
-    while not rospy.core.is_shutdown():
+        cvb = CvBridge()
 
-      cvim.fill(0)
-      cv2.circle(cvim, (ball_x, ball_y), 10, 255, -1)
+        while not rospy.core.is_shutdown():
 
-      ball_x += ball_xv
-      ball_y += ball_yv
-      if ball_x in [10, 630]:
-        ball_xv = -ball_xv
-      if ball_y in [10, 470]:
-        ball_yv = -ball_yv
+            cvim.fill(0)
+            cv2.circle(cvim, (ball_x, ball_y), 10, 255, -1)
 
-      self.pub.publish(cvb.cv2_to_imgmsg(cvim))
+            ball_x += ball_xv
+            ball_y += ball_yv
+            if ball_x in [10, 630]:
+                ball_xv = -ball_xv
+            if ball_y in [10, 470]:
+                ball_yv = -ball_yv
 
-      time.sleep(0.03)
+            self.pub.publish(cvb.cv2_to_imgmsg(cvim))
+            self.pub_compressed.publish(cvb.cv2_to_compressed_imgmsg(cvim))
+            time.sleep(0.03)
+
 
 def main(args):
-  s = source()
-  rospy.init_node('source')
-  try:
-    s.spin()
-    rospy.spin()
-    outcome = 'test completed'
-  except KeyboardInterrupt:
-    print "shutting down"
-    outcome = 'keyboard interrupt'
-  rospy.core.signal_shutdown(outcome)
+    s = Source()
+    rospy.init_node('Source')
+    try:
+        s.spin()
+        rospy.spin()
+        outcome = 'test completed'
+    except KeyboardInterrupt:
+        print "shutting down"
+        outcome = 'keyboard interrupt'
+    rospy.core.signal_shutdown(outcome)
 
 if __name__ == '__main__':
-  main(sys.argv)
+    main(sys.argv)

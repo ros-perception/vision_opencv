@@ -431,7 +431,7 @@ cv::Mat matFromImage(const sensor_msgs::CompressedImage& source)
     cv::Mat jpegData(1,source.data.size(),CV_8UC1);
     jpegData.data     = const_cast<uchar*>(&source.data[0]);
     cv::InputArray data(jpegData);
-    cv::Mat bgrMat     = cv::imdecode(data,cv::IMREAD_COLOR);
+    cv::Mat bgrMat     = cv::imdecode(data,cv::IMREAD_ANYCOLOR);
     return bgrMat;
 }
 
@@ -445,8 +445,8 @@ sensor_msgs::CompressedImagePtr CvImage::toCompressedImageMsg(const Format dst_f
 std::string getFormat(Format format) {
 
 	switch (format) {
-		case DIP:
-			return "dip";
+		case DIB:
+			return "dib";
 		case BMP:
 			return "bmp";
 		case JPG:

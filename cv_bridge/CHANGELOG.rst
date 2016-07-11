@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.12.1 (2016-07-11)
+-------------------
 * split the conversion tests out of enumerants
 * support is_bigendian in Python
   Fixes `#114 <https://github.com/ros-perception/vision_opencv/issues/114>`_

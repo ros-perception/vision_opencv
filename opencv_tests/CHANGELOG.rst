@@ -2,8 +2,8 @@
 Changelog for package opencv_tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.12.1 (2016-07-11)
+-------------------
 * Support compressed Images messages in python for indigo
   - Add cv2_to_comprssed_imgmsg: Convert from cv2 image to compressed image ros msg.
   - Add comprssed_imgmsg_to_cv2:   Convert the compress message to a new image.

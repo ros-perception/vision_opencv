@@ -2,8 +2,8 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.13 (2016-07-11)
+--------------------
 * Add fullResolution getter to PinholeCameraModel
 * add a missing dependency when building the doc
 * fix sphinx doc path

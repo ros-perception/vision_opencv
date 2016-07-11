@@ -2,6 +2,11 @@
 Changelog for package vision_opencv
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* move opencv_apps to its own repo
+* Contributors: Vincent Rabaud
+
 1.11.12 (2016-03-10)
 --------------------
 

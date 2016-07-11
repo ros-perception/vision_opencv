@@ -2,6 +2,38 @@
 Changelog for package opencv_tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Support compressed Images messages in python for indigo
+  - Add cv2_to_comprssed_imgmsg: Convert from cv2 image to compressed image ros msg.
+  - Add comprssed_imgmsg_to_cv2:   Convert the compress message to a new image.
+  - Add compressed image tests.
+  - Add time to msgs (compressed and regular).
+  add enumerants test for compressed image.
+  merge the compressed tests with the regular ones.
+  better comment explanation. I will squash this commit.
+  Fix indentation
+  fix typo mistage: from .imgmsg_to_compressed_cv2 to .compressed_imgmsg_to_cv2.
+  remove cv2.CV_8UC1
+  remove rospy and time depndency.
+  change from IMREAD_COLOR to IMREAD_ANYCOLOR.
+  - make indentaion of 4.
+  - remove space trailer.
+  - remove space from empty lines.
+  - another set of for loops, it will make things easier to track. In that new set,  just have the number of channels in ([],1,3,4) (ignore two for jpg). from: https://github.com/ros-perception/vision_opencv/pull/132#discussion_r66721943
+  - keep the OpenCV error message. from: https://github.com/ros-perception/vision_opencv/pull/132#discussion_r66721013
+  add debug print for test.
+  add case for 4 channels in test.
+  remove 4 channels case from compressed test.
+  add debug print for test.
+  change typo of format.
+  fix typo in format. change from dip to dib.
+  change to IMREAD_ANYCOLOR as python code. (as it should).
+  rename TIFF to tiff
+  Sperate the tests one for regular images and one for compressed.
+  update comment
+* Contributors: talregev
+
 1.12.0 (2016-03-18)
 -------------------
 

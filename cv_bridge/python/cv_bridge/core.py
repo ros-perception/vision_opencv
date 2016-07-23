@@ -94,7 +94,15 @@ class CvBridge(object):
             raise CvBridgeError(e)
 
     def encoding_to_dtype_with_channels(self, encoding):
-        return self.cvtype2_to_dtype_with_channels(self.encoding_to_cvtype2(encoding))
+        try:
+            return self.cvtype2_to_dtype_with_channels(self.encoding_to_cvtype2(encoding))
+        except CvBridgeError as e:
+            try:
+                vals = re.split('(.+)C(.+)', encoding)
+                dtype, n_channels = self.numpy_type_to_cvtype[vals[1]], int(vals[2])
+                return dtype, n_channels
+            except Exception as e:
+                raise CvBridgeError(e)
 
     def compressed_imgmsg_to_cv2(self, cmprs_img_msg, desired_encoding = "passthrough"):
         """

@@ -256,7 +256,6 @@ class CvBridge(object):
             # Verify that the supplied encoding is compatible with the type of the OpenCV image
             if self.cvtype_to_name[self.encoding_to_cvtype2(encoding)] != cv_type:
                 raise CvBridgeError("encoding specified as %s, but image has incompatible type %s" % (encoding, cv_type))
-        print(cvim.dtype.byteorder)
         if cvim.dtype.byteorder == '>':
             img_msg.is_bigendian = True
         img_msg.data = cvim.tostring()

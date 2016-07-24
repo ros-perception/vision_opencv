@@ -28,7 +28,7 @@ class TestConversions(unittest.TestCase):
         for w in range(100, 800, 100):
             for h in range(100, 800, 100):
                 for f in fmts:
-                    for channels in ([], 1, 2, 3, 4):
+                    for channels in ([], 1, 2, 3, 4, 5):
                         if channels == []:
                             original = np.uint8(np.random.randint(0, 255, size=(h, w)))
                         else:

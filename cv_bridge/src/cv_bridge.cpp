@@ -38,6 +38,7 @@
 #include <map>
 
 #include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
 
 #include <opencv2/imgproc/imgproc.hpp>
 
@@ -51,6 +52,23 @@
 namespace enc = sensor_msgs::image_encodings;
 
 namespace cv_bridge {
+
+static int depthStrToInt(const std::string depth) {
+  if (depth == "8U") {
+    return 0;
+  } else if (depth == "8S") {
+    return 1;
+  } else if (depth == "16U") {
+    return 2;
+  } else if (depth == "16S") {
+    return 3;
+  } else if (depth == "32S") {
+    return 4;
+  } else if (depth == "32F") {
+    return 5;
+  }
+  return 6;
+}
 
 int getCvType(const std::string& encoding)
 {
@@ -80,26 +98,17 @@ int getCvType(const std::string& encoding)
   if (encoding == enc::YUV422) return CV_8UC2;
 
   // Check all the generic content encodings
-#define CHECK_ENCODING(code)                            \
-  if (encoding == enc::TYPE_##code) return CV_##code    \
-  /***/
-#define CHECK_CHANNEL_TYPE(t)                   \
-  CHECK_ENCODING(t##1);                         \
-  CHECK_ENCODING(t##2);                         \
-  CHECK_ENCODING(t##3);                         \
-  CHECK_ENCODING(t##4);                         \
-  /***/
+  boost::cmatch m;
 
-  CHECK_CHANNEL_TYPE(8UC);
-  CHECK_CHANNEL_TYPE(8SC);
-  CHECK_CHANNEL_TYPE(16UC);
-  CHECK_CHANNEL_TYPE(16SC);
-  CHECK_CHANNEL_TYPE(32SC);
-  CHECK_CHANNEL_TYPE(32FC);
-  CHECK_CHANNEL_TYPE(64FC);
+  if (boost::regex_match(encoding.c_str(), m,
+        boost::regex("(8U|8S|16U|16S|32S|32F|64F)C([0-9]+)"))) {
+    return CV_MAKETYPE(depthStrToInt(m[1].str()), atoi(m[2].str().c_str()));
+  }
 
-#undef CHECK_CHANNEL_TYPE
-#undef CHECK_ENCODING
+  if (boost::regex_match(encoding.c_str(), m,
+        boost::regex("(8U|8S|16U|16S|32S|32F|64F)"))) {
+    return CV_MAKETYPE(depthStrToInt(m[1].str()), 1);
+  }
 
   throw Exception("Unrecognized image encoding [" + encoding + "]");
 }

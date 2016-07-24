@@ -66,6 +66,9 @@ class CvBridge(object):
     def __init__(self):
         import cv2
         self.cvtype_to_name = {}
+        self.cvdepth_to_numpy_depth = {cv2.CV_8U: 'uint8', cv2.CV_8S: 'int8', cv2.CV_16U: 'uint16',
+                                       cv2.CV_16S: 'int16', cv2.CV_32S:'int32', cv2.CV_32F:'float32',
+                                       cv2.CV_64F: 'float64'}
 
         for t in ["8U", "8S", "16U", "16S", "32S", "32F", "64F"]:
             for c in [1, 2, 3, 4]:
@@ -81,9 +84,8 @@ class CvBridge(object):
         return '%sC%d' % (self.numpy_type_to_cvtype[dtype.name], n_channels)
 
     def cvtype2_to_dtype_with_channels(self, cvtype):
-        import re
-        vals = re.split('(.+)C(.+)', self.cvtype_to_name[cvtype])
-        return self.numpy_type_to_cvtype[vals[1]], int(vals[2])
+        from cv_bridge.boost.cv_bridge_boost import CV_MAT_CNWrap, CV_MAT_DEPTHWrap
+        return self.cvdepth_to_numpy_depth[CV_MAT_DEPTHWrap(cvtype)], CV_MAT_CNWrap(cvtype)
 
     def encoding_to_cvtype2(self, encoding):
         from cv_bridge.boost.cv_bridge_boost import getCvType

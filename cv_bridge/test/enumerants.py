@@ -3,10 +3,11 @@ import rostest
 import unittest
 
 import numpy as np
+import cv2
 
 import sensor_msgs.msg
 
-from cv_bridge import CvBridge, CvBridgeError
+from cv_bridge import CvBridge, CvBridgeError, getCvType
 
 class TestEnumerants(unittest.TestCase):
 
@@ -29,6 +30,10 @@ class TestEnumerants(unittest.TestCase):
         # but it can be sent as rgb8 and bgr8
         bridge_.cv2_to_imgmsg(cvim, "rgb8")
         bridge_.cv2_to_imgmsg(cvim, "bgr8")
+
+        self.assertRaises(getCvType("32FC4") == cv2.CV_8UC4)
+        self.assertRaises(getCvType("8UC1") == cv2.CV_8UC1)
+        self.assertRaises(getCvType("8U") == cv2.CV_8UC1)
 
     def test_numpy_types(self):
         import cv2

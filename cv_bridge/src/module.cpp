@@ -76,6 +76,14 @@ cvtColorForDisplayWrap(bp::object obj_in,
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(cvtColorForDisplayWrap_overloads, cvtColorForDisplayWrap, 3, 6)
 
+int CV_MAT_CNWrap(int i) {
+  return CV_MAT_CN(i);
+}
+
+int CV_MAT_DEPTHWrap(int i) {
+  return CV_MAT_DEPTH(i);
+}
+
 BOOST_PYTHON_MODULE(cv_bridge_boost)
 {
   do_numpy_import();
@@ -84,6 +92,8 @@ BOOST_PYTHON_MODULE(cv_bridge_boost)
   // Wrap the function to get encodings as OpenCV types
   boost::python::def("getCvType", cv_bridge::getCvType);
   boost::python::def("cvtColor2", cvtColor2Wrap);
+  boost::python::def("CV_MAT_CNWrap", CV_MAT_CNWrap);
+  boost::python::def("CV_MAT_DEPTHWrap", CV_MAT_DEPTHWrap);
   boost::python::def("cvtColorForDisplay", cvtColorForDisplayWrap,
                      cvtColorForDisplayWrap_overloads(
                        boost::python::args("source", "encoding_in", "encoding_out", "do_dynamic_scaling",

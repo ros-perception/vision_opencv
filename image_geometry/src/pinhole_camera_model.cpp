@@ -294,7 +294,13 @@ void PinholeCameraModel::rectifyImage(const cv::Mat& raw, cv::Mat& rectified, in
       break;
     case CALIBRATED:
       initRectificationMaps();
-      cv::remap(raw, rectified, cache_->reduced_map1, cache_->reduced_map2, interpolation);
+      if (raw.depth() == CV_32F || raw.depth() == CV_64F)
+      {
+        cv::remap(raw, rectified, cache_->reduced_map1, cache_->reduced_map2, interpolation, cv::BORDER_CONSTANT, std::numeric_limits<float>::quiet_NaN());
+      }
+      else {
+        cv::remap(raw, rectified, cache_->reduced_map1, cache_->reduced_map2, interpolation);
+      }
       break;
     default:
       assert(cache_->distortion_state == UNKNOWN);

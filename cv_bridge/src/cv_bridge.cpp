@@ -119,7 +119,9 @@ enum Encoding { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, YUV422, BAYER_RGGB
 
 Encoding getEncoding(const std::string& encoding)
 {
-  if ((encoding == enc::MONO8) || (encoding == enc::MONO16)) return GRAY;
+  int cv_type = getCvType(encoding);
+  if ((cv_type == CV_8UC1) || (cv_type == CV_16UC1)) return GRAY;
+
   if ((encoding == enc::BGR8) || (encoding == enc::BGR16))  return BGR;
   if ((encoding == enc::RGB8) || (encoding == enc::RGB16))  return RGB;
   if ((encoding == enc::BGRA8) || (encoding == enc::BGRA16))  return BGRA;
@@ -201,9 +203,9 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
 {
   Encoding src_encod = getEncoding(src_encoding);
   Encoding dst_encod = getEncoding(dst_encoding);
-  bool is_src_color_format = enc::isColor(src_encoding) || enc::isMono(src_encoding) ||
+  bool is_src_color_format = enc::isColor(src_encoding) || (src_encod == GRAY) ||
                              enc::isBayer(src_encoding) || (src_encoding == enc::YUV422);
-  bool is_dst_color_format = enc::isColor(dst_encoding) || enc::isMono(dst_encoding) ||
+  bool is_dst_color_format = enc::isColor(dst_encoding) || (dst_encod == GRAY) ||
                              enc::isBayer(dst_encoding) || (dst_encoding == enc::YUV422);
   bool is_num_channels_the_same = (enc::numChannels(src_encoding) == enc::numChannels(dst_encoding));
 

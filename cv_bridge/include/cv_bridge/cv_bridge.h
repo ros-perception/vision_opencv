@@ -298,6 +298,14 @@ CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
  */
 int getCvType(const std::string& encoding);
 
+/**
+ * \brief Check the input encoding is MONO. This function is similar to sensor_msgs::image_encodings::isMono,
+ * but can handle "8UC1" and "8UC" encoding representations.
+ *
+ * For example, "mono8" -> true, "8UC1" -> true, "8UC" -> true.
+ */
+bool isMono(const std::string& encoding);
+
 } // namespace cv_bridge
 
 

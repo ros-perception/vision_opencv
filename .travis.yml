@@ -60,5 +60,5 @@ script:
   - catkin config --install
   - catkin build -p1 -j1 --no-status
 after_failure:
-  - find ${HOME}/.ros/test_results -type f -exec echo "== {} ==" \; -exec cat {} \;
-  - for file in ${HOME}/.ros/log/rostest-*; do echo "=== $file ==="; cat $file; done
+  - if [ -e ~/catkin_ws/build/ ]; then catkin_test_results --verbose --all ~/catkin_ws/build ; fi
+  - if [ -e ~/.ros/test_results/ ]; then catkin_test_results --verbose --all ~/.ros/test_results ; fi

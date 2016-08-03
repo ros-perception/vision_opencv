@@ -248,11 +248,17 @@ CvImagePtr cvtColor(const CvImageConstPtr& source,
                     const std::string& encoding);
 
 struct CvtColorForDisplayOptions {
-  CvtColorForDisplayOptions() : do_dynamic_scaling(false), min_image_value(0.0), max_image_value(0.0), colormap(-1) {}
+  CvtColorForDisplayOptions() :
+    do_dynamic_scaling(false),
+    min_image_value(0.0),
+    max_image_value(0.0),
+    colormap(-1),
+    bg_label(-1) {}
   bool do_dynamic_scaling;
   double min_image_value;
   double max_image_value;
   int colormap;
+  int bg_label;
 };
 
 

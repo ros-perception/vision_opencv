@@ -585,7 +585,7 @@ CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
     for (size_t j = 0; j < source->image.rows; ++j) {
       for (size_t i = 0; i < source->image.cols; ++i) {
         int label = source->image.at<int>(j, i);
-        if (label == -1) {  // background label
+        if (label == options.bg_label) {  // background label
           result->image.at<cv::Vec3b>(j, i) = cv::Vec3b(0, 0, 0);
         }
         else

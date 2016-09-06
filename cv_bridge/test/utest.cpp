@@ -105,6 +105,39 @@ TEST(CvBridgeTest, imageMessageStep)
   ASSERT_EQ(200, cv_ptr->image.step[0]);
 }
 
+TEST(CvBridgeTest, imageMessageConversion)
+{
+  sensor_msgs::Image imgmsg;
+  cv_bridge::CvImagePtr cv_ptr;
+  imgmsg.height = 220;
+  imgmsg.width = 200;
+  imgmsg.is_bigendian = false;
+
+  // image with data type float32 and 1 channels
+  imgmsg.encoding = "32FC1";
+  imgmsg.step = imgmsg.width * 32 / 8 * 1;
+  imgmsg.data.resize(imgmsg.height * imgmsg.step);
+  ASSERT_EQ(32 / 8, cv_bridge::getByteDepth(imgmsg.encoding));
+  ASSERT_EQ(1, cv_bridge::getNumChannels(imgmsg.encoding));
+  ASSERT_NO_THROW(cv_ptr = cv_bridge::toCvCopy(imgmsg, imgmsg.encoding));
+  ASSERT_EQ(imgmsg.height, cv_ptr->image.rows);
+  ASSERT_EQ(imgmsg.width, cv_ptr->image.cols);
+  ASSERT_EQ(1, cv_ptr->image.channels());
+  ASSERT_EQ(imgmsg.step, cv_ptr->image.step[0]);
+
+  // image with data type float32 and 10 channels
+  imgmsg.encoding = "32FC10";
+  imgmsg.step = imgmsg.width * 32 / 8 * 10;
+  imgmsg.data.resize(imgmsg.height * imgmsg.step);
+  ASSERT_EQ(32 / 8, cv_bridge::getByteDepth(imgmsg.encoding));
+  ASSERT_EQ(10, cv_bridge::getNumChannels(imgmsg.encoding));
+  ASSERT_NO_THROW(cv_ptr = cv_bridge::toCvCopy(imgmsg, imgmsg.encoding));
+  ASSERT_EQ(imgmsg.height, cv_ptr->image.rows);
+  ASSERT_EQ(imgmsg.width, cv_ptr->image.cols);
+  ASSERT_EQ(10, cv_ptr->image.channels());
+  ASSERT_EQ(imgmsg.step, cv_ptr->image.step[0]);
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);

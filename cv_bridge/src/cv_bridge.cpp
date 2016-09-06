@@ -113,6 +113,46 @@ int getCvType(const std::string& encoding)
   throw Exception("Unrecognized image encoding [" + encoding + "]");
 }
 
+int getByteDepth(const std::string& encoding)
+{
+  try
+  {
+    return enc::bitDepth(encoding) / 8;
+  }
+  catch (std::runtime_error& e)
+  {
+    boost::cmatch m;
+    if (boost::regex_match(encoding.c_str(), m, boost::regex("(8|16|32|64)(U|S|F)C([0-9]+)")))
+    {
+      return atoi(m[1].str().c_str()) / 8;
+    }
+    else
+    {
+      throw Exception(e.what());
+    }
+  }
+}
+
+int getNumChannels(const std::string& encoding)
+{
+  try
+  {
+    return enc::numChannels(encoding);
+  }
+  catch (std::runtime_error& e)
+  {
+    boost::cmatch m;
+    if (boost::regex_match(encoding.c_str(), m, boost::regex("(8U|8S|16U|16S|32S|32F|64F)C([0-9]+)")))
+    {
+      return atoi(m[2].str().c_str());
+    }
+    else
+    {
+      throw Exception(e.what());
+    }
+  }
+}
+
 /// @cond DOXYGEN_IGNORE
 
 enum Encoding { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, YUV422, BAYER_RGGB, BAYER_BGGR, BAYER_GBRG, BAYER_GRBG};
@@ -250,8 +290,8 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
 cv::Mat matFromImage(const sensor_msgs::Image& source)
 {
   int source_type = getCvType(source.encoding);
-  int byte_depth = enc::bitDepth(source.encoding) / 8;
-  int num_channels = enc::numChannels(source.encoding);
+  int byte_depth = getByteDepth(source.encoding);
+  int num_channels = getNumChannels(source.encoding);
 
   if (source.step < source.width * byte_depth * num_channels)
   {

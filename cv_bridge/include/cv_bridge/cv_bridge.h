@@ -304,20 +304,6 @@ CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
  */
 int getCvType(const std::string& encoding);
 
-/**
- * \brief Get the byte depth corresponding to the encoding;
- *
- * For example, "bgr8" -> 1, "32FC1" -> 4, and "32FC10" -> 4.
- */
-int getByteDepth(const std::string& encoding);
-
-/**
- * \brief Get the number of channels corresponding to the encoding.
- *
- * For example, "bgr8" -> 3, "32FC1" -> 1, and "32FC10" -> 10.
- */
-int getNumChannels(const std::string& encoding);
-
 } // namespace cv_bridge
 
 

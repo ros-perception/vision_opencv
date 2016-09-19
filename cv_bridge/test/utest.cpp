@@ -117,8 +117,6 @@ TEST(CvBridgeTest, imageMessageConversion)
   imgmsg.encoding = "32FC1";
   imgmsg.step = imgmsg.width * 32 / 8 * 1;
   imgmsg.data.resize(imgmsg.height * imgmsg.step);
-  ASSERT_EQ(32 / 8, cv_bridge::getByteDepth(imgmsg.encoding));
-  ASSERT_EQ(1, cv_bridge::getNumChannels(imgmsg.encoding));
   ASSERT_NO_THROW(cv_ptr = cv_bridge::toCvCopy(imgmsg, imgmsg.encoding));
   ASSERT_EQ(imgmsg.height, cv_ptr->image.rows);
   ASSERT_EQ(imgmsg.width, cv_ptr->image.cols);
@@ -129,8 +127,6 @@ TEST(CvBridgeTest, imageMessageConversion)
   imgmsg.encoding = "32FC10";
   imgmsg.step = imgmsg.width * 32 / 8 * 10;
   imgmsg.data.resize(imgmsg.height * imgmsg.step);
-  ASSERT_EQ(32 / 8, cv_bridge::getByteDepth(imgmsg.encoding));
-  ASSERT_EQ(10, cv_bridge::getNumChannels(imgmsg.encoding));
   ASSERT_NO_THROW(cv_ptr = cv_bridge::toCvCopy(imgmsg, imgmsg.encoding));
   ASSERT_EQ(imgmsg.height, cv_ptr->image.rows);
   ASSERT_EQ(imgmsg.width, cv_ptr->image.cols);

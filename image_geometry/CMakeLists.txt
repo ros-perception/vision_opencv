@@ -12,7 +12,7 @@ catkin_package(CATKIN_DEPENDS sensor_msgs
 
 catkin_python_setup()
 
-include_directories(SYSTEM ${catkin_INCLUDE_DIRS}
+include_directories(${catkin_INCLUDE_DIRS}
                            ${OpenCV_INCLUDE_DIRS}
 )
 include_directories(include)

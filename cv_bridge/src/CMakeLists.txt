@@ -26,10 +26,7 @@ if(NOT PYTHON_NUMPY_INCLUDE_DIR)
     endif(PYTHON_NUMPY_PROCESS EQUAL 0)
  endif(NOT PYTHON_NUMPY_INCLUDE_DIR)
 
-include_directories(SYSTEM ${PYTHON_INCLUDE_PATH}
-                           ${Boost_INCLUDE_DIRS}
-                           ${PYTHON_NUMPY_INCLUDE_DIR} # cv_bridge module uses NumPy functions
-)
+include_directories(${PYTHON_INCLUDE_PATH} ${Boost_INCLUDE_DIRS} ${PYTHON_NUMPY_INCLUDE_DIR})
 
 if (PYTHON_VERSION_MAJOR VERSION_EQUAL 3)
   add_definitions(-DPYTHON3)

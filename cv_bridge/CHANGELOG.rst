@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.12.2 (2016-09-24)
+-------------------
 * Specify background label when colorizing label image
 * Adjust to arbitrary image channels like 32FC40
   Proper fix for `#141 <https://github.com/ros-perception/vision_opencv/issues/141>`_

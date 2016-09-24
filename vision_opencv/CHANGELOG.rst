@@ -2,6 +2,9 @@
 Changelog for package vision_opencv
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.11.13 (2016-07-11)
 --------------------
 * move opencv_apps to its own repo

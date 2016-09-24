@@ -2,6 +2,14 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Specify background label when colorizing label image
+* Adjust to arbitrary image channels like 32FC40
+  Proper fix for `#141 <https://github.com/ros-perception/vision_opencv/issues/141>`_
+* Remove unexpectedly included print statement
+* Contributors: Kentaro Wada, Vincent Rabaud
+
 1.11.13 (2016-07-11)
 --------------------
 * split the conversion tests out of enumerants

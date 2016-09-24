@@ -2,6 +2,15 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix "stdlib.h: No such file or directory" errors in GCC-6
+  Including '-isystem /usr/include' breaks building with GCC-6.
+  See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70129
+* remap with nan border if mat value is float or double
+* remap with nan border if mat value is float or double
+* Contributors: Hodorgasm, YuOhara
+
 1.11.13 (2016-07-11)
 --------------------
 * Add fullResolution getter to PinholeCameraModel

@@ -2,8 +2,8 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.14 (2016-09-24)
+--------------------
 * Fix "stdlib.h: No such file or directory" errors in GCC-6
   Including '-isystem /usr/include' breaks building with GCC-6.
   See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70129

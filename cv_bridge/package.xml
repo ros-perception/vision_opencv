@@ -32,6 +32,7 @@
   <build_export_depend>sensor_msgs</build_export_depend>
 
   <test_depend>rostest</test_depend>
+  <test_depend>python-numpy</test_depend>
 
   <doc_depend>dvipng</doc_depend>
 </package>

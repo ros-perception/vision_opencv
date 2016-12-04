@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.12.3 (2016-12-04)
+-------------------
 * Use api in sensor_msgs to get byte_depth and num channels
 * Implement cpp conversion of N channel image
   This is cpp version of https://github.com/ros-perception/vision_opencv/pull/141,

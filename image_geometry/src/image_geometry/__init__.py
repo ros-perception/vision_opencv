@@ -1,1 +1,2 @@
-from cameramodels import PinholeCameraModel, StereoCameraModel
+from __future__ import absolute_import
+from .cameramodels import PinholeCameraModel, StereoCameraModel

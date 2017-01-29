@@ -2,8 +2,8 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.12.4 (2017-01-29)
+-------------------
 * Import using __future_\_ for python 3 compatibility.
 * Contributors: Hans Gaiser
 

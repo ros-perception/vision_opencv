@@ -2,6 +2,25 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* properly find Boost Python 2 or 3
+  This fixes `#158 <https://github.com/ros-perception/vision_opencv/issues/158>`_
+* Fill black color to depth nan region
+* address gcc6 build error in cv_bridge and tune
+  With gcc6, compiling fails with `stdlib.h: No such file or directory`,
+  as including '-isystem /usr/include' breaks with gcc6, cf.,
+  https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70129
+  This commit addresses this issue for cv_bridge in the same way
+  it was done in the commit ead421b8 [1] for image_geometry.
+  This issue was also addressed in various other ROS packages.
+  A list of related commits and pull requests is at:
+  https://github.com/ros/rosdistro/issues/12783
+  [1] https://github.com/ros-perception/vision_opencv/commit/ead421b85eeb750cbf7988657015296ed6789bcf
+  Signed-off-by: Lukas Bulwahn <lukas.bulwahn@oss.bmw-carit.de>
+* cv_bridge: Add missing test_depend on numpy
+* Contributors: Kentaro Wada, Lukas Bulwahn, Maarten de Vries, Vincent Rabaud
+
 1.11.14 (2016-09-24)
 --------------------
 * Specify background label when colorizing label image

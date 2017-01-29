@@ -2,6 +2,11 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Import using __future_\_ for python 3 compatibility.
+* Contributors: Hans Gaiser
+
 1.11.14 (2016-09-24)
 --------------------
 * Fix "stdlib.h: No such file or directory" errors in GCC-6

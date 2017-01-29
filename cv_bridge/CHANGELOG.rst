@@ -2,6 +2,12 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* properly find Boost Python 2 or 3
+  This fixes `#158 <https://github.com/ros-perception/vision_opencv/issues/158>`_
+* Contributors: Vincent Rabaud
+
 1.12.3 (2016-12-04)
 -------------------
 * Use api in sensor_msgs to get byte_depth and num channels

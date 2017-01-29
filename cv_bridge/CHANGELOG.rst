@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.15 (2017-01-29)
+--------------------
 * properly find Boost Python 2 or 3
   This fixes `#158 <https://github.com/ros-perception/vision_opencv/issues/158>`_
 * Fill black color to depth nan region

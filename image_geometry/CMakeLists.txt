@@ -33,6 +33,6 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 # add tests
-if(CATKIN_ENABLE_TESTING)
+if(NOT APPLE AND CATKIN_ENABLE_TESTING)
   add_subdirectory(test)
 endif()

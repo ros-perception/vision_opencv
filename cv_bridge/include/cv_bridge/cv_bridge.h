@@ -300,7 +300,7 @@ CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
 /**
  * \brief Get the OpenCV type enum corresponding to the encoding.
  *
- * For example, "bgr8" -> CV_8UC3.
+ * For example, "bgr8" -> CV_8UC3, "32FC1" -> CV_32FC1, and "32FC10" -> CV_32FC10.
  */
 int getCvType(const std::string& encoding);
 

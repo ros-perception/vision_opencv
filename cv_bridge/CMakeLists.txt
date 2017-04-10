@@ -20,6 +20,7 @@ catkin_package(
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS rosconsole sensor_msgs
   DEPENDS OpenCV
+  CFG_EXTRAS cv_bridge-extras.cmake
 )
 
 catkin_python_setup()

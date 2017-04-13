@@ -404,7 +404,7 @@ namespace message_operations {
 template<> struct Printer<cv_bridge::CvImage>
 {
   template<typename Stream>
-  static void stream(Stream& s, const std::string& indent, const cv_bridge::CvImage& m)
+  static void stream(Stream&, const std::string&, const cv_bridge::CvImage&)
   {
     /// @todo Replicate printing for sensor_msgs::Image
   }

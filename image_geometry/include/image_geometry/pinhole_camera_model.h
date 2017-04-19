@@ -22,7 +22,7 @@ public:
 class PinholeCameraModel
 {
 public:
-  
+
   PinholeCameraModel();
 
   PinholeCameraModel(const PinholeCameraModel& other);
@@ -270,7 +270,7 @@ protected:
 
   // Use PIMPL here so we can change internals in patch updates if needed
   struct Cache;
-  boost::shared_ptr<Cache> cache_; // Holds cached data for internal use
+  std::shared_ptr<Cache> cache_; // Holds cached data for internal use
 
   void initRectificationMaps() const;
 

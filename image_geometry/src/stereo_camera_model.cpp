@@ -24,8 +24,8 @@ StereoCameraModel& StereoCameraModel::operator=(const StereoCameraModel& other)
   return *this;
 }
 
-bool StereoCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& left,
-                                       const sensor_msgs::CameraInfo& right)
+bool StereoCameraModel::fromCameraInfo(const sensor_msgs::msg::CameraInfo& left,
+                                       const sensor_msgs::msg::CameraInfo& right)
 {
   bool changed_left  = left_.fromCameraInfo(left);
   bool changed_right = right_.fromCameraInfo(right);
@@ -44,8 +44,8 @@ bool StereoCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& left,
   return changed;
 }
 
-bool StereoCameraModel::fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& left,
-                                       const sensor_msgs::CameraInfoConstPtr& right)
+bool StereoCameraModel::fromCameraInfo(const sensor_msgs::msg::CameraInfo::ConstSharedPtr& left,
+                                       const sensor_msgs::msg::CameraInfo::ConstSharedPtr& right)
 {
   return fromCameraInfo(*left, *right);
 }

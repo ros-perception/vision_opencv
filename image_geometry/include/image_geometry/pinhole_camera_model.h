@@ -1,7 +1,7 @@
 #ifndef IMAGE_GEOMETRY_PINHOLE_CAMERA_MODEL_H
 #define IMAGE_GEOMETRY_PINHOLE_CAMERA_MODEL_H
 
-#include <sensor_msgs/CameraInfo.h>
+#include <sensor_msgs/msg/camera_info.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
@@ -33,12 +33,12 @@ public:
   /**
    * \brief Set the camera parameters from the sensor_msgs/CameraInfo message.
    */
-  bool fromCameraInfo(const sensor_msgs::CameraInfo& msg);
+  bool fromCameraInfo(const sensor_msgs::msg::CameraInfo& msg);
 
   /**
    * \brief Set the camera parameters from the sensor_msgs/CameraInfo message.
    */
-  bool fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& msg);
+  bool fromCameraInfo(const sensor_msgs::msg::CameraInfo::ConstSharedPtr& msg);
 
   /**
    * \brief Get the name of the camera coordinate frame in tf.
@@ -48,7 +48,7 @@ public:
   /**
    * \brief Get the time stamp associated with this camera model.
    */
-  ros::Time stamp() const;
+  builtin_interfaces::msg::Time stamp() const;
 
   /**
    * \brief The resolution at which the camera was calibrated.
@@ -143,7 +143,7 @@ public:
   /**
    * \brief Returns the camera info message held internally
    */
-  const sensor_msgs::CameraInfo& cameraInfo() const;
+  const sensor_msgs::msg::CameraInfo& cameraInfo() const;
 
   /**
    * \brief Returns the original camera matrix.
@@ -261,7 +261,7 @@ public:
   bool initialized() const { return (bool)cache_; }
 
 protected:
-  sensor_msgs::CameraInfo cam_info_;
+  sensor_msgs::msg::CameraInfo cam_info_;
   cv::Mat_<double> D_;           // Unaffected by binning, ROI
   cv::Matx33d R_;           // Unaffected by binning, ROI
   cv::Matx33d K_;           // Describe current image (includes binning, ROI)
@@ -290,13 +290,13 @@ inline std::string PinholeCameraModel::tfFrame() const
   return cam_info_.header.frame_id;
 }
 
-inline ros::Time PinholeCameraModel::stamp() const
+inline builtin_interfaces::msg::Time PinholeCameraModel::stamp() const
 {
   assert( initialized() );
   return cam_info_.header.stamp;
 }
 
-inline const sensor_msgs::CameraInfo& PinholeCameraModel::cameraInfo() const  { return cam_info_; }
+inline const sensor_msgs::msg::CameraInfo& PinholeCameraModel::cameraInfo() const  { return cam_info_; }
 inline const cv::Matx33d& PinholeCameraModel::intrinsicMatrix() const  { return K_; }
 inline const cv::Mat_<double>& PinholeCameraModel::distortionCoeffs() const { return D_; }
 inline const cv::Matx33d& PinholeCameraModel::rotationMatrix() const   { return R_; }

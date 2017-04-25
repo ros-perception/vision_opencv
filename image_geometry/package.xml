@@ -13,17 +13,21 @@
   <url>http://www.ros.org/wiki/image_geometry</url>
 
   <export>
+    <build_type>ament_cmake</build_type>
     <rosdoc config="rosdoc.yaml" />
   </export>
 
-  <buildtool_depend version_gte="0.5.68">catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <build_depend>opencv3</build_depend>
-  <build_depend>sensor_msgs</build_depend>
+  <depend>opencv3</depend>
+  <depend>sensor_msgs</depend>
 
-  <exec_depend>opencv3</exec_depend>
-  <build_export_depend>sensor_msgs</build_export_depend>
+  <build_depend>boost</build_depend>
+
+  <test_depend>ament_cmake_nose</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
 
   <doc_depend>dvipng</doc_depend>
   <doc_depend>texlive-latex-extra</doc_depend>
+
 </package>

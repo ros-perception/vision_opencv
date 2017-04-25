@@ -21,14 +21,14 @@ public:
   /**
    * \brief Set the camera parameters from the sensor_msgs/CameraInfo messages.
    */
-  bool fromCameraInfo(const sensor_msgs::CameraInfo& left,
-                      const sensor_msgs::CameraInfo& right);
+  bool fromCameraInfo(const sensor_msgs::msg::CameraInfo& left,
+                      const sensor_msgs::msg::CameraInfo& right);
 
   /**
    * \brief Set the camera parameters from the sensor_msgs/CameraInfo messages.
    */
-  bool fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& left,
-                      const sensor_msgs::CameraInfoConstPtr& right);
+  bool fromCameraInfo(const sensor_msgs::msg::CameraInfo::ConstSharedPtr& left,
+                      const sensor_msgs::msg::CameraInfo::ConstSharedPtr& right);
 
   /**
    * \brief Get the left monocular camera model.

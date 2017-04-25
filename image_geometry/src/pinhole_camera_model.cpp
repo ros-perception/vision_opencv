@@ -1,5 +1,5 @@
 #include "image_geometry/pinhole_camera_model.h"
-#include <sensor_msgs/distortion_models.h>
+#include <sensor_msgs/distortion_models.hpp>
 #ifdef BOOST_SHARED_PTR_HPP_INCLUDED
 #include <boost/make_shared.hpp>
 #endif
@@ -33,6 +33,23 @@ struct PinholeCameraModel::Cache
 
 PinholeCameraModel::PinholeCameraModel()
 {
+  cam_info_.header.stamp.sec = 0;
+  cam_info_.header.stamp.nanosec = 0;
+  cam_info_.header.frame_id = "";
+  cam_info_.height = 0;
+  cam_info_.width = 0;
+  cam_info_.distortion_model = "";
+  std::fill(cam_info_.d.begin(), cam_info_.d.end(), 0);
+  std::fill(cam_info_.k.begin(), cam_info_.k.end(), 0);
+  std::fill(cam_info_.r.begin(), cam_info_.r.end(), 0);
+  std::fill(cam_info_.p.begin(), cam_info_.p.end(), 0);
+  cam_info_.binning_x = 0;
+  cam_info_.binning_y = 0;
+  cam_info_.roi.x_offset = 0;
+  cam_info_.roi.y_offset = 0;
+  cam_info_.roi.height = 0;
+  cam_info_.roi.width = 0;
+  cam_info_.roi.do_rectify = false;
 }
 
 PinholeCameraModel& PinholeCameraModel::operator=(const PinholeCameraModel& other)
@@ -58,11 +75,11 @@ bool update(const T& new_val, T& my_val)
   return true;
 }
 
-// For std::vector
+// For std::array, std::vector
 template<typename MatT>
 bool updateMat(const MatT& new_mat, MatT& my_mat, cv::Mat_<double>& cv_mat, int rows, int cols)
 {
-  if ((my_mat == new_mat) && (my_mat.size() == cv_mat.rows*cv_mat.cols))
+  if ((my_mat == new_mat) && (my_mat.size() == static_cast<unsigned int>(cv_mat.rows*cv_mat.cols)))
     return false;
   my_mat = new_mat;
   // D may be empty if camera is uncalibrated or distortion model is non-standard
@@ -81,7 +98,7 @@ bool updateMat(const MatT& new_mat, MatT& my_mat, MatU& cv_mat)
   return true;
 }
 
-bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
+bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::msg::CameraInfo& msg)
 {
   // Create our repository of cached data (rectification maps, etc.)
   if (!cache_)
@@ -96,7 +113,7 @@ bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
   uint32_t binning_y = msg.binning_y ? msg.binning_y : 1;
 
   // ROI all zeros is considered the same as full resolution.
-  sensor_msgs::RegionOfInterest roi = msg.roi;
+  sensor_msgs::msg::RegionOfInterest roi = msg.roi;
   if (roi.x_offset == 0 && roi.y_offset == 0 && roi.width == 0 && roi.height == 0) {
     roi.width  = msg.width;
     roi.height = msg.height;
@@ -111,10 +128,10 @@ bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
   full_dirty |= update(msg.height, cam_info_.height);
   full_dirty |= update(msg.width,  cam_info_.width);
   full_dirty |= update(msg.distortion_model, cam_info_.distortion_model);
-  full_dirty |= updateMat(msg.D, cam_info_.D, D_, 1, msg.D.size());
-  full_dirty |= updateMat(msg.K, cam_info_.K, K_full_);
-  full_dirty |= updateMat(msg.R, cam_info_.R, R_);
-  full_dirty |= updateMat(msg.P, cam_info_.P, P_full_);
+  full_dirty |= updateMat(msg.d, cam_info_.d, D_, 1, static_cast<int>(msg.d.size()));
+  full_dirty |= updateMat(msg.k, cam_info_.k, K_full_);
+  full_dirty |= updateMat(msg.r, cam_info_.r, R_);
+  full_dirty |= updateMat(msg.p, cam_info_.p, P_full_);
   full_dirty |= update(binning_x, cam_info_.binning_x);
   full_dirty |= update(binning_y, cam_info_.binning_y);
 
@@ -135,9 +152,9 @@ bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
       cam_info_.distortion_model == sensor_msgs::distortion_models::RATIONAL_POLYNOMIAL) {
     // If any distortion coefficient is non-zero, then need to apply the distortion
     cache_->distortion_state = NONE;
-    for (size_t i = 0; i < cam_info_.D.size(); ++i)
+    for (size_t i = 0; i < cam_info_.d.size(); ++i)
     {
-      if (cam_info_.D[i] != 0)
+      if (cam_info_.d[i] != 0)
       {
         cache_->distortion_state = CALIBRATED;
         break;
@@ -191,7 +208,7 @@ bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
   return reduced_dirty;
 }
 
-bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& msg)
+bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::msg::CameraInfo::ConstSharedPtr& msg)
 {
   return fromCameraInfo(*msg);
 }
@@ -316,6 +333,9 @@ void PinholeCameraModel::rectifyImage(const cv::Mat& raw, cv::Mat& rectified, in
 
 void PinholeCameraModel::unrectifyImage(const cv::Mat& rectified, cv::Mat& raw, int interpolation) const
 {
+  (void)rectified;
+  (void)raw;
+  (void)interpolation;
   assert( initialized() );
 
   throw Exception("PinholeCameraModel::unrectifyImage is unimplemented.");
@@ -381,10 +401,10 @@ cv::Rect PinholeCameraModel::rectifyRoi(const cv::Rect& roi_raw) const
                                                  roi_raw.y + roi_raw.height));
   cv::Point2d rect_bl = rectifyPoint(cv::Point2d(roi_raw.x, roi_raw.y + roi_raw.height));
 
-  cv::Point roi_tl(std::ceil (std::min(rect_tl.x, rect_bl.x)),
-                   std::ceil (std::min(rect_tl.y, rect_tr.y)));
-  cv::Point roi_br(std::floor(std::max(rect_tr.x, rect_br.x)),
-                   std::floor(std::max(rect_bl.y, rect_br.y)));
+  cv::Point roi_tl(static_cast<uint32_t>(std::ceil (std::min(rect_tl.x, rect_bl.x))),
+                   static_cast<uint32_t>(std::ceil (std::min(rect_tl.y, rect_tr.y))));
+  cv::Point roi_br(static_cast<uint32_t>(std::floor(std::max(rect_tr.x, rect_br.x))),
+                   static_cast<uint32_t>(std::floor(std::max(rect_bl.y, rect_br.y))));
 
   return cv::Rect(roi_tl.x, roi_tl.y, roi_br.x - roi_tl.x, roi_br.y - roi_tl.y);
 }
@@ -402,10 +422,10 @@ cv::Rect PinholeCameraModel::unrectifyRoi(const cv::Rect& roi_rect) const
                                                   roi_rect.y + roi_rect.height));
   cv::Point2d raw_bl = unrectifyPoint(cv::Point2d(roi_rect.x, roi_rect.y + roi_rect.height));
 
-  cv::Point roi_tl(std::floor(std::min(raw_tl.x, raw_bl.x)),
-                   std::floor(std::min(raw_tl.y, raw_tr.y)));
-  cv::Point roi_br(std::ceil (std::max(raw_tr.x, raw_br.x)),
-                   std::ceil (std::max(raw_bl.y, raw_br.y)));
+  cv::Point roi_tl(static_cast<uint32_t>(std::floor(std::min(raw_tl.x, raw_bl.x))),
+                   static_cast<uint32_t>(std::floor(std::min(raw_tl.y, raw_tr.y))));
+  cv::Point roi_br(static_cast<uint32_t>(std::ceil (std::max(raw_tr.x, raw_br.x))),
+                   static_cast<uint32_t>(std::ceil (std::max(raw_bl.y, raw_br.y))));
 
   return cv::Rect(roi_tl.x, roi_tl.y, roi_br.x - roi_tl.x, roi_br.y - roi_tl.y);
 }

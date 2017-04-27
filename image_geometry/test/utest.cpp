@@ -188,7 +188,7 @@ TEST_F(PinholeTest, rectifyIfCalibrated)
   // the test again.
   // Then zero out all the distortion coefficients and test
   // that the output image is the same as the input.
-  cv::Mat distorted_image(cv::Size(cam_info_.width, cam_info_.height), CV_8UC3);
+  cv::Mat distorted_image(cv::Size(cam_info_.width, cam_info_.height), CV_8UC3, cv::Scalar(0, 0, 0));
 
   // draw a grid
   const cv::Scalar color = cv::Scalar(255, 255, 255);

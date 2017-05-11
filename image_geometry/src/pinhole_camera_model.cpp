@@ -354,7 +354,8 @@ cv::Point2d PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect) const
   cv::Point3d ray = projectPixelTo3dRay(uv_rect);
 
   // Project the ray on the image
-  cv::Mat r_vec, t_vec = cv::Mat_<double>::zeros(3, 1);
+  cv::Mat r_vec = cv::Mat_<double>::zeros(3, 1);
+  cv::Mat t_vec = cv::Mat_<double>::zeros(3, 1);
   cv::Rodrigues(R_.t(), r_vec);
   std::vector<cv::Point2d> image_point;
   cv::projectPoints(std::vector<cv::Point3d>(1, ray), r_vec, t_vec, K_, D_, image_point);

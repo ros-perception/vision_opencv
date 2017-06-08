@@ -12,6 +12,8 @@ catkin_package(CATKIN_DEPENDS sensor_msgs
 
 catkin_python_setup()
 
+add_compile_options(-std=c++11)
+
 include_directories(${catkin_INCLUDE_DIRS}
                            ${OpenCV_INCLUDE_DIRS}
 )

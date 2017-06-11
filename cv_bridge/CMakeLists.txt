@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 project(cv_bridge)
 
+set("OpenCV_DIR" "/usr/local/share/OpenCV")
+set(CUDA_USE_STATIC_CUDA_RUNTIME OFF CACHE "" INTERNAL)
+
 find_package(catkin REQUIRED COMPONENTS rosconsole sensor_msgs)
 
 if(NOT ANDROID)

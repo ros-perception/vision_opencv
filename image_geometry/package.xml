@@ -19,7 +19,7 @@
 
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
 
-  <depend>opencv3</depend>
+  <depend>libopencv-dev</depend>
   <depend>sensor_msgs</depend>
 
   <test_depend>ament_cmake_nose</test_depend>

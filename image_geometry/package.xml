@@ -18,10 +18,10 @@
 
   <buildtool_depend version_gte="0.5.68">catkin</buildtool_depend>
 
-  <build_depend>opencv3</build_depend>
+  <build_depend>opencv3_catkin</build_depend>
   <build_depend>sensor_msgs</build_depend>
 
-  <exec_depend>opencv3</exec_depend>
+  <exec_depend>opencv3_catkin</exec_depend>
   <build_export_depend>sensor_msgs</build_export_depend>
 
   <doc_depend>dvipng</doc_depend>

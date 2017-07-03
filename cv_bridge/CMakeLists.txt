@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(cv_bridge)
 
+add_definitions(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS rosconsole sensor_msgs)
 
 if(NOT ANDROID)
@@ -31,7 +32,7 @@ if(NOT ANDROID)
 add_subdirectory(python)
 endif()
 add_subdirectory(src)
-if(CATKIN_ENABLE_TESTING)
+if(NOT APPLE AND CATKIN_ENABLE_TESTING)
   add_subdirectory(test)
 endif()
 

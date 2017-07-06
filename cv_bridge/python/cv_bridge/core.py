@@ -173,7 +173,8 @@ class CvBridge(object):
         if img_msg.is_bigendian == (sys.byteorder == 'little'):
             im = im.byteswap().newbyteorder()
 
-        if desired_encoding == "passthrough":
+        if desired_encoding == "passthrough" \
+                or img_msg.encoding == desired_encoding:
             return im
 
         from cv_bridge.boost.cv_bridge_boost import cvtColor2

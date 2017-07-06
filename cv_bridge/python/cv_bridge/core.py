@@ -180,6 +180,10 @@ class CvBridge(object):
 
         try:
             res = cvtColor2(im, img_msg.encoding, desired_encoding)
+            if cv2.__version__.startswith('2.') and res.ndim == 3 and res.shape[2] == 1:
+                # this is caused by pyopencv_from and must be fixed in OpenCV3
+                # https://github.com/ros-perception/vision_opencv/issues/177
+                res = np.squeeze(res, 2)
         except RuntimeError as e:
             raise CvBridgeError(e)
 

@@ -297,6 +297,27 @@ cv::Mat matFromImage(const sensor_msgs::Image& source)
   return mat_swap;
 }
 
+// Internal, used by toCvCopyImpl
+bool isSameEncoding(const std::string& encoding_a, const std::string& encoding_b)
+{
+  std::vector<std::string> mono8_encodings;
+  mono8_encodings.push_back("mono8");
+  mono8_encodings.push_back("8UC");
+  mono8_encodings.push_back("8UC1");
+  std::vector<std::string> mono16_encodings;
+  mono16_encodings.push_back("mono16");
+  mono16_encodings.push_back("16UC");
+  mono16_encodings.push_back("16UC1");
+  if (std::find(mono8_encodings.begin(), mono8_encodings.end(), encoding_a) != mono8_encodings.end() &&
+      std::find(mono8_encodings.begin(), mono8_encodings.end(), encoding_b) != mono8_encodings.end())
+    return true;
+  else if (std::find(mono16_encodings.begin(), mono16_encodings.end(), encoding_a) != mono16_encodings.end() &&
+           std::find(mono16_encodings.begin(), mono16_encodings.end(), encoding_b) != mono16_encodings.end())
+    return true;
+  else
+    return encoding_a == encoding_b;
+}
+
 // Internal, used by toCvCopy and cvtColor
 CvImagePtr toCvCopyImpl(const cv::Mat& source,
                         const std_msgs::Header& src_header,
@@ -308,9 +329,9 @@ CvImagePtr toCvCopyImpl(const cv::Mat& source,
   ptr->header = src_header;
   
   // Copy to new buffer if same encoding requested
-  if (dst_encoding.empty() || dst_encoding == src_encoding)
+  if (dst_encoding.empty() || isSameEncoding(src_encoding, dst_encoding))
   {
-    ptr->encoding = src_encoding;
+    ptr->encoding = dst_encoding;
     source.copyTo(ptr->image);
   }
   else

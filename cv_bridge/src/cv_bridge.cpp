@@ -197,13 +197,20 @@ std::map<std::pair<Encoding, Encoding>, std::vector<int> > getConversionCodes() 
   return res;
 }
 
+const bool isMono(const std::string encoding)
+{
+  return encoding == enc::MONO8 || encoding == enc::MONO16 ||
+         encoding == "8UC" || encoding == enc::TYPE_8UC1 ||
+         encoding == "16UC" || encoding == enc::TYPE_16UC1;
+}
+
 const std::vector<int> getConversionCode(std::string src_encoding, std::string dst_encoding)
 {
   Encoding src_encod = getEncoding(src_encoding);
   Encoding dst_encod = getEncoding(dst_encoding);
-  bool is_src_color_format = enc::isColor(src_encoding) || enc::isMono(src_encoding) ||
+  bool is_src_color_format = enc::isColor(src_encoding) || isMono(src_encoding) ||
                              enc::isBayer(src_encoding) || (src_encoding == enc::YUV422);
-  bool is_dst_color_format = enc::isColor(dst_encoding) || enc::isMono(dst_encoding) ||
+  bool is_dst_color_format = enc::isColor(dst_encoding) || isMono(dst_encoding) ||
                              enc::isBayer(dst_encoding) || (dst_encoding == enc::YUV422);
   bool is_num_channels_the_same = (enc::numChannels(src_encoding) == enc::numChannels(dst_encoding));
 

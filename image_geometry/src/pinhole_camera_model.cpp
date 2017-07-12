@@ -84,7 +84,7 @@ bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
 {
   // Create our repository of cached data (rectification maps, etc.)
   if (!cache_)
-    cache_ = std::make_shared<Cache>();
+    cache_ = boost::shared_ptr<Cache>();
 
   // Binning = 0 is considered the same as binning = 1 (no binning).
   uint32_t binning_x = msg.binning_x ? msg.binning_x : 1;

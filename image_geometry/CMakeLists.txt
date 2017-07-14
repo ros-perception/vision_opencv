@@ -12,10 +12,8 @@ catkin_package(CATKIN_DEPENDS sensor_msgs
 
 catkin_python_setup()
 
-include_directories(${catkin_INCLUDE_DIRS}
-                           ${OpenCV_INCLUDE_DIRS}
-)
 include_directories(include)
+include_directories(${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
 # add a library
 add_library(${PROJECT_NAME} src/pinhole_camera_model.cpp src/stereo_camera_model.cpp)

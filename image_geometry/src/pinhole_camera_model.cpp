@@ -383,18 +383,9 @@ cv::Point2d PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect) const
   cv::Mat r_vec, t_vec = cv::Mat_<double>::zeros(3, 1);
   cv::Rodrigues(R_.t(), r_vec);
   std::vector<cv::Point2d> image_point;
+  cv::projectPoints(std::vector<cv::Point3d>(1, ray), r_vec, t_vec, K_, D_, image_point);
 
-  // passing std::vector<..> to / from cv::projectPoints
-  // seems to not work on Windows in Debug mode with VS 2015
-  cv::Mat mat_in(1, 3, CV_64F);
-  mat_in.at<double>(0, 0) = ray.x;
-  mat_in.at<double>(0, 1) = ray.y;
-  mat_in.at<double>(0, 2) = ray.z;
-  cv::Mat mat_out(1, 1, CV_64F);
-
-  cv::projectPoints(mat_in, r_vec, t_vec, K_, D_, mat_out);
-
-  return cv::Point2d(mat_out.at<double>(0, 0), mat_out.at<double>(0, 1));
+  return image_point[0];
 }
 
 cv::Rect PinholeCameraModel::rectifyRoi(const cv::Rect& roi_raw) const

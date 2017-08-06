@@ -34,6 +34,8 @@
 
 #include "module.hpp"
 
+using namespace cv;
+
 // These are sucky, sketchy versions of the real things in OpenCV Python,
 // inferior in every way.
 
@@ -50,6 +52,31 @@ static int failmsg(const char *fmt, ...)
   return 0;
 }
 
+static PyObject* opencv_error = 0;
+
+class PyAllowThreads
+{
+public:
+    PyAllowThreads() : _state(PyEval_SaveThread()) {}
+    ~PyAllowThreads()
+    {
+        PyEval_RestoreThread(_state);
+    }
+private:
+    PyThreadState* _state;
+};
+
+#define ERRWRAP2(expr) \
+try \
+{ \
+    PyAllowThreads allowThreads; \
+    expr; \
+} \
+catch (const cv::Exception &e) \
+{ \
+    PyErr_SetString(opencv_error, e.what()); \
+    return 0; \
+}
 
 // Taken from http://stackoverflow.com/questions/19136944/call-c-opencv-functions-from-python-send-a-cv-mat-to-c-dll-which-is-usi
 
@@ -219,27 +246,17 @@ int convert_to_CvMat2(const PyObject* o, cv::Mat& m)
     return true;
 }
 
-PyObject* pyopencv_from(const cv::Mat& mat)
+PyObject* pyopencv_from(const Mat& m)
 {
-    npy_intp dims[] = {mat.rows, mat.cols, mat.channels()};
-
-    PyObject *res = 0 ;
-    if (mat.depth() == CV_8U)
-        res = PyArray_SimpleNew(3, dims, NPY_UBYTE);
-    else if (mat.depth() == CV_8S)
-        res = PyArray_SimpleNew(3, dims, NPY_BYTE);
-    else if (mat.depth() == CV_16S)
-        res = PyArray_SimpleNew(3, dims, NPY_SHORT);
-    else if (mat.depth() == CV_16U)
-        res = PyArray_SimpleNew(3, dims, NPY_USHORT);
-    else if (mat.depth() == CV_32S)
-        res = PyArray_SimpleNew(3, dims, NPY_INT);
-    else if (mat.depth() == CV_32F)
-        res = PyArray_SimpleNew(3, dims, NPY_CFLOAT);
-    else if (mat.depth() == CV_64F)
-        res = PyArray_SimpleNew(3, dims, NPY_CDOUBLE);
-
-    std::memcpy(PyArray_DATA((PyArrayObject*)res), mat.data, mat.step*mat.rows);
-
-    return res;
+    if( !m.data )
+        Py_RETURN_NONE;
+    Mat temp, *p = (Mat*)&m;
+    if(!p->refcount || p->allocator != &g_numpyAllocator)
+    {
+        temp.allocator = &g_numpyAllocator;
+        ERRWRAP2(m.copyTo(temp));
+        p = &temp;
+    }
+    p->addref();
+    return pyObjectFromRefcount(p->refcount);
 }

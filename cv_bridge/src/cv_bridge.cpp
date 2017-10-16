@@ -36,9 +36,9 @@
 #include "boost/endian/conversion.hpp"
 
 #include <map>
+#include <sstream>
 
 #include <boost/make_shared.hpp>
-#include <boost/regex.hpp>
 
 #include <opencv2/imgproc/imgproc.hpp>
 
@@ -98,16 +98,48 @@ int getCvType(const std::string& encoding)
   if (encoding == enc::YUV422) return CV_8UC2;
 
   // Check all the generic content encodings
-  boost::cmatch m;
-
-  if (boost::regex_match(encoding.c_str(), m,
-        boost::regex("(8U|8S|16U|16S|32S|32F|64F)C([0-9]+)"))) {
-    return CV_MAKETYPE(depthStrToInt(m[1].str()), atoi(m[2].str().c_str()));
+  int depthInt = -1;
+  size_t size_size;
+  if (encoding.substr(0, 2) == "8U") {
+    depthInt = depthStrToInt("8U");
+    size_size = 2;
+  } else if (encoding.substr(0, 2) == "8S") {
+    depthInt = depthStrToInt("8S");
+    size_size = 2;
+  } else if (encoding.substr(0, 3) == "16U") {
+    depthInt = depthStrToInt("16U");
+    size_size = 3;
+  } else if (encoding.substr(0, 3) == "16S") {
+    depthInt = depthStrToInt("16S");
+    size_size = 3;
+  } else if (encoding.substr(0, 3) == "32S") {
+    depthInt = depthStrToInt("32S");
+    size_size = 3;
+  } else if (encoding.substr(0, 3) == "32U") {
+    depthInt = depthStrToInt("32U");
+    size_size = 3;
+  } else if (encoding.substr(0, 3) == "32F") {
+    depthInt = depthStrToInt("32F");
+    size_size = 3;
+  } else if (encoding.substr(0, 3) == "64F") {
+    depthInt = depthStrToInt("64F");
+    size_size = 3;
   }
 
-  if (boost::regex_match(encoding.c_str(), m,
-        boost::regex("(8U|8S|16U|16S|32S|32F|64F)"))) {
-    return CV_MAKETYPE(depthStrToInt(m[1].str()), 1);
+  if (depthInt != -1) {
+    if (encoding.size() == size_size) {
+      return CV_MAKETYPE(depthInt, 1);
+    }
+
+    if (encoding.size() > size_size + 1
+            && encoding[size_size] == 'C'
+            && encoding[size_size + 1] != '-') {
+      std::stringstream channel_stream (encoding.substr(size_size + 1));
+      unsigned long long channels;
+      if (channel_stream >> channels) {
+        return CV_MAKETYPE(depthInt, channels);
+      }
+    }
   }
 
   throw Exception("Unrecognized image encoding [" + encoding + "]");

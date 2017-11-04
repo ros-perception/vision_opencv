@@ -2,6 +2,20 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Silence warnings about un-used variables
+* Fixes `#177 <https://github.com/ros-perception/vision_opencv/issues/177>`_
+  The Python bridge was wrong on OpenCV2 with mono8 (and any Mat
+  with only two dimensions btw). Took the official Python bridge
+  from OpenCV.
+* Add missing test file
+  This fixes `#171 <https://github.com/ros-perception/vision_opencv/issues/171>`_
+* export OpenCV variables
+* Properly deal with alpha in image compression.
+  That fixes `#169 <https://github.com/ros-perception/vision_opencv/issues/169>`_
+* Contributors: Kei Okada, Victor Lamoine, Vincent Rabaud
+
 1.11.15 (2017-01-29)
 --------------------
 * properly find Boost Python 2 or 3

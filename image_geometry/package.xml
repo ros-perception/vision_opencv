@@ -1,6 +1,6 @@
 <package format="2">
   <name>image_geometry</name>
-  <version>1.11.15</version>
+  <version>1.11.16</version>
   <description>
     `image_geometry` contains C++ and Python libraries for interpreting images
     geometrically. It interfaces the calibration parameters in sensor_msgs/CameraInfo

@@ -2,8 +2,8 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.16 (2017-11-05)
+--------------------
 * Fix compilation issues.
   Fix suggested by `#173 <https://github.com/ros-perception/vision_opencv/issues/173>`_ comment
 * Make sure to initialize the distorted_image Mat.

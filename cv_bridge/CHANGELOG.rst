@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.16 (2017-11-05)
+--------------------
 * Silence warnings about un-used variables
 * Fixes `#177 <https://github.com/ros-perception/vision_opencv/issues/177>`_
   The Python bridge was wrong on OpenCV2 with mono8 (and any Mat

@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.12.5 (2017-11-05)
+-------------------
 * add version_gte for opencv3
   @vrabaud If you'll update opencv3 version as discussed in https://discourse.ros.org/t/opencv-3-3/2674/4, I think we'd better to add 'version_gte' tag so that apt-get install ros-kinetic-cv-bridge also pulls openv3.3 from repository, to avoid API breaking issue between opencv2 and opencv3.
 * Simplify the dependency components of cv_bridge

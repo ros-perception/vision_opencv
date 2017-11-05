@@ -2,6 +2,21 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix compilation issues.
+  Fix suggested by `#173 <https://github.com/ros-perception/vision_opencv/issues/173>`_ comment
+* Make sure to initialize the distorted_image Mat.
+  Otherwise, valgrind throws errors about accessing uninitialized
+  memory.
+  Signed-off-by: Chris Lalancette <clalancette@osrfoundation.org>
+* Remove the last remnants of boost from image_geometry.
+  All of its functionality can be had from std:: in C++11, so
+  use that instead.  This also requires us to add the -std=c++11
+  flag.
+  Signed-off-by: Chris Lalancette <clalancette@osrfoundation.org>
+* Contributors: Chris Lalancette, Vincent Rabaud
+
 1.12.4 (2017-01-29)
 -------------------
 * Import using __future_\_ for python 3 compatibility.
@@ -115,7 +130,7 @@ Changelog for package image_geometry
   Added the operator= for the PinholeCameraModel. I am not sure if the
   PinholeCameraModel needs to have a destructor, too. To follow the
   'rule of three' it should actually have one.
-* Contributors: Tobias Bär, Valsamis Ntouskos, Vincent Rabaud
+* Contributors: Tobias Bar, Valsamis Ntouskos, Vincent Rabaud
 
 1.10.14 (2013-11-23 16:17)
 --------------------------

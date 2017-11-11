@@ -245,7 +245,7 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
 
 /////////////////////////////////////// Image ///////////////////////////////////////////
 
-// Converts a ROS Image to a cv::Mat by sharing the data or chaning its endianness if needed
+// Converts a ROS Image to a cv::Mat by sharing the data or changing its endianness if needed
 cv::Mat matFromImage(const sensor_msgs::Image& source)
 {
   int source_type = getCvType(source.encoding);
@@ -291,7 +291,7 @@ cv::Mat matFromImage(const sensor_msgs::Image& source)
   cv::mixChannels(std::vector<cv::Mat>(1, mat), std::vector<cv::Mat>(1, mat_swap), fromTo);
 
   // Interpret mat_swap back as the proper type
-  mat_swap = cv::Mat(source.height, source.width, source_type, mat_swap.data, mat_swap.step);
+  mat_swap.reshape(num_channels);
 
   return mat_swap;
 }

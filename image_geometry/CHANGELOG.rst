@@ -2,8 +2,8 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.12.6 (2017-11-11)
+-------------------
 * missing STL includes
 * Contributors: Mikael Arguedas, Vincent Rabaud
 

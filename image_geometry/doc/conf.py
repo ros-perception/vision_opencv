@@ -197,5 +197,5 @@ latex_documents = [
 intersphinx_mapping = {
     'http://docs.python.org/': None,
     'http://docs.scipy.org/doc/numpy' : None,
-    'http://www.ros.org/doc/api/tf/html/python/' : None
+    'http://docs.ros.org/api/tf/html/python/' : None,
     }

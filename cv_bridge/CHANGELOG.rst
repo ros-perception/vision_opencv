@@ -2,6 +2,9 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.12.6 (2017-11-11)
 -------------------
 * fix endianness issues

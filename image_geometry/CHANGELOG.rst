@@ -2,6 +2,11 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* get shared_ptr from boost or C++11
+* Contributors: Vincent Rabaud
+
 1.12.6 (2017-11-11)
 -------------------
 * missing STL includes

@@ -2,8 +2,8 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.12.7 (2017-11-12)
+-------------------
 * get shared_ptr from boost or C++11
 * Contributors: Vincent Rabaud
 

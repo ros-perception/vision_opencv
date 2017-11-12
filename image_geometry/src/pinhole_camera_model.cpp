@@ -1,7 +1,8 @@
-#include <memory>
-
 #include "image_geometry/pinhole_camera_model.h"
 #include <sensor_msgs/distortion_models.h>
+#ifdef BOOST_SHARED_PTR_HPP_INCLUDED
+#include <boost/make_shared.hpp>
+#endif
 
 namespace image_geometry {
 
@@ -84,7 +85,11 @@ bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
 {
   // Create our repository of cached data (rectification maps, etc.)
   if (!cache_)
+#ifdef BOOST_SHARED_PTR_HPP_INCLUDED
+    cache_ = boost::make_shared<Cache>();
+#else
     cache_ = std::make_shared<Cache>();
+#endif
 
   // Binning = 0 is considered the same as binning = 1 (no binning).
   uint32_t binning_x = msg.binning_x ? msg.binning_x : 1;

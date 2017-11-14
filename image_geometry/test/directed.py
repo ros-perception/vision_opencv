@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import rostest
 import rospy
 import unittest
@@ -14,12 +16,12 @@ class TestDirected(unittest.TestCase):
         ci = sensor_msgs.msg.CameraInfo()
         ci.width = 640
         ci.height = 480
-        print ci
+        print(ci)
         cam = PinholeCameraModel()
         cam.fromCameraInfo(ci)
-        print cam.rectifyPoint((0, 0))
+        print(cam.rectifyPoint((0, 0)))
 
-        print cam.project3dToPixel((0,0,0))
+        print(cam.project3dToPixel((0,0,0)))
 
     def test_stereo(self):
         lmsg = sensor_msgs.msg.CameraInfo()

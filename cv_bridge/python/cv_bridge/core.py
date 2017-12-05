@@ -261,6 +261,6 @@ class CvBridge(object):
         if cvim.dtype.byteorder == '>':
             img_msg.is_bigendian = True
         img_msg.data = cvim.tostring()
-        img_msg.step = len(img_msg.data) / img_msg.height
+        img_msg.step = len(img_msg.data) // img_msg.height
 
         return img_msg

@@ -33,17 +33,16 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
 
-#include "boost/endian/conversion.hpp"
+#include <boost/endian/conversion.hpp>
 
 #include <map>
-
-#include <boost/make_shared.hpp>
-#include <boost/regex.hpp>
+#include <memory>
+#include <regex>
 
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/image_encodings.hpp>
 
 #include <cv_bridge/cv_bridge.h>
 #include <cv_bridge/rgb_colors.h>
@@ -97,15 +96,15 @@ int getCvType(const std::string& encoding)
   if (encoding == enc::YUV422) return CV_8UC2;
 
   // Check all the generic content encodings
-  boost::cmatch m;
+  std::cmatch m;
 
-  if (boost::regex_match(encoding.c_str(), m,
-        boost::regex("(8U|8S|16U|16S|32S|32F|64F)C([0-9]+)"))) {
+  if (std::regex_match(encoding.c_str(), m,
+        std::regex("(8U|8S|16U|16S|32S|32F|64F)C([0-9]+)"))) {
     return CV_MAKETYPE(depthStrToInt(m[1].str()), atoi(m[2].str().c_str()));
   }
 
-  if (boost::regex_match(encoding.c_str(), m,
-        boost::regex("(8U|8S|16U|16S|32S|32F|64F)"))) {
+  if (std::regex_match(encoding.c_str(), m,
+        std::regex("(8U|8S|16U|16S|32S|32F|64F)"))) {
     return CV_MAKETYPE(depthStrToInt(m[1].str()), 1);
   }
 
@@ -246,7 +245,7 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
 /////////////////////////////////////// Image ///////////////////////////////////////////
 
 // Converts a ROS Image to a cv::Mat by sharing the data or changing its endianness if needed
-cv::Mat matFromImage(const sensor_msgs::Image& source)
+cv::Mat matFromImage(const sensor_msgs::msg::Image& source)
 {
   int source_type = getCvType(source.encoding);
   int byte_depth = enc::bitDepth(source.encoding) / 8;
@@ -298,12 +297,12 @@ cv::Mat matFromImage(const sensor_msgs::Image& source)
 
 // Internal, used by toCvCopy and cvtColor
 CvImagePtr toCvCopyImpl(const cv::Mat& source,
-                        const std_msgs::Header& src_header,
+                        const std_msgs::msg::Header& src_header,
                         const std::string& src_encoding,
                         const std::string& dst_encoding)
 {
   // Copy metadata
-  CvImagePtr ptr = boost::make_shared<CvImage>();
+  CvImagePtr ptr = std::make_shared<CvImage>();
   ptr->header = src_header;
   
   // Copy to new buffer if same encoding requested
@@ -352,14 +351,14 @@ CvImagePtr toCvCopyImpl(const cv::Mat& source,
 
 /// @endcond
 
-sensor_msgs::ImagePtr CvImage::toImageMsg() const
+sensor_msgs::msg::Image::SharedPtr CvImage::toImageMsg() const
 {
-  sensor_msgs::ImagePtr ptr = boost::make_shared<sensor_msgs::Image>();
+  sensor_msgs::msg::Image::SharedPtr ptr = std::make_shared<sensor_msgs::msg::Image>();
   toImageMsg(*ptr);
   return ptr;
 }
 
-void CvImage::toImageMsg(sensor_msgs::Image& ros_image) const
+void CvImage::toImageMsg(sensor_msgs::msg::Image& ros_image) const
 {
   ros_image.header = header;
   ros_image.height = image.rows;
@@ -389,13 +388,13 @@ void CvImage::toImageMsg(sensor_msgs::Image& ros_image) const
 }
 
 // Deep copy data, returnee is mutable
-CvImagePtr toCvCopy(const sensor_msgs::ImageConstPtr& source,
+CvImagePtr toCvCopy(const sensor_msgs::msg::Image::ConstSharedPtr& source,
                     const std::string& encoding)
 {
   return toCvCopy(*source, encoding);
 }
 
-CvImagePtr toCvCopy(const sensor_msgs::Image& source,
+CvImagePtr toCvCopy(const sensor_msgs::msg::Image& source,
                     const std::string& encoding)
 {
   // Construct matrix pointing to source data
@@ -403,14 +402,14 @@ CvImagePtr toCvCopy(const sensor_msgs::Image& source,
 }
 
 // Share const data, returnee is immutable
-CvImageConstPtr toCvShare(const sensor_msgs::ImageConstPtr& source,
+CvImageConstPtr toCvShare(const sensor_msgs::msg::Image::ConstSharedPtr& source,
                           const std::string& encoding)
 {
   return toCvShare(*source, source, encoding);
 }
 
-CvImageConstPtr toCvShare(const sensor_msgs::Image& source,
-                          const boost::shared_ptr<void const>& tracked_object,
+CvImageConstPtr toCvShare(const sensor_msgs::msg::Image& source,
+                          const std::shared_ptr<void const>& tracked_object,
                           const std::string& encoding)
 {
   // If the encoding different or the endianness different, you have to copy
@@ -418,7 +417,7 @@ CvImageConstPtr toCvShare(const sensor_msgs::Image& source,
       (boost::endian::order::native != boost::endian::order::big)))
     return toCvCopy(source, encoding);
 
-  CvImagePtr ptr = boost::make_shared<CvImage>();
+  CvImagePtr ptr = std::make_shared<CvImage>();
   ptr->header = source.header;
   ptr->encoding = source.encoding;
   ptr->tracked_object_ = tracked_object;
@@ -434,9 +433,9 @@ CvImagePtr cvtColor(const CvImageConstPtr& source,
 
 /////////////////////////////////////// CompressedImage ///////////////////////////////////////////
 
-sensor_msgs::CompressedImagePtr CvImage::toCompressedImageMsg(const Format dst_format) const
+sensor_msgs::msg::CompressedImage::SharedPtr CvImage::toCompressedImageMsg(const Format dst_format) const
 {
-  sensor_msgs::CompressedImagePtr ptr = boost::make_shared<sensor_msgs::CompressedImage>();
+  sensor_msgs::msg::CompressedImage::SharedPtr ptr = std::make_shared<sensor_msgs::msg::CompressedImage>();
   toCompressedImageMsg(*ptr,dst_format);
   return ptr;
 }
@@ -477,7 +476,7 @@ std::string getFormat(Format format) {
 	throw Exception("Unrecognized image format");
 }
 
-void CvImage::toCompressedImageMsg(sensor_msgs::CompressedImage& ros_image, const Format dst_format) const
+void CvImage::toCompressedImageMsg(sensor_msgs::msg::CompressedImage& ros_image, const Format dst_format) const
 {
   ros_image.header = header;
   cv::Mat image;
@@ -487,7 +486,7 @@ void CvImage::toCompressedImageMsg(sensor_msgs::CompressedImage& ros_image, cons
   }
   else
   {
-    CvImagePtr tempThis = boost::make_shared<CvImage>(*this);
+    CvImagePtr tempThis = std::make_shared<CvImage>(*this);
     CvImagePtr temp;
     if (enc::hasAlpha(encoding))
     {
@@ -506,13 +505,13 @@ void CvImage::toCompressedImageMsg(sensor_msgs::CompressedImage& ros_image, cons
 }
 
 // Deep copy data, returnee is mutable
-CvImagePtr toCvCopy(const sensor_msgs::CompressedImageConstPtr& source,
+CvImagePtr toCvCopy(const sensor_msgs::msg::CompressedImage::ConstSharedPtr& source,
                     const std::string& encoding)
 {
   return toCvCopy(*source, encoding);
 }
 
-CvImagePtr toCvCopy(const sensor_msgs::CompressedImage& source, const std::string& encoding)
+CvImagePtr toCvCopy(const sensor_msgs::msg::CompressedImage& source, const std::string& encoding)
 {
   // Construct matrix pointing to source data
   const cv::Mat_<uchar> in(1, source.data.size(), const_cast<uchar*>(&source.data[0]));

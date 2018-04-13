@@ -1,10 +1,12 @@
 # add library
-include_directories(./)
 add_library(${PROJECT_NAME} cv_bridge.cpp rgb_colors.cpp)
-add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
+ament_target_dependencies(${PROJECT_NAME}
+  "OpenCV"
+  "sensor_msgs"
+)
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${OpenCV_LIBRARIES})
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+install(TARGETS ${PROJECT_NAME} DESTINATION lib)
 
 if(NOT ANDROID)
 # add a Boost Python library
@@ -24,27 +26,26 @@ if(NOT PYTHON_NUMPY_INCLUDE_DIR)
     else(PYTHON_NUMPY_PROCESS EQUAL 0)
         message(SEND_ERROR "Could not determine the NumPy include directory, verify that NumPy was installed correctly.")
     endif(PYTHON_NUMPY_PROCESS EQUAL 0)
- endif(NOT PYTHON_NUMPY_INCLUDE_DIR)
+endif(NOT PYTHON_NUMPY_INCLUDE_DIR)
 
-include_directories(${PYTHON_INCLUDE_PATH} ${Boost_INCLUDE_DIRS} ${PYTHON_NUMPY_INCLUDE_DIR})
+include_directories(${PYTHON_INCLUDE_PATH} ${PYTHON_NUMPY_INCLUDE_DIR})
 
 if (PYTHON_VERSION_MAJOR VERSION_EQUAL 3)
   add_definitions(-DPYTHON3)
 endif()
 
 if (OpenCV_VERSION_MAJOR VERSION_EQUAL 3)
-add_library(${PROJECT_NAME}_boost module.cpp module_opencv3.cpp)
+  add_library(${PROJECT_NAME}_boost module.cpp module_opencv3.cpp)
 else()
-add_library(${PROJECT_NAME}_boost module.cpp module_opencv2.cpp)
+  add_library(${PROJECT_NAME}_boost module.cpp module_opencv2.cpp)
 endif()
-target_link_libraries(${PROJECT_NAME}_boost ${Boost_LIBRARIES}
-                                            ${catkin_LIBRARIES}
-                                            ${PYTHON_LIBRARIES}
-                                            ${PROJECT_NAME}
+target_link_libraries(${PROJECT_NAME}_boost 
+  ${PYTHON_LIBRARIES}
+  ${PROJECT_NAME}
 )
 
 set_target_properties(${PROJECT_NAME}_boost PROPERTIES
-                      LIBRARY_OUTPUT_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_PYTHON_DESTINATION}/${PROJECT_NAME}/boost/
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost/
                       PREFIX ""
 )
 if(APPLE)
@@ -52,5 +53,5 @@ if(APPLE)
                         SUFFIX ".so")
 endif()
 
-install(TARGETS ${PROJECT_NAME}_boost DESTINATION ${CATKIN_PACKAGE_PYTHON_DESTINATION}/boost/)
+install(TARGETS ${PROJECT_NAME}_boost DESTINATION ${PYTHON_INSTALL_DIR}/${PROJECT_NAME}/boost/)
 endif()

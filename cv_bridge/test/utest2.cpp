@@ -39,8 +39,8 @@
 #include "opencv2/core/core.hpp"  
 
 #include "cv_bridge/cv_bridge.h"
-#include <sensor_msgs/Image.h>
-#include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/msg/image.hpp>
+#include <sensor_msgs/image_encodings.hpp>
 
 using namespace sensor_msgs::image_encodings;
 
@@ -78,11 +78,11 @@ TEST(OpencvTests, testCase_encode_decode)
     cv::RNG r(77);
     r.fill(image_original, cv::RNG::UNIFORM, 0, 127);
 
-    sensor_msgs::Image image_message;
-    cv_bridge::CvImage image_bridge(std_msgs::Header(), src_encoding, image_original);
+    sensor_msgs::msg::Image image_message;
+    cv_bridge::CvImage image_bridge(std_msgs::msg::Header(), src_encoding, image_original);
 
     // Convert to a sensor_msgs::Image
-    sensor_msgs::ImagePtr image_msg = image_bridge.toImageMsg();
+    sensor_msgs::msg::Image::SharedPtr image_msg = image_bridge.toImageMsg();
 
     for(size_t j=0; j<encodings.size(); ++j) {
       std::string dst_encoding = encodings[j];

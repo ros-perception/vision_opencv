@@ -1,5 +1,5 @@
 #include "cv_bridge/cv_bridge.h"
-#include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/image_encodings.hpp>
 #include <gtest/gtest.h>
 
 
@@ -13,7 +13,7 @@ TEST(CvBridgeTest, NonContinuous)
   cvi.encoding = sensor_msgs::image_encodings::MONO16;
   cvi.image = partial;
 
-  sensor_msgs::ImagePtr msg = cvi.toImageMsg();
+  sensor_msgs::msg::Image::SharedPtr msg = cvi.toImageMsg();
   EXPECT_EQ(msg->height, 8);
   EXPECT_EQ(msg->width, 3);
   EXPECT_EQ(msg->encoding, cvi.encoding);
@@ -24,7 +24,7 @@ TEST(CvBridgeTest, ChannelOrder)
 {
   cv::Mat_<uint16_t> mat(200, 200);
   mat.setTo(cv::Scalar(1000,0,0,0));
-  sensor_msgs::ImagePtr image(new sensor_msgs::Image());
+  sensor_msgs::msg::Image::SharedPtr image(new sensor_msgs::msg::Image());
 
   image = cv_bridge::CvImage(image->header, sensor_msgs::image_encodings::MONO16, mat).toImageMsg();
 
@@ -46,7 +46,7 @@ TEST(CvBridgeTest, ChannelOrder)
 
 TEST(CvBridgeTest, initialization)
 {
-  sensor_msgs::Image image;
+  sensor_msgs::msg::Image image;
   cv_bridge::CvImagePtr cv_ptr;
 
   image.encoding = "bgr8";
@@ -73,7 +73,7 @@ TEST(CvBridgeTest, initialization)
 TEST(CvBridgeTest, imageMessageStep)
 {
   // Test 1: image step is padded
-  sensor_msgs::Image image;
+  sensor_msgs::msg::Image image;
   cv_bridge::CvImagePtr cv_ptr;
 
   image.encoding = "mono8";
@@ -107,7 +107,7 @@ TEST(CvBridgeTest, imageMessageStep)
 
 TEST(CvBridgeTest, imageMessageConversion)
 {
-  sensor_msgs::Image imgmsg;
+  sensor_msgs::msg::Image imgmsg;
   cv_bridge::CvImagePtr cv_ptr;
   imgmsg.height = 220;
   imgmsg.width = 200;

@@ -5,7 +5,7 @@
 TEST(CvBridgeTest, compression)
 {
   cv::RNG rng(0);
-  std_msgs::Header header;
+  std_msgs::msg::Header header;
 
   // Test 3 channel images.
   for (int i = 0; i < 2; ++i)
@@ -14,7 +14,7 @@ TEST(CvBridgeTest, compression)
     cv::Mat_<cv::Vec3b> in(10, 10);
     rng.fill(in, cv::RNG::UNIFORM, 0, 256);
 
-    sensor_msgs::CompressedImagePtr msg = cv_bridge::CvImage(header, format, in).toCompressedImageMsg(cv_bridge::PNG);
+    sensor_msgs::msg::CompressedImage::SharedPtr msg = cv_bridge::CvImage(header, format, in).toCompressedImageMsg(cv_bridge::PNG);
     const cv_bridge::CvImageConstPtr out = cv_bridge::toCvCopy(msg, format);
 
     EXPECT_EQ(out->image.channels(), 3);
@@ -28,7 +28,7 @@ TEST(CvBridgeTest, compression)
     cv::Mat_<cv::Vec4b> in(10, 10);
     rng.fill(in, cv::RNG::UNIFORM, 0, 256);
 
-    sensor_msgs::CompressedImagePtr msg = cv_bridge::CvImage(header, format, in).toCompressedImageMsg(cv_bridge::PNG);
+    sensor_msgs::msg::CompressedImage::SharedPtr msg = cv_bridge::CvImage(header, format, in).toCompressedImageMsg(cv_bridge::PNG);
     const cv_bridge::CvImageConstPtr out = cv_bridge::toCvCopy(msg, format);
     EXPECT_EQ(out->image.channels(), 4);
     EXPECT_EQ(cv::norm(out->image, in), 0);

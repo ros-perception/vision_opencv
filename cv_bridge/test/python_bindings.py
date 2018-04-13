@@ -1,3 +1,5 @@
+# !/usr/bin/env python
+
 from nose.tools import assert_equal
 import numpy as np
 
@@ -10,12 +12,12 @@ def test_cvtColorForDisplay():
     height, width = label.shape[:2]
     label_value = 0
     grid_num_y, grid_num_x = 3, 4
-    for grid_row in xrange(grid_num_y):
-        grid_size_y = height / grid_num_y
+    for grid_row in range(grid_num_y):
+        grid_size_y = height // grid_num_y
         min_y = grid_size_y * grid_row
         max_y = min_y + grid_size_y
-        for grid_col in xrange(grid_num_x):
-            grid_size_x = width / grid_num_x
+        for grid_col in range(grid_num_x):
+            grid_size_x = width // grid_num_x
             min_x = grid_size_x * grid_col
             max_x = min_x + grid_size_x
             label[min_y:max_y, min_x:max_x] = label_value

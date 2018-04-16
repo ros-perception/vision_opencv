@@ -2,6 +2,14 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#191 <https://github.com/ros-perception/vision_opencv/issues/191>`_ from patrickelectric/kinetic
+  cv2_to_imgmsg: step must be int
+* cv2_to_imgmsg: step must be int
+  Signed-off-by: Patrick José Pereira <patrickelectric@gmail.com>
+* Contributors: Patrick José Pereira, Vincent Rabaud
+
 1.12.7 (2017-11-12)
 -------------------
 

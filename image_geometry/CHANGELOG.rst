@@ -2,6 +2,14 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#189 <https://github.com/ros-perception/vision_opencv/issues/189>`_ from ros2/python3_support_in_test
+  python 3 compatibility in test
+* python 3 compatibility in test
+* fix doc job
+* Contributors: Mikael Arguedas, Vincent Rabaud
+
 1.12.7 (2017-11-12)
 -------------------
 * get shared_ptr from boost or C++11

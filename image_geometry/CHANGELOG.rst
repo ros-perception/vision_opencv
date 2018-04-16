@@ -2,8 +2,8 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.12.8 (2018-04-17)
+-------------------
 * Merge pull request `#189 <https://github.com/ros-perception/vision_opencv/issues/189>`_ from ros2/python3_support_in_test
   python 3 compatibility in test
 * python 3 compatibility in test

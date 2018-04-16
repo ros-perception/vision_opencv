@@ -1,8 +1,10 @@
 configure_file(__init__.py.plain.in
-               ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_PYTHON_DESTINATION}/boost/__init__.py
+               ${CMAKE_CURRENT_BINARY_DIR}/boost/__init__.py
                @ONLY
 )
 
-install(FILES ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_PYTHON_DESTINATION}/boost/__init__.py
-        DESTINATION ${CATKIN_PACKAGE_PYTHON_DESTINATION}/boost/
-)
+ament_python_install_package(${PROJECT_NAME})
+
+# install(FILES ${CMAKE_CURRENT_BINARY_DIR}/boost/__init__.py
+#   DESTINATION ${PYTHON_INSTALL_DIR}/${PROJECT_NAME}/boost/
+# )

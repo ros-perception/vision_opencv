@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-import rostest
+# !/usr/bin/env python
 import unittest
 
 import numpy as np
@@ -82,4 +81,9 @@ class TestConversions(unittest.TestCase):
         self.assert_((br.imgmsg_to_cv2(msg) == img).all())
 
 if __name__ == '__main__':
-    rosunit.unitrun('opencv_tests', 'conversions', TestConversions)
+    suite = unittest.TestSuite()
+    suite.addTest(TestConversions('test_mono16_cv2'))
+    suite.addTest(TestConversions('test_encode_decode_cv2'))
+    suite.addTest(TestConversions('test_encode_decode_cv2_compressed'))
+    suite.addTest(TestConversions('test_endianness'))
+    unittest.TextTestRunner(verbosity=2).run(suite)

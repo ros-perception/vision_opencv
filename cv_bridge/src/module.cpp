@@ -43,7 +43,7 @@ cvtColor2Wrap(bp::object obj_in, const std::string & encoding_in, const std::str
   convert_to_CvMat2(obj_in.ptr(), mat_in);
 
   // Call cv_bridge for color conversion
-  cv_bridge::CvImagePtr cv_image(new cv_bridge::CvImage(std_msgs::Header(), encoding_in, mat_in));
+  cv_bridge::CvImagePtr cv_image(new cv_bridge::CvImage(std_msgs::msg::Header(), encoding_in, mat_in));
 
   cv::Mat mat = cv_bridge::cvtColor(cv_image, encoding_out)->image;
 
@@ -61,7 +61,7 @@ cvtColorForDisplayWrap(bp::object obj_in,
   cv::Mat mat_in;
   convert_to_CvMat2(obj_in.ptr(), mat_in);
 
-  cv_bridge::CvImagePtr cv_image(new cv_bridge::CvImage(std_msgs::Header(), encoding_in, mat_in));
+  cv_bridge::CvImagePtr cv_image(new cv_bridge::CvImage(std_msgs::msg::Header(), encoding_in, mat_in));
 
   cv_bridge::CvtColorForDisplayOptions options;
   options.do_dynamic_scaling = do_dynamic_scaling;

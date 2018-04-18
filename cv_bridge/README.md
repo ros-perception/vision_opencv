@@ -45,6 +45,12 @@ src/ament/ament_tools/scripts/ament.py build --build-tests --symlink-install
 ```
 
 ### Run the tests
+Python tests have dependency to opencv python support and install it:
+```bash
+pip3 install opencv-python
+
+```
+Next to prepare runtime environment and run tests:
 ```bash
 
 source <YOUR_ROS2_WORKSPACE>/install/local_setup.bash

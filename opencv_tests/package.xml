@@ -1,15 +1,25 @@
-<package>
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="2">
   <name>opencv_tests</name>
-  <version>1.12.7</version>
+  <version>1.0.0</version>
   <description>
-    Tests the enumerants of the ROS Image message, and functionally tests the Python and C++ implementations of CvBridge.
+    OpenCV tests for the Python and C++ implementations of CvBridge with Image message in ROS2.
   </description>
   <author>James Bowman</author>
-  <maintainer email="vincent.rabaud@gmail.com">Vincent Rabaud</maintainer>
+  <author>Ethan Gao</author>
+  <maintainer email="ethan.gao@linux.intel.com">Ethan Gao</maintainer>
   <license>BSD</license>
   <url>http://wiki.ros.org/opencv_tests</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>rclpy</build_depend>
 
-  <run_depend>cv_bridge</run_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
 </package>

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 # Software License Agreement (BSD License)
 #
 # Copyright (c) 2008, Willow Garage, Inc.
@@ -35,7 +35,7 @@
 import sys
 import time
 import math
-import rospy
+import rclpy
 import cv2
 
 import sensor_msgs.msg
@@ -44,35 +44,35 @@ from cv_bridge import CvBridge
 
 # Send each image by iterate it from given array of files names  to a given topic,
 # as a regular and compressed ROS Images msgs.
-class Source:
+def main(args=None):
+    if args is None:
+        args = sys.argv
+    rclpy.init(args=args)
+    node = rclpy.create_node("Source")
+    node_logger = node.get_logger()
 
-    def __init__(self, topic, filenames):
-        self.pub            = rospy.Publisher(topic, sensor_msgs.msg.Image)
-        self.pub_compressed = rospy.Publisher(topic + "/compressed", sensor_msgs.msg.CompressedImage)
-        self.filenames      = filenames
+    topic = args[1]
+    filenames = args[2:]
+    pub_img = node.create_publisher(sensor_msgs.msg.Image, topic)
+    pub_img_compressed = node.create_publisher(sensor_msgs.msg.CompressedImage, topic + "/compressed")
 
-    def spin(self):
-        time.sleep(1.0)
-        cvb = CvBridge()
-        while not rospy.core.is_shutdown():
-            cvim = cv2.imload(self.filenames[0])
-            self.pub.publish(cvb.cv2_to_imgmsg(cvim))
-            self.pub_compressed.publish(cvb.cv2_to_compressed_imgmsg(cvim))
-            self.filenames = self.filenames[1:] + [self.filenames[0]]
-            time.sleep(1)
+    time.sleep(1.0)
+    cvb = CvBridge()
 
+    while rclpy.ok():
+      try:
+        cvim = cv2.imread(filenames[0])
+        pub_img.publish(cvb.cv2_to_imgmsg(cvim))
+        pub_img_compressed.publish(cvb.cv2_to_compressed_imgmsg(cvim))
+        filenames = filenames[1:] + [filenames[0]]
+        time.sleep(1)
+      except KeyboardInterrupt:
+        node_logger.info("shutting down: keyboard interrupt")
+        break
 
-def main(args):
-    s = Source(args[1], args[2:])
-    rospy.init_node('Source')
-    try:
-        s.spin()
-        rospy.spin()
-        outcome = 'test completed'
-    except KeyboardInterrupt:
-        print "shutting down"
-        outcome = 'keyboard interrupt'
-    rospy.core.signal_shutdown(outcome)
+    node_logger.info("test_completed")
+    node.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()

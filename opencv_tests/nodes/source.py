@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 # Software License Agreement (BSD License)
 #
 # Copyright (c) 2008, Willow Garage, Inc.
@@ -35,7 +35,7 @@
 import sys
 import time
 import math
-import rospy
+import rclpy
 import numpy
 import cv2
 
@@ -44,52 +44,49 @@ from cv_bridge import CvBridge
 
 
 # Send black pic with a circle as regular and compressed ros msgs.
-class Source:
+def main(args=None):
+    if args is None:
+        args = sys.argv
+    rclpy.init(args=args)
+    node = rclpy.create_node("Source")
+    node_logger = node.get_logger()
 
-    def __init__(self):
-        self.pub            = rospy.Publisher("/opencv_tests/images", sensor_msgs.msg.Image)
-        self.pub_compressed = rospy.Publisher("/opencv_tests/images/compressed", sensor_msgs.msg.CompressedImage)
+    pub_img = node.create_publisher(sensor_msgs.msg.Image, "/opencv_tests/images")
+    pub_compressed_img = node.create_publisher(sensor_msgs.msg.CompressedImage, "/opencv_tests/images/compressed")
 
-    def spin(self):
-        time.sleep(1.0)
-        started = time.time()
-        counter = 0
-        cvim = numpy.zeros((480, 640, 1), numpy.uint8)
-        ball_xv = 10
-        ball_yv = 10
-        ball_x = 100
-        ball_y = 100
+    time.sleep(1.0)
+    started = time.time()
+    counter = 0
+    cvim = numpy.zeros((480, 640, 1), numpy.uint8)
+    ball_xv = 10
+    ball_yv = 10
+    ball_x = 100
+    ball_y = 100
 
-        cvb = CvBridge()
+    cvb = CvBridge()
 
-        while not rospy.core.is_shutdown():
+    while rclpy.ok():
+      try:
+        cvim.fill(0)
+        cv2.circle(cvim, (ball_x, ball_y), 10, 255, -1)
 
-            cvim.fill(0)
-            cv2.circle(cvim, (ball_x, ball_y), 10, 255, -1)
+        ball_x += ball_xv
+        ball_y += ball_yv
+        if ball_x in [10, 630]:
+            ball_xv = -ball_xv
+        if ball_y in [10, 470]:
+            ball_yv = -ball_yv
 
-            ball_x += ball_xv
-            ball_y += ball_yv
-            if ball_x in [10, 630]:
-                ball_xv = -ball_xv
-            if ball_y in [10, 470]:
-                ball_yv = -ball_yv
+        pub_img.publish(cvb.cv2_to_imgmsg(cvim))
+        pub_compressed_img.publish(cvb.cv2_to_compressed_imgmsg(cvim))
+        time.sleep(0.03)
+      except KeyboardInterrupt:
+        node_logger.info("shutting down: keyboard interrupt")
+        break
 
-            self.pub.publish(cvb.cv2_to_imgmsg(cvim))
-            self.pub_compressed.publish(cvb.cv2_to_compressed_imgmsg(cvim))
-            time.sleep(0.03)
-
-
-def main(args):
-    s = Source()
-    rospy.init_node('Source')
-    try:
-        s.spin()
-        rospy.spin()
-        outcome = 'test completed'
-    except KeyboardInterrupt:
-        print "shutting down"
-        outcome = 'keyboard interrupt'
-    rospy.core.signal_shutdown(outcome)
+    node_logger.info("test_completed")
+    node.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()

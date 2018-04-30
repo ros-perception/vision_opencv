@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.13.0 (2018-04-30)
+-------------------
 * Use rosdep OpenCV and not ROS one.
   We defintely don't need the whole OpenCV.
   We need to clean the rosdep keys.

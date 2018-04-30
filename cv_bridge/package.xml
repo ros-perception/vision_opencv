@@ -17,18 +17,21 @@
     <rosdoc config="rosdoc.yaml" />
   </export>
 
-  <buildtool_depend version_gte="0.5.68">catkin</buildtool_depend>
+  <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>boost</build_depend>
-  <build_depend version_gte="3.3.0">opencv3</build_depend>
+  <build_depend>libopencv-dev</build_depend>
   <build_depend>python</build_depend>
+  <build_depend>python-opencv</build_depend>
   <build_depend>rosconsole</build_depend>
   <build_depend>sensor_msgs</build_depend>
 
   <exec_depend>boost</exec_depend>
-  <exec_depend version_gte="3.3.0">opencv3</exec_depend>
+  <exec_depend>libopencv-dev</exec_depend>
   <exec_depend>python</exec_depend>
+  <exec_depend>python-opencv</exec_depend>
   <exec_depend>rosconsole</exec_depend>
+  <build_export_depend>libopencv-dev</build_export_depend>
   <build_export_depend>sensor_msgs</build_export_depend>
 
   <test_depend>rostest</test_depend>

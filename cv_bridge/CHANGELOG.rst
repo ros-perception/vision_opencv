@@ -2,6 +2,13 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use rosdep OpenCV and not ROS one.
+  We defintely don't need the whole OpenCV.
+  We need to clean the rosdep keys.
+* Contributors: Vincent Rabaud
+
 1.12.8 (2018-04-17)
 -------------------
 * Merge pull request `#191 <https://github.com/ros-perception/vision_opencv/issues/191>`_ from patrickelectric/kinetic

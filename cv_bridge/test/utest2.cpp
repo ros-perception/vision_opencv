@@ -32,48 +32,70 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
 
-#include <string>
-#include <vector>
+// Copyright (c) 2018 Intel Corporation.
+// All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #include <gtest/gtest.h>
-
-#include "opencv2/core/core.hpp"  
-
-#include "cv_bridge/cv_bridge.h"
 #include <sensor_msgs/msg/image.hpp>
 #include <sensor_msgs/image_encodings.hpp>
 
+#include <string>
+#include <vector>
+
+#include "cv_bridge/cv_bridge.h"
+#include "opencv2/core/core.hpp"
+
 using namespace sensor_msgs::image_encodings;
 
-bool isUnsigned(const std::string & encoding) {
-  return encoding == RGB8 || encoding == RGBA8 || encoding == RGB16 || encoding == RGBA16 || encoding == BGR8 || encoding == BGRA8 || encoding == BGR16 || encoding == BGRA16 || encoding == MONO8 || encoding == MONO16 ||
-                           encoding == MONO8 || encoding == MONO16 || encoding == TYPE_8UC1 || encoding == TYPE_8UC2 || encoding == TYPE_8UC3 || encoding == TYPE_8UC4 ||
-                           encoding == TYPE_16UC1 || encoding == TYPE_16UC2 || encoding == TYPE_16UC3 || encoding == TYPE_16UC4;
-                           //BAYER_RGGB8, BAYER_BGGR8, BAYER_GBRG8, BAYER_GRBG8, BAYER_RGGB16, BAYER_BGGR16, BAYER_GBRG16, BAYER_GRBG16,
-                           //YUV422
+bool isUnsigned(const std::string & encoding)
+{
+  return encoding == RGB8 || encoding == RGBA8 || encoding == RGB16 || encoding == RGBA16 ||
+         encoding == BGR8 || encoding == BGRA8 || encoding == BGR16 || encoding == BGRA16 ||
+         encoding == MONO8 || encoding == MONO16 ||
+         encoding == MONO8 || encoding == MONO16 || encoding == TYPE_8UC1 ||
+         encoding == TYPE_8UC2 || encoding == TYPE_8UC3 || encoding == TYPE_8UC4 ||
+         encoding == TYPE_16UC1 || encoding == TYPE_16UC2 || encoding == TYPE_16UC3 ||
+         encoding == TYPE_16UC4;
+  // BAYER_RGGB8, BAYER_BGGR8, BAYER_GBRG8, BAYER_GRBG8, BAYER_RGGB16,
+  // BAYER_BGGR16, BAYER_GBRG16, BAYER_GRBG16, YUV422
 }
 std::vector<std::string>
-getEncodings() {
-// TODO for Groovy, the following types should be uncommented
-std::string encodings[] = { RGB8, RGBA8, RGB16, RGBA16, BGR8, BGRA8, BGR16, BGRA16, MONO8, MONO16,
-                           TYPE_8UC1, /*TYPE_8UC2,*/ TYPE_8UC3, TYPE_8UC4,
-                           TYPE_8SC1, /*TYPE_8SC2,*/ TYPE_8SC3, TYPE_8SC4,
-                           TYPE_16UC1, /*TYPE_16UC2,*/ TYPE_16UC3, TYPE_16UC4,
-                           TYPE_16SC1, /*TYPE_16SC2,*/ TYPE_16SC3, TYPE_16SC4,
-                           TYPE_32SC1, /*TYPE_32SC2,*/ TYPE_32SC3, TYPE_32SC4,
-                           TYPE_32FC1, /*TYPE_32FC2,*/ TYPE_32FC3, TYPE_32FC4,
-                           TYPE_64FC1, /*TYPE_64FC2,*/ TYPE_64FC3, TYPE_64FC4,
-                           //BAYER_RGGB8, BAYER_BGGR8, BAYER_GBRG8, BAYER_GRBG8, BAYER_RGGB16, BAYER_BGGR16, BAYER_GBRG16, BAYER_GRBG16,
-                           YUV422
-                         };
-return std::vector<std::string>(encodings, encodings+47-8-7);
+getEncodings()
+{
+// TODO(N/A) for Groovy, the following types should be uncommented
+  std::string encodings[] = {RGB8, RGBA8, RGB16, RGBA16, BGR8, BGRA8, BGR16, BGRA16, MONO8, MONO16,
+    TYPE_8UC1, /*TYPE_8UC2,*/ TYPE_8UC3, TYPE_8UC4,
+    TYPE_8SC1, /*TYPE_8SC2,*/ TYPE_8SC3, TYPE_8SC4,
+    TYPE_16UC1, /*TYPE_16UC2,*/ TYPE_16UC3, TYPE_16UC4,
+    TYPE_16SC1, /*TYPE_16SC2,*/ TYPE_16SC3, TYPE_16SC4,
+    TYPE_32SC1, /*TYPE_32SC2,*/ TYPE_32SC3, TYPE_32SC4,
+    TYPE_32FC1, /*TYPE_32FC2,*/ TYPE_32FC3, TYPE_32FC4,
+    TYPE_64FC1, /*TYPE_64FC2,*/ TYPE_64FC3, TYPE_64FC4,
+    // BAYER_RGGB8, BAYER_BGGR8, BAYER_GBRG8, BAYER_GRBG8,
+    // BAYER_RGGB16, BAYER_BGGR16, BAYER_GBRG16, BAYER_GRBG16,
+    YUV422};
+  return std::vector<std::string>(encodings, encodings + 47 - 8 - 7);
 }
 
 TEST(OpencvTests, testCase_encode_decode)
 {
   std::vector<std::string> encodings = getEncodings();
-  for(size_t i=0; i<encodings.size(); ++i) {
+  for (size_t i = 0; i < encodings.size(); ++i) {
     std::string src_encoding = encodings[i];
-    bool is_src_color_format = isColor(src_encoding) || isMono(src_encoding) || (src_encoding == sensor_msgs::image_encodings::YUV422);
+    bool is_src_color_format = isColor(src_encoding) || isMono(src_encoding) ||
+      (src_encoding == sensor_msgs::image_encodings::YUV422);
     cv::Mat image_original(cv::Size(400, 400), cv_bridge::getCvType(src_encoding));
     cv::RNG r(77);
     r.fill(image_original, cv::RNG::UNIFORM, 0, 127);
@@ -84,9 +106,10 @@ TEST(OpencvTests, testCase_encode_decode)
     // Convert to a sensor_msgs::Image
     sensor_msgs::msg::Image::SharedPtr image_msg = image_bridge.toImageMsg();
 
-    for(size_t j=0; j<encodings.size(); ++j) {
+    for (size_t j = 0; j < encodings.size(); ++j) {
       std::string dst_encoding = encodings[j];
-      bool is_dst_color_format = isColor(dst_encoding) || isMono(dst_encoding) || (dst_encoding == sensor_msgs::image_encodings::YUV422);
+      bool is_dst_color_format = isColor(dst_encoding) || isMono(dst_encoding) ||
+        (dst_encoding == sensor_msgs::image_encodings::YUV422);
       bool is_num_channels_the_same = (numChannels(src_encoding) == numChannels(dst_encoding));
 
       cv_bridge::CvImageConstPtr cv_image;
@@ -133,17 +156,26 @@ TEST(OpencvTests, testCase_encode_decode)
       // And convert back to a cv::Mat
       image_back = cvtColor(cv_image, src_encoding)->image;
 
-      // If the number of channels,s different some information got lost at some point, so no possible test
-      if (!is_num_channels_the_same)
+      // If the number of channels,s different some information
+      // got lost at some point, so no possible test
+      if (!is_num_channels_the_same) {
         continue;
+      }
       if (bitDepth(src_encoding) >= 32) {
         // In the case where the input has floats, we will lose precision but no more than 1
-        EXPECT_LT(cv::norm(image_original, image_back, cv::NORM_INF), 1) << "problem converting from " << src_encoding << " to " << dst_encoding << " and back.";
+        EXPECT_LT(cv::norm(image_original, image_back, cv::NORM_INF),
+          1) << "problem converting from " << src_encoding << " to " << dst_encoding <<
+          " and back.";
       } else if ((bitDepth(src_encoding) == 16) && (bitDepth(dst_encoding) == 8)) {
-        // In the case where the input has floats, we will lose precision but no more than 1 * max(127)
-        EXPECT_LT(cv::norm(image_original, image_back, cv::NORM_INF), 128) << "problem converting from " << src_encoding << " to " << dst_encoding << " and back.";
+        // In the case where the input has floats, we
+        // will lose precision but no more than 1 * max(127)
+        EXPECT_LT(cv::norm(image_original, image_back, cv::NORM_INF),
+          128) << "problem converting from " << src_encoding << " to " << dst_encoding <<
+          " and back.";
       } else {
-        EXPECT_EQ(cv::norm(image_original, image_back, cv::NORM_INF), 0) << "problem converting from " << src_encoding << " to " << dst_encoding << " and back.";
+        EXPECT_EQ(cv::norm(image_original, image_back, cv::NORM_INF),
+          0) << "problem converting from " << src_encoding << " to " << dst_encoding <<
+          " and back.";
       }
     }
   }

@@ -33,8 +33,23 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
 
-#ifndef CV_BRIDGE_CV_BRIDGE_H
-#define CV_BRIDGE_CV_BRIDGE_H
+// Copyright (c) 2018 Intel Corporation.
+// All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef CV_BRIDGE__CV_BRIDGE_H_
+#define CV_BRIDGE__CV_BRIDGE_H_
 
 #include <sensor_msgs/msg/image.hpp>
 #include <sensor_msgs/msg/compressed_image.hpp>
@@ -43,14 +58,17 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgproc/types_c.h>
 #include <stdexcept>
+#include <string>
+#include <memory>
 
-
-namespace cv_bridge {
+namespace cv_bridge
+{
 
 class Exception : public std::runtime_error
 {
 public:
-  Exception(const std::string& description) : std::runtime_error(description) {}
+  explicit Exception(const std::string & description)
+  : std::runtime_error(description) {}
 };
 
 class CvImage;
@@ -58,15 +76,17 @@ class CvImage;
 typedef std::shared_ptr<CvImage> CvImagePtr;
 typedef std::shared_ptr<CvImage const> CvImageConstPtr;
 
-//from: http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
-typedef enum {
-	BMP, DIB,
-	JPG, JPEG, JPE,
-	JP2,
-	PNG,
-	PBM, PGM, PPM,
-	SR, RAS,
-	TIFF, TIF,
+// From: http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat
+// imread(const string& filename, int flags)
+typedef enum
+{
+  BMP, DIB,
+  JPG, JPEG, JPE,
+  JP2,
+  PNG,
+  PBM, PGM, PPM,
+  SR, RAS,
+  TIFF, TIF,
 } Format;
 
 /**
@@ -76,9 +96,9 @@ typedef enum {
 class CvImage
 {
 public:
-  std_msgs::msg::Header header; //!< ROS header
-  std::string encoding;    //!< Image encoding ("mono8", "bgr8", etc.)
-  cv::Mat image;           //!< Image data for use with OpenCV
+  std_msgs::msg::Header header;  // !< ROS header
+  std::string encoding;    // !< Image encoding ("mono8", "bgr8", etc.)
+  cv::Mat image;           // !< Image data for use with OpenCV
 
   /**
    * \brief Empty constructor.
@@ -88,12 +108,13 @@ public:
   /**
    * \brief Constructor.
    */
-  CvImage(const std_msgs::msg::Header& header, const std::string& encoding,
-          const cv::Mat& image = cv::Mat())
-    : header(header), encoding(encoding), image(image)
+  CvImage(
+    const std_msgs::msg::Header & header, const std::string & encoding,
+    const cv::Mat & image = cv::Mat())
+  : header(header), encoding(encoding), image(image)
   {
   }
-  
+
   /**
    * \brief Convert this message to a ROS sensor_msgs::msg::Image message.
    *
@@ -108,7 +129,9 @@ public:
    * support this format from opencv:
    * http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
    */
-  sensor_msgs::msg::CompressedImage::SharedPtr toCompressedImageMsg(const Format dst_format = JPG) const;
+  sensor_msgs::msg::CompressedImage::SharedPtr toCompressedImageMsg(
+    const Format dst_format =
+    JPG) const;
 
   /**
    * \brief Copy the message data to a ROS sensor_msgs::msg::Image message.
@@ -116,7 +139,7 @@ public:
    * This overload is intended mainly for aggregate messages such as stereo_msgs::DisparityImage,
    * which contains a sensor_msgs::msg::Image as a data member.
    */
-  void toImageMsg(sensor_msgs::msg::Image& ros_image) const;
+  void toImageMsg(sensor_msgs::msg::Image & ros_image) const;
 
   /**
    * dst_format is compress the image to desire format.
@@ -125,20 +148,23 @@ public:
    * support this format from opencv:
    * http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
    */
-  void toCompressedImageMsg(sensor_msgs::msg::CompressedImage& ros_image, const Format dst_format = JPG) const;
+  void toCompressedImageMsg(
+    sensor_msgs::msg::CompressedImage & ros_image,
+    const Format dst_format = JPG) const;
 
 
   typedef std::shared_ptr<CvImage> Ptr;
   typedef std::shared_ptr<CvImage const> ConstPtr;
 
 protected:
-  std::shared_ptr<void const> tracked_object_; // for sharing ownership
+  std::shared_ptr<void const> tracked_object_;  // for sharing ownership
 
   /// @cond DOXYGEN_IGNORE
   friend
-  CvImageConstPtr toCvShare(const sensor_msgs::msg::Image& source,
-                            const std::shared_ptr<void const>& tracked_object,
-                            const std::string& encoding);
+  CvImageConstPtr toCvShare(
+    const sensor_msgs::msg::Image & source,
+    const std::shared_ptr<void const> & tracked_object,
+    const std::string & encoding);
   /// @endcond
 };
 
@@ -159,11 +185,13 @@ protected:
  * If \a encoding is the empty string (the default), the returned CvImage has the same encoding
  * as \a source.
  */
-CvImagePtr toCvCopy(const sensor_msgs::msg::Image::ConstSharedPtr& source,
-                    const std::string& encoding = std::string());
+CvImagePtr toCvCopy(
+  const sensor_msgs::msg::Image::ConstSharedPtr & source,
+  const std::string & encoding = std::string());
 
-CvImagePtr toCvCopy(const sensor_msgs::msg::CompressedImage::ConstSharedPtr& source,
-                    const std::string& encoding = std::string());
+CvImagePtr toCvCopy(
+  const sensor_msgs::msg::CompressedImage::ConstSharedPtr & source,
+  const std::string & encoding = std::string());
 
 /**
  * \brief Convert a sensor_msgs::msg::Image message to an OpenCV-compatible CvImage, copying the
@@ -184,11 +212,13 @@ CvImagePtr toCvCopy(const sensor_msgs::msg::CompressedImage::ConstSharedPtr& sou
  * 255/65535 respectively). Otherwise, no scaling is applied and the rules from the convertTo OpenCV
  * function are applied (capping): http://docs.opencv.org/modules/core/doc/basic_structures.html#mat-convertto
  */
-CvImagePtr toCvCopy(const sensor_msgs::msg::Image& source,
-                    const std::string& encoding = std::string());
+CvImagePtr toCvCopy(
+  const sensor_msgs::msg::Image & source,
+  const std::string & encoding = std::string());
 
-CvImagePtr toCvCopy(const sensor_msgs::msg::CompressedImage& source,
-                    const std::string& encoding = std::string());
+CvImagePtr toCvCopy(
+  const sensor_msgs::msg::CompressedImage & source,
+  const std::string & encoding = std::string());
 
 /**
  * \brief Convert an immutable sensor_msgs::msg::Image message to an OpenCV-compatible CvImage, sharing
@@ -210,8 +240,9 @@ CvImagePtr toCvCopy(const sensor_msgs::msg::CompressedImage& source,
  * If \a encoding is the empty string (the default), the returned CvImage has the same encoding
  * as \a source.
  */
-CvImageConstPtr toCvShare(const sensor_msgs::msg::Image::ConstSharedPtr& source,
-                          const std::string& encoding = std::string());
+CvImageConstPtr toCvShare(
+  const sensor_msgs::msg::Image::ConstSharedPtr & source,
+  const std::string & encoding = std::string());
 
 /**
  * \brief Convert an immutable sensor_msgs::msg::Image message to an OpenCV-compatible CvImage, sharing
@@ -237,19 +268,22 @@ CvImageConstPtr toCvShare(const sensor_msgs::msg::Image::ConstSharedPtr& source,
  * If \a encoding is the empty string (the default), the returned CvImage has the same encoding
  * as \a source.
  */
-CvImageConstPtr toCvShare(const sensor_msgs::msg::Image& source,
-                          const std::shared_ptr<void const>& tracked_object,
-                          const std::string& encoding = std::string());
+CvImageConstPtr toCvShare(
+  const sensor_msgs::msg::Image & source,
+  const std::shared_ptr<void const> & tracked_object,
+  const std::string & encoding = std::string());
 
 /**
  * \brief Convert a CvImage to another encoding using the same rules as toCvCopy
  */
-CvImagePtr cvtColor(const CvImageConstPtr& source,
-                    const std::string& encoding);
+CvImagePtr cvtColor(
+  const CvImageConstPtr & source,
+  const std::string & encoding);
 
-struct CvtColorForDisplayOptions {
-  CvtColorForDisplayOptions() :
-    do_dynamic_scaling(false),
+struct CvtColorForDisplayOptions
+{
+  CvtColorForDisplayOptions()
+  : do_dynamic_scaling(false),
     min_image_value(0.0),
     max_image_value(0.0),
     colormap(-1),
@@ -293,18 +327,19 @@ struct CvtColorForDisplayOptions {
  * - max_image_value Maximum image value
  * - colormap Colormap which the source image converted with.
  */
-CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
-                                   const std::string& encoding = std::string(),
-                                   const CvtColorForDisplayOptions options = CvtColorForDisplayOptions());
+CvImageConstPtr cvtColorForDisplay(
+  const CvImageConstPtr & source,
+  const std::string & encoding = std::string(),
+  const CvtColorForDisplayOptions options = CvtColorForDisplayOptions());
 
 /**
  * \brief Get the OpenCV type enum corresponding to the encoding.
  *
  * For example, "bgr8" -> CV_8UC3, "32FC1" -> CV_32FC1, and "32FC10" -> CV_32FC10.
  */
-int getCvType(const std::string& encoding);
+int getCvType(const std::string & encoding);
 
-} // namespace cv_bridge
+}  // namespace cv_bridge
 
 #if 0
 // CvImage as a first class message type
@@ -316,63 +351,72 @@ int getCvType(const std::string& encoding);
 // processing bag files.
 
 /// @cond DOXYGEN_IGNORE
-namespace ros {
-
-namespace message_traits {
-
-template<> struct MD5Sum<cv_bridge::CvImage>
+namespace ros
 {
-  static const char* value() { return MD5Sum<sensor_msgs::msg::Image>::value(); }
-  static const char* value(const cv_bridge::CvImage&) { return value(); }
+
+namespace message_traits
+{
+
+template<>
+struct MD5Sum<cv_bridge::CvImage>
+{
+  static const char * value() {return MD5Sum<sensor_msgs::msg::Image>::value();}
+  static const char * value(const cv_bridge::CvImage &) {return value();}
 
   static const uint64_t static_value1 = MD5Sum<sensor_msgs::msg::Image>::static_value1;
   static const uint64_t static_value2 = MD5Sum<sensor_msgs::msg::Image>::static_value2;
-  
+
   // If the definition of sensor_msgs/Image changes, we'll get a compile error here.
   ROS_STATIC_ASSERT(MD5Sum<sensor_msgs::msg::Image>::static_value1 == 0x060021388200f6f0ULL);
   ROS_STATIC_ASSERT(MD5Sum<sensor_msgs::msg::Image>::static_value2 == 0xf447d0fcd9c64743ULL);
 };
 
-template<> struct DataType<cv_bridge::CvImage>
+template<>
+struct DataType<cv_bridge::CvImage>
 {
-  static const char* value() { return DataType<sensor_msgs::msg::Image>::value(); }
-  static const char* value(const cv_bridge::CvImage&) { return value(); }
+  static const char * value() {return DataType<sensor_msgs::msg::Image>::value();}
+  static const char * value(const cv_bridge::CvImage &) {return value();}
 };
 
-template<> struct Definition<cv_bridge::CvImage>
+template<>
+struct Definition<cv_bridge::CvImage>
 {
-  static const char* value() { return Definition<sensor_msgs::msg::Image>::value(); }
-  static const char* value(const cv_bridge::CvImage&) { return value(); }
+  static const char * value() {return Definition<sensor_msgs::msg::Image>::value();}
+  static const char * value(const cv_bridge::CvImage &) {return value();}
 };
 
-template<> struct HasHeader<cv_bridge::CvImage> : TrueType {};
+template<>
+struct HasHeader<cv_bridge::CvImage>: TrueType {};
 
-} // namespace ros::message_traits
+}  // namespace message_traits
 
-namespace serialization {
+namespace serialization
+{
 
-template<> struct Serializer<cv_bridge::CvImage>
+template<>
+struct Serializer<cv_bridge::CvImage>
 {
   /// @todo Still ignoring endianness...
-  
+
   template<typename Stream>
-  inline static void write(Stream& stream, const cv_bridge::CvImage& m)
+  inline static void write(Stream & stream, const cv_bridge::CvImage & m)
   {
     stream.next(m.header);
-    stream.next((uint32_t)m.image.rows); // height
-    stream.next((uint32_t)m.image.cols); // width
+    stream.next((uint32_t)m.image.rows);  // height
+    stream.next((uint32_t)m.image.cols);  // width
     stream.next(m.encoding);
     uint8_t is_bigendian = 0;
     stream.next(is_bigendian);
     stream.next((uint32_t)m.image.step);
-    size_t data_size = m.image.step*m.image.rows;
+    size_t data_size = m.image.step * m.image.rows;
     stream.next((uint32_t)data_size);
-    if (data_size > 0)
+    if (data_size > 0) {
       memcpy(stream.advance(data_size), m.image.data, data_size);
+    }
   }
 
   template<typename Stream>
-  inline static void read(Stream& stream, cv_bridge::CvImage& m)
+  inline static void read(Stream & stream, cv_bridge::CvImage & m)
   {
     stream.next(m.header);
     uint32_t height, width;
@@ -390,41 +434,43 @@ template<> struct Serializer<cv_bridge::CvImage>
     tmp.copyTo(m.image);
   }
 
-  inline static uint32_t serializedLength(const cv_bridge::CvImage& m)
+  inline static uint32_t serializedLength(const cv_bridge::CvImage & m)
   {
-    size_t data_size = m.image.step*m.image.rows;
+    size_t data_size = m.image.step * m.image.rows;
     return serializationLength(m.header) + serializationLength(m.encoding) + 17 + data_size;
   }
 };
 
-} // namespace ros::serialization
+}  // namespace serialization
 
-namespace message_operations {
+namespace message_operations
+{
 
-template<> struct Printer<cv_bridge::CvImage>
+template<>
+struct Printer<cv_bridge::CvImage>
 {
   template<typename Stream>
-  static void stream(Stream&, const std::string&, const cv_bridge::CvImage&)
+  static void stream(Stream &, const std::string &, const cv_bridge::CvImage &)
   {
     /// @todo Replicate printing for sensor_msgs::msg::Image
   }
 };
+}  // namespace message_operations
 
-} // namespace ros::message_operations
+}  // namespace ros
 
-} // namespace ros
+namespace cv_bridge
+{
 
-namespace cv_bridge {
-
-inline std::ostream& operator<<(std::ostream& s, const CvImage& m)
+inline std::ostream & operator<<(std::ostream & s, const CvImage & m)
 {
   ros::message_operations::Printer<CvImage>::stream(s, "", m);
   return s;
 }
 
-} // namespace cv_bridge
+}  // namespace cv_bridge
 #endif
 
 /// @endcond
 
-#endif
+#endif  // CV_BRIDGE__CV_BRIDGE_H_

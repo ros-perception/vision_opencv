@@ -32,18 +32,36 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
 
-#include "module.hpp"
+// Copyright (c) 2018 Intel Corporation.
+// All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-PyObject *mod_opencv;
+#include "module.hpp"
+#include <string>
+
+PyObject * mod_opencv;
 
 bp::object
-cvtColor2Wrap(bp::object obj_in, const std::string & encoding_in, const std::string & encoding_out) {
+cvtColor2Wrap(bp::object obj_in, const std::string & encoding_in, const std::string & encoding_out)
+{
   // Convert the Python input to an image
   cv::Mat mat_in;
   convert_to_CvMat2(obj_in.ptr(), mat_in);
 
   // Call cv_bridge for color conversion
-  cv_bridge::CvImagePtr cv_image(new cv_bridge::CvImage(std_msgs::msg::Header(), encoding_in, mat_in));
+  cv_bridge::CvImagePtr cv_image(new cv_bridge::CvImage(
+      std_msgs::msg::Header(), encoding_in, mat_in));
 
   cv::Mat mat = cv_bridge::cvtColor(cv_image, encoding_out)->image;
 
@@ -51,36 +69,41 @@ cvtColor2Wrap(bp::object obj_in, const std::string & encoding_in, const std::str
 }
 
 bp::object
-cvtColorForDisplayWrap(bp::object obj_in,
-                       const std::string & encoding_in,
-                       const std::string & encoding_out,
-                       bool do_dynamic_scaling = false,
-                       double min_image_value = 0.0,
-                       double max_image_value = 0.0) {
+cvtColorForDisplayWrap(
+  bp::object obj_in,
+  const std::string & encoding_in,
+  const std::string & encoding_out,
+  bool do_dynamic_scaling = false,
+  double min_image_value = 0.0,
+  double max_image_value = 0.0)
+{
   // Convert the Python input to an image
   cv::Mat mat_in;
   convert_to_CvMat2(obj_in.ptr(), mat_in);
 
-  cv_bridge::CvImagePtr cv_image(new cv_bridge::CvImage(std_msgs::msg::Header(), encoding_in, mat_in));
+  cv_bridge::CvImagePtr cv_image(new cv_bridge::CvImage(
+      std_msgs::msg::Header(), encoding_in, mat_in));
 
   cv_bridge::CvtColorForDisplayOptions options;
   options.do_dynamic_scaling = do_dynamic_scaling;
   options.min_image_value = min_image_value;
   options.max_image_value = max_image_value;
-  cv::Mat mat = cv_bridge::cvtColorForDisplay(/*source=*/cv_image,
-                                              /*encoding_out=*/encoding_out,
-                                              /*options=*/options)->image;
+  cv::Mat mat = cv_bridge::cvtColorForDisplay(/*source=*/ cv_image,
+      /*encoding_out=*/ encoding_out,
+      /*options=*/ options)->image;
 
   return bp::object(boost::python::handle<>(pyopencv_from(mat)));
 }
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(cvtColorForDisplayWrap_overloads, cvtColorForDisplayWrap, 3, 6)
 
-int CV_MAT_CNWrap(int i) {
+int CV_MAT_CNWrap(int i)
+{
   return CV_MAT_CN(i);
 }
 
-int CV_MAT_DEPTHWrap(int i) {
+int CV_MAT_DEPTHWrap(int i)
+{
   return CV_MAT_DEPTH(i);
 }
 
@@ -95,16 +118,16 @@ BOOST_PYTHON_MODULE(cv_bridge_boost)
   boost::python::def("CV_MAT_CNWrap", CV_MAT_CNWrap);
   boost::python::def("CV_MAT_DEPTHWrap", CV_MAT_DEPTHWrap);
   boost::python::def("cvtColorForDisplay", cvtColorForDisplayWrap,
-                     cvtColorForDisplayWrap_overloads(
-                       boost::python::args("source", "encoding_in", "encoding_out", "do_dynamic_scaling",
-                                           "min_image_value", "max_image_value"),
-                       "Convert image to display with specified encodings.\n\n"
-                       "Args:\n"
-                       "  - source (numpy.ndarray): input image\n"
-                       "  - encoding_in (str): input image encoding\n"
-                       "  - encoding_out (str): encoding to which the image conveted\n"
-                       "  - do_dynamic_scaling (bool): flag to do dynamic scaling with min/max value\n"
-                       "  - min_image_value (float): minimum pixel value for dynamic scaling\n"
-                       "  - max_image_value (float): maximum pixel value for dynamic scaling\n"
-                     ));
+    cvtColorForDisplayWrap_overloads(
+      boost::python::args("source", "encoding_in", "encoding_out", "do_dynamic_scaling",
+      "min_image_value", "max_image_value"),
+      "Convert image to display with specified encodings.\n\n"
+      "Args:\n"
+      "  - source (numpy.ndarray): input image\n"
+      "  - encoding_in (str): input image encoding\n"
+      "  - encoding_out (str): encoding to which the image conveted\n"
+      "  - do_dynamic_scaling (bool): flag to do dynamic scaling with min/max value\n"
+      "  - min_image_value (float): minimum pixel value for dynamic scaling\n"
+      "  - max_image_value (float): maximum pixel value for dynamic scaling\n"
+    ));
 }

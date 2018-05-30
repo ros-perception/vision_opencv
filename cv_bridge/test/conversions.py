@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import unittest
+
 from cv_bridge import CvBridge, CvBridgeError
 import numpy as np
 

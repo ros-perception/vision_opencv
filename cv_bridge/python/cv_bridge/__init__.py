@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .core import CvBridge, CvBridgeError
+# from core import CvBridge, CvBridgeError
 
 # python bindings
-try:
-    # This try is just to satisfy doc jobs that are built differently.
-    from cv_bridge.boost.cv_bridge_boost import cvtColorForDisplay, getCvType
-except ImportError:
-    pass
+# This try is just to satisfy doc jobs that are built differently.
+# try:
+#    from cv_bridge.boost.cv_bridge_boost import cvtColorForDisplay, getCvType
+# except ImportError:
+#    pass

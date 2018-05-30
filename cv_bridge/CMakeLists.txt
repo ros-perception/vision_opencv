@@ -20,7 +20,7 @@ if(NOT ANDROID)
     find_package(Boost REQUIRED python3)
   endif()
 else()
-  find_package(Boost REQUIRED )
+  find_package(Boost REQUIRED)
 endif()
 
 find_package(sensor_msgs REQUIRED)
@@ -35,7 +35,7 @@ find_package(OpenCV REQUIRED
 include_directories(include)
 
 if(NOT ANDROID)
- add_subdirectory(python)
+  add_subdirectory(python)
 endif()
 
 add_subdirectory(src)

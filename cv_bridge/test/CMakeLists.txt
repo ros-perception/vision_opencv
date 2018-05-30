@@ -13,7 +13,7 @@ endif()
 
 # enable cv_bridge C++ tests
 find_package(ament_cmake_gtest REQUIRED)
-ament_add_gtest(${PROJECT_NAME}-utest 
+ament_add_gtest(${PROJECT_NAME}-utest
   test_endian.cpp
   test_compression.cpp
   utest.cpp utest2.cpp

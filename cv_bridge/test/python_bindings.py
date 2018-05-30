@@ -1,5 +1,4 @@
-# Copyright (c) 2018 Intel Corporation.
-# All Rights Reserved.
+# Copyright (c) 2018 Intel Corporation. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+import cv_bridge
 from nose.tools import assert_equal
 import numpy as np
-
-import cv_bridge
 
 
 def test_cvtColorForDisplay():
@@ -47,4 +44,4 @@ def test_cvtColorForDisplay():
 
     input_msg = bridge.cv2_to_imgmsg(mono, encoding='mono8')
     output = bridge.imgmsg_to_cv2(input_msg, desired_encoding='mono8')
-    assert_equal(output.shape, (100,100))
+    assert_equal(output.shape, (100, 100))

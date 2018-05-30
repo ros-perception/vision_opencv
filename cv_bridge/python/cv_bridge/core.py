@@ -96,7 +96,7 @@ class CvBridge(object):
         self.numpy_type_to_cvtype = {'uint8': '8U', 'int8': '8S', 'uint16': '16U',
                                      'int16': '16S', 'int32': '32S', 'float32': '32F',
                                      'float64': '64F'}
-        self.numpy_type_to_cvtype.update((v, k) for (k, v) in self.numpy_type_to_cvtype.items())
+        self.numpy_type_to_cvtype.update(dict((v, k) for (k, v) in self.numpy_type_to_cvtype.items()))
 
     def dtype_with_channels_to_cvtype2(self, dtype, n_channels):
         return '%sC%d' % (self.numpy_type_to_cvtype[dtype.name], n_channels)

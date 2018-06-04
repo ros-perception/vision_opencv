@@ -1,5 +1,5 @@
 #include "image_geometry/pinhole_camera_model.h"
-#include <sensor_msgs/distortion_models.h>
+#include <sensor_msgs/distortion_models.hpp>
 #include <gtest/gtest.h>
 
 /// @todo Tests with simple values (R = identity, D = 0, P = K or simple scaling)
@@ -26,31 +26,42 @@ protected:
                   0.0, 295.53402059708782, 223.29617881774902, 0.0,
                   0.0, 0.0, 1.0, 0.0};
 
+
+    cam_info_.header.stamp.sec = 0;
+    cam_info_.header.stamp.nanosec = 0;
     cam_info_.header.frame_id = "tf_frame";
     cam_info_.height = 480;
     cam_info_.width  = 640;
-    // No ROI
-    cam_info_.D.resize(5);
-    std::copy(D, D+5, cam_info_.D.begin());
-    std::copy(K, K+9, cam_info_.K.begin());
-    std::copy(R, R+9, cam_info_.R.begin());
-    std::copy(P, P+12, cam_info_.P.begin());
     cam_info_.distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;
+    // No binning
+    cam_info_.binning_x = 0;
+    cam_info_.binning_y = 0;
+    // No ROI
+    cam_info_.roi.x_offset = 0;
+    cam_info_.roi.y_offset = 0;
+    cam_info_.roi.height = 0;
+    cam_info_.roi.width = 0;
+    cam_info_.roi.do_rectify = false;
+    cam_info_.d.resize(5);
+    std::copy(D, D+5, cam_info_.d.begin());
+    std::copy(K, K+9, cam_info_.k.begin());
+    std::copy(R, R+9, cam_info_.r.begin());
+    std::copy(P, P+12, cam_info_.p.begin());
 
     model_.fromCameraInfo(cam_info_);
   }
   
-  sensor_msgs::CameraInfo cam_info_;
+  sensor_msgs::msg::CameraInfo cam_info_;
   image_geometry::PinholeCameraModel model_;
 };
 
 TEST_F(PinholeTest, accessorsCorrect)
 {
   EXPECT_STREQ("tf_frame", model_.tfFrame().c_str());
-  EXPECT_EQ(cam_info_.P[0], model_.fx());
-  EXPECT_EQ(cam_info_.P[5], model_.fy());
-  EXPECT_EQ(cam_info_.P[2], model_.cx());
-  EXPECT_EQ(cam_info_.P[6], model_.cy());
+  EXPECT_EQ(cam_info_.p[0], model_.fx());
+  EXPECT_EQ(cam_info_.p[5], model_.fy());
+  EXPECT_EQ(cam_info_.p[2], model_.cx());
+  EXPECT_EQ(cam_info_.p[6], model_.cy());
 }
 
 TEST_F(PinholeTest, projectPoint)
@@ -77,7 +88,7 @@ TEST_F(PinholeTest, projectPoint)
   const size_t step = 10;
   for (size_t row = 0; row <= cam_info_.height; row += step) {
     for (size_t col = 0; col <= cam_info_.width; col += step) {
-      cv::Point2d uv(row, col), uv_back;
+      cv::Point2d uv(static_cast<double>(row), static_cast<double>(col)), uv_back;
       cv::Point3d xyz = model_.projectPixelTo3dRay(uv);
       uv_back = model_.project3dToPixel(xyz);
       // Measured max error at 1.13687e-13
@@ -122,7 +133,7 @@ TEST_F(PinholeTest, rectifyPoint)
   const size_t border = 65; // Expect bad accuracy far from the center of the image.
   for (size_t row = border; row <= cam_info_.height - border; row += step) {
     for (size_t col = border; col <= cam_info_.width - border; col += step) {
-      cv::Point2d uv_raw(row, col), uv_rect, uv_unrect;
+      cv::Point2d uv_raw(static_cast<double>(row), static_cast<double>(col)), uv_rect, uv_unrect;
       uv_rect = model_.rectifyPoint(uv_raw);
       uv_unrect = model_.unrectifyPoint(uv_rect);
       // Check that we're at least within a pixel...
@@ -150,15 +161,9 @@ TEST_F(PinholeTest, getDeltas)
 
 TEST_F(PinholeTest, initialization)
 {
-
-    sensor_msgs::CameraInfo info;
-    image_geometry::PinholeCameraModel camera;
-
-    camera.fromCameraInfo(info);
-
-    EXPECT_EQ(camera.initialized(), 1);
-    EXPECT_EQ(camera.projectionMatrix().rows, 3);
-    EXPECT_EQ(camera.projectionMatrix().cols, 4);
+  EXPECT_EQ(model_.initialized(), true);
+  EXPECT_EQ(model_.projectionMatrix().rows, 3);
+  EXPECT_EQ(model_.projectionMatrix().cols, 4);
 }
 
 TEST_F(PinholeTest, rectifyIfCalibrated)
@@ -199,14 +204,18 @@ TEST_F(PinholeTest, rectifyIfCalibrated)
   for (size_t y = 0; y <= cam_info_.height; y += cam_info_.height/10)
   {
     cv::line(distorted_image,
-             cv::Point(0, y), cv::Point(cam_info_.width, y),
+             cv::Point(0UL, static_cast<uint32_t>(y)),
+             cv::Point(static_cast<uint32_t>(cam_info_.width),
+                       static_cast<uint32_t>(y)),
              color, type, thickness);
   }
   for (size_t x = 0; x <= cam_info_.width; x += cam_info_.width/10)
   {
     // draw the lines thick so the prorportion of interpolation error is reduced
     cv::line(distorted_image,
-             cv::Point(x, 0), cv::Point(x, cam_info_.height),
+             cv::Point(static_cast<uint32_t>(x), 0UL),
+             cv::Point(static_cast<uint32_t>(x),
+                       static_cast<uint32_t>(cam_info_.height)),
              color, type, thickness);
   }
 
@@ -227,22 +236,22 @@ TEST_F(PinholeTest, rectifyIfCalibrated)
   // Test that rectified image is sufficiently different
   // using default distortion but with first element zeroed
   // out.
-  sensor_msgs::CameraInfo cam_info_2 = cam_info_;
-  cam_info_2.D[0] = 0.0;
+  sensor_msgs::msg::CameraInfo cam_info_2 = cam_info_;
+  cam_info_2.d[0] = 0.0;
   model_.fromCameraInfo(cam_info_2);
   model_.rectifyImage(distorted_image, rectified_image);
   error = cv::norm(distorted_image, rectified_image, cv::NORM_L1);
   EXPECT_GT(error, diff_threshold);
 
   // Test that rectified image is the same using zero distortion
-  cam_info_2.D.assign(cam_info_2.D.size(), 0);
+  cam_info_2.d.assign(cam_info_2.d.size(), 0);
   model_.fromCameraInfo(cam_info_2);
   model_.rectifyImage(distorted_image, rectified_image);
   error = cv::norm(distorted_image, rectified_image, cv::NORM_L1);
   EXPECT_EQ(error, 0);
 
   // Test that rectified image is the same using empty distortion
-  cam_info_2.D.clear();
+  cam_info_2.d.clear();
   model_.fromCameraInfo(cam_info_2);
   model_.rectifyImage(distorted_image, rectified_image);
   error = cv::norm(distorted_image, rectified_image, cv::NORM_L1);

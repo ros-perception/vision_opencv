@@ -1,5 +1,3 @@
-import rostest
-import rospy
 import unittest
 import sensor_msgs.msg
 
@@ -67,9 +65,6 @@ class TestDirected(unittest.TestCase):
         self.assertAlmostEqual(cam.left.getDeltaY(dv, Z), xyz1[1] - xyz0[1], 3)
 
 if __name__ == '__main__':
-    if 1:
-        rostest.unitrun('image_geometry', 'directed', TestDirected)
-    else:
-        suite = unittest.TestSuite()
-        suite.addTest(TestDirected('test_stereo'))
-        unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestSuite()
+    suite.addTest(TestDirected('test_stereo'))
+    unittest.TextTestRunner(verbosity=2).run(suite)

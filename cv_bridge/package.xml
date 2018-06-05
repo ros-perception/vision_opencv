@@ -8,7 +8,7 @@
   <author>Patrick Mihelich</author>
   <author>James Bowman</author>
   <maintainer email="ethan.gao@linux.intel.com">Ethan Gao</maintainer>
-  <license>Apache License 2.0</license>
+  <license>BSD</license>
   <url type="website">http://www.ros.org/wiki/cv_bridge</url>
   <url type="repository">https://github.com/ros-perception/vision_opencv/tree/ros2</url>
   <url type="bugtracker">https://github.com/ros-perception/vision_opencv/issues</url>

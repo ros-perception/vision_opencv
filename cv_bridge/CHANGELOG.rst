@@ -2,6 +2,17 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.0 (2018-06-06)
+-------------------
+* Port cv_bridge to ros2 
+* Remove the old inherent boost files
+* Replace boost code with newer C++ standard higher than C++11
+* Add a new readme
+* Adapt message definition like sensor_msg/Image etc in ROS2
+* Coding style alignment with ROS2 using cppcheck/cpplint and python flake8/pep257
+* Enable all the C++/Python unit test with gtest and unittest with ament tools
+* Contributors: Ethan Gao
+
 1.12.7 (2017-11-12)
 -------------------
 

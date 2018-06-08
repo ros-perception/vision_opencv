@@ -2,6 +2,22 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.0 (2018-05-31)
+-------------------
+* Port image_geometry to ROS2. (#1)
+* remove dependency on boost given that we dont use it anymore (#4)
+* avoid passing std::vector to/from cv::projectPoints
+* Make sure to export include directories from image_geometry. (#5)
+* Build the image_geometry library shared. (#7)
+* use CMAKE_X_STANDARD and check compiler rather than platform
+* Use upstream opencv2. (#8)
+* Revert "avoid passing std::vector to/from cv::projectPoints" (#9)
+* use ament_cmake_pytest instead of ament_cmake_nose (#10)
+* Comment out unported test (#11)
+* reenable ported packages
+* [rebase fixup] remove boost support again
+* Contributors: Chris Lalancette, Mikael Arguedas, Dirk Thomas
+
 1.12.7 (2017-11-12)
 -------------------
 * get shared_ptr from boost or C++11

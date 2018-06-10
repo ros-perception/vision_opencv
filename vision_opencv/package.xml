@@ -15,11 +15,13 @@
   <author>James Bowman</author>
   <author>Vincent Rabaud</author>
 
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>image_geometry</exec_depend>
 
   <export>
-    <metapackage/>
+    <build_type>ament_cmake</build_type>
   </export>
 
 </package>

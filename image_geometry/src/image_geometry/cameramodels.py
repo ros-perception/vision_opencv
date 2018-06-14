@@ -136,7 +136,7 @@ class PinholeCameraModel:
         """
         x = (uv[0] - self.cx()) / self.fx()
         y = (uv[1] - self.cy()) / self.fy()
-        norm = math.sqrt(x*x + y*y + 1)
+        norm = numpy.sqrt(x*x + y*y + 1)
         x /= norm
         y /= norm
         z = 1.0 / norm

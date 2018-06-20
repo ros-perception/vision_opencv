@@ -413,7 +413,7 @@ CvImageConstPtr toCvShare(const sensor_msgs::Image& source,
                           const boost::shared_ptr<void const>& tracked_object,
                           const std::string& encoding)
 {
-  // If the encoding different or the endianness different, you have to copy
+  // If the encoding is different or the endianness is different, you have to copy
   if ((!encoding.empty() && source.encoding != encoding) || (source.is_bigendian &&
       (boost::endian::order::native != boost::endian::order::big)))
     return toCvCopy(source, encoding);

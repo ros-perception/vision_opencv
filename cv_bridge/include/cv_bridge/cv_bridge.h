@@ -102,8 +102,8 @@ public:
   sensor_msgs::ImagePtr toImageMsg() const;
 
   /**
-   * dst_format is compress the image to desire format.
-   * Default value is empty string that will convert to jpg format.
+   * dst_format compress the image to the desired format.
+   * Default value is an empty string that will convert to jpg format.
    * can be: jpg, jp2, bmp, png, tif at the moment
    * support this format from opencv:
    * http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
@@ -119,8 +119,8 @@ public:
   void toImageMsg(sensor_msgs::Image& ros_image) const;
 
   /**
-   * dst_format is compress the image to desire format.
-   * Default value is empty string that will convert to jpg format.
+   * dst_format compress the image to the desired format.
+   * Default value is an empty string that will convert to jpg format.
    * can be: jpg, jp2, bmp, png, tif at the moment
    * support this format from opencv:
    * http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
@@ -207,7 +207,7 @@ CvImagePtr toCvCopy(const sensor_msgs::CompressedImage& source,
  *    - \c "rgba8"
  *    - \c "mono16"
  *
- * If \a encoding is the empty string (the default), the returned CvImage has the same encoding
+ * If \a encoding is an empty string (the default), the returned CvImage has the same encoding
  * as \a source.
  */
 CvImageConstPtr toCvShare(const sensor_msgs::ImageConstPtr& source,
@@ -273,7 +273,7 @@ struct CvtColorForDisplayOptions {
  *
  * The following rules apply:
  * - if the output encoding is empty, the fact that the input image is mono or multiple-channel is
- * preserved in the ouput image. The bit depth will be 8. it tries to convert to BGR no matter what
+ * preserved in the output image. The bit depth will be 8. it tries to convert to BGR no matter what
  * encoding image is passed.
  * - if the output encoding is not empty, it must have sensor_msgs::image_encodings::isColor and
  * isMono return true. It must also be 8 bit in depth

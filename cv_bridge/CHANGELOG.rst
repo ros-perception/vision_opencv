@@ -78,11 +78,11 @@ Changelog for package cv_bridge
   merge the compressed tests with the regular ones.
   better comment explanation. I will squash this commit.
   Fix indentation
-  fix typo mistage: from .imgmsg_to_compressed_cv2 to .compressed_imgmsg_to_cv2.
+  fix typo mistake: from .imgmsg_to_compressed_cv2 to .compressed_imgmsg_to_cv2.
   remove cv2.CV_8UC1
   remove rospy and time depndency.
   change from IMREAD_COLOR to IMREAD_ANYCOLOR.
-  - make indentaion of 4.
+  - make indentation of 4.
   - remove space trailer.
   - remove space from empty lines.
   - another set of for loops, it will make things easier to track. In that new set,  just have the number of channels in ([],1,3,4) (ignore two for jpg). from: https://github.com/ros-perception/vision_opencv/pull/132#discussion_r66721943
@@ -164,7 +164,7 @@ Changelog for package cv_bridge
 
 1.11.6 (2014-11-16)
 -------------------
-* chnage the behavior when there is only one channel
+* change the behavior when there is only one channel
 * cleanup tests
 * Contributors: Vincent Rabaud
 

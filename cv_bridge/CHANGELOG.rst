@@ -2,6 +2,9 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.0.0 (2018-06-06)
 -------------------
 * Port cv_bridge to ros2 

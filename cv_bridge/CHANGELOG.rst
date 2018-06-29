@@ -2,6 +2,11 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.2 (2018-06-29)
+------------------
+* fix rosdep keys issue of opencv3
+
+
 2.0.1 (2018-06-28)
 ------------------
 

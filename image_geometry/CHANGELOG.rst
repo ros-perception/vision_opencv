@@ -2,6 +2,9 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.2 (2018-06-29)
+------------------
+
 2.0.1 (2018-06-28)
 ------------------
 * Mikael Arguedas claiming image_geometry maintainership (`#230 <https://github.com/ros-perception/vision_opencv/issues/230>`_)

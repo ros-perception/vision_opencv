@@ -22,7 +22,6 @@
   <buildtool_depend>python_cmake_module</buildtool_depend>
 
   <depend>boost</depend>
-  <depend>opencv3</depend>
   <depend>sensor_msgs</depend>
 
   <exec_depend>ament_index_python</exec_depend>

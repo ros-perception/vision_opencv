@@ -14,10 +14,10 @@ TEST(CvBridgeTest, NonContinuous)
   cvi.image = partial;
 
   sensor_msgs::msg::Image::SharedPtr msg = cvi.toImageMsg();
-  EXPECT_EQ(msg->height, 8);
-  EXPECT_EQ(msg->width, 3);
+  EXPECT_EQ(static_cast<int>(msg->height), 8);
+  EXPECT_EQ(static_cast<int>(msg->width), 3);
   EXPECT_EQ(msg->encoding, cvi.encoding);
-  EXPECT_EQ(msg->step, 6);
+  EXPECT_EQ(static_cast<int>(msg->step), 6);
 }
 
 TEST(CvBridgeTest, ChannelOrder)
@@ -88,7 +88,7 @@ TEST(CvBridgeTest, imageMessageStep)
   ASSERT_EQ(220, cv_ptr->image.rows);
   ASSERT_EQ(200, cv_ptr->image.cols);
   // OpenCV copyTo argument removes the stride
-  ASSERT_EQ(200, cv_ptr->image.step[0]);
+  ASSERT_EQ(200, static_cast<int>(cv_ptr->image.step[0]));
 
   // Test 2: image step is invalid
   image.step = 199;
@@ -102,7 +102,7 @@ TEST(CvBridgeTest, imageMessageStep)
   ASSERT_NO_THROW(cv_ptr = cv_bridge::toCvCopy(image, "mono8"));
   ASSERT_EQ(220, cv_ptr->image.rows);
   ASSERT_EQ(200, cv_ptr->image.cols);
-  ASSERT_EQ(200, cv_ptr->image.step[0]);
+  ASSERT_EQ(200, static_cast<int>(cv_ptr->image.step[0]));
 }
 
 TEST(CvBridgeTest, imageMessageConversion)
@@ -118,8 +118,8 @@ TEST(CvBridgeTest, imageMessageConversion)
   imgmsg.step = imgmsg.width * 32 / 8 * 1;
   imgmsg.data.resize(imgmsg.height * imgmsg.step);
   ASSERT_NO_THROW(cv_ptr = cv_bridge::toCvCopy(imgmsg, imgmsg.encoding));
-  ASSERT_EQ(imgmsg.height, cv_ptr->image.rows);
-  ASSERT_EQ(imgmsg.width, cv_ptr->image.cols);
+  ASSERT_EQ(static_cast<int>(imgmsg.height), cv_ptr->image.rows);
+  ASSERT_EQ(static_cast<int>(imgmsg.width), cv_ptr->image.cols);
   ASSERT_EQ(1, cv_ptr->image.channels());
   ASSERT_EQ(imgmsg.step, cv_ptr->image.step[0]);
 
@@ -128,8 +128,8 @@ TEST(CvBridgeTest, imageMessageConversion)
   imgmsg.step = imgmsg.width * 32 / 8 * 10;
   imgmsg.data.resize(imgmsg.height * imgmsg.step);
   ASSERT_NO_THROW(cv_ptr = cv_bridge::toCvCopy(imgmsg, imgmsg.encoding));
-  ASSERT_EQ(imgmsg.height, cv_ptr->image.rows);
-  ASSERT_EQ(imgmsg.width, cv_ptr->image.cols);
+  ASSERT_EQ(static_cast<int>(imgmsg.height), cv_ptr->image.rows);
+  ASSERT_EQ(static_cast<int>(imgmsg.width), cv_ptr->image.cols);
   ASSERT_EQ(10, cv_ptr->image.channels());
   ASSERT_EQ(imgmsg.step, cv_ptr->image.step[0]);
 }

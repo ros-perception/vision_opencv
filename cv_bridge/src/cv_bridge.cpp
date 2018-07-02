@@ -614,8 +614,8 @@ CvImageConstPtr cvtColorForDisplay(
     result->header = source->header;
     result->encoding = encoding;
     result->image = cv::Mat(source->image.rows, source->image.cols, CV_8UC3);
-    for (size_t j = 0; j < source->image.rows; ++j) {
-      for (size_t i = 0; i < source->image.cols; ++i) {
+    for (size_t j = 0; j < static_cast<unsigned int>(source->image.rows); ++j) {
+      for (size_t i = 0; i < static_cast<unsigned int>(source->image.cols); ++i) {
         int label = source->image.at<int>(j, i);
         if (label == options.bg_label) {  // background label
           result->image.at<cv::Vec3b>(j, i) = cv::Vec3b(0, 0, 0);
@@ -667,8 +667,8 @@ CvImageConstPtr cvtColorForDisplay(
       cv::applyColorMap(img_scaled->image, img_scaled->image, options.colormap);
       // Fill black color to the nan region.
       if (source->encoding == enc::TYPE_32FC1) {
-        for (size_t j = 0; j < source->image.rows; ++j) {
-          for (size_t i = 0; i < source->image.cols; ++i) {
+        for (size_t j = 0; j < static_cast<unsigned int>(source->image.rows); ++j) {
+          for (size_t i = 0; i < static_cast<unsigned int>(source->image.cols); ++i) {
             float float_value = source->image.at<float>(j, i);
             if (std::isnan(float_value)) {
               img_scaled->image.at<cv::Vec3b>(j, i) = cv::Vec3b(0, 0, 0);

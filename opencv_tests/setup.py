@@ -13,6 +13,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
     ],
     install_requires=['launch','setuptools'],
+    zip_safe=True,
     author='Ethan Gao',
     author_email='ethan.gao@linux.intel.com',
     maintainer='Ethan Gao',

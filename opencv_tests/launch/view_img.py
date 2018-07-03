@@ -1,4 +1,4 @@
-from launch.exit_handler import default_exit_handler, restart_exit_handler
+from launch.legacy.exit_handler import default_exit_handler, restart_exit_handler
 from ros2run.api import get_executable_path
 
 

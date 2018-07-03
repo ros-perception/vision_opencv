@@ -6,13 +6,13 @@ package_name = 'opencv_tests'
 setup(
     name=package_name,
     version='0.4.0',
-    packages=find_packages(),
+    packages=find_packages(exclude=['launch']),
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
     ],
-    install_requires=['launch','setuptools'],
+    install_requires=['setuptools'],
     zip_safe=True,
     author='Ethan Gao',
     author_email='ethan.gao@linux.intel.com',

@@ -34,6 +34,9 @@ if(PYTHON_VERSION_MAJOR VERSION_EQUAL 3)
   add_definitions(-DPYTHON3)
 endif()
 
+#(TODO gaoethan: address the known warning in more elegant way. this is limited by
+# inherent system definiion to import numpy in module.hpp
+add_compile_options(-Wno-conversion-null -Wno-unused-function -Wno-return-type)
 if(OpenCV_VERSION_MAJOR VERSION_EQUAL 3)
   add_library(${PROJECT_NAME}_boost module.cpp module_opencv3.cpp)
 else()

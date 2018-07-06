@@ -31,6 +31,16 @@ int convert_to_CvMat2(const PyObject * o, cv::Mat & m);
 
 PyObject * pyopencv_from(const cv::Mat & m);
 
+#ifdef __clang__
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wconversion-null"
+# pragma clang diagnostic ignored "-Wreturn-type"
+#elif __GNUC__
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wconversion-null"
+# pragma GCC diagnostic ignored "-Wreturn-type"
+#endif
+
 #if PYTHON3
 static int do_numpy_import()
 {
@@ -41,6 +51,12 @@ static void do_numpy_import()
 {
   import_array();
 }
+#endif
+
+#ifdef __clang__
+# pragma clang diagnostic pop
+#elif __GNUC__
+# pragma GCC diagnostic pop
 #endif
 
 #endif  // MODULE_HPP_

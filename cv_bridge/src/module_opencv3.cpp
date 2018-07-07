@@ -79,7 +79,8 @@ private:
 
 using namespace cv;
 
-static PyObject * failmsgp(const char * fmt, ...)
+
+[[gnu::unused]] static PyObject * failmsgp(const char * fmt, ...)
 {
   char str[1000];
 

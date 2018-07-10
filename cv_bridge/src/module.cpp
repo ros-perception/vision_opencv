@@ -115,5 +115,5 @@ BOOST_PYTHON_MODULE(cv_bridge_boost)
       "  - do_dynamic_scaling (bool): flag to do dynamic scaling with min/max value\n"
       "  - min_image_value (float): minimum pixel value for dynamic scaling\n"
       "  - max_image_value (float): maximum pixel value for dynamic scaling\n"
-    ));
+  ));
 }

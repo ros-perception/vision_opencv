@@ -169,7 +169,9 @@ class CvBridge(object):
         dtype, n_channels = self.encoding_to_dtype_with_channels(img_msg.encoding)
         dtype = np.dtype(dtype)
         dtype = dtype.newbyteorder('>' if img_msg.is_bigendian else '<')
-        buf = np.asarray(img_msg.data, dtype=dtype)
+
+        buf = np.asarray(img_msg.data, dtype=dtype) if isinstance(img_msg.data, list) else img_msg.data
+
         if n_channels == 1:
             im = np.ndarray(shape=(img_msg.height, img_msg.width),
                             dtype=dtype, buffer=buf)

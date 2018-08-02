@@ -6,7 +6,19 @@ find_package(catkin REQUIRED COMPONENTS rosconsole sensor_msgs)
 if(NOT ANDROID)
   find_package(PythonLibs)
   if(PYTHONLIBS_VERSION_STRING VERSION_LESS 3)
-    find_package(Boost REQUIRED python)
+    find_package(Boost QUIET)
+    if(Boost_VERSION LESS 106700)
+      find_package(Boost REQUIRED COMPONENTS python)
+    else()
+      # The boost_python library has been renamed in Boost 1.67 and the FindBoost.cmake
+      # module requires a Python version suffix:
+      #
+      # References:
+      # - https://www.boost.org/docs/libs/1_67_0/libs/python/doc/html/rn.html
+      # - https://cmake.org/cmake/help/v3.12/module/FindBoost.html
+      #
+      find_package(Boost REQUIRED COMPONENTS python27)
+    endif()
   else()
     find_package(Boost REQUIRED python3)
   endif()

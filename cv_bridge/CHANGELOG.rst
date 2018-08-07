@@ -2,6 +2,14 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.3 (2018-08-07)
+------------------
+* fix the build warning with colcon building
+* optimize buffer type of imgmsg_to_cv2()
+* add python3_opencv and python3_numpy as dependency
+* uncrustify 0.67 coding style alignment
+* Contributors: Mikael Arguedas, Lars Berscheid, Ethan Gao
+
 2.0.2 (2018-06-29)
 ------------------
 * fix rosdep keys issue of opencv3

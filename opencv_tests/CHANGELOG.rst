@@ -2,6 +2,13 @@
 Changelog for package opencv_tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.3 (2018-08-07)
+------------------
+* set zip_safe to avoid warning during installation
+* migrate launch to launch.legacy
+* fix exception of running launch after sourcing opencv_tests
+* Contributors: Ethan Gao
+
 2.0.2 (2018-06-29)
 ------------------
 

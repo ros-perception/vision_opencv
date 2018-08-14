@@ -2,6 +2,12 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.4 (2018-08-14)
+------------------
+* Add libopencv-dev as dependency of cv_bridge
+* Replace assert_equal with assert to remove dependency to nose package
+* Contributor: Ethan Gao
+
 2.0.3 (2018-08-07)
 ------------------
 * fix the build warning with colcon building

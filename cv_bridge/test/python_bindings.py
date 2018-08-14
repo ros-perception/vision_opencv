@@ -1,5 +1,4 @@
 import cv_bridge
-from nose.tools import assert_equal
 import numpy as np
 
 
@@ -20,9 +19,9 @@ def test_cvtColorForDisplay():
             label[min_y:max_y, min_x:max_x] = label_value
             label_value += 1
     label_viz = cv_bridge.cvtColorForDisplay(label, '32SC1', 'bgr8')
-    assert_equal(label_viz.dtype, np.uint8)
-    assert_equal(label_viz.min(), 0)
-    assert_equal(label_viz.max(), 255)
+    assert label_viz.dtype == np.uint8
+    assert label_viz.min() == 0
+    assert label_viz.max() == 255
 
     # Check that mono8 conversion returns the right shape.
     bridge = cv_bridge.CvBridge()
@@ -31,4 +30,4 @@ def test_cvtColorForDisplay():
 
     input_msg = bridge.cv2_to_imgmsg(mono, encoding='mono8')
     output = bridge.imgmsg_to_cv2(input_msg, desired_encoding='mono8')
-    assert_equal(output.shape, (100, 100))
+    assert output.shape == (100, 100)

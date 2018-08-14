@@ -21,6 +21,7 @@
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
   <buildtool_depend>python_cmake_module</buildtool_depend>
 
+  <depend>libopencv-dev</depend>
   <depend>boost</depend>
   <depend>sensor_msgs</depend>
 

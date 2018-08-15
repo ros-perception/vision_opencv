@@ -46,10 +46,9 @@ add_subdirectory(src)
 # This is overwritten each loop, but which one it points to doesn't really matter.
 set(cv_bridge_lib_dir "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
 
-find_package(ament_lint_auto REQUIRED)
-ament_lint_auto_find_test_dependencies()
-
 if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
   add_subdirectory(test)
 endif()
 

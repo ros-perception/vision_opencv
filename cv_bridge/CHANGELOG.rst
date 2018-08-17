@@ -2,6 +2,14 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.5 (2018-08-17)
+------------------
+* remove redundant ament_auto_lint dependency to release package
+* fix test_encode_decode_cv2_compressed runtime error with JPEG2000
+* change python3-numpy as build and execution dependency to fix building
+  error while releasing package
+* Contributor: Ethan Gao
+
 2.0.4 (2018-08-14)
 ------------------
 * Add libopencv-dev as dependency of cv_bridge

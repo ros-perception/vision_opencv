@@ -21,8 +21,9 @@
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
   <buildtool_depend>python_cmake_module</buildtool_depend>
 
-  <depend>libopencv-dev</depend>
   <depend>boost</depend>
+  <depend>libopencv-dev</depend>
+  <depend>python3-numpy</depend>
   <depend>sensor_msgs</depend>
 
   <exec_depend>ament_index_python</exec_depend>
@@ -31,8 +32,6 @@
   <test_depend>ament_cmake_pytest</test_depend>
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
-
-  <test_depend>python3-numpy</test_depend>
   <test_depend>python3-opencv</test_depend>
 
   <doc_depend>dvipng</doc_depend>

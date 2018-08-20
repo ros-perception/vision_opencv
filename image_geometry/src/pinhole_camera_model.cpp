@@ -30,23 +30,6 @@ struct PinholeCameraModel::Cache
 
 PinholeCameraModel::PinholeCameraModel()
 {
-  cam_info_.header.stamp.sec = 0;
-  cam_info_.header.stamp.nanosec = 0;
-  cam_info_.header.frame_id = "";
-  cam_info_.height = 0;
-  cam_info_.width = 0;
-  cam_info_.distortion_model = "";
-  std::fill(cam_info_.d.begin(), cam_info_.d.end(), 0);
-  std::fill(cam_info_.k.begin(), cam_info_.k.end(), 0);
-  std::fill(cam_info_.r.begin(), cam_info_.r.end(), 0);
-  std::fill(cam_info_.p.begin(), cam_info_.p.end(), 0);
-  cam_info_.binning_x = 0;
-  cam_info_.binning_y = 0;
-  cam_info_.roi.x_offset = 0;
-  cam_info_.roi.y_offset = 0;
-  cam_info_.roi.height = 0;
-  cam_info_.roi.width = 0;
-  cam_info_.roi.do_rectify = false;
 }
 
 PinholeCameraModel& PinholeCameraModel::operator=(const PinholeCameraModel& other)

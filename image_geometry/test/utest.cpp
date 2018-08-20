@@ -27,21 +27,11 @@ protected:
                   0.0, 0.0, 1.0, 0.0};
 
 
-    cam_info_.header.stamp.sec = 0;
-    cam_info_.header.stamp.nanosec = 0;
     cam_info_.header.frame_id = "tf_frame";
     cam_info_.height = 480;
     cam_info_.width  = 640;
     cam_info_.distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;
-    // No binning
-    cam_info_.binning_x = 0;
-    cam_info_.binning_y = 0;
     // No ROI
-    cam_info_.roi.x_offset = 0;
-    cam_info_.roi.y_offset = 0;
-    cam_info_.roi.height = 0;
-    cam_info_.roi.width = 0;
-    cam_info_.roi.do_rectify = false;
     cam_info_.d.resize(5);
     std::copy(D, D+5, cam_info_.d.begin());
     std::copy(K, K+9, cam_info_.k.begin());

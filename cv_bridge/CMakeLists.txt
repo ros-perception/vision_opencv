@@ -18,6 +18,8 @@ find_package(OpenCV 3 REQUIRED
     opencv_core
     opencv_imgproc
     opencv_imgcodecs
+    PATHS /usr/local/taraxl-opencv
+  NO_DEFAULT_PATH
   CONFIG
 )
 

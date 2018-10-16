@@ -5,10 +5,17 @@ find_package(catkin REQUIRED COMPONENTS rosconsole sensor_msgs)
 
 if(NOT ANDROID)
   find_package(PythonLibs)
-  if(PYTHONLIBS_VERSION_STRING VERSION_LESS 3)
+  if(PYTHONLIBS_VERSION_STRING MATCHES "^([0-9]+)\\.([0-9]+)\\.([0-9]+)")
+    set(Python_VERSION_MAJOR "${CMAKE_MATCH_1}")
+    set(Python_VERSION_MINOR "${CMAKE_MATCH_2}")
+    set(Python_VERSION_PATCH "${CMAKE_MATCH_3}")
     find_package(Boost QUIET)
     if(Boost_VERSION LESS 106700)
-      find_package(Boost REQUIRED COMPONENTS python)
+      if(Python_VERSION_MAJOR LESS 3)
+        find_package(Boost REQUIRED COMPONENTS python)
+      else()
+        find_package(Boost REQUIRED COMPONENTS python3)
+      endif()
     else()
       # The boost_python library has been renamed in Boost 1.67 and the FindBoost.cmake
       # module requires a Python version suffix:
@@ -17,10 +24,10 @@ if(NOT ANDROID)
       # - https://www.boost.org/docs/libs/1_67_0/libs/python/doc/html/rn.html
       # - https://cmake.org/cmake/help/v3.12/module/FindBoost.html
       #
-      find_package(Boost REQUIRED COMPONENTS python27)
+      find_package(Boost REQUIRED COMPONENTS python${Python_VERSION_MAJOR}${Python_VERSION_MINOR})
     endif()
   else()
-    find_package(Boost REQUIRED python3)
+    message(FATAL_ERROR "Could not detect the Python version from string '${PYTHONLIBS_VERSION_STRING}' required to find the respective boost_python module.")
   endif()
 else()
 find_package(Boost REQUIRED)

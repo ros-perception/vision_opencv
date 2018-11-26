@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.1.0 (2018-11-26)
+------------------
 * find boost_python on boost 1.58 (<1.65) (`#246 <https://github.com/ros-perception/vision_opencv/issues/246>`_)
 * Contributors: Mikael Arguedas
 

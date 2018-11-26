@@ -2,8 +2,8 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.1.0 (2018-11-26)
+------------------
 * python 3 compatibility in test (`#244 <https://github.com/ros-perception/vision_opencv/issues/244>`_)
 * Ros2 revert handmade message initialization (`#245 <https://github.com/ros-perception/vision_opencv/issues/245>`_)
   * revert initialization in PinholeCameraModel constructor (https://github.com/ros2/vision_opencv/pull/1/commits/d2e5edb207c58a54737c4949efe0ac9d4e638962)

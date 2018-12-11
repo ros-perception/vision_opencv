@@ -16,7 +16,7 @@ find_package(OpenCV REQUIRED COMPONENTS calib3d core highgui imgproc)
 find_package(sensor_msgs REQUIRED)
 
 include_directories(include)
-
+add_subdirectory(src)
 # add a library
 add_library(${PROJECT_NAME}
   src/pinhole_camera_model.cpp src/stereo_camera_model.cpp

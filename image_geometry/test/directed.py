@@ -16,9 +16,9 @@ from __future__ import print_function
 
 import unittest
 
-import sensor_msgs.msg
+from image_geometry import PinholeCameraModel, StereoCameraModel
 
-from src.image_geometry import PinholeCameraModel, StereoCameraModel
+import sensor_msgs.msg
 
 
 class TestDirected(unittest.TestCase):

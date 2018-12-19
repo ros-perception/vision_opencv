@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(image_geometry)
 
+find_package(ament_cmake_python REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 
 # Default to C++14
@@ -22,9 +23,10 @@ add_library(${PROJECT_NAME}
   src/pinhole_camera_model.cpp src/stereo_camera_model.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES})
-ament_target_dependencies(${PROJECT_NAME}
-  "OpenCV"
-  "sensor_msgs"
+ament_target_dependencies(
+  ${PROJECT_NAME}
+  OpenCV
+  sensor_msgs
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/
@@ -42,7 +44,7 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 # python install
-ament_python_install_package(src/${PROJECT_NAME})
+ament_python_install_package(${PROJECT_NAME})
 
 # image_geometry_lib_dir is passed as APPEND_LIBRARY_DIRS for each ament_add_gtest call so
 # the project library that they link against is on the library path.

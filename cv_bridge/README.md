@@ -39,8 +39,9 @@ cd /usr/lib/x86_64-linux-gnu/ && sudo ln -s libboost_python-py35.so libboost_pyt
 
 cd <YOUR_ROS2_WORKSPACE>
 git clone https://github.com/ros-perception/vision_opencv.git
+cd vision_opencv
 git checkout ros2
-src/ament/ament_tools/scripts/ament.py build --build-tests --symlink-install
+colcon build --symlink-install
 
 ```
 
@@ -54,7 +55,7 @@ Next to prepare runtime environment and run tests:
 ```bash
 
 source <YOUR_ROS2_WORKSPACE>/install/local_setup.bash
-ament test --skip-build --skip-install --only-packages cv_bridge
+colcon test
 
 ```
 

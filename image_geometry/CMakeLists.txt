@@ -4,6 +4,8 @@ project(image_geometry)
 find_package(ament_cmake_python REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 
+ament_python_install_package(${PROJECT_NAME})
+
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)

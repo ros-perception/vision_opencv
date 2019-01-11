@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.5)
 project(image_geometry)
 
+find_package(ament_cmake_python REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
+
+ament_python_install_package(${PROJECT_NAME})
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
@@ -22,9 +25,10 @@ add_library(${PROJECT_NAME}
   src/pinhole_camera_model.cpp src/stereo_camera_model.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES})
-ament_target_dependencies(${PROJECT_NAME}
-  "OpenCV"
-  "sensor_msgs"
+ament_target_dependencies(
+  ${PROJECT_NAME}
+  OpenCV
+  sensor_msgs
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/

@@ -10,7 +10,7 @@ namespace image_geometry {
  * \brief Simplifies interpreting stereo image pairs geometrically using the
  * parameters from the left and right sensor_msgs/CameraInfo.
  */
-class IMG_GEO_DECL StereoCameraModel
+class IMAGE_GEOMETRY_DECL StereoCameraModel
 {
 public:
   StereoCameraModel();

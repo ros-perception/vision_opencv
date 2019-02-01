@@ -21,7 +21,7 @@ public:
  * \brief Simplifies interpreting images geometrically using the parameters from
  * sensor_msgs/CameraInfo.
  */
-class IMG_GEO_DECL PinholeCameraModel
+class IMAGE_GEOMETRY_DECL PinholeCameraModel
 {
 public:
 

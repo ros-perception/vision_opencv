@@ -137,4 +137,21 @@ void StereoCameraModel::projectDisparityImageTo3d(const cv::Mat& disparity, cv::
   cv::reprojectImageTo3D(disparity, point_cloud, Q_, handleMissingValues);
 }
 
+
+void StereoCameraModel::reproject3dToDisparity(const cv::Point3d & xyz, float disparity, 
+                                              cv::Point2i & left_uv_rect) const
+{
+  assert(initialized());
+
+  // [X Y Z W]^T = Q * [u v d 1]^T
+  // where [x, y, z] = (X/W, Y/W, Z/W)
+
+  double d = getDisparity(xyz.z);
+  double W = Q_(3,2)*d + Q_(3,3);
+
+  int u = (int) round((xyz.x * W - Q_(0, 3)) / Q_(0, 0)); 
+  int v = (int) round((xyz.y * W - Q_(1, 3)) / Q_(1, 1)); 
+
+  left_uv_rect = cv::Point2i(u, v);
+}
 } //namespace image_geometry

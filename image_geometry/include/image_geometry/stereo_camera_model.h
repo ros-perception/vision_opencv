@@ -65,7 +65,7 @@ public:
   /**
    * \brief Project a 3d point to a rectified pixel 
    */
-  void reproject3dToDisparity(const cv::Point3d & xyz, float disparity, cv::Point2i & left_uv_rect) const;
+  void reproject3dToImage(const cv::Point3d & xyz, float disparity, cv::Point2i & left_uv_rect) const;
 
   static const double MISSING_Z;
   

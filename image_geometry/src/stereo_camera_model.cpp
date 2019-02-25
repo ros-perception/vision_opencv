@@ -138,7 +138,7 @@ void StereoCameraModel::projectDisparityImageTo3d(const cv::Mat& disparity, cv::
 }
 
 
-void StereoCameraModel::reproject3dToDisparity(const cv::Point3d & xyz, float disparity, 
+void StereoCameraModel::reproject3dToImage(const cv::Point3d & xyz, float disparity, 
                                               cv::Point2i & left_uv_rect) const
 {
   assert(initialized());

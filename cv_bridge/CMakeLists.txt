@@ -3,8 +3,10 @@ project(cv_bridge)
 
 find_package(catkin REQUIRED COMPONENTS rosconsole sensor_msgs)
 
-find_package(Boost QUIET)
 if(NOT ANDROID)
+  find_package(PythonLibs REQUIRED)
+  find_package(PythonInterp REQUIRED)
+  find_package(Boost QUIET)
   if(Boost_VERSION LESS 106700)
     set(BOOST_PYTHON_COMPONENT_SUFFIX "-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
   else()

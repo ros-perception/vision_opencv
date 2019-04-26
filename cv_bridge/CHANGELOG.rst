@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.1.1 (2019-04-26)
+------------------
 * Replace ament commands with colcon (`#263 <https://github.com/ros-perception/vision_opencv/issues/263>`_)
   Latest ros2 repo does not include ament_tools. Executing ament command results in error.
 * Contributors: Lalit Begani

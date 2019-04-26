@@ -2,6 +2,12 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [image_geometry] Enable python package installation (`#257 <https://github.com/ros-perception/vision_opencv/issues/257>`_)
+  * [image_geometry] Install python package.
+* Contributors: Michael Carroll
+
 2.1.0 (2018-11-26)
 ------------------
 * python 3 compatibility in test (`#244 <https://github.com/ros-perception/vision_opencv/issues/244>`_)

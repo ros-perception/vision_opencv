@@ -142,17 +142,17 @@ Encoding getEncoding(const std::string & encoding)
   return INVALID;
 }
 
-static const int SAME_FORMAT = -1;
+static const int SAME_ENCODING = -1;
 
-/** Return a lit of OpenCV conversion codes to get from one Format to the other
- * The key is a pair: <FromFormat, ToFormat> and the value a succession of OpenCV code conversion
+/** Return a lit of OpenCV conversion codes to get from one encoding to the other
+ * The key is a pair: <FromEncoding, ToEncoding> and the value a succession of OpenCV code conversion
  * It's not efficient code but it is only called once and the structure is small enough
  */
 std::map<std::pair<Encoding, Encoding>, std::vector<int>> getConversionCodes()
 {
   std::map<std::pair<Encoding, Encoding>, std::vector<int>> res;
   for (int i = 0; i < MAX_ENCODING; ++i) {
-    res[std::pair<Encoding, Encoding>(Encoding(i), Encoding(i))].push_back(SAME_FORMAT);
+    res[std::pair<Encoding, Encoding>(Encoding(i), Encoding(i))].push_back(SAME_ENCODING);
   }
 
   res[std::make_pair(GRAY, RGB)].push_back(cv::COLOR_GRAY2RGB);
@@ -216,18 +216,18 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
 {
   Encoding src_encod = getEncoding(src_encoding);
   Encoding dst_encod = getEncoding(dst_encoding);
-  bool is_src_color_format = enc::isColor(src_encoding) || enc::isMono(src_encoding) ||
+  bool is_src_color_encoding = enc::isColor(src_encoding) || enc::isMono(src_encoding) ||
     enc::isBayer(src_encoding) || (src_encoding == enc::YUV422) || (src_encoding == enc::YUV422_YUY2);
-  bool is_dst_color_format = enc::isColor(dst_encoding) || enc::isMono(dst_encoding) ||
+  bool is_dst_color_encoding = enc::isColor(dst_encoding) || enc::isMono(dst_encoding) ||
     enc::isBayer(dst_encoding) || (dst_encoding == enc::YUV422) || (dst_encoding == enc::YUV422_YUY2);
   bool is_num_channels_the_same =
     (enc::numChannels(src_encoding) == enc::numChannels(dst_encoding));
 
-  // If we have no color info in the source, we can only convert to the same format which
+  // If we have no color info in the source, we can only convert to the same encoding which
   // was resolved in the previous condition. Otherwise, fail
-  if (!is_src_color_format) {
-    if (is_dst_color_format) {
-      throw Exception("[" + src_encoding + "] is not a color format. but [" + dst_encoding +
+  if (!is_src_color_encoding) {
+    if (is_dst_color_encoding) {
+      throw Exception("[" + src_encoding + "] is not a color encoding. but [" + dst_encoding +
               "] is. The conversion does not make sense");
     }
     if (!is_num_channels_the_same) {
@@ -235,17 +235,17 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
               "[" + src_encoding + "] and [" + dst_encoding +
               "] do not have the same number of channel");
     }
-    return std::vector<int>(1, SAME_FORMAT);
+    return std::vector<int>(1, SAME_ENCODING);
   }
 
   // If we are converting from a color type to a non color type, we can only do so if we stick
   // to the number of channels
-  if (!is_dst_color_format) {
+  if (!is_dst_color_encoding) {
     if (!is_num_channels_the_same) {
-      throw Exception("[" + src_encoding + "] is a color format but [" + dst_encoding + "] " +
+      throw Exception("[" + src_encoding + "] is a color encoding but [" + dst_encoding + "] " +
               "is not so they must have the same OpenCV type, CV_8UC3, CV16UC1 ....");
     }
-    return std::vector<int>(1, SAME_FORMAT);
+    return std::vector<int>(1, SAME_ENCODING);
   }
 
   // If we are converting from a color type to another type, then everything is fine
@@ -265,7 +265,7 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
   if ((enc::bitDepth(src_encoding) != enc::bitDepth(dst_encoding)) &&
     (getEncoding(src_encoding) != getEncoding(dst_encoding)))
   {
-    res.push_back(SAME_FORMAT);
+    res.push_back(SAME_ENCODING);
   }
 
   return res;
@@ -349,7 +349,7 @@ CvImagePtr toCvCopyImpl(
     cv::Mat image2;
     for (size_t i = 0; i < conversion_codes.size(); ++i) {
       int conversion_code = conversion_codes[i];
-      if (conversion_code == SAME_FORMAT) {
+      if (conversion_code == SAME_ENCODING) {
         // Same number of channels, but different bit depth
         int src_depth = enc::bitDepth(src_encoding);
         int dst_depth = enc::bitDepth(dst_encoding);
@@ -585,7 +585,7 @@ CvImageConstPtr cvtColorForDisplay(
   std::string encoding = encoding_out;
   if (encoding.empty()) {
     try {
-      // Let's decide upon an output format
+      // Let's decide upon an output encoding
       if (enc::numChannels(source->encoding) == 1) {
         if ((source->encoding == enc::TYPE_32SC1) ||
           (enc::bitDepth(source->encoding) == 8) ||
@@ -700,13 +700,13 @@ CvImageConstPtr cvtColorForDisplay(
     return cvtColor(img_scaled, encoding);
   }
 
-  // If no color conversion is possible, we must "guess" the input format
+  // If no color conversion is possible, we must "guess" the input encoding
   CvImagePtr source_typed(new CvImage());
   source_typed->image = source->image;
   source_typed->header = source->header;
   source_typed->encoding = source->encoding;
 
-  // If we get the OpenCV format, if we have 1,3 or 4 channels,
+  // If we get the OpenCV encoding, if we have 1,3 or 4 channels,
   // :we are most likely in mono, BGR or BGRA modes
   if (source->encoding == "CV_8UC1") {
     source_typed->encoding = enc::MONO8;
@@ -728,7 +728,7 @@ CvImageConstPtr cvtColorForDisplay(
   }
 
   try {
-    // Now that the output is a proper color format, try to see if any conversion is possible
+    // Now that the output is a proper color encoding, try to see if any conversion is possible
     return cvtColor(source_typed, encoding);
   } catch (cv_bridge::Exception & e) {
     throw Exception(

@@ -116,7 +116,7 @@ class CvBridge(object):
         :rtype: :cpp:type:`cv::Mat`
         :raises CvBridgeError: when conversion is not possible.
 
-        If desired_encoding is ``"passthrough"``, then the returned image has the same format
+        If desired_encoding is ``"passthrough"``, then the returned image has the same encoding
         as img_msg. Otherwise desired_encoding must be one of the standard image encodings
 
         This function returns an OpenCV :cpp:type:`cv::Mat` message on success,
@@ -157,7 +157,7 @@ class CvBridge(object):
         :rtype: :cpp:type:`cv::Mat`
         :raises CvBridgeError: when conversion is not possible.
 
-        If desired_encoding is ``"passthrough"``, then the returned image has the same format
+        If desired_encoding is ``"passthrough"``, then the returned image has the same encoding
         as img_msg. Otherwise desired_encoding must be one of the standard image encodings
 
         This function returns an OpenCV :cpp:type:`cv::Mat` message on success,

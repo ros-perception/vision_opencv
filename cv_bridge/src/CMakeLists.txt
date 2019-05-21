@@ -5,6 +5,7 @@ ament_target_dependencies(${PROJECT_NAME}
   "sensor_msgs"
 )
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${OpenCV_LIBRARIES})
+set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 install(TARGETS ${PROJECT_NAME} DESTINATION lib)
 

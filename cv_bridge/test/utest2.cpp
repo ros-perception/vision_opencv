@@ -122,7 +122,7 @@ TEST(OpencvTests, testCase_encode_decode)
           }
           cv_image = cv_bridge::toCvShare(image_msg, dst_encoding);
           // We cannot convert from non-color to color
-          EXPECT_THROW(cvtColor(cv_image, src_encoding)->image, cv_bridge::Exception);
+          EXPECT_THROW((void)cvtColor(cv_image, src_encoding)->image, cv_bridge::Exception);
           continue;
         }
         // We do not support conversion to YUV422 for now, except from YUV422
@@ -135,7 +135,7 @@ TEST(OpencvTests, testCase_encode_decode)
 
         // We do not support conversion to YUV422 for now, except from YUV422
         if ((src_encoding == YUV422) && (dst_encoding != YUV422)) {
-          EXPECT_THROW(cvtColor(cv_image, src_encoding)->image, cv_bridge::Exception);
+          EXPECT_THROW((void)cvtColor(cv_image, src_encoding)->image, cv_bridge::Exception);
           continue;
         }
       }

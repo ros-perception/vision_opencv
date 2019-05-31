@@ -2,6 +2,12 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.2 (2019-05-30)
+------------------
+* Suppress Boost Python warning. (`#279 <https://github.com/ros-perception/vision_opencv/issues/279>`_)
+* silence unused return value warnings (`#276 <https://github.com/ros-perception/vision_opencv/issues/276>`_)
+* Contributors: Karsten Knese, Michael Carroll
+
 2.1.1 (2019-04-26)
 ------------------
 * Replace ament commands with colcon (`#263 <https://github.com/ros-perception/vision_opencv/issues/263>`_)
@@ -45,7 +51,7 @@ Changelog for package cv_bridge
 
 2.0.0 (2018-06-06)
 -------------------
-* Port cv_bridge to ros2 
+* Port cv_bridge to ros2
 * Remove the old inherent boost files
 * Replace boost code with newer C++ standard higher than C++11
 * Add a new readme

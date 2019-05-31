@@ -2,6 +2,9 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.2 (2019-05-30)
+------------------
+
 2.1.1 (2019-04-26)
 ------------------
 * [image_geometry] Enable python package installation (`#257 <https://github.com/ros-perception/vision_opencv/issues/257>`_)

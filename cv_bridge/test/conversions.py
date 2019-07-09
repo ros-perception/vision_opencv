@@ -47,8 +47,10 @@ class TestConversions(unittest.TestCase):
     def test_encode_decode_cv2_compressed(self):
         import numpy as np
         # from: http://docs.opencv.org/2.4/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
+        # NOTE: remove jp2(a.k.a JPEG2000) as its JASPER codec is disabled within Ubuntu opencv library
+        # due to security issues, but it works once you rebuild your opencv library with JASPER enabled
         formats = ["jpg", "jpeg", "jpe", "png", "bmp", "dib", "ppm", "pgm", "pbm",
-                   "jp2", "sr", "ras", "tif", "tiff"]  # this formats rviz is not support
+                   "sr", "ras", "tif", "tiff"]  # this formats rviz is not support
 
         cvb_en = CvBridge()
         cvb_de = CvBridge()

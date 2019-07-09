@@ -2,7 +2,7 @@ sudo: required
 dist: trusty
 language: generic
 env:
-  - ROS_DISTRO=kinetic
+  - ROS_DISTRO=melodic
 # Install system dependencies, namely ROS.
 before_install:
   # Define some config vars.
@@ -11,7 +11,7 @@ before_install:
   - export ROS_PARALLEL_JOBS='-j8 -l6'
 script:
   - echo "Testing branch $TRAVIS_BRANCH of $REPOSITORY_NAME"
-  - docker run --rm -i -v $CI_SOURCE_PATH:$CI_SOURCE_PATH -e "CI_SOURCE_PATH=$CI_SOURCE_PATH" -e "HOME=$HOME" -e "ROS_DISTRO=$ROS_DISTRO" -e "ROS_PARALLEL_JOBS=$ROS_PARALLEL_JOBS" -t ubuntu:xenial sh -c "cd $CI_SOURCE_PATH; ./.travis.sh"
+  - docker run --rm -i -v $CI_SOURCE_PATH:$CI_SOURCE_PATH -e "CI_SOURCE_PATH=$CI_SOURCE_PATH" -e "HOME=$HOME" -e "ROS_DISTRO=$ROS_DISTRO" -e "ROS_PARALLEL_JOBS=$ROS_PARALLEL_JOBS" -t ubuntu:bionic sh -c "cd $CI_SOURCE_PATH; ./.travis.sh"
 after_failure:
   - find ${HOME}/.ros/test_results -type f -exec echo "== {} ==" \; -exec cat {} \;
   - for file in ${HOME}/.ros/log/rostest-*; do echo "=== $file ==="; cat $file; done

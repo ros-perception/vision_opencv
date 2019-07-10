@@ -12,30 +12,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra)
 endif()
 
-if(NOT ANDROID)
-  find_package(PythonLibs)
-  if(PYTHONLIBS_VERSION_STRING VERSION_LESS 3)
-    find_package(Boost REQUIRED python)
-  else()
-    find_package(Boost QUIET)
-    if(Boost_VERSION LESS 106500)
-      find_package(Boost REQUIRED python)
-    else()
-      # This is a bit of a hack to suppress a warning
-      #   No header defined for python3; skipping header check
-      # Which should only affect Boost versions < 1.67
-      # Resolution for newer versions:
-      #  https://gitlab.kitware.com/cmake/cmake/issues/16391
-      if (Boost_VERSION LESS 106700)
-        set(_Boost_PYTHON3_HEADERS "boost/python.hpp")
-      endif()
-      find_package(Boost COMPONENTS python3 REQUIRED)
-    endif()
-  endif()
-else()
-  find_package(Boost REQUIRED)
-endif()
-
 find_package(sensor_msgs REQUIRED)
 find_package(OpenCV 3 REQUIRED
   COMPONENTS
@@ -47,11 +23,35 @@ find_package(OpenCV 3 REQUIRED
 
 include_directories(include)
 
-if(NOT ANDROID)
-  add_subdirectory(python)
-endif()
+add_library(
+  ${PROJECT_NAME}
+  SHARED
+  src/cv_bridge.cpp
+  src/rgb_colors.cpp
+)
 
-add_subdirectory(src)
+ament_target_dependencies(
+  ${PROJECT_NAME}
+  "OpenCV"
+  "sensor_msgs"
+)
+
+if(NOT ANDROID)
+  find_package(PythonLibs 3 REQUIRED)
+  find_package(pybind11_vendor REQUIRED)
+  find_package(pybind11 CONFIG REQUIRED)
+
+  pybind11_add_module(
+    ${PROJECT_NAME}_pybind11
+    SHARED
+    ./src/ndarray_converter.cpp
+  )
+
+  target_link_libraries(${PROJECT_NAME}_pybind11
+    PUBLIC
+    ${OpenCV_LIBS}
+  )
+endif()
 
 # cv_bridge_lib_dir is passed as APPEND_LIBRARY_DIRS for each ament_add_gtest call so
 # the project library that they link against is on the library path.
@@ -60,7 +60,7 @@ add_subdirectory(src)
 set(cv_bridge_lib_dir "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
 
 if(BUILD_TESTING)
-  add_subdirectory(test)
+  #  add_subdirectory(test)
 endif()
 
 ament_export_dependencies(OpenCV)

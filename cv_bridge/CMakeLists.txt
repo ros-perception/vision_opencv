@@ -45,12 +45,19 @@ if(NOT ANDROID)
     ${PROJECT_NAME}_pybind11
     SHARED
     ./src/ndarray_converter.cpp
+    ./src/module.cpp
   )
 
   target_link_libraries(${PROJECT_NAME}_pybind11
     PUBLIC
     ${OpenCV_LIBS}
+    ${PROJECT_NAME}
   )
+  install(
+    TARGETS ${PROJECT_NAME}_pybind11
+    DESTINATION ${PYTHON_INSTALL_DIR}/${PROJECT_NAME}/pybind11/
+  )
+  add_subdirectory(python)
 endif()
 
 # cv_bridge_lib_dir is passed as APPEND_LIBRARY_DIRS for each ament_add_gtest call so
@@ -60,7 +67,7 @@ endif()
 set(cv_bridge_lib_dir "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
 
 if(BUILD_TESTING)
-  #  add_subdirectory(test)
+   add_subdirectory(test)
 endif()
 
 ament_export_dependencies(OpenCV)

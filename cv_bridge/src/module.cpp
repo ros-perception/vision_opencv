@@ -33,55 +33,44 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
 
-#include "module.hpp"
+#include "pybind11/pybind11.h"
+#include "ndarray_converter.hpp"
+#include "cv_bridge/cv_bridge.h"
+
 #include <string>
 
-PyObject * mod_opencv;
+namespace py = pybind11;
 
-bp::object
-cvtColor2Wrap(bp::object obj_in, const std::string & encoding_in, const std::string & encoding_out)
+cv::Mat
+cvtColor2Wrap(cv::Mat m, const std::string & encoding_in, const std::string & encoding_out)
 {
-  // Convert the Python input to an image
-  cv::Mat mat_in;
-  convert_to_CvMat2(obj_in.ptr(), mat_in);
-
   // Call cv_bridge for color conversion
   cv_bridge::CvImagePtr cv_image(new cv_bridge::CvImage(
-      std_msgs::msg::Header(), encoding_in, mat_in));
-
-  cv::Mat mat = cv_bridge::cvtColor(cv_image, encoding_out)->image;
-
-  return bp::object(boost::python::handle<>(pyopencv_from(mat)));
+      std_msgs::msg::Header(), encoding_in, m));
+  return cv_bridge::cvtColor(cv_image, encoding_out)->image;
 }
 
-bp::object
+cv::Mat
 cvtColorForDisplayWrap(
-  bp::object obj_in,
+  cv::Mat source,
   const std::string & encoding_in,
   const std::string & encoding_out,
   bool do_dynamic_scaling = false,
   double min_image_value = 0.0,
   double max_image_value = 0.0)
 {
-  // Convert the Python input to an image
-  cv::Mat mat_in;
-  convert_to_CvMat2(obj_in.ptr(), mat_in);
-
   cv_bridge::CvImagePtr cv_image(new cv_bridge::CvImage(
-      std_msgs::msg::Header(), encoding_in, mat_in));
+      std_msgs::msg::Header(), encoding_in, source));
 
   cv_bridge::CvtColorForDisplayOptions options;
   options.do_dynamic_scaling = do_dynamic_scaling;
   options.min_image_value = min_image_value;
   options.max_image_value = max_image_value;
-  cv::Mat mat = cv_bridge::cvtColorForDisplay(/*source=*/ cv_image,
-      /*encoding_out=*/ encoding_out,
-      /*options=*/ options)->image;
-
-  return bp::object(boost::python::handle<>(pyopencv_from(mat)));
+  cv::Mat mat_out = cv_bridge::cvtColorForDisplay(cv_image,
+      encoding_out,
+      options)->image;
+  return mat_out;
 }
-
-BOOST_PYTHON_FUNCTION_OVERLOADS(cvtColorForDisplayWrap_overloads, cvtColorForDisplayWrap, 3, 6)
 
 int CV_MAT_CNWrap(int i)
 {
@@ -93,6 +82,31 @@ int CV_MAT_DEPTHWrap(int i)
   return CV_MAT_DEPTH(i);
 }
 
+PYBIND11_MODULE(cv_bridge_pybind11, m)
+{
+  NDArrayConverter::init_numpy();
+  m.def("getCvType", &cv_bridge::getCvType,
+    "Get the OpenCV type enum corresponding to the encoding.",
+    py::arg("encoding"));
+  m.def("cvtColor2", cvtColor2Wrap,
+    "Convert an CvImage to another encoding using toCvCopy rules.",
+    py::arg("m"), py::arg("encoding_in"), py::arg("encoding_out"));
+  m.def("CV_MAT_CNWrap", CV_MAT_CNWrap,
+    "Call CV_MAT_CN utility macro");
+  m.def("CV_MAT_DEPTHWrap", CV_MAT_DEPTHWrap,
+    "Call CV_MATH_DEPTH utility macro");
+  m.def("cvtColorForDisplay", cvtColorForDisplayWrap,
+    "Convert image to display with specified encodings.",
+     py::arg("source"),
+     py::arg("encoding_in"),
+     py::arg("encoding_out"),
+     py::arg("do_dynamic_scaling") = false,
+     py::arg("min_image_value") = 0.0,
+     py::arg("max_image_value") = 0.0
+   );
+}
+
+/*
 BOOST_PYTHON_MODULE(cv_bridge_boost)
 {
   do_numpy_import();
@@ -117,3 +131,4 @@ BOOST_PYTHON_MODULE(cv_bridge_boost)
       "  - max_image_value (float): maximum pixel value for dynamic scaling\n"
   ));
 }
+*/

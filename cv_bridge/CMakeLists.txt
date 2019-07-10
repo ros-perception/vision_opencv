@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(cv_bridge)
 
-find_package(ament_cmake_python REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 
 # Default to C++14
@@ -38,6 +37,9 @@ ament_target_dependencies(
 )
 
 if(NOT ANDROID)
+  find_package(ament_cmake_python REQUIRED)
+  _ament_cmake_python_register_environment_hook()
+
   find_package(PythonLibs 3 REQUIRED)
   find_package(pybind11_vendor REQUIRED)
   find_package(pybind11 CONFIG REQUIRED)
@@ -59,6 +61,7 @@ if(NOT ANDROID)
     TARGETS ${PROJECT_NAME}_pybind11
     DESTINATION ${PYTHON_INSTALL_DIR}/${PROJECT_NAME}/pybind11/
   )
+
   add_subdirectory(python)
 endif()
 

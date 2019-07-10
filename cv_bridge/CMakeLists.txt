@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(cv_bridge)
 
+find_package(ament_cmake_python REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 
 # Default to C++14
@@ -53,6 +54,7 @@ if(NOT ANDROID)
     ${OpenCV_LIBS}
     ${PROJECT_NAME}
   )
+
   install(
     TARGETS ${PROJECT_NAME}_pybind11
     DESTINATION ${PYTHON_INSTALL_DIR}/${PROJECT_NAME}/pybind11/

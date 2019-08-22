@@ -17,8 +17,8 @@ class TestConversions(unittest.TestCase):
         cvb_en = CvBridge()
         cvb_de = CvBridge()
 
-        for w in range(100, 800, 100):
-            for h in range(100, 800, 100):
+        for w in range(200, 800, 200):
+            for h in range(200, 800, 200):
                 for f in fmts:
                     for channels in ([], 1, 2, 3, 4, 5):
                         if channels == []:
@@ -48,8 +48,8 @@ class TestConversions(unittest.TestCase):
         cvb_en = CvBridge()
         cvb_de = CvBridge()
 
-        for w in range(100, 800, 100):
-            for h in range(100, 800, 100):
+        for w in range(200, 800, 200):
+            for h in range(200, 800, 200):
                 for f in formats:
                     for channels in ([], 1, 3):
                         if channels == []:

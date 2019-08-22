@@ -89,11 +89,11 @@ class CvBridge(object):
         return '%sC%d' % (self.numpy_type_to_cvtype[dtype.name], n_channels)
 
     def cvtype2_to_dtype_with_channels(self, cvtype):
-        from cv_bridge.boost.cv_bridge_boost import CV_MAT_CNWrap, CV_MAT_DEPTHWrap
+        from cv_bridge.pybind11.cv_bridge_pybind11 import CV_MAT_CNWrap, CV_MAT_DEPTHWrap
         return self.cvdepth_to_numpy_depth[CV_MAT_DEPTHWrap(cvtype)], CV_MAT_CNWrap(cvtype)
 
     def encoding_to_cvtype2(self, encoding):
-        from cv_bridge.boost.cv_bridge_boost import getCvType
+        from cv_bridge.pybind11.cv_bridge_pybind11 import getCvType
 
         try:
             return getCvType(encoding)
@@ -135,7 +135,7 @@ class CvBridge(object):
         if desired_encoding == 'passthrough':
             return im
 
-        from cv_bridge.boost.cv_bridge_boost import cvtColor2
+        from cv_bridge.pybind11.cv_bridge_pybind11 import cvtColor2
 
         try:
             res = cvtColor2(im, 'bgr8', desired_encoding)
@@ -185,7 +185,7 @@ class CvBridge(object):
         if desired_encoding == 'passthrough':
             return im
 
-        from cv_bridge.boost.cv_bridge_boost import cvtColor2
+        from cv_bridge.pybind11.cv_bridge_pybind11 import cvtColor2
 
         try:
             res = cvtColor2(im, img_msg.encoding, desired_encoding)

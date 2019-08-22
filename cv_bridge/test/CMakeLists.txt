@@ -18,7 +18,9 @@ ament_add_gtest(${PROJECT_NAME}-utest
   test_compression.cpp
   utest.cpp utest2.cpp
   test_rgb_colors.cpp
-  APPEND_LIBRARY_DIRS "${cv_bridge_lib_dir}")
+  APPEND_LIBRARY_DIRS "${cv_bridge_lib_dir}"
+)
+
 target_link_libraries(${PROJECT_NAME}-utest
   ${PROJECT_NAME}
   ${OpenCV_LIBRARIES}
@@ -26,6 +28,19 @@ target_link_libraries(${PROJECT_NAME}-utest
 
 # enable cv_bridge python tests
 find_package(ament_cmake_pytest REQUIRED)
-ament_add_pytest_test(enumerants.py "enumerants.py")
-ament_add_pytest_test(conversions.py "conversions.py" TIMEOUT 600 ${SKIP_TEST})
-ament_add_pytest_test(python_bindings.py "python_bindings.py")
+ament_add_pytest_test(
+  enumerants.py "enumerants.py"
+  APPEND_LIBRARY_DIRS ${cv_bridge_lib_dir}
+)
+
+ament_add_pytest_test(
+  conversions.py "conversions.py"
+  TIMEOUT 600
+  ${SKIP_TEST}
+  APPEND_LIBRARY_DIRS ${cv_bridge_lib_dir}
+)
+
+ament_add_pytest_test(
+  python_bindings.py "python_bindings.py"
+  APPEND_LIBRARY_DIRS ${cv_bridge_lib_dir}
+)

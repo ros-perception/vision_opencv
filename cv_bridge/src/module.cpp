@@ -105,30 +105,3 @@ PYBIND11_MODULE(cv_bridge_pybind11, m)
      py::arg("max_image_value") = 0.0
    );
 }
-
-/*
-BOOST_PYTHON_MODULE(cv_bridge_boost)
-{
-  do_numpy_import();
-  mod_opencv = PyImport_ImportModule("cv2");
-
-  // Wrap the function to get encodings as OpenCV types
-  boost::python::def("getCvType", cv_bridge::getCvType);
-  boost::python::def("cvtColor2", cvtColor2Wrap);
-  boost::python::def("CV_MAT_CNWrap", CV_MAT_CNWrap);
-  boost::python::def("CV_MAT_DEPTHWrap", CV_MAT_DEPTHWrap);
-  boost::python::def("cvtColorForDisplay", cvtColorForDisplayWrap,
-    cvtColorForDisplayWrap_overloads(
-      boost::python::args("source", "encoding_in", "encoding_out", "do_dynamic_scaling",
-      "min_image_value", "max_image_value"),
-      "Convert image to display with specified encodings.\n\n"
-      "Args:\n"
-      "  - source (numpy.ndarray): input image\n"
-      "  - encoding_in (str): input image encoding\n"
-      "  - encoding_out (str): encoding to which the image conveted\n"
-      "  - do_dynamic_scaling (bool): flag to do dynamic scaling with min/max value\n"
-      "  - min_image_value (float): minimum pixel value for dynamic scaling\n"
-      "  - max_image_value (float): maximum pixel value for dynamic scaling\n"
-  ));
-}
-*/

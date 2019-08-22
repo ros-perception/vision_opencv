@@ -13,7 +13,8 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(sensor_msgs REQUIRED)
-find_package(OpenCV 3 REQUIRED
+
+find_package(OpenCV REQUIRED
   COMPONENTS
     opencv_core
     opencv_imgproc

@@ -132,7 +132,8 @@ bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
 
   // Figure out how to handle the distortion
   if (cam_info_.distortion_model == sensor_msgs::distortion_models::PLUMB_BOB ||
-      cam_info_.distortion_model == sensor_msgs::distortion_models::RATIONAL_POLYNOMIAL) {
+      cam_info_.distortion_model == sensor_msgs::distortion_models::RATIONAL_POLYNOMIAL ||
+      cam_info_.distortion_model == sensor_msgs::distortion_models::EQUIDISTANT) {
     // If any distortion coefficient is non-zero, then need to apply the distortion
     cache_->distortion_state = NONE;
     for (size_t i = 0; i < cam_info_.D.size(); ++i)
@@ -448,10 +449,16 @@ void PinholeCameraModel::initRectificationMaps() const
         P_binned(1,3) *= scale_y;
       }
     }
-    
-    // Note: m1type=CV_16SC2 to use fast fixed-point maps (see cv::remap)
-    cv::initUndistortRectifyMap(K_binned, D_, R_, P_binned, binned_resolution,
-                                CV_16SC2, cache_->full_map1, cache_->full_map2);
+
+    if (cam_info_.distortion_model == sensor_msgs::distortion_models::PLUMB_BOB ||
+        cam_info_.distortion_model == sensor_msgs::distortion_models::RATIONAL_POLYNOMIAL){
+      // Note: m1type=CV_16SC2 to use fast fixed-point maps (see cv::remap)
+      cv::initUndistortRectifyMap(K_binned, D_, R_, P_binned, binned_resolution,
+                                  CV_16SC2, cache_->full_map1, cache_->full_map2);
+    } else if (cam_info_.distortion_model == sensor_msgs::distortion_models::EQUIDISTANT) {
+      cv::fisheye::initUndistortRectifyMap(K_binned, D_, R_, P_binned, binned_resolution,
+                                           CV_16SC2, cache_->full_map1, cache_->full_map2);
+    }
     cache_->full_maps_dirty = false;
   }
 

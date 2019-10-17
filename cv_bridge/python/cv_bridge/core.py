@@ -255,7 +255,8 @@ class CvBridge(object):
         import numpy as np
         if not isinstance(cvim, (np.ndarray, np.generic)):
             raise TypeError('Your input type is not a numpy array')
-        img_msg = sensor_msgs.msg.Image()
+        data = cvim.tostring()
+        img_msg = sensor_msgs.msg.Image(data=data)
         img_msg.height = cvim.shape[0]
         img_msg.width = cvim.shape[1]
         if len(cvim.shape) < 3:
@@ -272,7 +273,6 @@ class CvBridge(object):
                                     % (encoding, cv_type))
         if cvim.dtype.byteorder == '>':
             img_msg.is_bigendian = True
-        img_msg.data = cvim.tostring()
         img_msg.step = len(img_msg.data) // img_msg.height
 
         return img_msg

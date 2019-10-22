@@ -45,7 +45,7 @@ find_package(OpenCV 3 REQUIRED
   CONFIG
 )
 
-include_directories(include)
+include_directories(include ${Boost_INCLUDE_DIRS})
 
 if(NOT ANDROID)
   add_subdirectory(python)

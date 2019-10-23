@@ -227,7 +227,7 @@ class CvBridge(object):
         cmprs_img_msg.format = dst_format
         ext_format = '.' + dst_format
         try:
-            cmprs_img_msg.data = np.array(cv2.imencode(ext_format, cvim)[1]).tostring()
+            cmprs_img_msg.data.frombytes(np.array(cv2.imencode(ext_format, cvim)[1]).tobytes())
         except RuntimeError as e:
             raise CvBridgeError(e)
 
@@ -272,7 +272,7 @@ class CvBridge(object):
                                     % (encoding, cv_type))
         if cvim.dtype.byteorder == '>':
             img_msg.is_bigendian = True
-        img_msg.data = cvim.tostring()
+        img_msg.data.frombytes(cvim.tobytes())
         img_msg.step = len(img_msg.data) // img_msg.height
 
         return img_msg

@@ -2,6 +2,13 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.3 (2019-10-23)
+------------------
+* populate array.array directly instead of converting to and from a string (`#305 <https://github.com/ros-perception/vision_opencv/issues/305>`_)
+* include Boost to fix Windows build (`#290 <https://github.com/ros-perception/vision_opencv/issues/290>`_)
+* Export interfaces for Win32 Shared Lib (`#301 <https://github.com/ros-perception/vision_opencv/issues/301>`_)
+* Contributors: Dirk Thomas, Jonathan Noyola, Sean Yen
+
 2.1.2 (2019-05-30)
 ------------------
 * Suppress Boost Python warning. (`#279 <https://github.com/ros-perception/vision_opencv/issues/279>`_)

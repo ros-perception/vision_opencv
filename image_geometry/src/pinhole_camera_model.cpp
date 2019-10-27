@@ -338,7 +338,10 @@ void PinholeCameraModel::rectifyImage(const cv::Mat& raw, cv::Mat& rectified, in
       break;
     default:
       assert(cache_->distortion_state == UNKNOWN);
-      throw Exception("Cannot call rectifyImage when distortion is unknown.");
+      throw Exception("Cannot call rectifyImage when distortion is unknown. Current supported distortion models are: "+
+        sensor_msgs::distortion_models::PLUMB_BOB+" , "+
+        sensor_msgs::distortion_models::RATIONAL_POLYNOMIAL+" and "+
+        sensor_msgs::distortion_models::FISHEYE );
   }
 }
 

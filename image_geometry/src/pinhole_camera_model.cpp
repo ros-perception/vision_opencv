@@ -7,10 +7,12 @@
 namespace image_geometry {
 
 enum DistortionState { NONE, CALIBRATED, UNKNOWN };
+enum DistortionModel { FISHEYE, PLUMB_BOB };
 
 struct PinholeCameraModel::Cache
 {
   DistortionState distortion_state;
+  DistortionModel distortion_model;
 
   cv::Mat_<double> K_binned, P_binned; // Binning applied, but not cropping
 
@@ -132,9 +134,11 @@ bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
 
   // Figure out how to handle the distortion
   if (cam_info_.distortion_model == sensor_msgs::distortion_models::PLUMB_BOB ||
-      cam_info_.distortion_model == sensor_msgs::distortion_models::RATIONAL_POLYNOMIAL) {
+      cam_info_.distortion_model == sensor_msgs::distortion_models::RATIONAL_POLYNOMIAL || 
+      cam_info_.distortion_model == sensor_msgs::distortion_models::FISHEYE) {
     // If any distortion coefficient is non-zero, then need to apply the distortion
     cache_->distortion_state = NONE;
+
     for (size_t i = 0; i < cam_info_.D.size(); ++i)
     {
       if (cam_info_.D[i] != 0)
@@ -146,6 +150,15 @@ bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
   }
   else
     cache_->distortion_state = UNKNOWN;
+
+  // Get the distortion model, if supported
+  if (cam_info_.distortion_model == sensor_msgs::distortion_models::PLUMB_BOB ||
+      cam_info_.distortion_model == sensor_msgs::distortion_models::RATIONAL_POLYNOMIAL) {
+    cache_->distortion_model = PLUMB_BOB;
+  }
+  else if(cam_info_.distortion_model == sensor_msgs::distortion_models::FISHEYE){
+    cache_->distortion_model = FISHEYE;
+  }
 
   // If necessary, create new K_ and P_ adjusted for binning and ROI
   /// @todo Calculate and use rectified ROI
@@ -268,25 +281,40 @@ cv::Rect PinholeCameraModel::rectifiedRoi() const
 cv::Point2d PinholeCameraModel::project3dToPixel(const cv::Point3d& xyz) const
 {
   assert( initialized() );
-  assert(P_(2, 3) == 0.0); // Calibrated stereo cameras should be in the same plane
+  assert(P_(2, 3) == 0.0); // Calibrated stereo cameras should be in the same plane 
+  std::vector<cv::Point2d> uv_rect;
 
-  // [U V W]^T = P * [X Y Z 1]^T
-  // u = U/W
-  // v = V/W
-  cv::Point2d uv_rect;
-  uv_rect.x = (fx()*xyz.x + Tx()) / xyz.z + cx();
-  uv_rect.y = (fy()*xyz.y + Ty()) / xyz.z + cy();
-  return uv_rect;
+  cv::Mat r_vec, t_vec = cv::Mat_<double>::zeros(3, 1);
+  cv::Rodrigues(R_.t(), r_vec);
+
+  switch (cache_->distortion_model) {
+    case PLUMB_BOB:
+      // [U V W]^T = P * [X Y Z 1]^T
+      // u = U/W
+      // v = V/W
+      
+      uv_rect[0].x = (fx()*xyz.x + Tx()) / xyz.z + cx();
+      uv_rect[0].y = (fy()*xyz.y + Ty()) / xyz.z + cy();
+      break;
+    case FISHEYE:
+      cv::fisheye::projectPoints(std::vector<cv::Point3d> (1,xyz), uv_rect, r_vec, t_vec, K_, D_ );
+      break;
+    default:
+      throw Exception("Wrong distortion model. Can only support PLUMB_BOB and FISHEYE distortion models.");
+  }
+
+  return uv_rect[0];
 }
 
 cv::Point3d PinholeCameraModel::projectPixelTo3dRay(const cv::Point2d& uv_rect) const
 {
   assert( initialized() );
-
   cv::Point3d ray;
+
   ray.x = (uv_rect.x - cx() - Tx()) / fx();
   ray.y = (uv_rect.y - cy() - Ty()) / fy();
   ray.z = 1.0;
+  
   return ray;
 }
 
@@ -318,7 +346,7 @@ void PinholeCameraModel::unrectifyImage(const cv::Mat& rectified, cv::Mat& raw, 
 {
   assert( initialized() );
 
-  throw Exception("PinholeCameraModel::unrectifyImage is unimplemented.");
+  throw Exception("unrectifyImage method is unimplemented.");
   /// @todo Implement unrectifyImage()
   // Similar to rectifyImage, but need to build separate set of inverse maps (raw->rectified)...
   // - Build src_pt Mat with all the raw pixel coordinates (or do it one row at a time)
@@ -342,7 +370,19 @@ cv::Point2d PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw) const
   cv::Point2f raw32 = uv_raw, rect32;
   const cv::Mat src_pt(1, 1, CV_32FC2, &raw32.x);
   cv::Mat dst_pt(1, 1, CV_32FC2, &rect32.x);
-  cv::undistortPoints(src_pt, dst_pt, K_, D_, R_, P_);
+
+  switch (cache_->distortion_model) {
+    case PLUMB_BOB:
+      cv::undistortPoints(src_pt, dst_pt, K_, D_, R_, P_);
+      break;
+    case FISHEYE:
+      cv::fisheye::undistortPoints(src_pt, dst_pt, K_, D_, R_, P_);
+      break;
+    default:
+      throw Exception("Wrong distortion model. Can only support PLUMB_BOB and FISHEYE distortion models.");
+  }
+
+  
   return rect32;
 }
 
@@ -356,14 +396,25 @@ cv::Point2d PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect) const
     throw Exception("Cannot call unrectifyPoint when distortion is unknown.");
   assert(cache_->distortion_state == CALIBRATED);
 
-  // Convert to a ray
-  cv::Point3d ray = projectPixelTo3dRay(uv_rect);
-
   // Project the ray on the image
   cv::Mat r_vec, t_vec = cv::Mat_<double>::zeros(3, 1);
   cv::Rodrigues(R_.t(), r_vec);
   std::vector<cv::Point2d> image_point;
-  cv::projectPoints(std::vector<cv::Point3d>(1, ray), r_vec, t_vec, K_, D_, image_point);
+  cv::Point3d ray;
+
+  switch (cache_->distortion_model) {
+    case PLUMB_BOB:
+      // Convert to an unitary ray
+      ray = projectPixelTo3dRay(uv_rect);
+      // Project the unitary ray
+      cv::projectPoints(std::vector<cv::Point3d>(1, ray), r_vec, t_vec, K_, D_, image_point);
+      break;
+    case FISHEYE:
+      cv::fisheye::distortPoints(std::vector<cv::Point2d>(1, uv_rect), K_, D_, image_point);
+      break;
+    default:
+      throw Exception("Wrong distortion model. Can only support PLUMB_BOB and FISHEYE distortion models.");
+  }
 
   return image_point[0];
 }
@@ -449,10 +500,22 @@ void PinholeCameraModel::initRectificationMaps() const
       }
     }
     
-    // Note: m1type=CV_16SC2 to use fast fixed-point maps (see cv::remap)
-    cv::initUndistortRectifyMap(K_binned, D_, R_, P_binned, binned_resolution,
-                                CV_16SC2, cache_->full_map1, cache_->full_map2);
-    cache_->full_maps_dirty = false;
+    switch (cache_->distortion_model) {
+      case PLUMB_BOB:
+        // Note: m1type=CV_16SC2 to use fast fixed-point maps (see cv::remap)
+        cv::initUndistortRectifyMap(K_binned, D_, R_, P_binned, binned_resolution,
+                                    CV_16SC2, cache_->full_map1, cache_->full_map2);
+        cache_->full_maps_dirty = false;
+        break;
+      case FISHEYE:
+        cv::fisheye::initUndistortRectifyMap(K_binned,D_, R_, P_binned, binned_resolution, CV_16SC2, cache_->full_map1, cache_->full_map2);
+        cache_->full_maps_dirty = false;
+        break;
+      default:
+        throw Exception("Wrong distortion model. Can only support PLUMB_BOB and FISHEYE distortion models..");
+    }
+
+    
   }
 
   if (cache_->reduced_maps_dirty) {

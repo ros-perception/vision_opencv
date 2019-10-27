@@ -1,4 +1,4 @@
-#include "image_geometry/pinhole_camera_model.h"
+#include "image_geometry/camera_model.h"
 #include <sensor_msgs/distortion_models.h>
 #ifdef BOOST_SHARED_PTR_HPP_INCLUDED
 #include <boost/make_shared.hpp>
@@ -9,7 +9,7 @@ namespace image_geometry {
 enum DistortionState { NONE, CALIBRATED, UNKNOWN };
 enum DistortionModel { FISHEYE, PLUMB_BOB };
 
-struct PinholeCameraModel::Cache
+struct CameraModel::Cache
 {
   DistortionState distortion_state;
   DistortionModel distortion_model;
@@ -33,18 +33,18 @@ struct PinholeCameraModel::Cache
   }
 };
 
-PinholeCameraModel::PinholeCameraModel()
+CameraModel::CameraModel()
 {
 }
 
-PinholeCameraModel& PinholeCameraModel::operator=(const PinholeCameraModel& other)
+CameraModel& CameraModel::operator=(const CameraModel& other)
 {
   if (other.initialized())
     this->fromCameraInfo(other.cameraInfo());
   return *this;
 }
 
-PinholeCameraModel::PinholeCameraModel(const PinholeCameraModel& other)
+CameraModel::CameraModel(const CameraModel& other)
 {
   if (other.initialized())
     fromCameraInfo(other.cam_info_);
@@ -83,7 +83,7 @@ bool updateMat(const MatT& new_mat, MatT& my_mat, MatU& cv_mat)
   return true;
 }
 
-bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
+bool CameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
 {
   // Create our repository of cached data (rectification maps, etc.)
   if (!cache_)
@@ -204,18 +204,18 @@ bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
   return reduced_dirty;
 }
 
-bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& msg)
+bool CameraModel::fromCameraInfo(const sensor_msgs::CameraInfoConstPtr& msg)
 {
   return fromCameraInfo(*msg);
 }
 
-cv::Size PinholeCameraModel::fullResolution() const
+cv::Size CameraModel::fullResolution() const
 {
   assert( initialized() );
   return cv::Size(cam_info_.width, cam_info_.height);
 }
 
-cv::Size PinholeCameraModel::reducedResolution() const
+cv::Size CameraModel::reducedResolution() const
 {
   assert( initialized() );
 
@@ -223,14 +223,14 @@ cv::Size PinholeCameraModel::reducedResolution() const
   return cv::Size(roi.width / binningX(), roi.height / binningY());
 }
 
-cv::Point2d PinholeCameraModel::toFullResolution(const cv::Point2d& uv_reduced) const
+cv::Point2d CameraModel::toFullResolution(const cv::Point2d& uv_reduced) const
 {
   cv::Rect roi = rectifiedRoi();
   return cv::Point2d(uv_reduced.x * binningX() + roi.x,
                      uv_reduced.y * binningY() + roi.y);
 }
 
-cv::Rect PinholeCameraModel::toFullResolution(const cv::Rect& roi_reduced) const
+cv::Rect CameraModel::toFullResolution(const cv::Rect& roi_reduced) const
 {
   cv::Rect roi = rectifiedRoi();
   return cv::Rect(roi_reduced.x * binningX() + roi.x,
@@ -239,14 +239,14 @@ cv::Rect PinholeCameraModel::toFullResolution(const cv::Rect& roi_reduced) const
                   roi_reduced.height * binningY());
 }
 
-cv::Point2d PinholeCameraModel::toReducedResolution(const cv::Point2d& uv_full) const
+cv::Point2d CameraModel::toReducedResolution(const cv::Point2d& uv_full) const
 {
   cv::Rect roi = rectifiedRoi();
   return cv::Point2d((uv_full.x - roi.x) / binningX(),
                      (uv_full.y - roi.y) / binningY());
 }
 
-cv::Rect PinholeCameraModel::toReducedResolution(const cv::Rect& roi_full) const
+cv::Rect CameraModel::toReducedResolution(const cv::Rect& roi_full) const
 {
   cv::Rect roi = rectifiedRoi();
   return cv::Rect((roi_full.x - roi.x) / binningX(),
@@ -255,7 +255,7 @@ cv::Rect PinholeCameraModel::toReducedResolution(const cv::Rect& roi_full) const
                   roi_full.height / binningY());
 }
 
-cv::Rect PinholeCameraModel::rawRoi() const
+cv::Rect CameraModel::rawRoi() const
 {
   assert( initialized() );
 
@@ -263,7 +263,7 @@ cv::Rect PinholeCameraModel::rawRoi() const
                   cam_info_.roi.width, cam_info_.roi.height);
 }
 
-cv::Rect PinholeCameraModel::rectifiedRoi() const
+cv::Rect CameraModel::rectifiedRoi() const
 {
   assert( initialized() );
   
@@ -278,7 +278,7 @@ cv::Rect PinholeCameraModel::rectifiedRoi() const
   return cache_->rectified_roi;
 }
 
-cv::Point2d PinholeCameraModel::project3dToPixel(const cv::Point3d& xyz) const
+cv::Point2d CameraModel::project3dToPixel(const cv::Point3d& xyz) const
 {
   assert( initialized() );
   assert(P_(2, 3) == 0.0); // Calibrated stereo cameras should be in the same plane 
@@ -306,7 +306,7 @@ cv::Point2d PinholeCameraModel::project3dToPixel(const cv::Point3d& xyz) const
   return uv_rect[0];
 }
 
-cv::Point3d PinholeCameraModel::projectPixelTo3dRay(const cv::Point2d& uv_rect) const
+cv::Point3d CameraModel::projectPixelTo3dRay(const cv::Point2d& uv_rect) const
 {
   assert( initialized() );
   cv::Point3d ray;
@@ -318,7 +318,7 @@ cv::Point3d PinholeCameraModel::projectPixelTo3dRay(const cv::Point2d& uv_rect) 
   return ray;
 }
 
-void PinholeCameraModel::rectifyImage(const cv::Mat& raw, cv::Mat& rectified, int interpolation) const
+void CameraModel::rectifyImage(const cv::Mat& raw, cv::Mat& rectified, int interpolation) const
 {
   assert( initialized() );
 
@@ -345,7 +345,7 @@ void PinholeCameraModel::rectifyImage(const cv::Mat& raw, cv::Mat& rectified, in
   }
 }
 
-void PinholeCameraModel::unrectifyImage(const cv::Mat& rectified, cv::Mat& raw, int interpolation) const
+void CameraModel::unrectifyImage(const cv::Mat& rectified, cv::Mat& raw, int interpolation) const
 {
   assert( initialized() );
 
@@ -359,7 +359,7 @@ void PinholeCameraModel::unrectifyImage(const cv::Mat& rectified, cv::Mat& raw, 
   // Need interpolation argument. Same caching behavior?
 }
 
-cv::Point2d PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw) const
+cv::Point2d CameraModel::rectifyPoint(const cv::Point2d& uv_raw) const
 {
   assert( initialized() );
 
@@ -389,7 +389,7 @@ cv::Point2d PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw) const
   return rect32;
 }
 
-cv::Point2d PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect) const
+cv::Point2d CameraModel::unrectifyPoint(const cv::Point2d& uv_rect) const
 {
   assert( initialized() );
 
@@ -422,7 +422,7 @@ cv::Point2d PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect) const
   return image_point[0];
 }
 
-cv::Rect PinholeCameraModel::rectifyRoi(const cv::Rect& roi_raw) const
+cv::Rect CameraModel::rectifyRoi(const cv::Rect& roi_raw) const
 {
   assert( initialized() );
 
@@ -443,7 +443,7 @@ cv::Rect PinholeCameraModel::rectifyRoi(const cv::Rect& roi_raw) const
   return cv::Rect(roi_tl.x, roi_tl.y, roi_br.x - roi_tl.x, roi_br.y - roi_tl.y);
 }
 
-cv::Rect PinholeCameraModel::unrectifyRoi(const cv::Rect& roi_rect) const
+cv::Rect CameraModel::unrectifyRoi(const cv::Rect& roi_rect) const
 {
   assert( initialized() );
 
@@ -464,7 +464,7 @@ cv::Rect PinholeCameraModel::unrectifyRoi(const cv::Rect& roi_rect) const
   return cv::Rect(roi_tl.x, roi_tl.y, roi_br.x - roi_tl.x, roi_br.y - roi_tl.y);
 }
 
-void PinholeCameraModel::initRectificationMaps() const
+void CameraModel::initRectificationMaps() const
 {
   /// @todo For large binning settings, can drop extra rows/cols at bottom/right boundary.
   /// Make sure we're handling that 100% correctly.

@@ -1,4 +1,4 @@
-#include "image_geometry/pinhole_camera_model.h"
+#include "image_geometry/camera_model.h"
 #include <sensor_msgs/distortion_models.h>
 #include <gtest/gtest.h>
 

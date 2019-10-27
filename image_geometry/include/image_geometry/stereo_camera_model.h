@@ -1,7 +1,7 @@
 #ifndef IMAGE_GEOMETRY_STEREO_CAMERA_MODEL_H
 #define IMAGE_GEOMETRY_STEREO_CAMERA_MODEL_H
 
-#include "image_geometry/pinhole_camera_model.h"
+#include "image_geometry/camera_model.h"
 
 namespace image_geometry {
 
@@ -33,12 +33,12 @@ public:
   /**
    * \brief Get the left monocular camera model.
    */
-  const PinholeCameraModel& left() const;
+  const CameraModel& left() const;
 
   /**
    * \brief Get the right monocular camera model.
    */
-  const PinholeCameraModel& right() const;
+  const CameraModel& right() const;
 
   /**
    * \brief Get the name of the camera coordinate frame in tf.
@@ -92,7 +92,7 @@ public:
    */
   bool initialized() const { return left_.initialized() && right_.initialized(); }
 protected:
-  PinholeCameraModel left_, right_;
+  CameraModel left_, right_;
   cv::Matx44d Q_;
 
   void updateQ();
@@ -100,8 +100,8 @@ protected:
 
 
 /* Trivial inline functions */
-inline const PinholeCameraModel& StereoCameraModel::left() const  { return left_; }
-inline const PinholeCameraModel& StereoCameraModel::right() const { return right_; }
+inline const CameraModel& StereoCameraModel::left() const  { return left_; }
+inline const CameraModel& StereoCameraModel::right() const { return right_; }
 
 inline std::string StereoCameraModel::tfFrame() const { return left_.tfFrame(); }
 

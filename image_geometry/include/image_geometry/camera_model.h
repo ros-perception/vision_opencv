@@ -20,15 +20,15 @@ public:
  * \brief Simplifies interpreting images geometrically using the parameters from
  * sensor_msgs/CameraInfo.
  */
-class PinholeCameraModel
+class CameraModel
 {
 public:
 
-  PinholeCameraModel();
+  CameraModel();
 
-  PinholeCameraModel(const PinholeCameraModel& other);
+  CameraModel(const CameraModel& other);
 
-  PinholeCameraModel& operator=(const PinholeCameraModel& other);
+  CameraModel& operator=(const CameraModel& other);
 
   /**
    * \brief Set the camera parameters from the sensor_msgs/CameraInfo message.
@@ -284,55 +284,55 @@ protected:
 
 
 /* Trivial inline functions */
-inline std::string PinholeCameraModel::tfFrame() const
+inline std::string CameraModel::tfFrame() const
 {
   assert( initialized() );
   return cam_info_.header.frame_id;
 }
 
-inline ros::Time PinholeCameraModel::stamp() const
+inline ros::Time CameraModel::stamp() const
 {
   assert( initialized() );
   return cam_info_.header.stamp;
 }
 
-inline const sensor_msgs::CameraInfo& PinholeCameraModel::cameraInfo() const  { return cam_info_; }
-inline const cv::Matx33d& PinholeCameraModel::intrinsicMatrix() const  { return K_; }
-inline const cv::Mat_<double>& PinholeCameraModel::distortionCoeffs() const { return D_; }
-inline const cv::Matx33d& PinholeCameraModel::rotationMatrix() const   { return R_; }
-inline const cv::Matx34d& PinholeCameraModel::projectionMatrix() const { return P_; }
-inline const cv::Matx33d& PinholeCameraModel::fullIntrinsicMatrix() const  { return K_full_; }
-inline const cv::Matx34d& PinholeCameraModel::fullProjectionMatrix() const { return P_full_; }
+inline const sensor_msgs::CameraInfo& CameraModel::cameraInfo() const  { return cam_info_; }
+inline const cv::Matx33d& CameraModel::intrinsicMatrix() const  { return K_; }
+inline const cv::Mat_<double>& CameraModel::distortionCoeffs() const { return D_; }
+inline const cv::Matx33d& CameraModel::rotationMatrix() const   { return R_; }
+inline const cv::Matx34d& CameraModel::projectionMatrix() const { return P_; }
+inline const cv::Matx33d& CameraModel::fullIntrinsicMatrix() const  { return K_full_; }
+inline const cv::Matx34d& CameraModel::fullProjectionMatrix() const { return P_full_; }
 
-inline double PinholeCameraModel::fx() const { return P_(0,0); }
-inline double PinholeCameraModel::fy() const { return P_(1,1); }
-inline double PinholeCameraModel::cx() const { return P_(0,2); }
-inline double PinholeCameraModel::cy() const { return P_(1,2); }
-inline double PinholeCameraModel::Tx() const { return P_(0,3); }
-inline double PinholeCameraModel::Ty() const { return P_(1,3); }
+inline double CameraModel::fx() const { return P_(0,0); }
+inline double CameraModel::fy() const { return P_(1,1); }
+inline double CameraModel::cx() const { return P_(0,2); }
+inline double CameraModel::cy() const { return P_(1,2); }
+inline double CameraModel::Tx() const { return P_(0,3); }
+inline double CameraModel::Ty() const { return P_(1,3); }
 
-inline uint32_t PinholeCameraModel::binningX() const { return cam_info_.binning_x; }
-inline uint32_t PinholeCameraModel::binningY() const { return cam_info_.binning_y; }
+inline uint32_t CameraModel::binningX() const { return cam_info_.binning_x; }
+inline uint32_t CameraModel::binningY() const { return cam_info_.binning_y; }
 
-inline double PinholeCameraModel::getDeltaU(double deltaX, double Z) const
+inline double CameraModel::getDeltaU(double deltaX, double Z) const
 {
   assert( initialized() );
   return fx() * deltaX / Z;
 }
 
-inline double PinholeCameraModel::getDeltaV(double deltaY, double Z) const
+inline double CameraModel::getDeltaV(double deltaY, double Z) const
 {
   assert( initialized() );
   return fy() * deltaY / Z;
 }
 
-inline double PinholeCameraModel::getDeltaX(double deltaU, double Z) const
+inline double CameraModel::getDeltaX(double deltaU, double Z) const
 {
   assert( initialized() );
   return Z * deltaU / fx();
 }
 
-inline double PinholeCameraModel::getDeltaY(double deltaV, double Z) const
+inline double CameraModel::getDeltaY(double deltaV, double Z) const
 {
   assert( initialized() );
   return Z * deltaV / fy();

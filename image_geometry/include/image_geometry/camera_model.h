@@ -1,5 +1,5 @@
-#ifndef IMAGE_GEOMETRY_PINHOLE_CAMERA_MODEL_H
-#define IMAGE_GEOMETRY_PINHOLE_CAMERA_MODEL_H
+#ifndef IMAGE_GEOMETRY_CAMERA_MODEL_H
+#define IMAGE_GEOMETRY_CAMERA_MODEL_H
 
 #include <sensor_msgs/CameraInfo.h>
 #include <opencv2/core/core.hpp>

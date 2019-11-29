@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 project(cv_bridge)
 
 find_package(catkin REQUIRED COMPONENTS rosconsole sensor_msgs)
@@ -11,9 +11,11 @@ if(NOT ANDROID)
     find_package(Boost REQUIRED python3)
   endif()
 else()
-find_package(Boost REQUIRED)
+  find_package(Boost REQUIRED)
 endif()
-find_package(OpenCV 3 REQUIRED
+
+find_package(sensor_msgs REQUIRED)
+find_package(OpenCV REQUIRED
   COMPONENTS
     opencv_core
     opencv_imgproc
@@ -34,8 +36,9 @@ catkin_python_setup()
 include_directories(include ${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 if(NOT ANDROID)
-add_subdirectory(python)
+  add_subdirectory(python)
 endif()
+
 add_subdirectory(src)
 if(CATKIN_ENABLE_TESTING)
   add_subdirectory(test)

@@ -222,7 +222,7 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
   if (!is_dst_color_format) {
     if (!is_num_channels_the_same)
       throw Exception("[" + src_encoding + "] is a color format but [" + dst_encoding + "] " +
-                      "is not so they must have the same OpenCV type, CV_8UC3, CV16UC1 ....");
+                      "is not so they must have the same OpenCV type, CV_8UC3, CV_16UC1 ....");
     return std::vector<int>(1, SAME_FORMAT);
   }
 

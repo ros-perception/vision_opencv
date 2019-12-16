@@ -431,7 +431,7 @@ CvImageConstPtr toCvShare(
   const std::string & encoding)
 {
   // If the encoding different or the endianness different, you have to copy
-  if ((!encoding.empty() && source.encoding != encoding) || (source.is_bigendian &&
+  if ((!encoding.empty() && source.encoding != encoding) || (!source.is_bigendian !=
     (boost::endian::order::native != boost::endian::order::big)))
   {
     return toCvCopy(source, encoding);

@@ -61,6 +61,12 @@ public:
    */
   void projectDisparityImageTo3d(const cv::Mat& disparity, cv::Mat& point_cloud,
                                  bool handleMissingValues = false) const;
+
+  /**
+   * \brief Project a 3d point to a rectified pixel 
+   */
+  void reproject3dToImage(const cv::Point3d & xyz, float disparity, cv::Point2i & left_uv_rect) const;
+
   static const double MISSING_Z;
   
   /**

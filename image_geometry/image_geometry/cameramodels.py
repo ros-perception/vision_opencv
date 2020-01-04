@@ -39,15 +39,15 @@ class PinholeCameraModel:
 
         Set the camera parameters from the :class:`sensor_msgs.msg.CameraInfo` message.
         """
-        self.K = mkmat(3, 3, msg.K)
-        if msg.D:
-            self.D = mkmat(len(msg.D), 1, msg.D)
+        self.K = mkmat(3, 3, msg.k)
+        if msg.d:
+            self.D = mkmat(len(msg.d), 1, msg.d)
         else:
             self.D = None
-        self.R = mkmat(3, 3, msg.R)
-        self.P = mkmat(3, 4, msg.P)
-        self.full_K = mkmat(3, 3, msg.K)
-        self.full_P = mkmat(3, 4, msg.P)
+        self.R = mkmat(3, 3, msg.r)
+        self.P = mkmat(3, 4, msg.p)
+        self.full_K = mkmat(3, 3, msg.k)
+        self.full_P = mkmat(3, 4, msg.p)
         self.width = msg.width
         self.height = msg.height
         self.binning_x = max(1, msg.binning_x)

@@ -98,6 +98,50 @@ class CvBridge(object):
     def encoding_to_dtype_with_channels(self, encoding):
         return self.cvtype2_to_dtype_with_channels(self.encoding_to_cvtype2(encoding))
 
+    def compressed_depthmsg_to_cv2(self, cmprs_depth_msg):
+        """
+        Convert a sensor_msgs::CompressedImage message to an OpenCV :cpp:type:`cv::Mat`.
+
+        :param cmprs_depth_msg:   A :cpp:type:`sensor_msgs::CompressedImage` message containing depth information
+
+        :rtype: :cpp:type:`cv::Mat`
+        :raises CvBridgeError: when conversion is not possible.
+
+        This function returns an OpenCV :cpp:type:`cv::Mat` message on success, or raises :exc:`cv_bridge.CvBridgeError` on failure.
+
+        """
+        import cv2
+        depth_fmt, cmprs_type = cmprs_depth_msg.format.split(';')
+        depth_fmt = depth_fmt.strip()
+        cmprs_type = cmprs_type.strip()
+        if cmprs_type != "compressedDepth":
+            raise CvBridgeError("Compression type is not 'compressedDepth'."
+                            "You probably subscribed to the wrong topic.")
+    
+        # remove header from raw data
+        depth_header_size = 12
+        raw_data = cmprs_depth_msg.data[depth_header_size:]
+    
+        depth_img_raw = cv2.imdecode(np.fromstring(raw_data, np.uint8), cv2.IMREAD_UNCHANGED)
+        if depth_img_raw is None:
+            # probably wrong header size
+            raise CvBridgeError("Could not decode compressed depth image."
+                            "You may need to change 'depth_header_size'!")
+    
+        if depth_fmt == "16UC1":
+            # return raw image data
+            return depth_img_raw
+        elif depth_fmt == "32FC1":
+            raw_header = cmprs_depth_msg.data[:depth_header_size]
+            # header: int, float, float
+            [compfmt, depthQuantA, depthQuantB] = struct.unpack('iff', raw_header)
+            depth_img_scaled = depthQuantA / (depth_img_raw.astype(np.float32) - depthQuantB)
+            # filter max values
+            depth_img_scaled[depth_img_raw == 0] = np.nan
+            return depth_img_scaled
+        else:
+            raise CvBridgeError("Decoding of '%s' is not implemented!" % depth_fmt)
+
     def compressed_imgmsg_to_cv2(self, cmprs_img_msg, desired_encoding = "passthrough"):
         """
         Convert a sensor_msgs::CompressedImage message to an OpenCV :cpp:type:`cv::Mat`.

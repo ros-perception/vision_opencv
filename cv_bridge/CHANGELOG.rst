@@ -2,6 +2,9 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.4 (2020-01-17)
+------------------
+
 2.1.3 (2019-10-23)
 ------------------
 * populate array.array directly instead of converting to and from a string (`#305 <https://github.com/ros-perception/vision_opencv/issues/305>`_)

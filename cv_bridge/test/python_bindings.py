@@ -3,6 +3,9 @@ import numpy as np
 
 import cv_bridge
 
+import sys
+if sys.version > '3':
+    xrange = range
 
 def test_cvtColorForDisplay():
     # convert label image to display

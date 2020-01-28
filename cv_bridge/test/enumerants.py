@@ -17,7 +17,7 @@ class TestEnumerants(unittest.TestCase):
         img_msg.height = 480
         img_msg.encoding = "rgba8"
         img_msg.step = 640*4
-        img_msg.data = (640 * 480) * "1234"
+        img_msg.data = (640 * 480) * b"1234"
 
         bridge_ = CvBridge()
         cvim = bridge_.imgmsg_to_cv2(img_msg, "rgb8")

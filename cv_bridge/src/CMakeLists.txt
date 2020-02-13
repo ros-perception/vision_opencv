@@ -5,7 +5,7 @@ generate_export_header(${PROJECT_NAME} EXPORT_FILE_NAME ${PROJECT_NAME}/${PROJEC
 target_include_directories(${PROJECT_NAME}
   PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>"
   ${PROJECT_SOURCE_DIR}/include
-  ${BOOST_INCLUDE_DIRS})
+  ${Boost_INCLUDE_DIRS})
 ament_target_dependencies(${PROJECT_NAME}
   "OpenCV"
   "sensor_msgs"

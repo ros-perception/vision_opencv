@@ -87,7 +87,7 @@ def main(args):
         rospy.spin()
         outcome = 'test completed'
     except KeyboardInterrupt:
-        print "shutting down"
+        print("shutting down")
         outcome = 'keyboard interrupt'
     rospy.core.signal_shutdown(outcome)
 

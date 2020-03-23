@@ -22,7 +22,7 @@ class TestEnumerants(unittest.TestCase):
         bridge_ = CvBridge()
         cvim = bridge_.imgmsg_to_cv2(img_msg, "rgb8")
         import sys
-        self.assertRaises(sys.getrefcount(cvim) == 2)
+        self.assert_(sys.getrefcount(cvim) == 2)
 
         # A 3 channel image cannot be sent as an rgba8
         self.assertRaises(CvBridgeError, lambda: bridge_.cv2_to_imgmsg(cvim, "rgba8"))
@@ -31,9 +31,9 @@ class TestEnumerants(unittest.TestCase):
         bridge_.cv2_to_imgmsg(cvim, "rgb8")
         bridge_.cv2_to_imgmsg(cvim, "bgr8")
 
-        self.assertRaises(getCvType("32FC4") == cv2.CV_8UC4)
-        self.assertRaises(getCvType("8UC1") == cv2.CV_8UC1)
-        self.assertRaises(getCvType("8U") == cv2.CV_8UC1)
+        self.assert_(getCvType("32FC4") == cv2.CV_32FC4)
+        self.assert_(getCvType("8UC1") == cv2.CV_8UC1)
+        self.assert_(getCvType("8U") == cv2.CV_8UC1)
 
     def test_numpy_types(self):
         import cv2

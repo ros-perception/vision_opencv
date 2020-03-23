@@ -49,7 +49,7 @@ class TestConversions(unittest.TestCase):
         # from: http://docs.opencv.org/2.4/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
         # NOTE: remove jp2(a.k.a JPEG2000) as its JASPER codec is disabled within Ubuntu opencv library
         # due to security issues, but it works once you rebuild your opencv library with JASPER enabled
-        formats = ["jpg", "jpeg", "jpe", "png", "bmp", "dib", "ppm", "pgm", "pbm",
+        formats = ["jpg", "jpeg", "jpe", "png", "bmp", "dib",
                    "sr", "ras", "tif", "tiff"]  # this formats rviz is not support
 
         cvb_en = CvBridge()
@@ -63,6 +63,7 @@ class TestConversions(unittest.TestCase):
                             original = np.uint8(np.random.randint(0, 255, size=(h, w)))
                         else:
                             original = np.uint8(np.random.randint(0, 255, size=(h, w, channels)))
+                        print(f)
                         compress_rosmsg = cvb_en.cv2_to_compressed_imgmsg(original, f)
                         newimg          = cvb_de.compressed_imgmsg_to_cv2(compress_rosmsg)
                         self.assert_(original.dtype == newimg.dtype)

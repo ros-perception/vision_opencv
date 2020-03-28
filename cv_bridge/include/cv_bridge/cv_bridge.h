@@ -277,7 +277,7 @@ struct CvtColorForDisplayOptions {
  * encoding image is passed.
  * - if the output encoding is not empty, it must have sensor_msgs::image_encodings::isColor and
  * isMono return true. It must also be 8 bit in depth
- * - if the input encoding is an OpenCV format (e.g. 8UC1), and if we have 1,3 or 4 channels, it is
+ * - if the input encoding is an OpenCV encoding (e.g. 8UC1), and if we have 1,3 or 4 channels, it is
  * respectively converted to mono, BGR or BGRA.
  * - if the input encoding is 32SC1, this estimate that image as label image and will convert it as
  * bgr image with different colors for each label.

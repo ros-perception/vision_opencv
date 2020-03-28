@@ -32,10 +32,12 @@ if (PYTHON_VERSION_MAJOR VERSION_EQUAL 3)
   add_definitions(-DPYTHON3)
 endif()
 
-if (OpenCV_VERSION_MAJOR VERSION_EQUAL 3)
-add_library(${PROJECT_NAME}_boost module.cpp module_opencv3.cpp)
+if(OpenCV_VERSION_MAJOR VERSION_EQUAL 4)
+  add_library(${PROJECT_NAME}_boost module.cpp module_opencv4.cpp)
+elseif(OpenCV_VERSION_MAJOR VERSION_EQUAL 3)
+  add_library(${PROJECT_NAME}_boost module.cpp module_opencv3.cpp)
 else()
-add_library(${PROJECT_NAME}_boost module.cpp module_opencv2.cpp)
+  add_library(${PROJECT_NAME}_boost module.cpp module_opencv2.cpp)
 endif()
 target_link_libraries(${PROJECT_NAME}_boost ${Boost_LIBRARIES}
                                             ${catkin_LIBRARIES}

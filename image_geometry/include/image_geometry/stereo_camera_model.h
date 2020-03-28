@@ -2,6 +2,7 @@
 #define IMAGE_GEOMETRY_STEREO_CAMERA_MODEL_H
 
 #include "image_geometry/pinhole_camera_model.h"
+#include "exports.h"
 
 namespace image_geometry {
 
@@ -9,7 +10,7 @@ namespace image_geometry {
  * \brief Simplifies interpreting stereo image pairs geometrically using the
  * parameters from the left and right sensor_msgs/CameraInfo.
  */
-class StereoCameraModel
+class IMAGE_GEOMETRY_DECL StereoCameraModel
 {
 public:
   StereoCameraModel();

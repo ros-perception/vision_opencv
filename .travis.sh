@@ -33,11 +33,38 @@ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main
 wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
 sudo apt-get update -qq || echo Ignore error on apt-get update
 # Install ROS
-sudo apt-get install -qq -y python-catkin-pkg python-catkin-tools python-rosdep python-wstool ros-$ROS_DISTRO-catkin
-source /opt/ros/$ROS_DISTRO/setup.bash
-# Setup for rosdep
-sudo rosdep init
-rosdep update
+if [ "x${ROS_PYTHON_VERSION}" == "x3" ]; then
+    sudo apt-get install -qq -y python3-catkin-pkg python3-rosdep python3-rosinstall-generator python3-wstool python3-vcstool build-essential
+    wget https://bootstrap.pypa.io/get-pip.py
+    python3 ./get-pip.py
+    rm ./get-pip.py
+    pip3 install catkin_tools
+    # Update rosdep definitions
+    sudo rosdep init
+    rosdep update
+    # Create an underlay with all dependencies
+    mkdir -p ~/underlay_ws/src
+    cd ~/underlay_ws
+    # FIXME: use RPP instead of hardcoded list?
+    # FIXME: change --upstream-devel to releases?
+    rosinstall_generator cv_bridge image_geometry --deps --deps-only --upstream-devel --rosdistro $ROS_DISTRO > deps.rosinstall
+    vcs import --input deps.rosinstall ./src
+    # FIXME: roslisp does not get pulled somehow
+    if [ ! -d "./src/roslisp" ]; then
+        git clone https://github.com/ros/roslisp src/roslisp
+    fi
+    rosdep install --from-paths ./src --ignore-src -y
+    catkin config --install --cmake-args -DCMAKE_BUILD_TYPE=Release
+    catkin build
+    source ~/underlay_ws/install/setup.bash
+else
+    sudo apt-get install -qq -y python-catkin-pkg python-catkin-tools python-rosdep python-wstool ros-$ROS_DISTRO-catkin
+    source /opt/ros/$ROS_DISTRO/setup.bash
+    # Setup for rosdep
+    sudo rosdep init
+    rosdep update
+fi
+
 travis_time_end
 
 travis_time_start setup.install
@@ -67,7 +94,11 @@ travis_time_end
 travis_time_start setup.script
 # Compile and test.
 #script:
-source /opt/ros/$ROS_DISTRO/setup.bash
+if [ "x${ROS_PYTHON_VERSION}" == "x3" ]; then
+    source ~/underlay_ws/install/setup.bash
+else
+    source /opt/ros/$ROS_DISTRO/setup.bash
+fi
 cd ~/catkin_ws
 catkin build -p1 -j1 --no-status
 catkin run_tests -p1 -j1

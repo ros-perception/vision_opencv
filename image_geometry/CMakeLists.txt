@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0.2)
 project(image_geometry)
 
 find_package(catkin REQUIRED sensor_msgs)

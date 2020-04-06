@@ -2,8 +2,8 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.14.0 (2020-04-06)
+-------------------
 * Noetic release (`#323 <https://github.com/ros-perception/vision_opencv/issues/323>`_)
 * update CMakeLists.txt for Windows build environment (`#265 <https://github.com/ros-perception/vision_opencv/issues/265>`_)
 * add DLL import/export macros (`#266 <https://github.com/ros-perception/vision_opencv/issues/266>`_)

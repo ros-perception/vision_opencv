@@ -2,6 +2,11 @@
 Changelog for package opencv_tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Noetic release (`#323 <https://github.com/ros-perception/vision_opencv/issues/323>`_)
+* Contributors: Alejandro Hernández Cordero
+
 1.13.0 (2018-04-30)
 -------------------
 

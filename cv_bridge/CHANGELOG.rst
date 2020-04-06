@@ -2,6 +2,14 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Noetic release (`#323 <https://github.com/ros-perception/vision_opencv/issues/323>`_)
+* update CMakeLists.txt for Windows build environment (`#265 <https://github.com/ros-perception/vision_opencv/issues/265>`_)
+* remove path splash separator from 'package_dir' (`#267 <https://github.com/ros-perception/vision_opencv/issues/267>`_)
+* fix travis. (`#269 <https://github.com/ros-perception/vision_opencv/issues/269>`_)
+* Contributors: Alejandro Hernández Cordero, James Xu, Sean Yen
+
 1.13.0 (2018-04-30)
 -------------------
 * Use rosdep OpenCV and not ROS one.

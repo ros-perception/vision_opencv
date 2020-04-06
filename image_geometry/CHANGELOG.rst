@@ -2,6 +2,13 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Noetic release (`#323 <https://github.com/ros-perception/vision_opencv/issues/323>`_)
+* update CMakeLists.txt for Windows build environment (`#265 <https://github.com/ros-perception/vision_opencv/issues/265>`_)
+* add DLL import/export macros (`#266 <https://github.com/ros-perception/vision_opencv/issues/266>`_)
+* Contributors: Alejandro Hernández Cordero, James Xu
+
 1.13.0 (2018-04-30)
 -------------------
 * Use rosdep OpenCV and not ROS one.

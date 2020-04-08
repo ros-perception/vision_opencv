@@ -37,13 +37,23 @@ else()
 endif()
 
 find_package(sensor_msgs REQUIRED)
-find_package(OpenCV 4 REQUIRED
+
+find_package(OpenCV 4 QUIET
   COMPONENTS
     opencv_core
     opencv_imgproc
     opencv_imgcodecs
   CONFIG
 )
+if(NOT OpenCV_FOUND)
+  find_package(OpenCV 3 REQUIRED
+    COMPONENTS
+      opencv_core
+      opencv_imgproc
+      opencv_imgcodecs
+    CONFIG
+  )
+endif()
 
 if(NOT ANDROID)
   add_subdirectory(python)

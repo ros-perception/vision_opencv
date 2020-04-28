@@ -28,6 +28,7 @@ catkin_package(
 catkin_python_setup()
 
 include_directories(include ${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+link_directories(${Boost_LIBRARY_DIRS})
 
 if(NOT ANDROID)
 add_subdirectory(python)

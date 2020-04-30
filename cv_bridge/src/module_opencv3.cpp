@@ -99,6 +99,11 @@ public:
   NumpyAllocator() {stdAllocator = Mat::getStdAllocator();}
   ~NumpyAllocator() {}
 
+// To compile openCV3 with OpenCV4 APIs.
+#ifndef OPENCV_VERSION_4
+#define AccessFlag int
+#endif
+
   UMatData * allocate(PyObject * o, int dims, const int * sizes, int type, size_t * step) const
   {
     UMatData * u = new UMatData(this);
@@ -115,7 +120,7 @@ public:
   }
 
   UMatData * allocate(
-    int dims0, const int * sizes, int type, void * data, size_t * step, int flags,
+    int dims0, const int * sizes, int type, void * data, size_t * step, AccessFlag flags,
     UMatUsageFlags usageFlags) const
   {
     if (data != 0) {
@@ -148,7 +153,7 @@ public:
     return allocate(o, dims0, sizes, type, step);
   }
 
-  bool allocate(UMatData * u, int accessFlags, UMatUsageFlags usageFlags) const
+  bool allocate(UMatData * u, AccessFlag accessFlags, UMatUsageFlags usageFlags) const
   {
     return stdAllocator->allocate(u, accessFlags, usageFlags);
   }

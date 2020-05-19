@@ -5,11 +5,26 @@ find_package(catkin REQUIRED COMPONENTS rosconsole sensor_msgs)
 
 if(NOT ANDROID)
   find_package(PythonLibs)
-  find_package(Boost REQUIRED python)
+
+  if(PYTHONLIBS_VERSION_STRING VERSION_LESS "3.8")
+    # Debian Buster
+    find_package(Boost REQUIRED python37)
+  else()
+    # Ubuntu Focal
+    find_package(Boost REQUIRED python)
+  endif()
 else()
 find_package(Boost REQUIRED)
 endif()
-find_package(OpenCV 4 REQUIRED
+
+set(_opencv_version 4)
+find_package(OpenCV 4 QUIET)
+if(NOT OpenCV_FOUND)
+  message(STATUS "Did not find OpenCV 4, trying OpenCV 3")
+  set(_opencv_version 3)
+endif()
+
+find_package(OpenCV ${_opencv_version4} REQUIRED
   COMPONENTS
     opencv_core
     opencv_imgproc

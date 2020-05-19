@@ -90,6 +90,11 @@ static PyObject* failmsgp(const char *fmt, ...)
 
 class NumpyAllocator : public MatAllocator
 {
+#if CV_MAJOR_VERSION == 3
+protected:
+    typedef int AccessFlag;
+#endif
+
 public:
     NumpyAllocator() { stdAllocator = Mat::getStdAllocator(); }
     ~NumpyAllocator() {}

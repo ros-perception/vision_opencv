@@ -2,6 +2,12 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [Noetic] Use opencv3 on buster (`#330 <https://github.com/ros-perception/vision_opencv/issues/330>`_)
+* more portable fixes. (`#328 <https://github.com/ros-perception/vision_opencv/issues/328>`_)
+* Contributors: Sean Yen, Shane Loretz
+
 1.14.0 (2020-04-06)
 -------------------
 * Noetic release (`#323 <https://github.com/ros-perception/vision_opencv/issues/323>`_)

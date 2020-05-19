@@ -39,9 +39,12 @@ endif()
 add_library(${PROJECT_NAME}_boost module.cpp module_opencv4.cpp)
 target_link_libraries(${PROJECT_NAME}_boost ${Boost_LIBRARIES}
                                             ${catkin_LIBRARIES}
-                                            ${PYTHON_LIBRARIES}
                                             ${PROJECT_NAME}
 )
+
+if(NOT APPLE)
+  target_link_libraries(${PROJECT_NAME}_boost ${PYTHON_LIBRARIES})
+endif()
 
 set_target_properties(${PROJECT_NAME}_boost PROPERTIES
                       LIBRARY_OUTPUT_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_PYTHON_DESTINATION}/${PROJECT_NAME}/boost/
@@ -51,6 +54,8 @@ set_target_properties(${PROJECT_NAME}_boost PROPERTIES
 if(APPLE)
   set_target_properties(${PROJECT_NAME}_boost PROPERTIES
                         SUFFIX ".so")
+  set_target_properties(${PROJECT_NAME}_boost PROPERTIES
+                        LINK_FLAGS "-undefined dynamic_lookup")
 endif()
 if(MSVC)
   set_target_properties(${PROJECT_NAME}_boost PROPERTIES

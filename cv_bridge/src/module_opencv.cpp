@@ -107,11 +107,15 @@ public:
         return u;
     }
 
+#if CV_MAJOR_VERSION > 3
+    UMatData* allocate(int dims0, const int* sizes, int type, void* data, size_t* step, AccessFlag flags, UMatUsageFlags usageFlags) const CV_OVERRIDE
+#else
     UMatData* allocate(int dims0, const int* sizes, int type, void* data, size_t* step, int flags, UMatUsageFlags usageFlags) const
+#endif
     {
         if( data != 0 )
         {
-            CV_Error(Error::StsAssert, "The data should normally be NULL!");
+            // issue #6969: CV_Error(Error::StsAssert, "The data should normally be NULL!");
             // probably this is safe to do in such extreme case
             return stdAllocator->allocate(dims0, sizes, type, data, step, flags, usageFlags);
         }
@@ -130,22 +134,38 @@ public:
             _sizes[i] = sizes[i];
         if( cn > 1 )
             _sizes[dims++] = cn;
+#if CV_MAJOR_VERSION > 3
+        PyObject* o = PyArray_SimpleNew(dims, _sizes.data(), typenum);
+#else
         PyObject* o = PyArray_SimpleNew(dims, _sizes, typenum);
+#endif
         if(!o)
             CV_Error_(Error::StsError, ("The numpy array of typenum=%d, ndims=%d can not be created", typenum, dims));
         return allocate(o, dims0, sizes, type, step);
     }
 
+#if CV_MAJOR_VERSION > 3
+    bool allocate(UMatData* u, AccessFlag accessFlags, UMatUsageFlags usageFlags) const CV_OVERRIDE
+#else
     bool allocate(UMatData* u, int accessFlags, UMatUsageFlags usageFlags) const
+#endif
     {
         return stdAllocator->allocate(u, accessFlags, usageFlags);
     }
 
+#if CV_MAJOR_VERSION > 3
+    void deallocate(UMatData* u) const CV_OVERRIDE
+#else
     void deallocate(UMatData* u) const
+#endif
     {
-        if(u)
+        if(!u)
+            return;
+        PyEnsureGIL gil;
+        CV_Assert(u->urefcount >= 0);
+        CV_Assert(u->refcount >= 0);
+        if(u->refcount == 0)
         {
-            PyEnsureGIL gil;
             PyObject* o = (PyObject*)u->userdata;
             Py_XDECREF(o);
             delete u;

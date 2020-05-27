@@ -2,7 +2,10 @@
 add_library(${PROJECT_NAME} cv_bridge.cpp rgb_colors.cpp)
 include(GenerateExportHeader)
 generate_export_header(${PROJECT_NAME} EXPORT_FILE_NAME ${PROJECT_NAME}/${PROJECT_NAME}_export.h)
-target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>")
+target_include_directories(${PROJECT_NAME}
+  PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>"
+  ${PROJECT_SOURCE_DIR}/include
+  ${Boost_INCLUDE_DIRS})
 ament_target_dependencies(${PROJECT_NAME}
   "OpenCV"
   "sensor_msgs"
@@ -41,10 +44,14 @@ if(PYTHON_VERSION_MAJOR VERSION_EQUAL 3)
   add_definitions(-DPYTHON3)
 endif()
 
-if(OpenCV_VERSION_MAJOR VERSION_EQUAL 3)
-  add_library(${PROJECT_NAME}_boost module.cpp module_opencv3.cpp)
-else()
+if(OpenCV_VERSION_MAJOR VERSION_EQUAL 4)
+  add_definitions(-DOPENCV_VERSION_4)
+endif()
+
+if(OpenCV_VERSION_MAJOR VERSION_LESS 3)
   add_library(${PROJECT_NAME}_boost module.cpp module_opencv2.cpp)
+else()
+  add_library(${PROJECT_NAME}_boost module.cpp module_opencv3.cpp)
 endif()
 target_link_libraries(${PROJECT_NAME}_boost
   ${PYTHON_LIBRARIES}

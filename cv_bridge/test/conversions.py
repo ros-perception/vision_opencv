@@ -42,7 +42,7 @@ class TestConversions(unittest.TestCase):
     def test_encode_decode_cv2_compressed(self):
         # FIXME: remove jp2(a.k.a JPEG2000) as its JASPER codec is disabled within Ubuntu opencv library
         # due to security issues, but it works once you rebuild your opencv library with JASPER enabled
-        formats = ['jpg', 'jpeg', 'jpe', 'png', 'bmp', 'dib', 'ppm', 'pgm', 'pbm',
+        formats = ['jpg', 'jpeg', 'jpe', 'png', 'bmp', 'dib',
                    'sr', 'ras', 'tif', 'tiff']  # this formats rviz is not support
 
         cvb_en = CvBridge()
@@ -56,6 +56,7 @@ class TestConversions(unittest.TestCase):
                             original = np.uint8(np.random.randint(0, 255, size=(h, w)))
                         else:
                             original = np.uint8(np.random.randint(0, 255, size=(h, w, channels)))
+
                         compress_rosmsg = cvb_en.cv2_to_compressed_imgmsg(original, f)
                         newimg = cvb_de.compressed_imgmsg_to_cv2(compress_rosmsg)
                         self.assertTrue(original.dtype == newimg.dtype)

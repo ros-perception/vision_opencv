@@ -2,6 +2,11 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0 (2020-05-27)
+------------------
+* Updated fromCameraInfo function to match ROS2 CameraInfo message (`#295 <https://github.com/ros-perception/vision_opencv/issues/295>`_)
+* Contributors: Luca Della Vedova
+
 2.1.3 (2019-10-23)
 ------------------
 

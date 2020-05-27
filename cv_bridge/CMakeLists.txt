@@ -24,7 +24,7 @@ if(NOT OpenCV_FOUND)
   set(_opencv_version 3)
 endif()
 
-find_package(OpenCV ${_opencv_version4} REQUIRED
+find_package(OpenCV ${_opencv_version} REQUIRED
   COMPONENTS
     opencv_core
     opencv_imgproc

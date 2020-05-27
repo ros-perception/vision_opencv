@@ -23,7 +23,7 @@ function travis_time_end {
 }
 
 apt-get update -qq && apt-get install -y -q wget sudo lsb-release gnupg # for docker
-DEBIAN_FRONTEND=noninteractive apt-get install -y dialog apt-utils tzdata # https://stackoverflow.com/questions/44331836/apt-get-install-tzdata-noninteractive
+DEBIAN_FRONTEND=noninteractive apt-get install -y -q dialog apt-utils tzdata # https://stackoverflow.com/questions/44331836/apt-get-install-tzdata-noninteractive
 
 travis_time_start setup.before_install
 #before_install:
@@ -33,7 +33,7 @@ sh -c 'echo "deb http://repositories.ros.org/ubuntu/testing $(lsb_release -sc) m
 wget http://packages.ros.org/ros.key -O - | apt-key add -
 apt-get update -qq || echo "Ignore error on apt-get update"
 # Install ROS
-apt-get install -qq -y python3-catkin-pkg python3-catkin-tools python3-rosdep python3-wstool ros-$ROS_DISTRO-catkin
+apt-get install -y -q python3-catkin-pkg python3-catkin-tools python3-rosdep python3-wstool ros-$ROS_DISTRO-catkin
 source /opt/ros/$ROS_DISTRO/setup.bash
 # Setup for rosdep
 rosdep init

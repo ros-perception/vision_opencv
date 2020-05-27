@@ -1,5 +1,5 @@
-sudo: required
-dist: trusty
+os: linux
+dist: bionic
 language: generic
 env:
   - ROS_DISTRO=noetic

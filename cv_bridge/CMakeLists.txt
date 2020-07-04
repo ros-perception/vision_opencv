@@ -18,7 +18,7 @@ if(NOT ANDROID)
     find_package(Boost REQUIRED python)
   else()
     find_package(Boost QUIET)
-    if(Boost_VERSION LESS 106500)
+    if(Boost_VERSION VERSION_LESS 1.65)
       find_package(Boost REQUIRED python)
     else()
       # This is a bit of a hack to suppress a warning
@@ -26,7 +26,7 @@ if(NOT ANDROID)
       # Which should only affect Boost versions < 1.67
       # Resolution for newer versions:
       #  https://gitlab.kitware.com/cmake/cmake/issues/16391
-      if (Boost_VERSION LESS 106700)
+      if (Boost_VERSION VERSION_LESS 1.67)
         set(_Boost_PYTHON3_HEADERS "boost/python.hpp")
       endif()
       # Boost >= 1.67 requires python suffix, like "python27" or "python38"

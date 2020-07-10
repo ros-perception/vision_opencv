@@ -13,17 +13,18 @@
 // limitations under the License.
 //
 
-#ifndef MODULE_HPP_
-#define MODULE_HPP_
+#ifndef CV_BRIDGE_MODULE_HPP_
+#define CV_BRIDGE_MODULE_HPP_
 
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#include <numpy/ndarrayobject.h>
+#include <iostream>
+#include <boost/python.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <Python.h>
 
-#include <boost/python.hpp>
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#include <numpy/ndarrayobject.h>
+
 #include <opencv2/core/core.hpp>
-#include <iostream>
 
 namespace bp = boost::python;
 
@@ -31,32 +32,10 @@ int convert_to_CvMat2(const PyObject * o, cv::Mat & m);
 
 PyObject * pyopencv_from(const cv::Mat & m);
 
-#ifdef __clang__
-# pragma clang diagnostic push
-# pragma clang diagnostic ignored "-Wconversion-null"
-# pragma clang diagnostic ignored "-Wreturn-type"
-#elif __GNUC__
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wconversion-null"
-# pragma GCC diagnostic ignored "-Wreturn-type"
-#endif
-
-#if PYTHON3
-static int do_numpy_import()
+static void * do_numpy_import()
 {
   import_array();
+  return nullptr;
 }
-#else
-static void do_numpy_import()
-{
-  import_array();
-}
-#endif
 
-#ifdef __clang__
-# pragma clang diagnostic pop
-#elif __GNUC__
-# pragma GCC diagnostic pop
-#endif
-
-#endif  // MODULE_HPP_
+#endif  // CV_BRIDGE_MODULE_HPP_

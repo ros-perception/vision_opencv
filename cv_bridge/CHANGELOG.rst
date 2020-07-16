@@ -2,6 +2,11 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.1 (2020-07-16)
+------------------
+* Align module.hpp with noetic (`#342 <https://github.com/ros-perception/vision_opencv/issues/342>`_)
+* Contributors: Michael Carroll
+
 2.2.0 (2020-05-27)
 ------------------
 * Disable portable image tests (`#337 <https://github.com/ros-perception/vision_opencv/issues/337>`_)

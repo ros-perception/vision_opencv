@@ -7,7 +7,7 @@
 namespace image_geometry {
 
 enum DistortionState { NONE, CALIBRATED, UNKNOWN };
-enum DistortionModel { FISHEYE, PLUMB_BOB };
+enum DistortionModel { EQUIDISTANT, PLUMB_BOB };
 
 struct CameraModel::Cache
 {
@@ -131,11 +131,11 @@ bool CameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
   reduced_dirty |= update(roi.do_rectify, cam_info_.roi.do_rectify);
   // As is the rectified ROI
   cache_->rectified_roi_dirty = reduced_dirty;
-
+  
   // Figure out how to handle the distortion
   if (cam_info_.distortion_model == sensor_msgs::distortion_models::PLUMB_BOB ||
       cam_info_.distortion_model == sensor_msgs::distortion_models::RATIONAL_POLYNOMIAL || 
-      cam_info_.distortion_model == sensor_msgs::distortion_models::FISHEYE) {
+      cam_info_.distortion_model == sensor_msgs::distortion_models::EQUIDISTANT) {
     // If any distortion coefficient is non-zero, then need to apply the distortion
     cache_->distortion_state = NONE;
 
@@ -156,8 +156,8 @@ bool CameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
       cam_info_.distortion_model == sensor_msgs::distortion_models::RATIONAL_POLYNOMIAL) {
     cache_->distortion_model = PLUMB_BOB;
   }
-  else if(cam_info_.distortion_model == sensor_msgs::distortion_models::FISHEYE){
-    cache_->distortion_model = FISHEYE;
+  else if(cam_info_.distortion_model == sensor_msgs::distortion_models::EQUIDISTANT){
+    cache_->distortion_model = EQUIDISTANT;
   }
 
   // If necessary, create new K_ and P_ adjusted for binning and ROI
@@ -296,11 +296,11 @@ cv::Point2d CameraModel::project3dToPixel(const cv::Point3d& xyz) const
       uv_rect[0].x = (fx()*xyz.x + Tx()) / xyz.z + cx();
       uv_rect[0].y = (fy()*xyz.y + Ty()) / xyz.z + cy();
       break;
-    case FISHEYE:
+    case EQUIDISTANT:
       cv::fisheye::projectPoints(std::vector<cv::Point3d> (1,xyz), uv_rect, r_vec, t_vec, K_, D_ );
       break;
     default:
-      throw Exception("Wrong distortion model. Can only support PLUMB_BOB and FISHEYE distortion models.");
+      throw Exception("Wrong distortion model. Can only support PLUMB_BOB and EQUIDISTANT distortion models.");
   }
 
   return uv_rect[0];
@@ -341,7 +341,7 @@ void CameraModel::rectifyImage(const cv::Mat& raw, cv::Mat& rectified, int inter
       throw Exception("Cannot call rectifyImage when distortion is unknown. Current supported distortion models are: "+
         sensor_msgs::distortion_models::PLUMB_BOB+" , "+
         sensor_msgs::distortion_models::RATIONAL_POLYNOMIAL+" and "+
-        sensor_msgs::distortion_models::FISHEYE );
+        sensor_msgs::distortion_models::EQUIDISTANT );
   }
 }
 
@@ -378,11 +378,11 @@ cv::Point2d CameraModel::rectifyPoint(const cv::Point2d& uv_raw) const
     case PLUMB_BOB:
       cv::undistortPoints(src_pt, dst_pt, K_, D_, R_, P_);
       break;
-    case FISHEYE:
+    case EQUIDISTANT:
       cv::fisheye::undistortPoints(src_pt, dst_pt, K_, D_, R_, P_);
       break;
     default:
-      throw Exception("Wrong distortion model. Can only support PLUMB_BOB and FISHEYE distortion models.");
+      throw Exception("Wrong distortion model. Can only support PLUMB_BOB and EQUIDISTANT distortion models.");
   }
 
   
@@ -412,11 +412,11 @@ cv::Point2d CameraModel::unrectifyPoint(const cv::Point2d& uv_rect) const
       // Project the unitary ray
       cv::projectPoints(std::vector<cv::Point3d>(1, ray), r_vec, t_vec, K_, D_, image_point);
       break;
-    case FISHEYE:
+    case EQUIDISTANT:
       cv::fisheye::distortPoints(std::vector<cv::Point2d>(1, uv_rect), K_, D_, image_point);
       break;
     default:
-      throw Exception("Wrong distortion model. Can only support PLUMB_BOB and FISHEYE distortion models.");
+      throw Exception("Wrong distortion model. Can only support PLUMB_BOB and EQUIDISTANT distortion models.");
   }
 
   return image_point[0];
@@ -510,12 +510,12 @@ void CameraModel::initRectificationMaps() const
                                     CV_16SC2, cache_->full_map1, cache_->full_map2);
         cache_->full_maps_dirty = false;
         break;
-      case FISHEYE:
+      case EQUIDISTANT:
         cv::fisheye::initUndistortRectifyMap(K_binned,D_, R_, P_binned, binned_resolution, CV_16SC2, cache_->full_map1, cache_->full_map2);
         cache_->full_maps_dirty = false;
         break;
       default:
-        throw Exception("Wrong distortion model. Can only support PLUMB_BOB and FISHEYE distortion models..");
+        throw Exception("Wrong distortion model. Can only support PLUMB_BOB and EQUIDISTANT distortion models..");
     }
 
     

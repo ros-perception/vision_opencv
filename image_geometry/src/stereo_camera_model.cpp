@@ -1,4 +1,5 @@
 #include "image_geometry/stereo_camera_model.h"
+#include <opencv2/calib3d/calib3d.hpp>
 
 namespace image_geometry {
 

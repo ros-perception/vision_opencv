@@ -21,6 +21,12 @@ if(NOT ANDROID)
     if(Boost_VERSION VERSION_LESS 1.65)
       find_package(Boost REQUIRED python)
     else()
+      # Boost >= 1.67 requires python suffix, like "python27" or "python38"
+      # (see https://cmake.org/cmake/help/latest/module/FindBoost.html?highlight=version%20suffix)
+      # In the future, for CMAKE > 3.12, FindPython3 and Python3_VERSION_MAJOR etc. could be to build suffix
+      string(REPLACE "." ";" PYTHONLIBS_VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
+      list(GET PYTHONLIBS_VERSION_LIST 0 PYTHONLIBS_VERSION_MAJOR)
+      list(GET PYTHONLIBS_VERSION_LIST 1 PYTHONLIBS_VERSION_MINOR)
       # This is a bit of a hack to suppress a warning
       #   No header defined for python3; skipping header check
       # Which should only affect Boost versions < 1.67
@@ -28,14 +34,10 @@ if(NOT ANDROID)
       #  https://gitlab.kitware.com/cmake/cmake/issues/16391
       if (Boost_VERSION VERSION_LESS 1.67)
         set(_Boost_PYTHON3_HEADERS "boost/python.hpp")
+        set(PYTHON_SUFFIX "python${PYTHONLIBS_VERSION_MAJOR}") # Boost < 1.67 is fine with "python3"
+      else()
+        set(PYTHON_SUFFIX "python${PYTHONLIBS_VERSION_MAJOR}${PYTHONLIBS_VERSION_MINOR}")
       endif()
-      # Boost >= 1.67 requires python suffix, like "python27" or "python38"
-      # (see https://cmake.org/cmake/help/latest/module/FindBoost.html?highlight=version%20suffix)
-      # In the future, for CMAKE > 3.12, FindPython3 and Python3_VERSION_MAJOR etc. could be to build suffix
-      string(REPLACE "." ";" PYTHONLIBS_VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
-      list(GET PYTHONLIBS_VERSION_LIST 0 PYTHONLIBS_VERSION_MAJOR)
-      list(GET PYTHONLIBS_VERSION_LIST 1 PYTHONLIBS_VERSION_MINOR)
-      set(PYTHON_SUFFIX "python${PYTHONLIBS_VERSION_MAJOR}${PYTHONLIBS_VERSION_MINOR}")
       find_package(Boost COMPONENTS ${PYTHON_SUFFIX} REQUIRED)
     endif()
   endif()

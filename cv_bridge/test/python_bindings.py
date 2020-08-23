@@ -10,15 +10,15 @@ def test_cvtColorForDisplay():
     height, width = label.shape[:2]
     label_value = 0
     grid_num_y, grid_num_x = 3, 4
-    for grid_row in xrange(grid_num_y):
+    for grid_row in range(grid_num_y):
         grid_size_y = height / grid_num_y
         min_y = grid_size_y * grid_row
         max_y = min_y + grid_size_y
-        for grid_col in xrange(grid_num_x):
+        for grid_col in range(grid_num_x):
             grid_size_x = width / grid_num_x
             min_x = grid_size_x * grid_col
             max_x = min_x + grid_size_x
-            label[min_y:max_y, min_x:max_x] = label_value
+            label[int(min_y):int(max_y), int(min_x):int(max_x)] = label_value
             label_value += 1
     label_viz = cv_bridge.cvtColorForDisplay(label, '32SC1', 'bgr8')
     assert_equal(label_viz.dtype, np.uint8)

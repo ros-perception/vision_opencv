@@ -2,6 +2,20 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.15.0 (2020-05-19)
+-------------------
+* [Noetic] Use opencv3 on buster (`#330 <https://github.com/ros-perception/vision_opencv/issues/330>`_)
+* more portable fixes. (`#328 <https://github.com/ros-perception/vision_opencv/issues/328>`_)
+* Contributors: Sean Yen, Shane Loretz
+
+1.14.0 (2020-04-06)
+-------------------
+* Noetic release (`#323 <https://github.com/ros-perception/vision_opencv/issues/323>`_)
+* update CMakeLists.txt for Windows build environment (`#265 <https://github.com/ros-perception/vision_opencv/issues/265>`_)
+* remove path splash separator from 'package_dir' (`#267 <https://github.com/ros-perception/vision_opencv/issues/267>`_)
+* fix travis. (`#269 <https://github.com/ros-perception/vision_opencv/issues/269>`_)
+* Contributors: Alejandro Hernández Cordero, James Xu, Sean Yen
+
 1.13.0 (2018-04-30)
 -------------------
 * Use rosdep OpenCV and not ROS one.

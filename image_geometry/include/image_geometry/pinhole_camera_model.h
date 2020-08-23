@@ -7,6 +7,7 @@
 #include <opencv2/calib3d/calib3d.hpp>
 #include <stdexcept>
 #include <string>
+#include "exports.h"
 
 namespace image_geometry {
 
@@ -21,7 +22,7 @@ namespace image_geometry {
  * sensor_msgs/CameraInfo.
  */
 [[deprecated("PinholeCameraModel is deprecated. Use CameraModel instead")]]
-class PinholeCameraModel
+class IMAGE_GEOMETRY_DECL PinholeCameraModel
 {
 public:
 

@@ -1,19 +1,30 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0.2)
 project(cv_bridge)
 
 find_package(catkin REQUIRED COMPONENTS rosconsole sensor_msgs)
 
 if(NOT ANDROID)
   find_package(PythonLibs)
-  if(PYTHONLIBS_VERSION_STRING VERSION_LESS 3)
-    find_package(Boost REQUIRED python)
+
+  if(PYTHONLIBS_VERSION_STRING VERSION_LESS "3.8")
+    # Debian Buster
+    find_package(Boost REQUIRED python37)
   else()
-    find_package(Boost REQUIRED python3)
+    # Ubuntu Focal
+    find_package(Boost REQUIRED python)
   endif()
 else()
 find_package(Boost REQUIRED)
 endif()
-find_package(OpenCV 3 REQUIRED
+
+set(_opencv_version 4)
+find_package(OpenCV 4 QUIET)
+if(NOT OpenCV_FOUND)
+  message(STATUS "Did not find OpenCV 4, trying OpenCV 3")
+  set(_opencv_version 3)
+endif()
+
+find_package(OpenCV ${_opencv_version} REQUIRED
   COMPONENTS
     opencv_core
     opencv_imgproc
@@ -32,6 +43,7 @@ catkin_package(
 catkin_python_setup()
 
 include_directories(include ${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+link_directories(${Boost_LIBRARY_DIRS})
 
 if(NOT ANDROID)
 add_subdirectory(python)

@@ -36,7 +36,7 @@
 #ifndef CV_BRIDGE_RGB_COLORS_H_
 #define CV_BRIDGE_RGB_COLORS_H_
 
-#include <opencv2/opencv.hpp>
+#include <opencv2/core/matx.hpp>
 
 
 namespace cv_bridge

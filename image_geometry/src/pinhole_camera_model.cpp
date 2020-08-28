@@ -1,5 +1,6 @@
 #include "image_geometry/pinhole_camera_model.h"
 #include <sensor_msgs/distortion_models.h>
+#include <opencv2/calib3d/calib3d.hpp>
 #ifdef BOOST_SHARED_PTR_HPP_INCLUDED
 #include <boost/make_shared.hpp>
 #endif

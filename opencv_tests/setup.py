@@ -32,9 +32,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'source = nodes.source:main',
-            'broadcast = nodes.broadcast:main',
-            'rosfacedetect = nodes.rosfacedetect:main',
+            'source = opencv_tests.source:main',
+            'broadcast = opencv_tests.broadcast:main',
+            'rosfacedetect = opencv_tests.rosfacedetect:main',
         ],
     },
 )

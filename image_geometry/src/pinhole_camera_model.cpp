@@ -7,10 +7,12 @@
 namespace image_geometry {
 
 enum DistortionState { NONE, CALIBRATED, UNKNOWN };
+enum DistortionModel { EQUIDISTANT, PLUMB_BOB_OR_RATIONAL_POLYNOMIAL, UNKNOWN_MODEL };
 
 struct PinholeCameraModel::Cache
 {
   DistortionState distortion_state;
+  DistortionModel distortion_model;
 
   cv::Mat_<double> K_binned, P_binned; // Binning applied, but not cropping
 
@@ -24,7 +26,9 @@ struct PinholeCameraModel::Cache
   mutable cv::Rect rectified_roi;
 
   Cache()
-    : full_maps_dirty(true),
+    : distortion_state(UNKNOWN),
+      distortion_model(UNKNOWN_MODEL),
+      full_maps_dirty(true),
       reduced_maps_dirty(true),
       rectified_roi_dirty(true)
   {
@@ -132,7 +136,8 @@ bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
 
   // Figure out how to handle the distortion
   if (cam_info_.distortion_model == sensor_msgs::distortion_models::PLUMB_BOB ||
-      cam_info_.distortion_model == sensor_msgs::distortion_models::RATIONAL_POLYNOMIAL) {
+      cam_info_.distortion_model == sensor_msgs::distortion_models::RATIONAL_POLYNOMIAL ||
+      cam_info_.distortion_model == sensor_msgs::distortion_models::EQUIDISTANT) {
     // If any distortion coefficient is non-zero, then need to apply the distortion
     cache_->distortion_state = NONE;
     for (size_t i = 0; i < cam_info_.D.size(); ++i)
@@ -146,6 +151,17 @@ bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
   }
   else
     cache_->distortion_state = UNKNOWN;
+
+  // Get the distortion model, if supported
+  if (cam_info_.distortion_model == sensor_msgs::distortion_models::PLUMB_BOB ||
+      cam_info_.distortion_model == sensor_msgs::distortion_models::RATIONAL_POLYNOMIAL) {
+    cache_->distortion_model = PLUMB_BOB_OR_RATIONAL_POLYNOMIAL;
+  }
+  else if(cam_info_.distortion_model == sensor_msgs::distortion_models::EQUIDISTANT) {
+    cache_->distortion_model = EQUIDISTANT;
+  }
+  else
+    cache_->distortion_model = UNKNOWN_MODEL;
 
   // If necessary, create new K_ and P_ adjusted for binning and ROI
   /// @todo Calculate and use rectified ROI
@@ -342,7 +358,18 @@ cv::Point2d PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw) const
   cv::Point2f raw32 = uv_raw, rect32;
   const cv::Mat src_pt(1, 1, CV_32FC2, &raw32.x);
   cv::Mat dst_pt(1, 1, CV_32FC2, &rect32.x);
-  cv::undistortPoints(src_pt, dst_pt, K_, D_, R_, P_);
+
+  switch (cache_->distortion_model) {
+    case PLUMB_BOB_OR_RATIONAL_POLYNOMIAL:
+      cv::undistortPoints(src_pt, dst_pt, K_, D_, R_, P_);
+      break;
+    case EQUIDISTANT:
+      cv::fisheye::undistortPoints(src_pt, dst_pt, K_, D_, R_, P_);
+      break;
+    default:
+      assert(cache_->distortion_model == UNKNOWN_MODEL);
+      throw Exception("Wrong distortion model. Supported models: PLUMB_BOB, RATIONAL_POLYNOMIAL and EQUIDISTANT.");
+  }
   return rect32;
 }
 
@@ -363,7 +390,18 @@ cv::Point2d PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect) const
   cv::Mat r_vec, t_vec = cv::Mat_<double>::zeros(3, 1);
   cv::Rodrigues(R_.t(), r_vec);
   std::vector<cv::Point2d> image_point;
-  cv::projectPoints(std::vector<cv::Point3d>(1, ray), r_vec, t_vec, K_, D_, image_point);
+
+  switch (cache_->distortion_model) {
+    case PLUMB_BOB_OR_RATIONAL_POLYNOMIAL:
+      cv::projectPoints(std::vector<cv::Point3d>(1, ray), r_vec, t_vec, K_, D_, image_point);
+      break;
+    case EQUIDISTANT:
+      cv::fisheye::projectPoints(std::vector<cv::Point3d>(1, ray), image_point, r_vec, t_vec, K_, D_);
+      break;
+    default:
+      assert(cache_->distortion_model == UNKNOWN_MODEL);
+      throw Exception("Wrong distortion model. Supported models: PLUMB_BOB, RATIONAL_POLYNOMIAL and EQUIDISTANT.");
+  }
 
   return image_point[0];
 }
@@ -448,10 +486,21 @@ void PinholeCameraModel::initRectificationMaps() const
         P_binned(1,3) *= scale_y;
       }
     }
-    
-    // Note: m1type=CV_16SC2 to use fast fixed-point maps (see cv::remap)
-    cv::initUndistortRectifyMap(K_binned, D_, R_, P_binned, binned_resolution,
-                                CV_16SC2, cache_->full_map1, cache_->full_map2);
+
+    switch (cache_->distortion_model) {
+      case PLUMB_BOB_OR_RATIONAL_POLYNOMIAL:
+        // Note: m1type=CV_16SC2 to use fast fixed-point maps (see cv::remap)
+        cv::initUndistortRectifyMap(K_binned, D_, R_, P_binned, binned_resolution,
+                                    CV_16SC2, cache_->full_map1, cache_->full_map2);
+        break;
+      case EQUIDISTANT:
+        cv::fisheye::initUndistortRectifyMap(K_binned,D_, R_, P_binned, binned_resolution,
+                                             CV_16SC2, cache_->full_map1, cache_->full_map2);
+        break;
+      default:
+        assert(cache_->distortion_model == UNKNOWN_MODEL);
+        throw Exception("Wrong distortion model. Supported models: PLUMB_BOB, RATIONAL_POLYNOMIAL and EQUIDISTANT.");
+    }
     cache_->full_maps_dirty = false;
   }
 

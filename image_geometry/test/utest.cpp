@@ -4,7 +4,7 @@
 
 /// @todo Tests with simple values (R = identity, D = 0, P = K or simple scaling)
 /// @todo Test projection functions for right stereo values, P(:,3) != 0
-/// @todo Tests for [un]rectifyImage
+/// @todo Tests for rectifyImage
 /// @todo Tests using ROI, needs support from PinholeCameraModel
 /// @todo Tests for StereoCameraModel
 
@@ -250,6 +250,124 @@ TEST_F(PinholeTest, rectifyIfCalibrated)
 
   // restore original distortion
   model_.fromCameraInfo(cam_info_);
+}
+
+void testUnrectifyImage(const sensor_msgs::CameraInfo& cam_info, const image_geometry::PinholeCameraModel& model)
+{
+  // test for unrectifyImage: call unrectifyImage, call unrectifyPoint in a loop, compare
+
+  // prepare rectified_image
+  cv::Mat rectified_image(model.fullResolution(), CV_8UC3, cv::Scalar(0, 0, 0));
+
+  // draw a grid
+  const cv::Scalar color = cv::Scalar(255, 255, 255);
+  const int thickness = 7;
+  const int type = 8;
+  for (size_t y = 0; y <= rectified_image.rows; y += rectified_image.rows / 10)
+  {
+    cv::line(rectified_image,
+             cv::Point(0, y), cv::Point(cam_info.width, y),
+             color, type, thickness);
+  }
+  for (size_t x = 0; x <= rectified_image.cols; x += rectified_image.cols / 10)
+  {
+    cv::line(rectified_image,
+             cv::Point(x, 0), cv::Point(x, cam_info.height),
+             color, type, thickness);
+  }
+
+  // restrict rectified_image to ROI and resize to new binning
+  rectified_image = rectified_image(model.rawRoi());
+  cv::resize(rectified_image, rectified_image, cv::Size(), 1.0 / model.binningX(), 1.0 / model.binningY(),
+             cv::INTER_NEAREST);
+
+  // unrectify image in one go using unrectifyImage
+  cv::Mat distorted_image;
+  // Just making this number up, maybe ought to be larger
+  // since a completely different image would be on the order of
+  // width * height * 255 = 78e6
+  const double diff_threshold = 10000.0;
+  double error;
+
+  // Test that unrectified image is sufficiently different
+  // using default distortion
+  model.unrectifyImage(rectified_image, distorted_image);
+  error = cv::norm(rectified_image, distorted_image, cv::NORM_L1);
+  // Just making this number up, maybe ought to be larger
+  EXPECT_GT(error, diff_threshold);
+
+  // unrectify image pixel by pixel using unrectifyPoint
+  assert(rectified_image.type() == CV_8UC3);  // need this for at<cv::Vec3b> to be correct
+  cv::Mat distorted_image_by_pixel = cv::Mat::zeros(rectified_image.size(), rectified_image.type());
+  cv::Mat mask = cv::Mat::zeros(rectified_image.size(), CV_8UC1);
+  for (size_t y = 0; y < rectified_image.rows; y++)
+  {
+    for (size_t x = 0; x < rectified_image.cols; x++)
+    {
+      cv::Point2i uv_rect(x, y), uv_raw;
+
+      uv_raw = model.unrectifyPoint(uv_rect);
+
+      if (0 <= uv_raw.x && uv_raw.x < distorted_image_by_pixel.cols && 0 <= uv_raw.y
+          && uv_raw.y < distorted_image_by_pixel.rows)
+      {
+        distorted_image_by_pixel.at<cv::Vec3b>(uv_raw) = rectified_image.at<cv::Vec3b>(uv_rect);
+        mask.at<uchar>(uv_raw) = 255;
+        // Test that both methods produce similar values at the pixels that unrectifyPoint hits; don't test for all
+        // other pixels (the images will differ there, because unrectifyPoint doesn't interpolate missing pixels).
+        // Also don't check for absolute equality, but allow a color difference of up to 200. This still catches
+        // complete misses (color difference would be 255) while allowing for interpolation at the grid borders.
+        EXPECT_LT(distorted_image.at<cv::Vec3b>(uv_raw)[0] - distorted_image_by_pixel.at<cv::Vec3b>(uv_raw)[0], 200);
+      }
+    }
+  }
+
+  // Test that absolute error (due to interpolation) is less than 6% of the maximum possible error
+  error = cv::norm(distorted_image, distorted_image_by_pixel, cv::NORM_L1, mask);
+  EXPECT_LT(error / (distorted_image.size[0] * distorted_image.size[1] * 255), 0.06);
+
+  // Test that unrectifyPoint hits more than 50% of the output image
+  EXPECT_GT((double) cv::countNonZero(mask) / (distorted_image.size[0] * distorted_image.size[1]), 0.5);
+};
+
+TEST_F(PinholeTest, unrectifyImage)
+{
+  testUnrectifyImage(cam_info_, model_);
+}
+
+TEST_F(PinholeTest, unrectifyImageWithBinning)
+{
+  cam_info_.binning_x = 2;
+  cam_info_.binning_y = 2;
+  model_.fromCameraInfo(cam_info_);
+
+  testUnrectifyImage(cam_info_, model_);
+}
+
+TEST_F(PinholeTest, unrectifyImageWithRoi)
+{
+  cam_info_.roi.x_offset = 100;
+  cam_info_.roi.y_offset = 50;
+  cam_info_.roi.width = 400;
+  cam_info_.roi.height = 300;
+  cam_info_.roi.do_rectify = true;
+  model_.fromCameraInfo(cam_info_);
+
+  testUnrectifyImage(cam_info_, model_);
+}
+
+TEST_F(PinholeTest, unrectifyImageWithBinningAndRoi)
+{
+  cam_info_.binning_x = 2;
+  cam_info_.binning_y = 2;
+  cam_info_.roi.x_offset = 100;
+  cam_info_.roi.y_offset = 50;
+  cam_info_.roi.width = 400;
+  cam_info_.roi.height = 300;
+  cam_info_.roi.do_rectify = true;
+  model_.fromCameraInfo(cam_info_);
+
+  testUnrectifyImage(cam_info_, model_);
 }
 
 int main(int argc, char** argv)

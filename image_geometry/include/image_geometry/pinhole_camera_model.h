@@ -278,6 +278,7 @@ protected:
 #endif
 
   void initRectificationMaps() const;
+  void initUnrectificationMaps() const;
 
   friend class StereoCameraModel;
 };

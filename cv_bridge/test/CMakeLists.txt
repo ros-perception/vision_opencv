@@ -22,6 +22,7 @@ ament_add_gtest(${PROJECT_NAME}-utest
 target_link_libraries(${PROJECT_NAME}-utest
   ${PROJECT_NAME}
   ${OpenCV_LIBRARIES}
+  ${PYTHON_LIBRARIES}
 )
 
 # enable cv_bridge python tests

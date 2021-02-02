@@ -34,6 +34,8 @@ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
 sudo apt-get update -qq || echo Ignore error on apt-get update
 # Install ROS
 sudo apt-get install -qq -y python3-catkin-pkg python3-catkin-tools python3-rosdep python3-wstool ros-$ROS_DISTRO-catkin
+sudo apt-get install -qq -y build-essential  # for catkin build
+sudo apt-get install -qq -y python3-osrf-pycommon  # FIXME: python3-catkin-tools should depend on this
 source /opt/ros/$ROS_DISTRO/setup.bash
 # Setup for rosdep
 sudo rosdep init

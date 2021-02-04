@@ -334,7 +334,7 @@ class StereoCameraModel:
         Note that a disparity of zero implies that the 3D point is at infinity.
         """
         src = mkmat(4, 1, [left_uv[0], left_uv[1], disparity, 1.0])
-        dst = self.Q * src
+        dst = self.Q @ src
         x = dst[0, 0]
         y = dst[1, 0]
         z = dst[2, 0]

@@ -7,7 +7,7 @@ import copy
 import numpy
 
 def mkmat(rows, cols, L):
-    mat = numpy.matrix(L, dtype='float64')
+    mat = numpy.array(L, dtype='float64')
     mat.resize((rows,cols))
     return mat
 
@@ -116,7 +116,7 @@ class PinholeCameraModel:
         This is the inverse of :meth:`projectPixelTo3dRay`.
         """
         src = mkmat(4, 1, [point[0], point[1], point[2], 1.0])
-        dst = self.P * src
+        dst = self.P @ src
         x = dst[0,0]
         y = dst[1,0]
         w = dst[2,0]

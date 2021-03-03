@@ -247,9 +247,6 @@ TEST_F(PinholeTest, rectifyIfCalibrated)
   model_.rectifyImage(distorted_image, rectified_image);
   error = cv::norm(distorted_image, rectified_image, cv::NORM_L1);
   EXPECT_EQ(error, 0);
-
-  // restore original distortion
-  model_.fromCameraInfo(cam_info_);
 }
 
 void testUnrectifyImage(const sensor_msgs::CameraInfo& cam_info, const image_geometry::PinholeCameraModel& model)

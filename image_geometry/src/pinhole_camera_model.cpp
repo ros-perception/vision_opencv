@@ -460,11 +460,12 @@ cv::Rect PinholeCameraModel::rectifyRoi(const cv::Rect& roi_raw) const
   /// @todo Actually implement "best fit" as described by REP 104.
   
   // For now, just unrectify the four corners and take the bounding box.
-  cv::Point2d rect_tl = rectifyPoint(cv::Point2d(roi_raw.x, roi_raw.y));
-  cv::Point2d rect_tr = rectifyPoint(cv::Point2d(roi_raw.x + roi_raw.width, roi_raw.y));
+  // Since ROI is specified in unbinned coordinates (see REP-104), this has to use K_full_ and P_full_.
+  cv::Point2d rect_tl = rectifyPoint(cv::Point2d(roi_raw.x, roi_raw.y), K_full_, P_full_);
+  cv::Point2d rect_tr = rectifyPoint(cv::Point2d(roi_raw.x + roi_raw.width, roi_raw.y), K_full_, P_full_);
   cv::Point2d rect_br = rectifyPoint(cv::Point2d(roi_raw.x + roi_raw.width,
-                                                 roi_raw.y + roi_raw.height));
-  cv::Point2d rect_bl = rectifyPoint(cv::Point2d(roi_raw.x, roi_raw.y + roi_raw.height));
+                                                 roi_raw.y + roi_raw.height), K_full_, P_full_);
+  cv::Point2d rect_bl = rectifyPoint(cv::Point2d(roi_raw.x, roi_raw.y + roi_raw.height), K_full_, P_full_);
 
   cv::Point roi_tl(std::ceil (std::min(rect_tl.x, rect_bl.x)),
                    std::ceil (std::min(rect_tl.y, rect_tr.y)));

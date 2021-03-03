@@ -370,6 +370,64 @@ TEST_F(PinholeTest, unrectifyImageWithBinningAndRoi)
   testUnrectifyImage(cam_info_, model_);
 }
 
+TEST_F(PinholeTest, rectifiedRoiSize) {
+
+  cv::Rect rectified_roi = model_.rectifiedRoi();
+  cv::Size reduced_resolution = model_.reducedResolution();
+  EXPECT_EQ(0, rectified_roi.x);
+  EXPECT_EQ(0, rectified_roi.y);
+  EXPECT_EQ(640, rectified_roi.width);
+  EXPECT_EQ(480, rectified_roi.height);
+  EXPECT_EQ(640, reduced_resolution.width);
+  EXPECT_EQ(480, reduced_resolution.height);
+
+  cam_info_.binning_x = 2;
+  cam_info_.binning_y = 2;
+  model_.fromCameraInfo(cam_info_);
+  rectified_roi = model_.rectifiedRoi();
+  reduced_resolution = model_.reducedResolution();
+  EXPECT_EQ(0, rectified_roi.x);
+  EXPECT_EQ(0, rectified_roi.y);
+  EXPECT_EQ(640, rectified_roi.width);
+  EXPECT_EQ(480, rectified_roi.height);
+  EXPECT_EQ(320, reduced_resolution.width);
+  EXPECT_EQ(240, reduced_resolution.height);
+
+  cam_info_.binning_x = 1;
+  cam_info_.binning_y = 1;
+  cam_info_.roi.x_offset = 100;
+  cam_info_.roi.y_offset = 50;
+  cam_info_.roi.width = 400;
+  cam_info_.roi.height = 300;
+  cam_info_.roi.do_rectify = true;
+  model_.fromCameraInfo(cam_info_);
+  rectified_roi = model_.rectifiedRoi();
+  reduced_resolution = model_.reducedResolution();
+  EXPECT_EQ(137, rectified_roi.x);
+  EXPECT_EQ(82, rectified_roi.y);
+  EXPECT_EQ(321, rectified_roi.width);
+  EXPECT_EQ(242, rectified_roi.height);
+  EXPECT_EQ(321, reduced_resolution.width);
+  EXPECT_EQ(242, reduced_resolution.height);
+
+  cam_info_.binning_x = 2;
+  cam_info_.binning_y = 2;
+  cam_info_.roi.x_offset = 100;
+  cam_info_.roi.y_offset = 50;
+  cam_info_.roi.width = 400;
+  cam_info_.roi.height = 300;
+  cam_info_.roi.do_rectify = true;
+  model_.fromCameraInfo(cam_info_);
+  rectified_roi = model_.rectifiedRoi();
+  reduced_resolution = model_.reducedResolution();
+  EXPECT_EQ(137, rectified_roi.x);
+  EXPECT_EQ(82, rectified_roi.y);
+  EXPECT_EQ(321, rectified_roi.width);
+  EXPECT_EQ(242, rectified_roi.height);
+  EXPECT_EQ(160, reduced_resolution.width);
+  EXPECT_EQ(121, reduced_resolution.height);
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);

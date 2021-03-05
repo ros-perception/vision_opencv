@@ -556,8 +556,8 @@ void PinholeCameraModel::initRectificationMaps() const
     cv::Rect roi(cam_info_.roi.x_offset, cam_info_.roi.y_offset,
                  cam_info_.roi.width, cam_info_.roi.height);
     if (roi.x != 0 || roi.y != 0 ||
-        roi.height != (int)cam_info_.height ||
-        roi.width  != (int)cam_info_.width) {
+        (roi.height != 0 && roi.height != (int)cam_info_.height) ||
+        (roi.width != 0 && roi.width  != (int)cam_info_.width)) {
 
       // map1 contains integer (x,y) offsets, which we adjust by the ROI offset
       // map2 contains LUT index for subpixel interpolation, which we can leave as-is

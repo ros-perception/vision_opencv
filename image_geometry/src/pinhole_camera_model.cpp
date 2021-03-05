@@ -312,11 +312,23 @@ cv::Point2d PinholeCameraModel::project3dToPixel(const cv::Point3d& xyz) const
 
 cv::Point3d PinholeCameraModel::projectPixelTo3dRay(const cv::Point2d& uv_rect) const
 {
+  return projectPixelTo3dRay(uv_rect, P_);
+}
+
+cv::Point3d PinholeCameraModel::projectPixelTo3dRay(const cv::Point2d& uv_rect, const cv::Matx34d& P) const
+{
   assert( initialized() );
 
+  const double& fx = P(0,0);
+  const double& fy = P(1,1);
+  const double& cx = P(0,2);
+  const double& cy = P(1,2);
+  const double& Tx = P(0,3);
+  const double& Ty = P(1,3);
+
   cv::Point3d ray;
-  ray.x = (uv_rect.x - cx() - Tx()) / fx();
-  ray.y = (uv_rect.y - cy() - Ty()) / fy();
+  ray.x = (uv_rect.x - cx - Tx) / fx;
+  ray.y = (uv_rect.y - cy - Ty) / fy;
   ray.z = 1.0;
   return ray;
 }
@@ -371,6 +383,11 @@ void PinholeCameraModel::unrectifyImage(const cv::Mat& rectified, cv::Mat& raw, 
 
 cv::Point2d PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw) const
 {
+  return rectifyPoint(uv_raw, K_, P_);
+}
+
+cv::Point2d PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw, const cv::Matx33d& K, const cv::Matx34d& P) const
+{
   assert( initialized() );
 
   if (cache_->distortion_state == NONE)
@@ -386,10 +403,10 @@ cv::Point2d PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw) const
 
   switch (cache_->distortion_model) {
     case PLUMB_BOB_OR_RATIONAL_POLYNOMIAL:
-      cv::undistortPoints(src_pt, dst_pt, K_, D_, R_, P_);
+      cv::undistortPoints(src_pt, dst_pt, K, D_, R_, P);
       break;
     case EQUIDISTANT:
-      cv::fisheye::undistortPoints(src_pt, dst_pt, K_, D_, R_, P_);
+      cv::fisheye::undistortPoints(src_pt, dst_pt, K, D_, R_, P);
       break;
     default:
       assert(cache_->distortion_model == UNKNOWN_MODEL);
@@ -400,6 +417,11 @@ cv::Point2d PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw) const
 
 cv::Point2d PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect) const
 {
+  return unrectifyPoint(uv_rect, K_, P_);
+}
+
+cv::Point2d PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect, const cv::Matx33d& K, const cv::Matx34d& P) const
+{
   assert( initialized() );
 
   if (cache_->distortion_state == NONE)
@@ -409,7 +431,7 @@ cv::Point2d PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect) const
   assert(cache_->distortion_state == CALIBRATED);
 
   // Convert to a ray
-  cv::Point3d ray = projectPixelTo3dRay(uv_rect);
+  cv::Point3d ray = projectPixelTo3dRay(uv_rect, P);
 
   // Project the ray on the image
   cv::Mat r_vec, t_vec = cv::Mat_<double>::zeros(3, 1);
@@ -418,10 +440,10 @@ cv::Point2d PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect) const
 
   switch (cache_->distortion_model) {
     case PLUMB_BOB_OR_RATIONAL_POLYNOMIAL:
-      cv::projectPoints(std::vector<cv::Point3d>(1, ray), r_vec, t_vec, K_, D_, image_point);
+      cv::projectPoints(std::vector<cv::Point3d>(1, ray), r_vec, t_vec, K, D_, image_point);
       break;
     case EQUIDISTANT:
-      cv::fisheye::projectPoints(std::vector<cv::Point3d>(1, ray), image_point, r_vec, t_vec, K_, D_);
+      cv::fisheye::projectPoints(std::vector<cv::Point3d>(1, ray), image_point, r_vec, t_vec, K, D_);
       break;
     default:
       assert(cache_->distortion_model == UNKNOWN_MODEL);

@@ -107,6 +107,7 @@ public:
    * \return 3d ray passing through (u,v)
    */
   cv::Point3d projectPixelTo3dRay(const cv::Point2d& uv_rect) const;
+  cv::Point3d projectPixelTo3dRay(const cv::Point2d& uv_rect, const cv::Matx34d& P) const;
 
   /**
    * \brief Rectify a raw camera image.
@@ -124,11 +125,13 @@ public:
    * \brief Compute the rectified image coordinates of a pixel in the raw image.
    */
   cv::Point2d rectifyPoint(const cv::Point2d& uv_raw) const;
+  cv::Point2d rectifyPoint(const cv::Point2d& uv_raw, const cv::Matx33d& K, const cv::Matx34d& P) const;
 
   /**
    * \brief Compute the raw image coordinates of a pixel in the rectified image.
    */
   cv::Point2d unrectifyPoint(const cv::Point2d& uv_rect) const;
+  cv::Point2d unrectifyPoint(const cv::Point2d& uv_rect, const cv::Matx33d& K, const cv::Matx34d& P) const;
 
   /**
    * \brief Compute the rectified ROI best fitting a raw ROI.

@@ -252,6 +252,44 @@ TEST_F(PinholeTest, rectifyIfCalibrated)
   model_.fromCameraInfo(cam_info_);
 }
 
+TEST_F(PinholeTest, unrectifyIfCalibrated)
+{
+  cv::Mat rectified_image(cv::Size(cam_info_.width, cam_info_.height), CV_8UC3, cv::Scalar(0, 0, 0));
+
+  // draw a grid
+  const cv::Scalar color = cv::Scalar(255, 255, 255);
+  // draw the lines thick so the proportion of error due to
+  // interpolation is reduced
+  const int thickness = 7;
+  const int type = 8;
+  for (size_t y = 0; y <= cam_info_.height; y += cam_info_.height/10)
+  {
+    cv::line(rectified_image,
+             cv::Point(0, y), cv::Point(cam_info_.width, y),
+             color, type, thickness);
+  }
+  for (size_t x = 0; x <= cam_info_.width; x += cam_info_.width/10)
+  {
+    // draw the lines thick so the prorportion of interpolation error is reduced
+    cv::line(rectified_image,
+             cv::Point(x, 0), cv::Point(x, cam_info_.height),
+             color, type, thickness);
+  }
+
+  cv::Mat distorted_image;
+  model_.unrectifyImage(rectified_image, distorted_image);
+  double error1 = cv::norm(rectified_image, distorted_image, cv::NORM_L1);
+
+  cv::Mat cp;
+  distorted_image.copyTo(cp);
+
+  model_.rectifyImage(distorted_image, rectified_image);
+  model_.unrectifyImage(rectified_image, distorted_image);
+  double error2 = cv::norm(distorted_image, cp, cv::NORM_L1);
+
+  EXPECT_LT(error2, error1);
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);

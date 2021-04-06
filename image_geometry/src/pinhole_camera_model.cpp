@@ -335,14 +335,45 @@ void PinholeCameraModel::unrectifyImage(const cv::Mat& rectified, cv::Mat& raw, 
 {
   assert( initialized() );
 
-  throw Exception("PinholeCameraModel::unrectifyImage is unimplemented.");
-  /// @todo Implement unrectifyImage()
   // Similar to rectifyImage, but need to build separate set of inverse maps (raw->rectified)...
   // - Build src_pt Mat with all the raw pixel coordinates (or do it one row at a time)
   // - Do cv::undistortPoints(src_pt, dst_pt, K_, D_, R_, P_)
   // - Use convertMaps() to convert dst_pt to fast fixed-point maps
   // - cv::remap(rectified, raw, ...)
   // Need interpolation argument. Same caching behavior?
+  switch (cache_->distortion_state) {
+    case NONE:
+      rectified.copyTo(raw);
+      break;
+    case CALIBRATED: {
+      cv::Mat map_x(rectified.size(), CV_32FC1), map_y(rectified.size(), CV_32FC1);
+      for (int i = 0; i < rectified.rows; ++i)
+      {
+        cv::Mat src_pt(1, rectified.cols, CV_32FC2);
+        cv::Mat dst_pt(1, rectified.cols, CV_32FC2);
+        for (int j = 0; j < rectified.cols; ++j)
+        {
+          src_pt.at<cv::Vec2f>(0, j)[0] = float(j);
+          src_pt.at<cv::Vec2f>(0, j)[1] = float(i);
+        }
+
+        cv::undistortPoints(src_pt, dst_pt, K_, D_, R_, P_);
+        for (int j = 0; j < dst_pt.cols; ++j)
+        {
+          map_x.at<float>(i, j) = dst_pt.at<cv::Vec2f>(0, j)[0];
+          map_y.at<float>(i, j) = dst_pt.at<cv::Vec2f>(0, j)[1];
+        }
+      }
+
+      cv::Mat o1;
+      cv::Mat o2;
+      cv::convertMaps(map_x, map_y, o1, o2, CV_16SC2);
+      cv::remap(rectified, raw, o1, o2, interpolation);
+    } break;
+    default:
+      assert(cache_->distortion_state == UNKNOWN);
+      throw Exception("Cannot call unrectifyImage when distortion is unknown.");
+  }
 }
 
 cv::Point2d PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw) const

@@ -95,6 +95,7 @@ int getCvType(const std::string& encoding)
 
   // Miscellaneous
   if (encoding == enc::YUV422) return CV_8UC2;
+  if (encoding == enc::YUV420) return CV_8UC1;
 
   // Check all the generic content encodings
   boost::cmatch m;
@@ -114,7 +115,7 @@ int getCvType(const std::string& encoding)
 
 /// @cond DOXYGEN_IGNORE
 
-enum Encoding { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, YUV422, BAYER_RGGB, BAYER_BGGR, BAYER_GBRG, BAYER_GRBG};
+enum Encoding { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, YUV422, YUV420, BAYER_RGGB, BAYER_BGGR, BAYER_GBRG, BAYER_GRBG};
 
 Encoding getEncoding(const std::string& encoding)
 {
@@ -124,6 +125,7 @@ Encoding getEncoding(const std::string& encoding)
   if ((encoding == enc::BGRA8) || (encoding == enc::BGRA16))  return BGRA;
   if ((encoding == enc::RGBA8) || (encoding == enc::RGBA16))  return RGBA;
   if (encoding == enc::YUV422) return YUV422;
+  if (encoding == enc::YUV420) return YUV420;
 
   if ((encoding == enc::BAYER_RGGB8) || (encoding == enc::BAYER_RGGB16)) return BAYER_RGGB;
   if ((encoding == enc::BAYER_BGGR8) || (encoding == enc::BAYER_BGGR16)) return BAYER_BGGR;
@@ -176,6 +178,12 @@ std::map<std::pair<Encoding, Encoding>, std::vector<int> > getConversionCodes() 
   res[std::make_pair(YUV422, RGBA)].push_back(cv::COLOR_YUV2RGBA_UYVY);
   res[std::make_pair(YUV422, BGRA)].push_back(cv::COLOR_YUV2BGRA_UYVY);
 
+  res[std::make_pair(YUV420, GRAY)].push_back(cv::COLOR_YUV2GRAY_I420);
+  res[std::make_pair(YUV420, RGB)].push_back(cv::COLOR_YUV2RGB_I420);
+  res[std::make_pair(YUV420, BGR)].push_back(cv::COLOR_YUV2BGR_I420);
+  res[std::make_pair(YUV420, RGBA)].push_back(cv::COLOR_YUV2RGBA_I420);
+  res[std::make_pair(YUV420, BGRA)].push_back(cv::COLOR_YUV2BGRA_I420);
+
   // Deal with Bayer
   res[std::make_pair(BAYER_RGGB, GRAY)].push_back(cv::COLOR_BayerBG2GRAY);
   res[std::make_pair(BAYER_RGGB, RGB)].push_back(cv::COLOR_BayerBG2RGB);
@@ -201,9 +209,11 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
   Encoding src_encod = getEncoding(src_encoding);
   Encoding dst_encod = getEncoding(dst_encoding);
   bool is_src_color_format = enc::isColor(src_encoding) || enc::isMono(src_encoding) ||
-                             enc::isBayer(src_encoding) || (src_encoding == enc::YUV422);
+                             enc::isBayer(src_encoding) || (src_encoding == enc::YUV422) ||
+                             (src_encoding == enc::YUV420);
   bool is_dst_color_format = enc::isColor(dst_encoding) || enc::isMono(dst_encoding) ||
-                             enc::isBayer(dst_encoding) || (dst_encoding == enc::YUV422);
+                             enc::isBayer(dst_encoding) || (dst_encoding == enc::YUV422) ||
+                             (dst_encoding == enc::YUV420);
   bool is_num_channels_the_same = (enc::numChannels(src_encoding) == enc::numChannels(dst_encoding));
 
   // If we have no color info in the source, we can only convert to the same format which

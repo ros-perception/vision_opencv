@@ -147,7 +147,7 @@ bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::CameraInfo& msg)
   cache_->unrectify_reduced_maps_dirty |= cache_->unrectify_full_maps_dirty;
 
   // As is the rectified ROI
-  cache_->rectified_roi_dirty = reduced_dirty;
+  cache_->rectified_roi_dirty |= reduced_dirty;
 
   // Figure out how to handle the distortion
   if (cam_info_.distortion_model == sensor_msgs::distortion_models::PLUMB_BOB ||

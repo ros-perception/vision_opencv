@@ -18,7 +18,9 @@ endif()
 find_package(OpenCV REQUIRED COMPONENTS calib3d core highgui imgproc)
 find_package(sensor_msgs REQUIRED)
 
-include_directories(include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${OpenCV_INCLUDE_DIRS}
+)
 
 # add a library
 add_library(${PROJECT_NAME}

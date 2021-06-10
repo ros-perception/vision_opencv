@@ -71,7 +71,10 @@ if(BUILD_TESTING)
   add_subdirectory(test)
 endif()
 
-ament_export_dependencies(OpenCV)
+ament_export_dependencies(
+  OpenCV
+  sensor_msgs
+)
 
 ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME})

@@ -124,7 +124,7 @@ class CvBridge(object):
         str_msg = cmprs_img_msg.data
         buf = np.ndarray(shape=(1, len(str_msg)),
                           dtype=np.uint8, buffer=cmprs_img_msg.data)
-        im = cv2.imdecode(buf, cv2.IMREAD_ANYCOLOR)
+        im = cv2.imdecode(buf, cv2.IMREAD_UNCHANGED)
 
         if desired_encoding == "passthrough":
             return im

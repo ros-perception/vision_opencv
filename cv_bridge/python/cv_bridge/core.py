@@ -173,11 +173,11 @@ class CvBridge(object):
         img_buf = np.asarray(img_msg.data, dtype=dtype) if isinstance(img_msg.data, list) else img_msg.data
 
         if n_channels == 1:
-            im = np.ndarray(shape=(img_msg.height, img_msg.step/dtype.itemsize),
+            im = np.ndarray(shape=(img_msg.height, int(img_msg.step/dtype.itemsize)),
                             dtype=dtype, buffer=img_buf)
             im = np.ascontiguousarray(im[:img_msg.height, :img_msg.width])
         else:
-            im = np.ndarray(shape=(img_msg.height, img_msg.step/dtype.itemsize/n_channels, n_channels),
+            im = np.ndarray(shape=(img_msg.height, int(img_msg.step/dtype.itemsize/n_channels), n_channels),
                             dtype=dtype, buffer=img_buf)
             im = np.ascontiguousarray(im[:img_msg.height, :img_msg.width, :])
 

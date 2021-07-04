@@ -23,13 +23,19 @@ sudo apt install python3-numpy
 
 ```
 
-Now cv_bridge python backend still has dependency on python boost (`equal or higer than 1.58.0`), and install them as follows in Ubuntu 16.04:
+Now cv_bridge python backend still has dependency on python boost (`equal or higer than 1.58.0`).<br>
+Install python boost as follows in Ubuntu 16.04:
 
 ```bash
 
 sudo apt install libboost-python1.58.0
 cd /usr/lib/x86_64-linux-gnu/ && sudo ln -s libboost_python-py35.so libboost_python3.so
 
+```
+Install python boost as follows in ubuntu 18.04:
+```bash
+ sudo apt install -y --no-install-recommends libboost-all-dev
+ sudo apt install libboost-python1.62.0
 ```
 
 ## Build and Test

@@ -1,0 +1,20 @@
+name: vision_opencv CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - ros2
+
+jobs: 
+    # Give each job a different name for better feedback
+    name: ament_${{ matrix.linter }}
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: ros-tooling/setup-ros@v0.2
+        with:
+          required-ros-distributions: galactic
+      - uses: ros-tooling/action-ros-ci@v0.2
+        with:
+          package-name: vision_opencv 
+          target-ros2-distro: galactic

@@ -71,8 +71,8 @@ getEncodings()
     TYPE_64FC1, /*TYPE_64FC2,*/ TYPE_64FC3, TYPE_64FC4,
     // BAYER_RGGB8, BAYER_BGGR8, BAYER_GBRG8, BAYER_GRBG8,
     // BAYER_RGGB16, BAYER_BGGR16, BAYER_GBRG16, BAYER_GRBG16,
-    YUV422};
-  return std::vector<std::string>(encodings, encodings + 47 - 8 - 7);
+    YUV422, YUV422_YUY2};
+  return std::vector<std::string>(encodings, encodings + 48 - 8 - 7);
 }
 
 TEST(OpencvTests, testCase_encode_decode)
@@ -81,7 +81,8 @@ TEST(OpencvTests, testCase_encode_decode)
   for (size_t i = 0; i < encodings.size(); ++i) {
     std::string src_encoding = encodings[i];
     bool is_src_color_format = isColor(src_encoding) || isMono(src_encoding) ||
-      (src_encoding == sensor_msgs::image_encodings::YUV422);
+      (src_encoding == sensor_msgs::image_encodings::YUV422) ||
+      (src_encoding == sensor_msgs::image_encodings::YUV422_YUY2);
     cv::Mat image_original(cv::Size(400, 400), cv_bridge::getCvType(src_encoding));
     cv::RNG r(77);
     r.fill(image_original, cv::RNG::UNIFORM, 0, 127);
@@ -95,7 +96,8 @@ TEST(OpencvTests, testCase_encode_decode)
     for (size_t j = 0; j < encodings.size(); ++j) {
       std::string dst_encoding = encodings[j];
       bool is_dst_color_format = isColor(dst_encoding) || isMono(dst_encoding) ||
-        (dst_encoding == sensor_msgs::image_encodings::YUV422);
+        (dst_encoding == sensor_msgs::image_encodings::YUV422) ||
+        (dst_encoding == sensor_msgs::image_encodings::YUV422_YUY2);
       bool is_num_channels_the_same = (numChannels(src_encoding) == numChannels(dst_encoding));
 
       cv_bridge::CvImageConstPtr cv_image;
@@ -126,7 +128,8 @@ TEST(OpencvTests, testCase_encode_decode)
           continue;
         }
         // We do not support conversion to YUV422 for now, except from YUV422
-        if ((dst_encoding == YUV422) && (src_encoding != YUV422)) {
+        if (((dst_encoding == YUV422) && (src_encoding != YUV422)) ||
+          ((dst_encoding == YUV422_YUY2) && (src_encoding != YUV422_YUY2))) {
           EXPECT_THROW(cv_bridge::toCvShare(image_msg, dst_encoding), cv_bridge::Exception);
           continue;
         }
@@ -134,7 +137,8 @@ TEST(OpencvTests, testCase_encode_decode)
         cv_image = cv_bridge::toCvShare(image_msg, dst_encoding);
 
         // We do not support conversion to YUV422 for now, except from YUV422
-        if ((src_encoding == YUV422) && (dst_encoding != YUV422)) {
+        if (((src_encoding == YUV422) && (dst_encoding != YUV422)) ||
+            ((src_encoding == YUV422_YUY2) && (dst_encoding != YUV422_YUY2))){
           EXPECT_THROW((void)cvtColor(cv_image, src_encoding)->image, cv_bridge::Exception);
           continue;
         }

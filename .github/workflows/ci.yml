@@ -7,8 +7,7 @@ on:
       - ros2
 
 jobs: 
-    # Give each job a different name for better feedback
-    name: ament_${{ matrix.linter }}
+    name: Build and test vision_opencv
     runs-on: ubuntu-18.04
     steps:
       - uses: ros-tooling/setup-ros@v0.2

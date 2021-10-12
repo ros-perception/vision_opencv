@@ -481,7 +481,7 @@ void CvImage::toCompressedImageMsg(sensor_msgs::CompressedImage& ros_image, cons
 {
   ros_image.header = header;
   cv::Mat image;
-  if (encoding == enc::BGR8 || encoding == enc::BGRA8)
+  if (encoding == enc::BGR8 || encoding == enc::BGRA8  || encoding == enc::MONO8 || encoding == enc::MONO16)
   {
     image = this->image;
   }
@@ -519,19 +519,24 @@ CvImagePtr toCvCopy(const sensor_msgs::CompressedImage& source, const std::strin
   // Loads as BGR or BGRA.
   const cv::Mat rgb_a = cv::imdecode(in, cv::IMREAD_UNCHANGED);
 
-  switch (rgb_a.channels())
-  {
-    case 4:
-      return toCvCopyImpl(rgb_a, source.header, enc::BGRA8, encoding);
-      break;
-    case 3:
-      return toCvCopyImpl(rgb_a, source.header, enc::BGR8, encoding);
-      break;
-    case 1:
-      return toCvCopyImpl(rgb_a, source.header, enc::MONO8, encoding);
-      break;
-    default:
-      return CvImagePtr();
+  if (encoding != enc::MONO16) {
+    switch (rgb_a.channels())
+    {
+      case 4:
+        return toCvCopyImpl(rgb_a, source.header, enc::BGRA8, encoding);
+        break;
+      case 3:
+        return toCvCopyImpl(rgb_a, source.header, enc::BGR8, encoding);
+        break;
+      case 1:
+        return toCvCopyImpl(rgb_a, source.header, enc::MONO8, encoding);
+        break;
+      default:
+        return CvImagePtr();
+    }
+  }
+  else {
+    return toCvCopyImpl(rgb_a, source.header, enc::MONO16, encoding);
   }
 }
 

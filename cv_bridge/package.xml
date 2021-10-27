@@ -13,11 +13,6 @@
   <url type="repository">https://github.com/ros-perception/vision_opencv/tree/ros2</url>
   <url type="bugtracker">https://github.com/ros-perception/vision_opencv/issues</url>
 
-  <export>
-    <rosdoc config="rosdoc.yaml" />
-    <build_type>ament_cmake</build_type>
-  </export>
-
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
   <buildtool_depend>python_cmake_module</buildtool_depend>
 
@@ -37,5 +32,8 @@
   <test_depend>ament_lint_common</test_depend>
   <test_depend>python3-opencv</test_depend>
 
-  <doc_depend>dvipng</doc_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+
 </package>

@@ -1,5 +1,5 @@
-#ifndef IMAGE_GEOMETRY_PINHOLE_CAMERA_MODEL_H
-#define IMAGE_GEOMETRY_PINHOLE_CAMERA_MODEL_H
+#ifndef IMAGE_GEOMETRY__PINHOLE_CAMERA_MODEL_H
+#define IMAGE_GEOMETRY__PINHOLE_CAMERA_MODEL_H
 
 #include "image_geometry/visibility_control.hpp"
 
@@ -256,7 +256,7 @@ public:
    */
   IMAGE_GEOMETRY_PUBLIC
   uint32_t binningY() const;
-  
+
   /**
    * \brief Compute delta u, given Z and delta X in Cartesian space.
    *
@@ -404,6 +404,6 @@ inline double PinholeCameraModel::getDeltaY(double deltaV, double Z) const
   return Z * deltaV / fy();
 }
 
-} //namespace image_geometry
+}  // namespace image_geometry
 
 #endif

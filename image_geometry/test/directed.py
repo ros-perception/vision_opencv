@@ -51,7 +51,7 @@ class TestDirected(unittest.TestCase):
                     self.assertAlmostEqual(y, ry, 3)
                     self.assertAlmostEqual(x, lx, 3)
                     self.assertAlmostEqual(x, rx + d, 3)
-        
+
         u = 100.0
         v = 200.0
         du = 17.0

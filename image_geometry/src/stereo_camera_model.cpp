@@ -13,14 +13,16 @@ StereoCameraModel::StereoCameraModel(const StereoCameraModel& other)
     Q_(0.0)
 {
   Q_(0,0) = Q_(1,1) = 1.0;
-  if (other.initialized())
+  if (other.initialized()) {
     updateQ();
+  }
 }
 
 StereoCameraModel& StereoCameraModel::operator=(const StereoCameraModel& other)
 {
-  if (other.initialized())
+  if (other.initialized()) {
     this->fromCameraInfo(other.left_.cameraInfo(), other.right_.cameraInfo());
+  }
   return *this;
 }
 
@@ -38,8 +40,9 @@ bool StereoCameraModel::fromCameraInfo(const sensor_msgs::msg::CameraInfo& left,
   assert( left_.cy() == right_.cy() );
   // cx may differ for verged cameras
 
-  if (changed)
+  if (changed) {
     updateQ();
+  }
 
   return changed;
 }
@@ -137,4 +140,4 @@ void StereoCameraModel::projectDisparityImageTo3d(const cv::Mat& disparity, cv::
   cv::reprojectImageTo3D(disparity, point_cloud, Q_, handleMissingValues);
 }
 
-} //namespace image_geometry
+}  // namespace image_geometry

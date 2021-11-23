@@ -226,7 +226,7 @@ class CvBridge(object):
 
         return cmprs_img_msg
 
-    def cv2_to_imgmsg(self, cvim, encoding = "passthrough"):
+    def cv2_to_imgmsg(self, cvim, encoding = "passthrough", header = None):
         """
         Convert an OpenCV :cpp:type:`cv::Mat` type to a ROS sensor_msgs::Image message.
 
@@ -235,6 +235,7 @@ class CvBridge(object):
 
            * ``"passthrough"``
            * one of the standard strings in sensor_msgs/image_encodings.h
+        :param header:    A std_msgs.msg.Header message
 
         :rtype:           A sensor_msgs.msg.Image message
         :raises CvBridgeError: when the ``cvim`` has a type that is incompatible with ``encoding``
@@ -251,6 +252,8 @@ class CvBridge(object):
         img_msg = sensor_msgs.msg.Image()
         img_msg.height = cvim.shape[0]
         img_msg.width = cvim.shape[1]
+        if header is not None:
+            img_msg.header = header
         if len(cvim.shape) < 3:
             cv_type = self.dtype_with_channels_to_cvtype2(cvim.dtype, 1)
         else:

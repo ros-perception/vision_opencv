@@ -2,6 +2,16 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.16.0 (2021-11-23)
+-------------------
+* prevent conversion of single channel 16bit integer images to/from colour (`#412 <https://github.com/ros-perception/vision_opencv/issues/412>`_)
+* decode images in mode IMREAD_UNCHANGED (`#228 <https://github.com/ros-perception/vision_opencv/issues/228>`_)
+* Optimize includes (`#354 <https://github.com/ros-perception/vision_opencv/issues/354>`_)
+  As suggested by include-what-you-use
+* Fix Python linking on OSX (`#331 <https://github.com/ros-perception/vision_opencv/issues/331>`_)
+* Fix typo (`#333 <https://github.com/ros-perception/vision_opencv/issues/333>`_)
+* Contributors: Christian Rauch, Markus Vieth, Matthijs van der Burgh, Tobias Fischer
+
 1.15.0 (2020-05-19)
 -------------------
 * [Noetic] Use opencv3 on buster (`#330 <https://github.com/ros-perception/vision_opencv/issues/330>`_)

@@ -247,9 +247,6 @@ TEST_F(PinholeTest, rectifyIfCalibrated)
   model_.rectifyImage(distorted_image, rectified_image);
   error = cv::norm(distorted_image, rectified_image, cv::NORM_L1);
   EXPECT_EQ(error, 0);
-
-  // restore original distortion
-  model_.fromCameraInfo(cam_info_);
 }
 
 void testUnrectifyImage(const sensor_msgs::CameraInfo& cam_info, const image_geometry::PinholeCameraModel& model)
@@ -368,6 +365,96 @@ TEST_F(PinholeTest, unrectifyImageWithBinningAndRoi)
   model_.fromCameraInfo(cam_info_);
 
   testUnrectifyImage(cam_info_, model_);
+}
+
+TEST_F(PinholeTest, rectifiedRoiSize) {
+
+  cv::Rect rectified_roi = model_.rectifiedRoi();
+  cv::Size reduced_resolution = model_.reducedResolution();
+  EXPECT_EQ(0, rectified_roi.x);
+  EXPECT_EQ(0, rectified_roi.y);
+  EXPECT_EQ(640, rectified_roi.width);
+  EXPECT_EQ(480, rectified_roi.height);
+  EXPECT_EQ(640, reduced_resolution.width);
+  EXPECT_EQ(480, reduced_resolution.height);
+
+  cam_info_.binning_x = 2;
+  cam_info_.binning_y = 2;
+  model_.fromCameraInfo(cam_info_);
+  rectified_roi = model_.rectifiedRoi();
+  reduced_resolution = model_.reducedResolution();
+  EXPECT_EQ(0, rectified_roi.x);
+  EXPECT_EQ(0, rectified_roi.y);
+  EXPECT_EQ(640, rectified_roi.width);
+  EXPECT_EQ(480, rectified_roi.height);
+  EXPECT_EQ(320, reduced_resolution.width);
+  EXPECT_EQ(240, reduced_resolution.height);
+
+  cam_info_.binning_x = 1;
+  cam_info_.binning_y = 1;
+  cam_info_.roi.x_offset = 100;
+  cam_info_.roi.y_offset = 50;
+  cam_info_.roi.width = 400;
+  cam_info_.roi.height = 300;
+  cam_info_.roi.do_rectify = true;
+  model_.fromCameraInfo(cam_info_);
+  rectified_roi = model_.rectifiedRoi();
+  reduced_resolution = model_.reducedResolution();
+  EXPECT_EQ(137, rectified_roi.x);
+  EXPECT_EQ(82, rectified_roi.y);
+  EXPECT_EQ(321, rectified_roi.width);
+  EXPECT_EQ(242, rectified_roi.height);
+  EXPECT_EQ(321, reduced_resolution.width);
+  EXPECT_EQ(242, reduced_resolution.height);
+
+  cam_info_.binning_x = 2;
+  cam_info_.binning_y = 2;
+  cam_info_.roi.x_offset = 100;
+  cam_info_.roi.y_offset = 50;
+  cam_info_.roi.width = 400;
+  cam_info_.roi.height = 300;
+  cam_info_.roi.do_rectify = true;
+  model_.fromCameraInfo(cam_info_);
+  rectified_roi = model_.rectifiedRoi();
+  reduced_resolution = model_.reducedResolution();
+  EXPECT_EQ(137, rectified_roi.x);
+  EXPECT_EQ(82, rectified_roi.y);
+  EXPECT_EQ(321, rectified_roi.width);
+  EXPECT_EQ(242, rectified_roi.height);
+  EXPECT_EQ(160, reduced_resolution.width);
+  EXPECT_EQ(121, reduced_resolution.height);
+}
+
+TEST_F(PinholeTest, rectifiedRoiCaching)
+{
+  // Test that the following sequence works correctly:
+  // 1. fromCameraInfo is called with ROI A.  | rectified_roi_dirty = true
+  // (already happened in SetUp())
+
+  // 2. rectifiedRoi is called                | rectified_roi_dirty = false
+  cv::Rect actual_roi_a = model_.rectifiedRoi();
+  cv::Rect expected_roi_a(0, 0, 640, 480);
+  EXPECT_EQ(expected_roi_a, actual_roi_a);
+
+  // 3. fromCameraInfo is called with ROI B.  | rectified_roi_dirty = true
+  cam_info_.roi.x_offset = 100;
+  cam_info_.roi.y_offset = 50;
+  cam_info_.roi.width = 400;
+  cam_info_.roi.height = 300;
+  cam_info_.roi.do_rectify = true;
+  model_.fromCameraInfo(cam_info_);
+
+  // 4. fromCameraInfo is called again with ROI B.  | rectified_roi_dirty should still be true!
+  model_.fromCameraInfo(cam_info_);
+
+  // 5. rectifiedRoi is called
+  // There was a bug before where rectified_roi_dirty was incorrectly set to `false` by step 4.
+  // If rectifiedRoi was called again, the cached rectified_roi for
+  // ROI A was returned, but it should be recalculated based on ROI B.
+  // This test checks that this behavior is correct.
+  cv::Rect actual_roi_b = model_.rectifiedRoi();
+  cv::Rect expected_roi_b(137, 82, 321, 242);
+  EXPECT_EQ(expected_roi_b, actual_roi_b);
 }
 
 int main(int argc, char** argv)

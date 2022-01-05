@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.14)
 project(cv_bridge)
 
 find_package(ament_cmake_ros REQUIRED)
@@ -33,7 +33,7 @@ if(NOT ANDROID)
     endif()
   endif()
 else()
-  find_package(Boost REQUIRED)
+  find_package(Boost REQUIRED COMPONENTS python)
 endif()
 
 find_package(sensor_msgs REQUIRED)
@@ -76,14 +76,10 @@ ament_export_dependencies(
   sensor_msgs
 )
 
-ament_export_include_directories(include)
-ament_export_libraries(${PROJECT_NAME})
+ament_export_targets(export_${PROJECT_NAME})
 
 # install the include folder
-install(
-  DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION include/${PROJECT_NAME}
-)
+install(DIRECTORY include/ DESTINATION include/${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION bin

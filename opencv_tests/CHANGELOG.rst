@@ -2,6 +2,12 @@
 Changelog for package opencv_tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.0.0 (2022-01-19)
+------------------
+* Rename opencv_tests install folder to deconflict (`#357 <https://github.com/ros-perception/vision_opencv/issues/357>`_)
+* delete __init_\_ for launch directory (`#352 <https://github.com/ros-perception/vision_opencv/issues/352>`_)
+* Contributors: Dirk Thomas, Michael Carroll
+
 2.2.1 (2020-07-16)
 ------------------
 

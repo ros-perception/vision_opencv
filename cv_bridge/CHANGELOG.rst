@@ -2,6 +2,18 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.0.0 (2022-01-19)
+------------------
+* Export Modern CMake targets and install includes to another folder(`#419 <https://github.com/ros-perception/vision_opencv/issues/419>`_)
+* Handle padded img msg in Python (`#400 <https://github.com/ros-perception/vision_opencv/issues/400>`_)
+* Remove boost endian (`#399 <https://github.com/ros-perception/vision_opencv/issues/399>`_)
+* Add conversions from YUV422 YUY2 (`#396 <https://github.com/ros-perception/vision_opencv/issues/396>`_)
+* fix endianness comparison (`#397 <https://github.com/ros-perception/vision_opencv/issues/397>`_)
+* Export sensor_msgs dependency (`#392 <https://github.com/ros-perception/vision_opencv/issues/392>`_)
+* Fix multiple undefined references (`#370 <https://github.com/ros-perception/vision_opencv/issues/370>`_)
+* Updated `cv_bridge.dll` install location. (`#356 <https://github.com/ros-perception/vision_opencv/issues/356>`_)
+* Contributors: Homalozoa X, Jacob Perron, Patrick Musau, Sean Yen, Shane Loretz
+
 2.2.1 (2020-07-16)
 ------------------
 * Align module.hpp with noetic (`#342 <https://github.com/ros-perception/vision_opencv/issues/342>`_)

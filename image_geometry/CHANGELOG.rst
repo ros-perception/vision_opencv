@@ -2,6 +2,9 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.0.1 (2022-01-25)
+------------------
+
 3.0.0 (2022-01-19)
 ------------------
 * Export Modern CMake targets and install includes to another folder(`#419 <https://github.com/ros-perception/vision_opencv/issues/419>`_)

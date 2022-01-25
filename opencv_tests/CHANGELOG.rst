@@ -2,6 +2,9 @@
 Changelog for package opencv_tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.0.1 (2022-01-25)
+------------------
+
 3.0.0 (2022-01-19)
 ------------------
 * Rename opencv_tests install folder to deconflict (`#357 <https://github.com/ros-perception/vision_opencv/issues/357>`_)

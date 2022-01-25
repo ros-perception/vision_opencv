@@ -2,6 +2,12 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.0.1 (2022-01-25)
+------------------
+* Use Boost::python3 if Boost < 1.67 (`#422 <https://github.com/ros-perception/vision_opencv/issues/422>`_)
+* Use Boost::pythonXY target (`#421 <https://github.com/ros-perception/vision_opencv/issues/421>`_)
+* Contributors: Shane Loretz
+
 3.0.0 (2022-01-19)
 ------------------
 * Export Modern CMake targets and install includes to another folder(`#419 <https://github.com/ros-perception/vision_opencv/issues/419>`_)

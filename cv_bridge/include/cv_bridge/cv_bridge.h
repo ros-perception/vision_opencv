@@ -43,10 +43,12 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgproc/types_c.h>
+#include <cv_bridge/cv_bridge_export.h>
+
+#include <memory>
+#include <ostream>
 #include <stdexcept>
 #include <string>
-#include <memory>
-#include <cv_bridge/cv_bridge_export.h>
 
 namespace cv_bridge
 {
@@ -327,137 +329,5 @@ CV_BRIDGE_EXPORT CvImageConstPtr cvtColorForDisplay(
 CV_BRIDGE_EXPORT int getCvType(const std::string & encoding);
 
 }  // namespace cv_bridge
-
-#if 0
-// CvImage as a first class message type
-
-// The rest of this file hooks into the roscpp serialization API to make CvImage
-// a first-class message type you can publish and subscribe to directly.
-// Unfortunately this doesn't yet work with image_transport, so don't rewrite all
-// your callbacks to use CvImage! It might be useful for specific tasks, like
-// processing bag files.
-
-/// @cond DOXYGEN_IGNORE
-namespace ros
-{
-
-namespace message_traits
-{
-
-template<>
-struct MD5Sum<cv_bridge::CvImage>
-{
-  static const char * value() {return MD5Sum<sensor_msgs::msg::Image>::value();}
-  static const char * value(const cv_bridge::CvImage &) {return value();}
-
-  static const uint64_t static_value1 = MD5Sum<sensor_msgs::msg::Image>::static_value1;
-  static const uint64_t static_value2 = MD5Sum<sensor_msgs::msg::Image>::static_value2;
-
-  // If the definition of sensor_msgs/Image changes, we'll get a compile error here.
-  ROS_STATIC_ASSERT(MD5Sum<sensor_msgs::msg::Image>::static_value1 == 0x060021388200f6f0ULL);
-  ROS_STATIC_ASSERT(MD5Sum<sensor_msgs::msg::Image>::static_value2 == 0xf447d0fcd9c64743ULL);
-};
-
-template<>
-struct DataType<cv_bridge::CvImage>
-{
-  static const char * value() {return DataType<sensor_msgs::msg::Image>::value();}
-  static const char * value(const cv_bridge::CvImage &) {return value();}
-};
-
-template<>
-struct Definition<cv_bridge::CvImage>
-{
-  static const char * value() {return Definition<sensor_msgs::msg::Image>::value();}
-  static const char * value(const cv_bridge::CvImage &) {return value();}
-};
-
-template<>
-struct HasHeader<cv_bridge::CvImage>: TrueType {};
-
-}  // namespace message_traits
-
-namespace serialization
-{
-
-template<>
-struct Serializer<cv_bridge::CvImage>
-{
-  /// @todo Still ignoring endianness...
-
-  template<typename Stream>
-  inline static void write(Stream & stream, const cv_bridge::CvImage & m)
-  {
-    stream.next(m.header);
-    stream.next((uint32_t)m.image.rows);  // height
-    stream.next((uint32_t)m.image.cols);  // width
-    stream.next(m.encoding);
-    uint8_t is_bigendian = 0;
-    stream.next(is_bigendian);
-    stream.next((uint32_t)m.image.step);
-    size_t data_size = m.image.step * m.image.rows;
-    stream.next((uint32_t)data_size);
-    if (data_size > 0) {
-      memcpy(stream.advance(data_size), m.image.data, data_size);
-    }
-  }
-
-  template<typename Stream>
-  inline static void read(Stream & stream, cv_bridge::CvImage & m)
-  {
-    stream.next(m.header);
-    uint32_t height, width;
-    stream.next(height);
-    stream.next(width);
-    stream.next(m.encoding);
-    uint8_t is_bigendian;
-    stream.next(is_bigendian);
-    uint32_t step, data_size;
-    stream.next(step);
-    stream.next(data_size);
-    int type = cv_bridge::getCvType(m.encoding);
-    // Construct matrix pointing to the stream data, then copy it to m.image
-    cv::Mat tmp((int)height, (int)width, type, stream.advance(data_size), (size_t)step);
-    tmp.copyTo(m.image);
-  }
-
-  inline static uint32_t serializedLength(const cv_bridge::CvImage & m)
-  {
-    size_t data_size = m.image.step * m.image.rows;
-    return serializationLength(m.header) + serializationLength(m.encoding) + 17 + data_size;
-  }
-};
-
-}  // namespace serialization
-
-namespace message_operations
-{
-
-template<>
-struct Printer<cv_bridge::CvImage>
-{
-  template<typename Stream>
-  static void stream(Stream &, const std::string &, const cv_bridge::CvImage &)
-  {
-    /// @todo Replicate printing for sensor_msgs::msg::Image
-  }
-};
-}  // namespace message_operations
-
-}  // namespace ros
-
-namespace cv_bridge
-{
-
-inline std::ostream & operator<<(std::ostream & s, const CvImage & m)
-{
-  ros::message_operations::Printer<CvImage>::stream(s, "", m);
-  return s;
-}
-
-}  // namespace cv_bridge
-#endif
-
-/// @endcond
 
 #endif  // CV_BRIDGE__CV_BRIDGE_H_

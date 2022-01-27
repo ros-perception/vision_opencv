@@ -40,7 +40,7 @@ protected:
 
     model_.fromCameraInfo(cam_info_);
   }
-  
+
   sensor_msgs::msg::CameraInfo cam_info_;
   image_geometry::PinholeCameraModel model_;
 };
@@ -73,7 +73,7 @@ TEST_F(PinholeTest, projectPoint)
     EXPECT_DOUBLE_EQ(0.0, xyz.y);
     EXPECT_DOUBLE_EQ(1.0, xyz.z);
   }
-  
+
   // Check projecting to 3d and back over entire image is accurate.
   const size_t step = 10;
   for (size_t row = 0; row <= cam_info_.height; row += step) {
@@ -191,16 +191,14 @@ TEST_F(PinholeTest, rectifyIfCalibrated)
   // interpolation is reduced
   const int thickness = 7;
   const int type = 8;
-  for (size_t y = 0; y <= cam_info_.height; y += cam_info_.height/10)
-  {
+  for (size_t y = 0; y <= cam_info_.height; y += cam_info_.height / 10) {
     cv::line(distorted_image,
              cv::Point(0UL, static_cast<uint32_t>(y)),
              cv::Point(static_cast<uint32_t>(cam_info_.width),
                        static_cast<uint32_t>(y)),
              color, type, thickness);
   }
-  for (size_t x = 0; x <= cam_info_.width; x += cam_info_.width/10)
-  {
+  for (size_t x = 0; x <= cam_info_.width; x += cam_info_.width / 10) {
     // draw the lines thick so the prorportion of interpolation error is reduced
     cv::line(distorted_image,
              cv::Point(static_cast<uint32_t>(x), 0UL),

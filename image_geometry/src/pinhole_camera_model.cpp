@@ -46,23 +46,26 @@ PinholeCameraModel::PinholeCameraModel()
 
 PinholeCameraModel& PinholeCameraModel::operator=(const PinholeCameraModel& other)
 {
-  if (other.initialized())
+  if (other.initialized()) {
     this->fromCameraInfo(other.cameraInfo());
+  }
   return *this;
 }
 
 PinholeCameraModel::PinholeCameraModel(const PinholeCameraModel& other)
 {
-  if (other.initialized())
+  if (other.initialized()) {
     fromCameraInfo(other.cam_info_);
+  }
 }
 
 // For uint32_t, string, bool...
 template<typename T>
 bool update(const T& new_val, T& my_val)
 {
-  if (my_val == new_val)
+  if (my_val == new_val) {
     return false;
+  }
   my_val = new_val;
   return true;
 }
@@ -71,8 +74,9 @@ bool update(const T& new_val, T& my_val)
 template<typename MatT>
 bool updateMat(const MatT& new_mat, MatT& my_mat, cv::Mat_<double>& cv_mat, int rows, int cols)
 {
-  if ((my_mat == new_mat) && (my_mat.size() == static_cast<unsigned int>(cv_mat.rows*cv_mat.cols)))
+  if ((my_mat == new_mat) && (my_mat.size() == static_cast<unsigned int>(cv_mat.rows*cv_mat.cols))) {
     return false;
+  }
   my_mat = new_mat;
   // D may be empty if camera is uncalibrated or distortion model is non-standard
   cv_mat = (my_mat.size() == 0) ? cv::Mat_<double>() : cv::Mat_<double>(rows, cols, &my_mat[0]);
@@ -82,8 +86,9 @@ bool updateMat(const MatT& new_mat, MatT& my_mat, cv::Mat_<double>& cv_mat, int 
 template<typename MatT, typename MatU>
 bool updateMat(const MatT& new_mat, MatT& my_mat, MatU& cv_mat)
 {
-  if ((my_mat == new_mat) && (my_mat.size() == cv_mat.rows*cv_mat.cols))
+  if ((my_mat == new_mat) && (my_mat.size() == cv_mat.rows*cv_mat.cols)) {
     return false;
+  }
   my_mat = new_mat;
   // D may be empty if camera is uncalibrated or distortion model is non-standard
   cv_mat = MatU(&my_mat[0]);
@@ -93,8 +98,9 @@ bool updateMat(const MatT& new_mat, MatT& my_mat, MatU& cv_mat)
 bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::msg::CameraInfo& msg)
 {
   // Create our repository of cached data (rectification maps, etc.)
-  if (!cache_)
+  if (!cache_) {
     cache_ = std::make_shared<Cache>();
+  }
 
   // Binning = 0 is considered the same as binning = 1 (no binning).
   uint32_t binning_x = msg.binning_x ? msg.binning_x : 1;
@@ -147,17 +153,16 @@ bool PinholeCameraModel::fromCameraInfo(const sensor_msgs::msg::CameraInfo& msg)
       cam_info_.distortion_model == sensor_msgs::distortion_models::EQUIDISTANT) {
     // If any distortion coefficient is non-zero, then need to apply the distortion
     cache_->distortion_state = NONE;
-    for (size_t i = 0; i < cam_info_.d.size(); ++i)
-    {
-      if (cam_info_.d[i] != 0)
-      {
+    for (size_t i = 0; i < cam_info_.d.size(); ++i) {
+      if (cam_info_.d[i] != 0) {
         cache_->distortion_state = CALIBRATED;
         break;
       }
     }
   }
-  else
+  else {
     cache_->distortion_state = UNKNOWN;
+  }
 
   // Get the distortion model, if supported
   if (cam_info_.distortion_model == sensor_msgs::distortion_models::PLUMB_BOB ||
@@ -276,13 +281,14 @@ cv::Rect PinholeCameraModel::rawRoi() const
 cv::Rect PinholeCameraModel::rectifiedRoi() const
 {
   assert( initialized() );
-  
-  if (cache_->rectified_roi_dirty)
-  {
-    if (!cam_info_.roi.do_rectify)
+
+  if (cache_->rectified_roi_dirty) {
+    if (!cam_info_.roi.do_rectify) {
       cache_->rectified_roi = rawRoi();
-    else
+    }
+    else {
       cache_->rectified_roi = rectifyRoi(rawRoi());
+    }
     cache_->rectified_roi_dirty = false;
   }
   return cache_->rectified_roi;
@@ -335,8 +341,7 @@ void PinholeCameraModel::rectifyImage(const cv::Mat& raw, cv::Mat& rectified, in
       break;
     case CALIBRATED:
       initRectificationMaps();
-      if (raw.depth() == CV_32F || raw.depth() == CV_64F)
-      {
+      if (raw.depth() == CV_32F || raw.depth() == CV_64F) {
         cv::remap(raw, rectified, cache_->reduced_map1, cache_->reduced_map2, interpolation, cv::BORDER_CONSTANT, std::numeric_limits<float>::quiet_NaN());
       }
       else {
@@ -385,10 +390,12 @@ cv::Point2d PinholeCameraModel::rectifyPoint(const cv::Point2d& uv_raw, const cv
 {
   assert( initialized() );
 
-  if (cache_->distortion_state == NONE)
+  if (cache_->distortion_state == NONE) {
     return uv_raw;
-  if (cache_->distortion_state == UNKNOWN)
+  }
+  if (cache_->distortion_state == UNKNOWN) {
     throw Exception("Cannot call rectifyPoint when distortion is unknown.");
+  }
   assert(cache_->distortion_state == CALIBRATED);
 
   /// @todo cv::undistortPoints requires the point data to be float, should allow double
@@ -419,10 +426,12 @@ cv::Point2d PinholeCameraModel::unrectifyPoint(const cv::Point2d& uv_rect, const
 {
   assert( initialized() );
 
-  if (cache_->distortion_state == NONE)
+  if (cache_->distortion_state == NONE) {
     return uv_rect;
-  if (cache_->distortion_state == UNKNOWN)
+  }
+  if (cache_->distortion_state == UNKNOWN) {
     throw Exception("Cannot call unrectifyPoint when distortion is unknown.");
+  }
   assert(cache_->distortion_state == CALIBRATED);
 
   // Convert to a ray
@@ -453,7 +462,7 @@ cv::Rect PinholeCameraModel::rectifyRoi(const cv::Rect& roi_raw) const
   assert( initialized() );
 
   /// @todo Actually implement "best fit" as described by REP 104.
-  
+
   // For now, just unrectify the four corners and take the bounding box.
   // Since ROI is specified in unbinned coordinates (see REP-104), this has to use K_full_ and P_full_.
   cv::Point2d rect_tl = rectifyPoint(cv::Point2d(roi_raw.x, roi_raw.y), K_full_, P_full_);
@@ -475,7 +484,7 @@ cv::Rect PinholeCameraModel::unrectifyRoi(const cv::Rect& roi_rect) const
   assert( initialized() );
 
   /// @todo Actually implement "best fit" as described by REP 104.
-  
+
   // For now, just unrectify the four corners and take the bounding box.
   cv::Point2d raw_tl = unrectifyPoint(cv::Point2d(roi_rect.x, roi_rect.y));
   cv::Point2d raw_tr = unrectifyPoint(cv::Point2d(roi_rect.x + roi_rect.width, roi_rect.y));
@@ -495,7 +504,7 @@ void PinholeCameraModel::initRectificationMaps() const
 {
   /// @todo For large binning settings, can drop extra rows/cols at bottom/right boundary.
   /// Make sure we're handling that 100% correctly.
-  
+
   if (cache_->full_maps_dirty) {
     // Create the full-size map at the binned resolution
     /// @todo Should binned resolution, K, P be part of public API?
@@ -653,4 +662,4 @@ void PinholeCameraModel::initUnrectificationMaps() const
   }
 }
 
-} //namespace image_geometry
+}  // namespace image_geometry

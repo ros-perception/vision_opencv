@@ -14,11 +14,6 @@
   <author>Patrick Mihelich</author>
   <author>Vincent Rabaud</author>
 
-  <export>
-    <build_type>ament_cmake</build_type>
-    <rosdoc config="rosdoc.yaml" />
-  </export>
-
   <buildtool_depend>ament_cmake_python</buildtool_depend>
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
 
@@ -28,7 +23,8 @@
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_cmake_pytest</test_depend>
 
-  <doc_depend>dvipng</doc_depend>
-  <doc_depend>texlive-latex-extra</doc_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 
 </package>

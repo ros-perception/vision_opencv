@@ -1,5 +1,5 @@
-#ifndef IMAGE_GEOMETRY_STEREO_CAMERA_MODEL_H
-#define IMAGE_GEOMETRY_STEREO_CAMERA_MODEL_H
+#ifndef IMAGE_GEOMETRY__STEREO_CAMERA_MODEL_H
+#define IMAGE_GEOMETRY__STEREO_CAMERA_MODEL_H
 
 #include "image_geometry/pinhole_camera_model.h"
 #include "image_geometry/visibility_control.hpp"
@@ -149,6 +149,6 @@ inline double StereoCameraModel::getDisparity(double Z) const
   return -right_.Tx() / Z + (left().cx() - right().cx()); ;
 }
 
-} //namespace image_geometry
+}  // namespace image_geometry
 
 #endif

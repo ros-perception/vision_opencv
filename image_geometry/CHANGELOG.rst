@@ -2,6 +2,16 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.0.2 (2022-01-27)
+------------------
+* Minor cleanups to the ROS 2 branch (`#418 <https://github.com/ros-perception/vision_opencv/issues/418>`_)
+* Forward ports from Noetic (`#420 <https://github.com/ros-perception/vision_opencv/issues/420>`_)
+  * substituted missing sphinx extension (`#417 <https://github.com/ros-perception/vision_opencv/issues/417>`_)
+  * Fix rectifyRoi when used with binning and/or ROI (`#378 <https://github.com/ros-perception/vision_opencv/issues/378>`_)
+  * Implement unrectifyImage() (`#359 <https://github.com/ros-perception/vision_opencv/issues/359>`_)
+  * Add equidistant distortion model (`#358 <https://github.com/ros-perception/vision_opencv/issues/358>`_)
+* Contributors: Chris Lalancette, Martin Günther, Michael Carroll, Paddy
+
 3.0.1 (2022-01-25)
 ------------------
 

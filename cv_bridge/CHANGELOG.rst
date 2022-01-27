@@ -2,6 +2,15 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.0.2 (2022-01-27)
+------------------
+* Minor cleanups to the ROS 2 branch (`#418 <https://github.com/ros-perception/vision_opencv/issues/418>`_)
+* Find Python3 if not on Android (`#423 <https://github.com/ros-perception/vision_opencv/issues/423>`_)
+* Forward ports from noetic (`#420 <https://github.com/ros-perception/vision_opencv/issues/420>`_)
+  * Add header arg to cv2_to_imgmsg (`#326 <https://github.com/ros-perception/vision_opencv/issues/326>`_)
+  * prevent conversion of single channel 16bit integer images to/from colour (`#412 <https://github.com/ros-perception/vision_opencv/issues/412>`_)
+* Contributors: Chris Lalancette, Christian Rauch, Michael Carroll, Naoya Yamaguchi, Shane Loretz
+
 3.0.1 (2022-01-25)
 ------------------
 * Use Boost::python3 if Boost < 1.67 (`#422 <https://github.com/ros-perception/vision_opencv/issues/422>`_)

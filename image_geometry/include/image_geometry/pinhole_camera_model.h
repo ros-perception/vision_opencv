@@ -125,6 +125,7 @@ public:
    */
   IMAGE_GEOMETRY_PUBLIC
   cv::Point3d projectPixelTo3dRay(const cv::Point2d& uv_rect) const;
+  cv::Point3d projectPixelTo3dRay(const cv::Point2d& uv_rect, const cv::Matx34d& P) const;
 
   /**
    * \brief Rectify a raw camera image.
@@ -145,12 +146,14 @@ public:
    */
   IMAGE_GEOMETRY_PUBLIC
   cv::Point2d rectifyPoint(const cv::Point2d& uv_raw) const;
+  cv::Point2d rectifyPoint(const cv::Point2d& uv_raw, const cv::Matx33d& K, const cv::Matx34d& P) const;
 
   /**
    * \brief Compute the raw image coordinates of a pixel in the rectified image.
    */
   IMAGE_GEOMETRY_PUBLIC
   cv::Point2d unrectifyPoint(const cv::Point2d& uv_rect) const;
+  cv::Point2d unrectifyPoint(const cv::Point2d& uv_rect, const cv::Matx33d& K, const cv::Matx34d& P) const;
 
   /**
    * \brief Compute the rectified ROI best fitting a raw ROI.
@@ -319,6 +322,7 @@ protected:
 
   IMAGE_GEOMETRY_PUBLIC
   void initRectificationMaps() const;
+  void initUnrectificationMaps() const;
 
   friend class StereoCameraModel;
 };

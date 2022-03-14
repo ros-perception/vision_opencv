@@ -12,7 +12,8 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   opencv_imgproc
   opencv_imgcodecs)
 target_link_libraries(${PROJECT_NAME} PRIVATE
-  Boost::headers)
+  Boost::headers
+  rcpputils::rcpputils)
 
 install(TARGETS ${PROJECT_NAME} EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib

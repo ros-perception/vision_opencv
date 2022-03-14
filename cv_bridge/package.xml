@@ -21,6 +21,7 @@
 
   <depend>libopencv-dev</depend>
   <depend>python3-numpy</depend>
+  <depend>rcpputils</depend>
   <depend>sensor_msgs</depend>
 
   <exec_depend>ament_index_python</exec_depend>

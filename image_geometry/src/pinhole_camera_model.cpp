@@ -284,7 +284,7 @@ cv::Rect PinholeCameraModel::rawRoi() const
 cv::Rect PinholeCameraModel::rectifiedRoi() const
 {
   assert( initialized() );
-  
+
   if (cache_->rectified_roi_dirty)
   {
     if (!cam_info_.roi.do_rectify)
@@ -458,7 +458,7 @@ cv::Rect PinholeCameraModel::rectifyRoi(const cv::Rect& roi_raw) const
   assert( initialized() );
 
   /// @todo Actually implement "best fit" as described by REP 104.
-  
+
   // For now, just unrectify the four corners and take the bounding box.
   // Since ROI is specified in unbinned coordinates (see REP-104), this has to use K_full_ and P_full_.
   cv::Point2d rect_tl = rectifyPoint(cv::Point2d(roi_raw.x, roi_raw.y), K_full_, P_full_);
@@ -480,7 +480,7 @@ cv::Rect PinholeCameraModel::unrectifyRoi(const cv::Rect& roi_rect) const
   assert( initialized() );
 
   /// @todo Actually implement "best fit" as described by REP 104.
-  
+
   // For now, just unrectify the four corners and take the bounding box.
   cv::Point2d raw_tl = unrectifyPoint(cv::Point2d(roi_rect.x, roi_rect.y));
   cv::Point2d raw_tr = unrectifyPoint(cv::Point2d(roi_rect.x + roi_rect.width, roi_rect.y));
@@ -500,7 +500,7 @@ void PinholeCameraModel::initRectificationMaps() const
 {
   /// @todo For large binning settings, can drop extra rows/cols at bottom/right boundary.
   /// Make sure we're handling that 100% correctly.
-  
+
   if (cache_->full_maps_dirty) {
     // Create the full-size map at the binned resolution
     /// @todo Should binned resolution, K, P be part of public API?

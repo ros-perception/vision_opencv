@@ -6,6 +6,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <stdexcept>
 #include <string>
+#include <math.h>
 #include "exports.h"
 
 namespace image_geometry {
@@ -209,6 +210,16 @@ public:
   double Ty() const;
 
   /**
+   * \brief Returns the horizontal field of view in radians.
+   */
+  double fovX() const;
+
+  /**
+   * \brief Returns the vertical field of view in radians.
+   */
+  double fovY() const;
+
+  /**
    * \brief Returns the number of columns in each bin.
    */
   uint32_t binningX() const;
@@ -217,7 +228,7 @@ public:
    * \brief Returns the number of rows in each bin.
    */
   uint32_t binningY() const;
-  
+
   /**
    * \brief Compute delta u, given Z and delta X in Cartesian space.
    *
@@ -314,6 +325,13 @@ inline double PinholeCameraModel::cx() const { return P_(0,2); }
 inline double PinholeCameraModel::cy() const { return P_(1,2); }
 inline double PinholeCameraModel::Tx() const { return P_(0,3); }
 inline double PinholeCameraModel::Ty() const { return P_(1,3); }
+
+inline double PinholeCameraModel::fovX() const {
+        return 2 * atan(rawRoi().width / (2 * fx()));
+}
+inline double PinholeCameraModel::fovY() const {
+        return 2 * atan(rawRoi().height / (2 * fy()));
+}
 
 inline uint32_t PinholeCameraModel::binningX() const { return cam_info_.binning_x; }
 inline uint32_t PinholeCameraModel::binningY() const { return cam_info_.binning_y; }

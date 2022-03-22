@@ -113,7 +113,7 @@ class PinholeCameraModel:
 
         Returns the rectified pixel coordinates (u, v) of the 3D point,
         using the camera :math:`P` matrix.
-        This is the inverse of :meth:`projectPixelTo3dRay`.
+        This is the inverse of :math:`projectPixelTo3dRay`.
         """
         src = mkmat(4, 1, [point[0], point[1], point[2], 1.0])
         dst = self.P * src
@@ -132,7 +132,7 @@ class PinholeCameraModel:
 
         Returns the unit vector which passes from the camera center to through rectified pixel (u, v),
         using the camera :math:`P` matrix.
-        This is the inverse of :meth:`project3dToPixel`.
+        This is the inverse of :math:`project3dToPixel`.
         """
         x = (uv[0] - self.cx()) / self.fx()
         y = (uv[1] - self.cy()) / self.fy()
@@ -151,7 +151,7 @@ class PinholeCameraModel:
         :rtype:                 float
 
         Compute delta u, given Z and delta X in Cartesian space.
-        For given Z, this is the inverse of :meth:`getDeltaX`.
+        For given Z, this is the inverse of :math:`getDeltaX`.
         """
         fx = self.P[0, 0]
         if Z == 0:
@@ -168,7 +168,7 @@ class PinholeCameraModel:
         :rtype:                 float
 
         Compute delta v, given Z and delta Y in Cartesian space.
-        For given Z, this is the inverse of :meth:`getDeltaY`.
+        For given Z, this is the inverse of :math:`getDeltaY`.
         """
         fy = self.P[1, 1]
         if Z == 0:
@@ -185,7 +185,7 @@ class PinholeCameraModel:
         :rtype:                 float
 
         Compute delta X, given Z in cartesian space and delta u in pixels.
-        For given Z, this is the inverse of :meth:`getDeltaU`.
+        For given Z, this is the inverse of :math:`getDeltaU`.
         """
         fx = self.P[0, 0]
         return Z * deltaU / fx
@@ -199,7 +199,7 @@ class PinholeCameraModel:
         :rtype:                 float
 
         Compute delta Y, given Z in cartesian space and delta v in pixels.
-        For given Z, this is the inverse of :meth:`getDeltaV`.
+        For given Z, this is the inverse of :math:`getDeltaV`.
         """
         fy = self.P[1, 1]
         return Z * deltaV / fy
@@ -248,6 +248,24 @@ class PinholeCameraModel:
         """ Return the y-translation term of the projection matrix """
         return self.P[1,3]
 
+    def fovX(self):
+        """ Returns the horizontal field of view in radians.
+            Horizontal FoV = 2 * arctan((width) / (2 * Focal Length) )
+        """
+        K = self.fullIntrinsicMatrix()
+        assert K is not None
+        alphax = K[0,0]
+        return 2 * math.atan(self.width / (2 * alphax))
+
+    def fovY(self):
+        """ Returns the vertical field of view in radians.
+            Vertical FoV = 2 * arctan((height) / (2 * Focal Length) )
+        """
+        K = self.fullIntrinsicMatrix()
+        assert K is not None
+        alphay = K[1,1]
+        return 2 * math.atan(self.height / (2 * alphay))
+
     def tfFrame(self):
         """ Returns the tf frame name - a string - of the camera.
         This is the frame of the :class:`sensor_msgs.msg.CameraInfo` message.
@@ -278,11 +296,12 @@ class StereoCameraModel:
         # [ 0,  Fy, Cy,  0      ]
         # [ 0,  0,  1,   0      ]
 
-        fx = self.right.P[0, 0]
-        fy = self.right.P[1, 1]
-        cx = self.right.P[0, 2]
-        cy = self.right.P[1, 2]
-        tx = -self.right.P[0, 3] / fx
+        assert self.right.P is not None
+        self._fx = self.right.P[0, 0]
+        self._fy = self.right.P[1, 1]
+        self._cx = self.right.P[0, 2]
+        self._cy = self.right.P[1, 2]
+        self._tx = -self.right.P[0, 3] / self._fx
 
         # Q is:
         #    [ 1, 0,  0, -Clx ]
@@ -292,11 +311,11 @@ class StereoCameraModel:
 
         self.Q = numpy.zeros((4, 4), dtype='float64')
         self.Q[0, 0] = 1.0
-        self.Q[0, 3] = -cx
+        self.Q[0, 3] = -self._cx
         self.Q[1, 1] = 1.0
-        self.Q[1, 3] = -cy
-        self.Q[2, 3] = fx
-        self.Q[3, 2] = 1 / tx
+        self.Q[1, 3] = -self._cy
+        self.Q[2, 3] = self._fx
+        self.Q[3, 2] = 1 / self._tx
 
     def tfFrame(self):
         """
@@ -314,7 +333,7 @@ class StereoCameraModel:
 
         Returns the rectified pixel coordinates (u, v) of the 3D point, for each camera, as ((u_left, v_left), (u_right, v_right))
         using the cameras' :math:`P` matrices.
-        This is the inverse of :meth:`projectPixelTo3d`.
+        This is the inverse of :math:`projectPixelTo3d`.
         """
         l = self.left.project3dToPixel(point)
         r = self.right.project3dToPixel(point)
@@ -329,7 +348,7 @@ class StereoCameraModel:
 
         Returns the 3D point (x, y, z) for the given pixel position,
         using the cameras' :math:`P` matrices.
-        This is the inverse of :meth:`project3dToPixel`.
+        This is the inverse of :math:`project3dToPixel`.
 
         Note that a disparity of zero implies that the 3D point is at infinity.
         """
@@ -350,12 +369,13 @@ class StereoCameraModel:
         :type disparity:         float
 
         Returns the depth at which a point is observed with a given disparity.
-        This is the inverse of :meth:`getDisparity`.
+        This is the inverse of :math:`getDisparity`.
 
         Note that a disparity of zero implies Z is infinite.
         """
         if disparity == 0:
             return float('inf')
+        assert self.right.P is not None
         Tx = -self.right.P[0, 3]
         return Tx / disparity
 
@@ -365,9 +385,10 @@ class StereoCameraModel:
         :type Z:           float
 
         Returns the disparity observed for a point at depth Z.
-        This is the inverse of :meth:`getZ`.
+        This is the inverse of :math:`getZ`.
         """
         if Z == 0:
             return float('inf')
+        assert self.right.P is not None
         Tx = -self.right.P[0, 3]
         return Tx / Z

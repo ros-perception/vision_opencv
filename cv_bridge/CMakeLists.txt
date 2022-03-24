@@ -33,6 +33,7 @@ else()
   endif()
 endif()
 
+find_package(rcpputils REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
 find_package(OpenCV 4 QUIET

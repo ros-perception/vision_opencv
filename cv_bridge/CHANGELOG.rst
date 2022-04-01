@@ -2,6 +2,11 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add missing dependency on rcpputils (`#427 <https://github.com/ros-perception/vision_opencv/issues/427>`_)
+* Contributors: Shane Loretz
+
 3.0.2 (2022-01-27)
 ------------------
 * Minor cleanups to the ROS 2 branch (`#418 <https://github.com/ros-perception/vision_opencv/issues/418>`_)

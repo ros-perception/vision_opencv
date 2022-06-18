@@ -23,6 +23,7 @@
   <depend>python3-numpy</depend>
   <depend>rcpputils</depend>
   <depend>sensor_msgs</depend>
+  <depend>python3-opencv</depend>
 
   <exec_depend>ament_index_python</exec_depend>
   <exec_depend>libboost-python</exec_depend>
@@ -31,7 +32,6 @@
   <test_depend>ament_cmake_pytest</test_depend>
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
-  <test_depend>python3-opencv</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

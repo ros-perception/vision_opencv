@@ -72,6 +72,7 @@ public:
   IMAGE_GEOMETRY_PUBLIC
   void projectDisparityImageTo3d(const cv::Mat& disparity, cv::Mat& point_cloud,
                                  bool handleMissingValues = false) const;
+  IMAGE_GEOMETRY_PUBLIC
   static const double MISSING_Z;
   
   /**

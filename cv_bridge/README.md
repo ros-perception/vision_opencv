@@ -36,10 +36,9 @@ sudo apt install libboost-python-dev
 ### Fetch the latest code and build
 ```bash
 
-cd <YOUR_ROS2_WORKSPACE>
-git clone https://github.com/ros-perception/vision_opencv.git
-cd vision_opencv
-git checkout ros2
+cd <YOUR_ROS2_WORKSPACE>/src
+git clone https://github.com/ros-perception/vision_opencv.git -b ros2
+cd ..
 colcon build --symlink-install
 
 ```
@@ -47,7 +46,8 @@ colcon build --symlink-install
 ### Run the tests
 Python tests have a dependency on OpenCV Python support.  To install it:
 ```bash
-pip3 install opencv-python
+
+sudo apt install python3-opencv
 
 ```
 Next to prepare runtime environment and run tests:

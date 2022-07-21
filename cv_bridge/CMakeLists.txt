@@ -54,7 +54,14 @@ if(NOT OpenCV_FOUND)
 endif()
 
 if(NOT ANDROID)
-  add_subdirectory(python)
+  configure_file(python/__init__.py.plain.in
+    ${CMAKE_CURRENT_BINARY_DIR}/python/boost/__init__.py
+    @ONLY
+  )
+
+  ament_python_install_package(${PROJECT_NAME}
+    PACKAGE_DIR python/${PROJECT_NAME}
+  )
 endif()
 
 add_subdirectory(src)

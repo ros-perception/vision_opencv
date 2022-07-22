@@ -54,7 +54,9 @@ if(NOT OpenCV_FOUND)
 endif()
 
 if(NOT ANDROID)
-  add_subdirectory(python)
+  ament_python_install_package(${PROJECT_NAME}
+    PACKAGE_DIR python/${PROJECT_NAME}
+  )
 endif()
 
 add_subdirectory(src)

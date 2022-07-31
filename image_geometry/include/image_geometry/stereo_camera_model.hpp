@@ -1,7 +1,7 @@
 #ifndef IMAGE_GEOMETRY__STEREO_CAMERA_MODEL_HPP_
 #define IMAGE_GEOMETRY__STEREO_CAMERA_MODEL_HPP_
 
-#include "image_geometry/pinhole_camera_model.h"
+#include "image_geometry/pinhole_camera_model.hpp"
 #include "image_geometry/visibility_control.hpp"
 
 namespace image_geometry {

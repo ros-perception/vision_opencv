@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <sensor_msgs/image_encodings.hpp>
 
-#include "cv_bridge/cv_bridge.h"
+#include "cv_bridge/cv_bridge.hpp"
 
 // Tests conversion of non-continuous cv::Mat. #5206
 TEST(CvBridgeTest, NonContinuous)

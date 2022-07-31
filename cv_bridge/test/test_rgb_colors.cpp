@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <opencv2/opencv.hpp>
 
-#include "cv_bridge/rgb_colors.h"
+#include "cv_bridge/rgb_colors.hpp"
 
 TEST(RGBColors, testGetRGBColor)
 {

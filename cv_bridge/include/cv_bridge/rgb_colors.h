@@ -36,6 +36,8 @@
 #ifndef CV_BRIDGE__RGB_COLORS_H_
 #define CV_BRIDGE__RGB_COLORS_H_
 
+// This file is deprecated as of I-turtle and can be completely removed in J-turtle.
+
 #warning This header is obsolete, please include cv_bridge/rgb_colors.hpp instead
 
 #include <cv_bridge/rgb_colors.hpp>

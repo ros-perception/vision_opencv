@@ -37,6 +37,8 @@
 #ifndef CV_BRIDGE__CV_BRIDGE_H_
 #define CV_BRIDGE__CV_BRIDGE_H_
 
+// This file is deprecated as of I-turtle and can be completely removed in J-turtle.
+
 #warning This header is obsolete, please include cv_bridge/cv_bridge.hpp instead
 
 #include <cv_bridge/cv_bridge.hpp>

@@ -33,8 +33,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef CV_BRIDGE__RGB_COLORS_H_
-#define CV_BRIDGE__RGB_COLORS_H_
+#ifndef CV_BRIDGE__RGB_COLORS_HPP_
+#define CV_BRIDGE__RGB_COLORS_HPP_
 
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge_export.h>
@@ -210,4 +210,4 @@ CV_BRIDGE_EXPORT cv::Vec3d getRGBColor(const int color);
 
 }  // namespace cv_bridge
 
-#endif  // CV_BRIDGE__RGB_COLORS_H_
+#endif  // CV_BRIDGE__RGB_COLORS_HPP_

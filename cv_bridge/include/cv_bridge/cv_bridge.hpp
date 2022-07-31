@@ -34,8 +34,8 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
 
-#ifndef CV_BRIDGE__CV_BRIDGE_H_
-#define CV_BRIDGE__CV_BRIDGE_H_
+#ifndef CV_BRIDGE__CV_BRIDGE_HPP_
+#define CV_BRIDGE__CV_BRIDGE_HPP_
 
 #include <sensor_msgs/msg/image.hpp>
 #include <sensor_msgs/msg/compressed_image.hpp>
@@ -330,4 +330,4 @@ CV_BRIDGE_EXPORT int getCvType(const std::string & encoding);
 
 }  // namespace cv_bridge
 
-#endif  // CV_BRIDGE__CV_BRIDGE_H_
+#endif  // CV_BRIDGE__CV_BRIDGE_HPP_

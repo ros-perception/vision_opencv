@@ -1,5 +1,5 @@
-#ifndef IMAGE_GEOMETRY__PINHOLE_CAMERA_MODEL_H
-#define IMAGE_GEOMETRY__PINHOLE_CAMERA_MODEL_H
+#ifndef IMAGE_GEOMETRY__PINHOLE_CAMERA_MODEL_HPP_
+#define IMAGE_GEOMETRY__PINHOLE_CAMERA_MODEL_HPP_
 
 #include "image_geometry/visibility_control.hpp"
 
@@ -406,4 +406,4 @@ inline double PinholeCameraModel::getDeltaY(double deltaV, double Z) const
 
 }  // namespace image_geometry
 
-#endif
+#endif  // IMAGE_GEOMETRY__PINHOLE_CAMERA_MODEL_HPP_

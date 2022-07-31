@@ -13,18 +13,20 @@ endif()
 
 # enable cv_bridge C++ tests
 find_package(ament_cmake_gtest REQUIRED)
-ament_add_gtest(${PROJECT_NAME}-utest
-  test_endian.cpp
-  test_compression.cpp
-  utest.cpp utest2.cpp
-  test_rgb_colors.cpp
-  APPEND_LIBRARY_DIRS "${cv_bridge_lib_dir}")
-target_link_libraries(${PROJECT_NAME}-utest
-  ${PROJECT_NAME}
-  Boost::headers
-  opencv_core
-  opencv_imgcodecs
-  ${sensor_msgs_TARGETS})
+ament_add_gtest(test_compression test_compression.cpp)
+target_link_libraries(test_compression ${PROJECT_NAME})
+
+ament_add_gtest(test_endian test_endian.cpp)
+target_link_libraries(test_endian ${PROJECT_NAME})
+
+ament_add_gtest(test_rgb_colors test_rgb_colors.cpp)
+target_link_libraries(test_rgb_colors ${PROJECT_NAME})
+
+ament_add_gtest(utest utest.cpp)
+target_link_libraries(utest ${PROJECT_NAME})
+
+ament_add_gtest(utest2 utest2.cpp)
+target_link_libraries(utest2 ${PROJECT_NAME})
 
 # enable cv_bridge python tests
 find_package(ament_cmake_pytest REQUIRED)

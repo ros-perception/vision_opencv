@@ -61,12 +61,6 @@ endif()
 
 add_subdirectory(src)
 
-# cv_bridge_lib_dir is passed as APPEND_LIBRARY_DIRS for each ament_add_gtest call so
-# the project library that they link against is on the library path.
-# This is especially important on Windows.
-# This is overwritten each loop, but which one it points to doesn't really matter.
-set(cv_bridge_lib_dir "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
-
 if(BUILD_TESTING)
   add_subdirectory(test)
 endif()

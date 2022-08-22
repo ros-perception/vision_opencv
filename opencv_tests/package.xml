@@ -8,7 +8,8 @@
   </description>
   <author>James Bowman</author>
   <author>Ethan Gao</author>
-  <maintainer email="ethan.gao@linux.intel.com">Ethan Gao</maintainer>
+  <author email="ethan.gao@linux.intel.com">Ethan Gao</author>
+  <maintainer email="kenjibrameld@gmail.com">Kenji Brameld</maintainer>
   <license>BSD</license>
   <url>http://wiki.ros.org/opencv_tests</url>
 

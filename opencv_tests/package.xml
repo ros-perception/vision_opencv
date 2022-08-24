@@ -7,7 +7,6 @@
     OpenCV tests for the Python and C++ implementations of CvBridge with Image message in ROS2.
   </description>
   <author>James Bowman</author>
-  <author>Ethan Gao</author>
   <author email="ethan.gao@linux.intel.com">Ethan Gao</author>
   <maintainer email="kenjibrameld@gmail.com">Kenji Brameld</maintainer>
   <license>BSD</license>

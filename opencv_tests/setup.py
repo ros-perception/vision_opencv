@@ -16,8 +16,8 @@ setup(
     zip_safe=True,
     author='Ethan Gao',
     author_email='ethan.gao@linux.intel.com',
-    maintainer='Ethan Gao',
-    maintainer_email='ethan.gao@linux.intel.com',
+    maintainer='Kenji Brameld',
+    maintainer_email='kenjibrameld@gmail.com',
     keywords=['ROS'],
     classifiers=[
         'Intended Audience :: Developers',

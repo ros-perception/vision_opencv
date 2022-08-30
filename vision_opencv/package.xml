@@ -4,7 +4,8 @@
   <name>vision_opencv</name>
   <version>3.0.3</version>
   <description>Packages for interfacing ROS2 with OpenCV, a library of programming functions for real time computer vision.</description>
-  <maintainer email="ethan.gao@linux.intel.com">Ethan Gao</maintainer>
+  <author email="ethan.gao@linux.intel.com">Ethan Gao</author>
+  <maintainer email="kenjibrameld@gmail.com">Kenji Brameld</maintainer>
   <license>BSD</license>
 
   <url type="website">http://www.ros.org/wiki/vision_opencv</url>

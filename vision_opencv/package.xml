@@ -4,7 +4,6 @@
   <name>vision_opencv</name>
   <version>3.0.3</version>
   <description>Packages for interfacing ROS2 with OpenCV, a library of programming functions for real time computer vision.</description>
-  <author email="ethan.gao@linux.intel.com">Ethan Gao</author>
   <maintainer email="kenjibrameld@gmail.com">Kenji Brameld</maintainer>
   <license>BSD</license>
 
@@ -15,6 +14,7 @@
   <author>Patrick Mihelich</author>
   <author>James Bowman</author>
   <author>Vincent Rabaud</author>
+  <author email="ethan.gao@linux.intel.com">Ethan Gao</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

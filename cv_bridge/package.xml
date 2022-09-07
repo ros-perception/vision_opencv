@@ -22,6 +22,7 @@
 
   <depend>libopencv-dev</depend>
   <depend>python3-numpy</depend>
+  <depend>rclcpp</depend>
   <depend>rcpputils</depend>
   <depend>sensor_msgs</depend>
   <depend>python3-opencv</depend>

@@ -5,14 +5,15 @@
     This contains CvBridge, which converts between ROS2
     Image messages and OpenCV images.
   </description>
-  <author>Patrick Mihelich</author>
-  <author>James Bowman</author>
-  <author email="ethan.gao@linux.intel.com">Ethan Gao</author>
   <maintainer email="kenjibrameld@gmail.com">Kenji Brameld</maintainer>
   <license>BSD</license>
   <url type="website">http://www.ros.org/wiki/cv_bridge</url>
   <url type="repository">https://github.com/ros-perception/vision_opencv/tree/ros2</url>
   <url type="bugtracker">https://github.com/ros-perception/vision_opencv/issues</url>
+
+  <author>Patrick Mihelich</author>
+  <author>James Bowman</author>
+  <author email="ethan.gao@linux.intel.com">Ethan Gao</author>
 
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
   <buildtool_depend>python_cmake_module</buildtool_depend>

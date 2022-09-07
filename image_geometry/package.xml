@@ -7,13 +7,13 @@
     messages with OpenCV functions such as image rectification, much as cv_bridge
     interfaces ROS sensor_msgs/Image with OpenCV data types.
   </description>
-  <author email="mikael@osrfoundation.org">Mikael Arguedas</author>
   <maintainer email="kenjibrameld@gmail.com">Kenji Brameld</maintainer>
   <license>BSD</license>
   <url>http://www.ros.org/wiki/image_geometry</url>
 
   <author>Patrick Mihelich</author>
   <author>Vincent Rabaud</author>
+  <author email="mikael@osrfoundation.org">Mikael Arguedas</author>
 
   <buildtool_depend>ament_cmake_python</buildtool_depend>
   <buildtool_depend>ament_cmake_ros</buildtool_depend>

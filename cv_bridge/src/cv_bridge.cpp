@@ -714,9 +714,9 @@ CvImageConstPtr cvtColorForDisplay(
   } else if (source->encoding == "CV_8UC4") {
     source_typed->encoding = enc::BGRA8;
   } else if (source->encoding == "CV_16UC3") {
-    source_typed->encoding = enc::BGR8;
+    source_typed->encoding = enc::BGR16;
   } else if (source->encoding == "CV_16UC4") {
-    source_typed->encoding = enc::BGRA8;
+    source_typed->encoding = enc::BGRA16;
   }
 
   // If no conversion is needed, don't convert

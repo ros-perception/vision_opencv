@@ -61,7 +61,8 @@ cvtColorForDisplayWrap(
   const std::string & encoding_out,
   bool do_dynamic_scaling = false,
   double min_image_value = 0.0,
-  double max_image_value = 0.0)
+  double max_image_value = 0.0,
+  int colormap = -1)
 {
   // Convert the Python input to an image
   cv::Mat mat_in;
@@ -74,6 +75,7 @@ cvtColorForDisplayWrap(
   options.do_dynamic_scaling = do_dynamic_scaling;
   options.min_image_value = min_image_value;
   options.max_image_value = max_image_value;
+  options.colormap = colormap;
   cv::Mat mat = cv_bridge::cvtColorForDisplay(/*source=*/ cv_image,
       /*encoding_out=*/ encoding_out,
       /*options=*/ options)->image;
@@ -81,7 +83,7 @@ cvtColorForDisplayWrap(
   return bp::object(boost::python::handle<>(pyopencv_from(mat)));
 }
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(cvtColorForDisplayWrap_overloads, cvtColorForDisplayWrap, 3, 6)
+BOOST_PYTHON_FUNCTION_OVERLOADS(cvtColorForDisplayWrap_overloads, cvtColorForDisplayWrap, 3, 7)
 
 int CV_MAT_CNWrap(int i)
 {
@@ -106,7 +108,7 @@ BOOST_PYTHON_MODULE(cv_bridge_boost)
   boost::python::def("cvtColorForDisplay", cvtColorForDisplayWrap,
     cvtColorForDisplayWrap_overloads(
       boost::python::args("source", "encoding_in", "encoding_out", "do_dynamic_scaling",
-      "min_image_value", "max_image_value"),
+      "min_image_value", "max_image_value", "colormap"),
       "Convert image to display with specified encodings.\n\n"
       "Args:\n"
       "  - source (numpy.ndarray): input image\n"
@@ -115,5 +117,6 @@ BOOST_PYTHON_MODULE(cv_bridge_boost)
       "  - do_dynamic_scaling (bool): flag to do dynamic scaling with min/max value\n"
       "  - min_image_value (float): minimum pixel value for dynamic scaling\n"
       "  - max_image_value (float): maximum pixel value for dynamic scaling\n"
+      "  - colormap (int): colormap to use when converting to color image\n"
   ));
 }

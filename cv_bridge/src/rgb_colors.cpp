@@ -33,7 +33,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "cv_bridge/rgb_colors.h"
+#include "cv_bridge/rgb_colors.hpp"
 #include <opencv2/core/core.hpp>
 
 

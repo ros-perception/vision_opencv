@@ -1,4 +1,4 @@
-#include "image_geometry/stereo_camera_model.h"
+#include "image_geometry/stereo_camera_model.hpp"
 
 namespace image_geometry {
 

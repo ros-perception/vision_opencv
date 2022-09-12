@@ -32,7 +32,7 @@ install(FILES
   DESTINATION include/${PROJECT_NAME}/${PROJECT_NAME})
 
 if(NOT ANDROID)
-  Python3_add_library(${PROJECT_NAME}_boost MODULE module.cpp module_opencv3.cpp)
+  Python3_add_library(${PROJECT_NAME}_boost MODULE module.cpp module_opencv4.cpp)
   target_link_libraries(${PROJECT_NAME}_boost PRIVATE
     ${PROJECT_NAME}
     ${boost_python_target}

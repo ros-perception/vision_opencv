@@ -8,6 +8,7 @@
     interfaces ROS sensor_msgs/Image with OpenCV data types.
   </description>
   <maintainer email="kenjibrameld@gmail.com">Kenji Brameld</maintainer>
+  <license>Apache License 2.0</license>
   <license>BSD</license>
   <url>http://www.ros.org/wiki/image_geometry</url>
 

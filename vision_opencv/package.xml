@@ -5,6 +5,7 @@
   <version>3.0.3</version>
   <description>Packages for interfacing ROS2 with OpenCV, a library of programming functions for real time computer vision.</description>
   <maintainer email="kenjibrameld@gmail.com">Kenji Brameld</maintainer>
+  <license>Apache License 2.0</license>
   <license>BSD</license>
 
   <url type="website">http://www.ros.org/wiki/vision_opencv</url>

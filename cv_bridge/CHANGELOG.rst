@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.3.0 (2022-09-14)
+------------------
 * Add apache license and bsd license, because both are used. (`#479 <https://github.com/ros-perception/vision_opencv/issues/479>`_)
 * Remove opencv2.cpp and rename opencv3.cpp to opencv4.cpp (`#480 <https://github.com/ros-perception/vision_opencv/issues/480>`_)
 * Deprecate .h files in favor of .hpp headers (`#448 <https://github.com/ros-perception/vision_opencv/issues/448>`_)

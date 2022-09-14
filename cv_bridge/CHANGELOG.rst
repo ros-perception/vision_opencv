@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.1.0 (2022-09-14)
+------------------
 * Add apache license and bsd license, because both are used. (`#482 <https://github.com/ros-perception/vision_opencv/issues/482>`_)
 * Fix 16U encoding type (`#462 <https://github.com/ros-perception/vision_opencv/issues/462>`_)
 * Reorganize author tag (`#468 <https://github.com/ros-perception/vision_opencv/issues/468>`_)

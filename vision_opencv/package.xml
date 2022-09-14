@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
   <name>vision_opencv</name>
-  <version>3.0.3</version>
+  <version>3.0.4</version>
   <description>Packages for interfacing ROS2 with OpenCV, a library of programming functions for real time computer vision.</description>
   <maintainer email="kenjibrameld@gmail.com">Kenji Brameld</maintainer>
   <license>Apache License 2.0</license>

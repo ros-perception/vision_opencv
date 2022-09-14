@@ -2,6 +2,17 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add apache license and bsd license, because both are used. (`#482 <https://github.com/ros-perception/vision_opencv/issues/482>`_)
+* Fix 16U encoding type (`#462 <https://github.com/ros-perception/vision_opencv/issues/462>`_)
+* Reorganize author tag (`#468 <https://github.com/ros-perception/vision_opencv/issues/468>`_)
+* Update maintainers (`#451 <https://github.com/ros-perception/vision_opencv/issues/451>`_)
+* Fix ModuleNotFoundError: No module named 'cv_bridge' error (`#444 <https://github.com/ros-perception/vision_opencv/issues/444>`_)
+* Update README.md (`#252 <https://github.com/ros-perception/vision_opencv/issues/252>`_)
+* Make python3-opencv from test_depend to depend tag in package.xml (`#439 <https://github.com/ros-perception/vision_opencv/issues/439>`_)
+* Contributors: Daisuke Nishimatsu, Kenji Brameld, RachelRen05
+
 3.0.3 (2022-04-01)
 ------------------
 * Add missing dependency on rcpputils (`#427 <https://github.com/ros-perception/vision_opencv/issues/427>`_)

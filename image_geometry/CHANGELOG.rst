@@ -2,6 +2,14 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add apache license and bsd license, because both are used. (`#482 <https://github.com/ros-perception/vision_opencv/issues/482>`_)
+* Reorganize author tag (`#468 <https://github.com/ros-perception/vision_opencv/issues/468>`_)
+* Add description of MISSING_Z (`#465 <https://github.com/ros-perception/vision_opencv/issues/465>`_)
+* Update maintainers (`#451 <https://github.com/ros-perception/vision_opencv/issues/451>`_)
+* Contributors: Kenji Brameld
+
 3.0.3 (2022-04-01)
 ------------------
 

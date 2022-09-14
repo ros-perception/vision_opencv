@@ -2,6 +2,12 @@
 Changelog for package opencv_tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Reorganize author tag (`#469 <https://github.com/ros-perception/vision_opencv/issues/469>`_)
+* Update maintainers (`#451 <https://github.com/ros-perception/vision_opencv/issues/451>`_)
+* Contributors: Kenji Brameld
+
 3.0.3 (2022-04-01)
 ------------------
 

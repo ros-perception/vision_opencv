@@ -26,10 +26,12 @@ install(FILES
   DESTINATION include/${PROJECT_NAME}/${PROJECT_NAME})
 
 if(NOT ANDROID)
+  find_package(Python3 REQUIRED COMPONENTS Development NumPy)
+
   Python3_add_library(${PROJECT_NAME}_boost MODULE module.cpp module_opencv3.cpp)
   target_link_libraries(${PROJECT_NAME}_boost PRIVATE
     ${PROJECT_NAME}
-    ${boost_python_target}
+    Boost::python
     Python3::NumPy)
   target_compile_definitions(${PROJECT_NAME}_boost PRIVATE PYTHON3)
 

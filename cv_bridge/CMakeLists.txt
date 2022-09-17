@@ -25,12 +25,10 @@ else()
     # Resolution for newer versions:
     #  https://gitlab.kitware.com/cmake/cmake/issues/16391
     set(_Boost_PYTHON3_HEADERS "boost/python.hpp")
-    find_package(Boost REQUIRED COMPONENTS python3)
-    set(boost_python_target "Boost::python3")
-  else()
-    find_package(Boost REQUIRED COMPONENTS python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR})
-    set(boost_python_target "Boost::python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
   endif()
+  find_package(Python3 REQUIRED COMPONENTS Development NumPy)
+  find_package(Boost REQUIRED COMPONENTS python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR})
+  set(boost_python_target "Boost::python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
 endif()
 
 find_package(rcpputils REQUIRED)

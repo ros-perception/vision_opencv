@@ -2,8 +2,8 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.5 (2022-09-17)
+------------------
 * Revert API breakages
 * Contributors: Kenji Brameld
 

@@ -2,6 +2,11 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Revert API breakages
+* Contributors: Kenji Brameld
+
 3.1.0 (2022-09-14)
 ------------------
 * Add apache license and bsd license, because both are used. (`#482 <https://github.com/ros-perception/vision_opencv/issues/482>`_)

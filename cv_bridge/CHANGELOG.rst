@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.1.1 (2022-09-17)
+------------------
 * Revert API breakages
 * Contributors: Kenji Brameld
 

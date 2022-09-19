@@ -13,23 +13,24 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 if(NOT ANDROID)
-  find_package(PythonLibs)
+  find_package(PythonLibs REQUIRED)
   if(PYTHONLIBS_VERSION_STRING VERSION_LESS 3)
     find_package(Boost REQUIRED python)
   else()
     find_package(Boost QUIET)
-    if(Boost_VERSION LESS 106500)
-      find_package(Boost REQUIRED python)
-    else()
+    if(Boost_VERSION LESS 106700)
       # This is a bit of a hack to suppress a warning
       #   No header defined for python3; skipping header check
       # Which should only affect Boost versions < 1.67
       # Resolution for newer versions:
       #  https://gitlab.kitware.com/cmake/cmake/issues/16391
-      if (Boost_VERSION LESS 106700)
-        set(_Boost_PYTHON3_HEADERS "boost/python.hpp")
-      endif()
-      find_package(Boost COMPONENTS python3 REQUIRED)
+      set(_Boost_PYTHON3_HEADERS "boost/python.hpp")
+      find_package(Boost REQUIRED python)
+    else()
+      string(REPLACE "." ";" VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
+      list(GET VERSION_LIST 0 PYTHONLIBS_VERSION_MAJOR)
+      list(GET VERSION_LIST 1 PYTHONLIBS_VERSION_MINOR)
+      find_package(Boost COMPONENTS python${PYTHONLIBS_VERSION_MAJOR}${PYTHONLIBS_VERSION_MINOR} REQUIRED)
     endif()
   endif()
 else()

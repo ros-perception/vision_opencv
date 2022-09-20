@@ -75,6 +75,7 @@ endif()
 ament_export_dependencies(
   OpenCV
   sensor_msgs
+  rclcpp
 )
 
 ament_export_targets(export_${PROJECT_NAME})

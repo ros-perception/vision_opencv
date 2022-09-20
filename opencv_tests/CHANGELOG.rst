@@ -2,6 +2,9 @@
 Changelog for package opencv_tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 3.2.0 (2022-09-14)
 ------------------
 * Reorganize author tag (`#469 <https://github.com/ros-perception/vision_opencv/issues/469>`_)

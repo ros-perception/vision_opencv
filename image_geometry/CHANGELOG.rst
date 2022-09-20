@@ -2,6 +2,9 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 3.2.0 (2022-09-14)
 ------------------
 * Add apache license and bsd license, because both are used. (`#483 <https://github.com/ros-perception/vision_opencv/issues/483>`_)

@@ -17,7 +17,19 @@
 #define CV_BRIDGE_MODULE_HPP_
 
 #include <iostream>
+
+// Have to define macros to silence warnings about deprecated headers being used by
+// boost/python.hpp in some versions of boost.
+// See: https://github.com/ros-perception/vision_opencv/issues/449
+#include <boost/version.hpp>
+#if (BOOST_VERSION / 100 >= 1073 && BOOST_VERSION / 100 <= 1076)  // Boost 1.73 - 1.76
+  #define BOOST_BIND_GLOBAL_PLACEHOLDERS
+#endif
+#if (BOOST_VERSION / 100 == 1074)  // Boost 1.74
+  #define BOOST_ALLOW_DEPRECATED_HEADERS
+#endif
 #include <boost/python.hpp>
+
 #include <cv_bridge/cv_bridge.hpp>
 #include <Python.h>
 

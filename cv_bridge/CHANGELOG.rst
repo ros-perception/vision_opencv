@@ -2,6 +2,12 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* export rclcpp as dependency (`#491 <https://github.com/ros-perception/vision_opencv/issues/491>`_)
+* silence dperecation warnings using boost macros (`#478 <https://github.com/ros-perception/vision_opencv/issues/478>`_)
+* Contributors: Kenji Brameld
+
 3.3.0 (2022-09-14)
 ------------------
 * Add apache license and bsd license, because both are used. (`#479 <https://github.com/ros-perception/vision_opencv/issues/479>`_)

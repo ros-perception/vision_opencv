@@ -29,12 +29,8 @@
   #define BOOST_ALLOW_DEPRECATED_HEADERS
 #endif
 #include <boost/python.hpp>
-<<<<<<< HEAD
-#include <cv_bridge/cv_bridge.h>
-=======
 
-#include <cv_bridge/cv_bridge.hpp>
->>>>>>> 4a49715 (silence dperecation warnings using boost macros)
+#include <cv_bridge/cv_bridge.h>
 #include <Python.h>
 
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION

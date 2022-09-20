@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.2.1 (2022-09-21)
+------------------
 * silence dperecation warnings using boost macros (`#492 <https://github.com/ros-perception/vision_opencv/issues/492>`_)
 * Contributors: Kenji Brameld
 

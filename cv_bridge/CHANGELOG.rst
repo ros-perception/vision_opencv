@@ -2,6 +2,11 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix windows build when Boost 1.67 or newer (`#488 <https://github.com/ros-perception/vision_opencv/issues/488>`_)
+* Contributors: Kenji Brameld
+
 3.0.5 (2022-09-17)
 ------------------
 * Revert API breakages

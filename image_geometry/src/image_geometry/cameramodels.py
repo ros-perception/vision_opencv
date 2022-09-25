@@ -1,7 +1,4 @@
-import array
-
 import cv2
-import sensor_msgs.msg
 import math
 import copy
 import numpy
@@ -153,11 +150,10 @@ class PinholeCameraModel:
         Compute delta u, given Z and delta X in Cartesian space.
         For given Z, this is the inverse of :math:`getDeltaX`.
         """
-        fx = self.P[0, 0]
         if Z == 0:
             return float('inf')
         else:
-            return fx * deltaX / Z
+            return self.fx() * deltaX / Z
 
     def getDeltaV(self, deltaY, Z):
         """
@@ -170,11 +166,10 @@ class PinholeCameraModel:
         Compute delta v, given Z and delta Y in Cartesian space.
         For given Z, this is the inverse of :math:`getDeltaY`.
         """
-        fy = self.P[1, 1]
         if Z == 0:
             return float('inf')
         else:
-            return fy * deltaY / Z
+            return self.fy() * deltaY / Z
 
     def getDeltaX(self, deltaU, Z):
         """
@@ -187,8 +182,7 @@ class PinholeCameraModel:
         Compute delta X, given Z in cartesian space and delta u in pixels.
         For given Z, this is the inverse of :math:`getDeltaU`.
         """
-        fx = self.P[0, 0]
-        return Z * deltaU / fx
+        return Z * deltaU / self.fx()
 
     def getDeltaY(self, deltaV, Z):
         """
@@ -201,8 +195,7 @@ class PinholeCameraModel:
         Compute delta Y, given Z in cartesian space and delta v in pixels.
         For given Z, this is the inverse of :math:`getDeltaV`.
         """
-        fy = self.P[1, 1]
-        return Z * deltaV / fy
+        return Z * deltaV / self.fy()
 
     def fullResolution(self):
         """Returns the full resolution of the camera"""
@@ -211,18 +204,23 @@ class PinholeCameraModel:
     def intrinsicMatrix(self):
         """ Returns :math:`K`, also called camera_matrix in cv docs """
         return self.K
+
     def distortionCoeffs(self):
         """ Returns :math:`D` """
         return self.D
+
     def rotationMatrix(self):
         """ Returns :math:`R` """
         return self.R
+
     def projectionMatrix(self):
         """ Returns :math:`P` """
         return self.P
+
     def fullIntrinsicMatrix(self):
         """ Return the original camera matrix for full resolution """
         return self.full_K
+
     def fullProjectionMatrix(self):
         """ Return the projection matrix for full resolution """
         return self.full_P
@@ -230,12 +228,15 @@ class PinholeCameraModel:
     def cx(self):
         """ Returns x center """
         return self.P[0,2]
+
     def cy(self):
         """ Returns y center """
         return self.P[1,2]
+
     def fx(self):
         """ Returns x focal length """
         return self.P[0,0]
+
     def fy(self):
         """ Returns y focal length """
         return self.P[1,1]
@@ -250,21 +251,15 @@ class PinholeCameraModel:
 
     def fovX(self):
         """ Returns the horizontal field of view in radians.
-            Horizontal FoV = 2 * arctan((width) / (2 * Focal Length) )
+            Horizontal FoV = 2 * arctan((width) / (2 * Horizontal Focal Length) )
         """
-        K = self.fullIntrinsicMatrix()
-        assert K is not None
-        alphax = K[0,0]
-        return 2 * math.atan(self.width / (2 * alphax))
+        return 2 * math.atan(self.width / (2 * self.fx()))
 
     def fovY(self):
         """ Returns the vertical field of view in radians.
-            Vertical FoV = 2 * arctan((height) / (2 * Focal Length) )
+            Vertical FoV = 2 * arctan((height) / (2 * Vertical Focal Length) )
         """
-        K = self.fullIntrinsicMatrix()
-        assert K is not None
-        alphay = K[1,1]
-        return 2 * math.atan(self.height / (2 * alphay))
+        return 2 * math.atan(self.height / (2 * self.fy()))
 
     def tfFrame(self):
         """ Returns the tf frame name - a string - of the camera.
@@ -297,11 +292,10 @@ class StereoCameraModel:
         # [ 0,  0,  1,   0      ]
 
         assert self.right.P is not None
-        self._fx = self.right.P[0, 0]
-        self._fy = self.right.P[1, 1]
-        self._cx = self.right.P[0, 2]
-        self._cy = self.right.P[1, 2]
-        self._tx = -self.right.P[0, 3] / self._fx
+        fx = self.right.P[0, 0]
+        cx = self.right.P[0, 2]
+        cy = self.right.P[1, 2]
+        tx = -self.right.P[0, 3] / fx
 
         # Q is:
         #    [ 1, 0,  0, -Clx ]
@@ -311,11 +305,11 @@ class StereoCameraModel:
 
         self.Q = numpy.zeros((4, 4), dtype='float64')
         self.Q[0, 0] = 1.0
-        self.Q[0, 3] = -self._cx
+        self.Q[0, 3] = -cx
         self.Q[1, 1] = 1.0
-        self.Q[1, 3] = -self._cy
-        self.Q[2, 3] = self._fx
-        self.Q[3, 2] = 1 / self._tx
+        self.Q[1, 3] = -cy
+        self.Q[2, 3] = fx
+        self.Q[3, 2] = 1 / tx
 
     def tfFrame(self):
         """

@@ -9,6 +9,7 @@
 #include <opencv2/calib3d/calib3d.hpp>
 #include <stdexcept>
 #include <string>
+#include <math.h>
 
 namespace image_geometry {
 
@@ -246,6 +247,16 @@ public:
   double Ty() const;
 
   /**
+   * \brief Returns the horizontal field of view in radians.
+   */
+  double fovX() const;
+
+  /**
+   * \brief Returns the vertical field of view in radians.
+   */
+  double fovY() const;
+
+  /**
    * \brief Returns the number of columns in each bin.
    */
   IMAGE_GEOMETRY_PUBLIC
@@ -370,6 +381,13 @@ IMAGE_GEOMETRY_PUBLIC
 inline double PinholeCameraModel::Tx() const { return P_(0,3); }
 IMAGE_GEOMETRY_PUBLIC
 inline double PinholeCameraModel::Ty() const { return P_(1,3); }
+
+inline double PinholeCameraModel::fovX() const {
+        return 2 * atan(rawRoi().width / (2 * fx()));
+}
+inline double PinholeCameraModel::fovY() const {
+        return 2 * atan(rawRoi().height / (2 * fy()));
+}
 
 IMAGE_GEOMETRY_PUBLIC
 inline uint32_t PinholeCameraModel::binningX() const { return cam_info_.binning_x; }

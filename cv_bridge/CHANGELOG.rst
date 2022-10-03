@@ -2,6 +2,9 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 3.3.1 (2022-09-21)
 ------------------
 * export rclcpp as dependency (`#491 <https://github.com/ros-perception/vision_opencv/issues/491>`_)

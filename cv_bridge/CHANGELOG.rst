@@ -2,6 +2,14 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix endian mismatch issue per boostorg/python PR `#218 <https://github.com/ros-perception/vision_opencv/issues/218>`_
+* Update CMakeLists.txt for Windows build environment (`#265 <https://github.com/ros-perception/vision_opencv/issues/265>`_)
+* Remove path splash separator from 'package_dir' (`#267 <https://github.com/ros-perception/vision_opencv/issues/267>`_)
+* Fix travis. (`#269 <https://github.com/ros-perception/vision_opencv/issues/269>`_)
+* Contributors: Duan Yutong, James Xu, Kenji Brameld, Sean Yen
+
 1.13.0 (2018-04-30)
 -------------------
 * Use rosdep OpenCV and not ROS one.

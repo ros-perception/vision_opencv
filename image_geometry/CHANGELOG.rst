@@ -2,6 +2,11 @@
 Changelog for package image_geometry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add fovX and fovY functions in python, cpp, also some typo fixes (`#428 <https://github.com/ros-perception/vision_opencv/issues/428>`_)
+* Contributors: Chris Thierauf, Kenji Brameld
+
 1.16.1 (2022-09-06)
 -------------------
 

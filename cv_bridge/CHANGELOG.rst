@@ -2,6 +2,9 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.16.1 (2022-09-06)
 -------------------
 * Fix 16U encoding type (`#445 <https://github.com/ros-perception/vision_opencv/issues/445>`_)

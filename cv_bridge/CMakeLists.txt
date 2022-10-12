@@ -25,7 +25,7 @@ if(NOT ANDROID)
       # Resolution for newer versions:
       #  https://gitlab.kitware.com/cmake/cmake/issues/16391
       set(_Boost_PYTHON3_HEADERS "boost/python.hpp")
-      find_package(Boost REQUIRED python)
+      find_package(Boost REQUIRED python3)
     else()
       string(REPLACE "." ";" VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
       list(GET VERSION_LIST 0 PYTHONLIBS_VERSION_MAJOR)

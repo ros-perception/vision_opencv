@@ -18,7 +18,8 @@ if(NOT ANDROID)
     find_package(Boost REQUIRED python)
   else()
     find_package(Boost QUIET)
-    if(Boost_VERSION LESS 106700)
+    message(STATUS "Boost_VERSION_STRING: " ${Boost_VERSION_STRING})
+    if(Boost_VERSION_STRING VERSION_LESS "1.67")
       # This is a bit of a hack to suppress a warning
       #   No header defined for python3; skipping header check
       # Which should only affect Boost versions < 1.67

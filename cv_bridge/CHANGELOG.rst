@@ -2,8 +2,8 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.7 (2022-10-15)
+------------------
 * Add message to print out Boost_VERSION_STRING, and apply with CMP0093
 * Address RHEL buildfailure with Boost 1.66.0
 * Contributors: Kenji Brameld

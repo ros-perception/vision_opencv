@@ -18,14 +18,15 @@ if(NOT ANDROID)
     find_package(Boost REQUIRED python)
   else()
     find_package(Boost QUIET)
-    if(Boost_VERSION LESS 106700)
+    message(STATUS "Boost_VERSION_STRING: " ${Boost_VERSION_STRING})
+    if(Boost_VERSION_STRING VERSION_LESS "1.67")
       # This is a bit of a hack to suppress a warning
       #   No header defined for python3; skipping header check
       # Which should only affect Boost versions < 1.67
       # Resolution for newer versions:
       #  https://gitlab.kitware.com/cmake/cmake/issues/16391
       set(_Boost_PYTHON3_HEADERS "boost/python.hpp")
-      find_package(Boost REQUIRED python)
+      find_package(Boost REQUIRED python3)
     else()
       string(REPLACE "." ";" VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
       list(GET VERSION_LIST 0 PYTHONLIBS_VERSION_MAJOR)

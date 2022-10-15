@@ -2,6 +2,12 @@
 Changelog for package cv_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add message to print out Boost_VERSION_STRING, and apply with CMP0093
+* Fix RHEL buildfailure with Boost 1.66.0
+* Contributors: Kenji Brameld
+
 3.1.2 (2022-09-21)
 ------------------
 * Fix windows build when Boost 1.67 or newer (`#489 <https://github.com/ros-perception/vision_opencv/issues/489>`_)

@@ -111,19 +111,19 @@ inline const cv::Matx44d& StereoCameraModel::reprojectionMatrix() const { return
 inline double StereoCameraModel::baseline() const
 {
   /// @todo Currently assuming horizontal baseline
-  return -right_.Tx() / right_.fx();
+  return (left_.Tx() - right_.Tx()) / right_.fx();
 }
 
 inline double StereoCameraModel::getZ(double disparity) const
 {
   assert( initialized() );
-  return -right_.Tx() / (disparity - (left().cx() - right().cx()));
+  return (left_.Tx() - right_.Tx()) / (disparity - (left().cx() - right().cx()));
 }
 
 inline double StereoCameraModel::getDisparity(double Z) const
 {
   assert( initialized() );
-  return -right_.Tx() / Z + (left().cx() - right().cx()); ;
+  return (left_.Tx() - right_.Tx()) / Z + (left().cx() - right().cx()); ;
 }
 
 } //namespace image_geometry

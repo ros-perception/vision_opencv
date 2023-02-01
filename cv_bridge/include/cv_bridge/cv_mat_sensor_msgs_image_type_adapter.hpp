@@ -26,6 +26,8 @@
 
 #include "cv_bridge/visibility_control.h"
 
+#include <optional>
+
 namespace cv_bridge
 {
 namespace detail
@@ -139,14 +141,16 @@ public:
   ROSCvMatContainer(
     const cv::Mat & mat_frame,
     const std_msgs::msg::Header & header,
-    bool is_bigendian = is_bigendian_system);
+    bool is_bigendian = is_bigendian_system,
+    std::optional<std::string> encoding_override = std::nullopt);
 
   /// Move the given cv::Mat into this class.
   CV_BRIDGE_PUBLIC
   ROSCvMatContainer(
     cv::Mat && mat_frame,
     const std_msgs::msg::Header & header,
-    bool is_bigendian = is_bigendian_system);
+    bool is_bigendian = is_bigendian_system,
+    std::optional<std::string> encoding_override = std::nullopt);
 
   /// Copy the sensor_msgs::msg::Image into this contain and create a cv::Mat that references it.
   CV_BRIDGE_PUBLIC
@@ -209,12 +213,18 @@ public:
   CV_BRIDGE_PUBLIC
   bool
   is_bigendian() const;
+  
+  /// Return the encoding override if provided.
+  CV_BRIDGE_PUBLIC
+  std::optional<std::string>
+  encoding_override() const;
 
 private:
   std_msgs::msg::Header header_;
   cv::Mat frame_;
   SensorMsgsImageStorageType storage_;
   bool is_bigendian_;
+  std::optional<std::string> encoding_override_;
 };
 
 }  // namespace cv_bridge
@@ -234,7 +244,14 @@ struct rclcpp::TypeAdapter<cv_bridge::ROSCvMatContainer, sensor_msgs::msg::Image
   {
     destination.height = source.cv_mat().rows;
     destination.width = source.cv_mat().cols;
-    switch (source.cv_mat().type()) {
+    const auto& encoding_override = source.encoding_override();
+    if (encoding_override.has_value() && !encoding_override.value().empty())
+    {
+      destination.encoding = encoding_override.value();
+    }
+    else
+    {
+      switch (source.cv_mat().type()) {
       case CV_8UC1:
         destination.encoding = "mono8";
         break;
@@ -249,6 +266,7 @@ struct rclcpp::TypeAdapter<cv_bridge::ROSCvMatContainer, sensor_msgs::msg::Image
         break;
       default:
         throw std::runtime_error("unsupported encoding type");
+      }    
     }
     destination.step = static_cast<sensor_msgs::msg::Image::_step_type>(source.cv_mat().step);
     size_t size = source.cv_mat().step * source.cv_mat().rows;

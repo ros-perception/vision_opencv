@@ -100,21 +100,25 @@ ROSCvMatContainer::ROSCvMatContainer(
 ROSCvMatContainer::ROSCvMatContainer(
   const cv::Mat & mat_frame,
   const std_msgs::msg::Header & header,
-  bool is_bigendian)
+  bool is_bigendian,
+  std::optional<std::string> encoding_override)
 : header_(header),
   frame_(mat_frame),
   storage_(nullptr),
-  is_bigendian_(is_bigendian)
+  is_bigendian_(is_bigendian),
+  encoding_override_(encoding_override)
 {}
 
 ROSCvMatContainer::ROSCvMatContainer(
   cv::Mat && mat_frame,
   const std_msgs::msg::Header & header,
-  bool is_bigendian)
+  bool is_bigendian,
+  std::optional<std::string> encoding_override)
 : header_(header),
   frame_(std::forward<cv::Mat>(mat_frame)),
   storage_(nullptr),
-  is_bigendian_(is_bigendian)
+  is_bigendian_(is_bigendian),
+  encoding_override_(encoding_override)
 {}
 
 ROSCvMatContainer::ROSCvMatContainer(
@@ -173,23 +177,31 @@ void
 ROSCvMatContainer::get_sensor_msgs_msg_image_copy(
   sensor_msgs::msg::Image & sensor_msgs_image) const
 {
+  // TODO(YV): call convert_to_ros_message() instead?
   sensor_msgs_image.height = frame_.rows;
   sensor_msgs_image.width = frame_.cols;
-  switch (frame_.type()) {
-    case CV_8UC1:
-      sensor_msgs_image.encoding = "mono8";
-      break;
-    case CV_8UC3:
-      sensor_msgs_image.encoding = "bgr8";
-      break;
-    case CV_16SC1:
-      sensor_msgs_image.encoding = "mono16";
-      break;
-    case CV_8UC4:
-      sensor_msgs_image.encoding = "rgba8";
-      break;
-    default:
-      throw std::runtime_error("unsupported encoding type");
+  if (encoding_override_.has_value() && !encoding_override_.value().empty())
+  {
+    sensor_msgs_image.encoding = encoding_override_.value();
+  }
+  else
+  {
+    switch (frame_.type()) {
+      case CV_8UC1:
+        sensor_msgs_image.encoding = "mono8";
+        break;
+      case CV_8UC3:
+        sensor_msgs_image.encoding = "bgr8";
+        break;
+      case CV_16SC1:
+        sensor_msgs_image.encoding = "mono16";
+        break;
+      case CV_8UC4:
+        sensor_msgs_image.encoding = "rgba8";
+        break;
+      default:
+        throw std::runtime_error("unsupported encoding type");
+    }    
   }
   sensor_msgs_image.step = static_cast<sensor_msgs::msg::Image::_step_type>(frame_.step);
   size_t size = frame_.step * frame_.rows;
@@ -202,6 +214,12 @@ bool
 ROSCvMatContainer::is_bigendian() const
 {
   return is_bigendian_;
+}
+
+std::optional<std::string>
+ROSCvMatContainer::encoding_override() const
+{
+  return encoding_override_;
 }
 
 }  // namespace cv_bridge

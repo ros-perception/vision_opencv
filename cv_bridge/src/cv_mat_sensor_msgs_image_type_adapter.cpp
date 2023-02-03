@@ -177,7 +177,6 @@ void
 ROSCvMatContainer::get_sensor_msgs_msg_image_copy(
   sensor_msgs::msg::Image & sensor_msgs_image) const
 {
-  // TODO(YV): call convert_to_ros_message() instead?
   sensor_msgs_image.height = frame_.rows;
   sensor_msgs_image.width = frame_.cols;
   if (encoding_override_.has_value() && !encoding_override_.value().empty())
@@ -201,7 +200,7 @@ ROSCvMatContainer::get_sensor_msgs_msg_image_copy(
         break;
       default:
         throw std::runtime_error("unsupported encoding type");
-    }    
+    }
   }
   sensor_msgs_image.step = static_cast<sensor_msgs::msg::Image::_step_type>(frame_.step);
   size_t size = frame_.step * frame_.rows;

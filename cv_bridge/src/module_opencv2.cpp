@@ -148,9 +148,9 @@ void NumpyAllocator::deallocate( int* refcount, uchar* datastart, uchar* data )
 }
 
 // Declare the object
-NumpyAllocator g_numpyAllocator;
+NumpyAllocator *g_numpyAllocator;
 
-int convert_to_CvMat2(const PyObject* o, cv::Mat& m)
+int convert_to_CvMat2(const PyObject* o, cv::Mat& m, int* refcount)
 {
     // to avoid PyArray_Check() to crash even with valid array
     do_numpy_import();
@@ -158,7 +158,7 @@ int convert_to_CvMat2(const PyObject* o, cv::Mat& m)
     if(!o || o == Py_None)
     {
         if( !m.data )
-            m.allocator = &g_numpyAllocator;
+            m.allocator = g_numpyAllocator;
         return true;
     }
 
@@ -230,33 +230,33 @@ int convert_to_CvMat2(const PyObject* o, cv::Mat& m)
 
     if( m.data )
     {
-        m.refcount = refcountFromPyObject(o);
+        refcount = refcountFromPyObject(o);
         m.addref(); // protect the original numpy array from deallocation
         // (since Mat destructor will decrement the reference counter)
     };
-    m.allocator = &g_numpyAllocator;
+    m.allocator = g_numpyAllocator;
 
     if( transposed )
     {
         cv::Mat tmp;
-        tmp.allocator = &g_numpyAllocator;
+        tmp.allocator = g_numpyAllocator;
         transpose(m, tmp);
         m = tmp;
     }
     return true;
 }
 
-PyObject* pyopencv_from(const Mat& m)
+PyObject* pyopencv_from(const Mat& m, const int* refcount)
 {
     if( !m.data )
         Py_RETURN_NONE;
     Mat temp, *p = (Mat*)&m;
-    if(!p->refcount || p->allocator != &g_numpyAllocator)
+    if(!refcount || p->allocator != g_numpyAllocator)
     {
-        temp.allocator = &g_numpyAllocator;
+        temp.allocator = g_numpyAllocator;
         ERRWRAP2(m.copyTo(temp));
         p = &temp;
     }
     p->addref();
-    return pyObjectFromRefcount(p->refcount);
+    return pyObjectFromRefcount(refcount);
 }

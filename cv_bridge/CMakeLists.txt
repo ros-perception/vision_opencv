@@ -13,7 +13,15 @@ if(NOT ANDROID)
 else()
 find_package(Boost REQUIRED)
 endif()
-find_package(OpenCV 3 REQUIRED
+
+set(_opencv_version 4)
+find_package(OpenCV 4 QUIET)
+if(NOT OpenCV_FOUND)
+  message(STATUS "Did not find OpenCV 4, trying OpenCV 3")
+  set(_opencv_version 3)
+endif()
+
+find_package(OpenCV ${_opencv_version} REQUIRED
   COMPONENTS
     opencv_core
     opencv_imgproc

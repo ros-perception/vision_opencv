@@ -2,7 +2,7 @@ sudo: required
 dist: trusty
 language: generic
 env:
-  - ROS_DISTRO=kinetic
+  - ROS_DISTRO=rolling
 # Install system dependencies, namely ROS.
 before_install:
   # Define some config vars.

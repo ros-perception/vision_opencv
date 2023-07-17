@@ -599,7 +599,8 @@ CvImageConstPtr cvtColorForDisplay(
       } else {
         // We choose BGR by default here as we assume people will use OpenCV
         if ((enc::bitDepth(source->encoding) == 8) ||
-          (enc::bitDepth(source->encoding) == 16))
+          (enc::bitDepth(source->encoding) == 16) || 
+          (enc::bitDepth(source->encoding) == 32))
         {
           encoding = enc::BGR8;
         } else {

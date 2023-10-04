@@ -176,6 +176,11 @@ TEST(OpencvTests, testCase_encode_decode)
             EXPECT_THROW(cv_bridge::toCvShare(image_msg, dst_encoding), cv_bridge::Exception);
             continue;
           }
+          // We do not support conversion from Bayer for now
+          if (isBayer(dst_encoding) && src_encoding != dst_encoding) {
+            EXPECT_THROW(cv_bridge::toCvShare(image_msg, src_encoding), cv_bridge::Exception);
+            continue;
+          }
           cv_image = cv_bridge::toCvShare(image_msg, dst_encoding);
           // We cannot convert from non-color to color
           EXPECT_THROW((void)cvtColor(cv_image, src_encoding)->image, cv_bridge::Exception);

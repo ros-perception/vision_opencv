@@ -101,6 +101,8 @@ int getCvType(const std::string & encoding)
   if (encoding == enc::YUV422) {return CV_8UC2;}
   if (encoding == enc::YUYV) {return CV_8UC2;}
   if (encoding == enc::YUV422_YUY2) {return CV_8UC2;}
+  if (encoding == enc::NV21) {return CV_8UC2;}
+  if (encoding == enc::NV24) {return CV_8UC2;}
 
   // Check all the generic content encodings
   std::cmatch m;

@@ -45,101 +45,100 @@
 
 using namespace sensor_msgs::image_encodings;
 
-bool isUnsigned(const std::string & encoding)
+
+struct EncodingProperty
 {
-  return encoding == RGB8 || encoding == RGBA8 || encoding == RGB16 || encoding == RGBA16 ||
-         encoding == BGR8 || encoding == BGRA8 || encoding == BGR16 || encoding == BGRA16 ||
-         encoding == MONO8 || encoding == MONO16 ||
-         encoding == MONO8 || encoding == MONO16 || encoding == TYPE_8UC1 ||
-         encoding == TYPE_8UC2 || encoding == TYPE_8UC3 || encoding == TYPE_8UC4 ||
-         encoding == TYPE_16UC1 || encoding == TYPE_16UC2 || encoding == TYPE_16UC3 ||
-         encoding == TYPE_16UC4;
-  // BAYER_RGGB8, BAYER_BGGR8, BAYER_GBRG8, BAYER_GRBG8, BAYER_RGGB16,
-  // BAYER_BGGR16, BAYER_GBRG16, BAYER_GRBG16, YUV422
-}
+  EncodingProperty(int num_channels, bool is_yuv, bool has_channel_info)
+  : num_channels(num_channels), is_yuv(is_yuv), has_channel_info(has_channel_info)
+  {
+  }
 
-// Keep up-to-date with https://github.com/ros2/common_interfaces/blob/rolling/sensor_msgs/include/sensor_msgs/image_encodings.hpp
-const std::vector<std::string> all_encodings = {
-    RGB8,
-    RGBA8,
-    RGB16,
-    RGBA16,
-    BGR8,
-    BGRA8,
-    BGR16,
-    BGRA16,
-    MONO8,
-    MONO16,
+  int num_channels;
+  bool is_yuv;
 
-    // OpenCV CvMat types
-    TYPE_8UC1,
-    TYPE_8UC2,
-    TYPE_8UC3,
-    TYPE_8UC4,
-    TYPE_8SC1,
-    TYPE_8SC2,
-    TYPE_8SC3,
-    TYPE_8SC4,
-    TYPE_16UC1,
-    TYPE_16UC2,
-    TYPE_16UC3,
-    TYPE_16UC4,
-    TYPE_16SC1,
-    TYPE_16SC2,
-    TYPE_16SC3,
-    TYPE_16SC4,
-    TYPE_32SC1,
-    TYPE_32SC2,
-    TYPE_32SC3,
-    TYPE_32SC4,
-    TYPE_32FC1,
-    TYPE_32FC2,
-    TYPE_32FC3,
-    TYPE_32FC4,
-    TYPE_64FC1,
-    TYPE_64FC2,
-    TYPE_64FC3,
-    TYPE_64FC4,
-
-    // Bayer encodings
-    BAYER_RGGB8,
-    BAYER_BGGR8,
-    BAYER_GBRG8,
-    BAYER_GRBG8,
-    BAYER_RGGB16,
-    BAYER_BGGR16,
-    BAYER_GBRG16,
-    BAYER_GRBG16,
-
-    // YUV formats
-    // YUV 4:2:2 encodings with an 8-bit depth
-    // https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/pixfmt-packed-yuv.html#id1
-    // fourcc: UYVY
-    UYVY,
-    YUV422,  // Deprecated
-    // fourcc: YUYV
-    YUYV,
-    YUV422_YUY2,  // Deprecated
-
-    // YUV 4:2:0 encodings with an 8-bit depth
-    // NV21: https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/pixfmt-yuv-planar.html#nv12-nv21-nv12m-and-nv21m
-    NV21,
-
-    // YUV 4:4:4 encodings with 8-bit depth
-    // NV24: https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/pixfmt-yuv-planar.html#nv24-and-nv42
-    NV24,
+  // Whether the channels can be assumed in the encoding. We cannot assume channels in opencv encodings.
+  // Think about it this way: it does not make sense to convert 8UC3 to RGB as you don't know what
+  // you store in your 3 channels (could be BGR, YUV whatever). Same here, maybe your 1 channel is
+  // grayscale, maybe intensity, maybe it's not even color, it's a depth image.
+  bool has_channel_info;
 };
 
-static bool isYUV(const std::string& encoding)
-{
-  return encoding == YUYV || encoding == UYVY || encoding == YUV422 || encoding == YUV422_YUY2 ||
-         encoding == NV21 || encoding == NV24;
-}
+static std::map<std::string, EncodingProperty> encodingProperties = {
+  {RGB8, {3, false, true}},
+  {RGBA8, {4, false, true}},
+  {RGB16, {3, false, true}},
+  {RGBA16, {4, false, true}},
+  {BGR8, {3, false, true}},
+  {BGRA8, {4, false, true}},
+  {BGR16, {3, false, true}},
+  {BGRA16, {4, false, true}},
+  {MONO8, {1, false, true}},
+  {MONO16, {1, false, true}},
+
+  // OpenCV CvMat types
+  {TYPE_8UC1, {1, false, false}},
+  {TYPE_8UC2, {2, false, false}},
+  {TYPE_8UC3, {3, false, false}},
+  {TYPE_8UC4, {4, false, false}},
+  {TYPE_8SC1, {1, false, false}},
+  {TYPE_8SC2, {2, false, false}},
+  {TYPE_8SC3, {3, false, false}},
+  {TYPE_8SC4, {4, false, false}},
+  {TYPE_16UC1, {1, false, false}},
+  {TYPE_16UC2, {2, false, false}},
+  {TYPE_16UC3, {3, false, false}},
+  {TYPE_16UC4, {4, false, false}},
+  {TYPE_16SC1, {1, false, false}},
+  {TYPE_16SC2, {2, false, false}},
+  {TYPE_16SC3, {3, false, false}},
+  {TYPE_16SC4, {4, false, false}},
+  {TYPE_32SC1, {1, false, false}},
+  {TYPE_32SC2, {2, false, false}},
+  {TYPE_32SC3, {3, false, false}},
+  {TYPE_32SC4, {4, false, false}},
+  {TYPE_32FC1, {1, false, false}},
+  {TYPE_32FC2, {2, false, false}},
+  {TYPE_32FC3, {3, false, false}},
+  {TYPE_32FC4, {4, false, false}},
+  {TYPE_64FC1, {1, false, false}},
+  {TYPE_64FC2, {2, false, false}},
+  {TYPE_64FC3, {3, false, false}},
+  {TYPE_64FC4, {4, false, false}},
+
+  // // Bayer encodings
+  // {BAYER_RGGB8, },
+  // {BAYER_BGGR8, },
+  // {BAYER_GBRG8, },
+  // {BAYER_GRBG8, },
+  // {BAYER_RGGB16, },
+  // {BAYER_BGGR16, },
+  // {BAYER_GBRG16, },
+  // {BAYER_GRBG16, },
+
+  // YUV formats
+  // YUV 4:2:2 encodings with an 8-bit depth
+  // https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/pixfmt-packed-yuv.html#id1
+  // fourcc: UYVY
+  {UYVY, {2, true, true}},
+  {YUV422, {2, true, true}},  // Deprecated
+  // fourcc: YUYV
+  {YUYV, {2, true, true}},
+  {YUV422_YUY2, {2, true, true}},  // Deprecated
+
+  // YUV 4:2:0 encodings with an 8-bit depth
+  // NV21: https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/pixfmt-yuv-planar.html#nv12-nv21-nv12m-and-nv21m
+  {NV21, {2, true, true}},
+
+  // YUV 4:4:4 encodings with 8-bit depth
+  // NV24: https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/pixfmt-yuv-planar.html#nv24-and-nv42
+  {NV24, {2, true, true}},
+};
+
 
 TEST(OpencvTests, testCase_encode_decode)
 {
-  for (const auto& src_encoding : all_encodings) {
-    bool is_src_color_format = isColor(src_encoding) || isMono(src_encoding) || isYUV(src_encoding);
+  for (const auto& [src_encoding, src_encoding_property] : encodingProperties) {
+    bool is_src_color_format = isColor(src_encoding) || isMono(src_encoding) || src_encoding_property.is_yuv;
     cv::Mat image_original(cv::Size(400, 400), cv_bridge::getCvType(src_encoding));
     cv::RNG r(77);
     r.fill(image_original, cv::RNG::UNIFORM, 0, 127);
@@ -150,8 +149,8 @@ TEST(OpencvTests, testCase_encode_decode)
     // Convert to a sensor_msgs::Image
     sensor_msgs::msg::Image::SharedPtr image_msg = image_bridge.toImageMsg();
 
-    for (const auto& dst_encoding : all_encodings) {
-      bool is_dst_color_format = isColor(dst_encoding) || isMono(dst_encoding) || isYUV(dst_encoding);
+    for (const auto& [dst_encoding, dst_encoding_property] : encodingProperties) {
+      bool is_dst_color_format = isColor(dst_encoding) || isMono(dst_encoding) || dst_encoding_property.is_yuv;
       bool is_num_channels_the_same = (numChannels(src_encoding) == numChannels(dst_encoding));
 
       cv_bridge::CvImageConstPtr cv_image;
@@ -187,7 +186,7 @@ TEST(OpencvTests, testCase_encode_decode)
           continue;
         }
         // We do not support conversion to YUV for now
-        if (isYUV(dst_encoding) && src_encoding != dst_encoding) {
+        if (dst_encoding_property.is_yuv && src_encoding != dst_encoding) {
           EXPECT_THROW(cv_bridge::toCvShare(image_msg, dst_encoding), cv_bridge::Exception);
           continue;
         }
@@ -195,7 +194,7 @@ TEST(OpencvTests, testCase_encode_decode)
         cv_image = cv_bridge::toCvShare(image_msg, dst_encoding);
 
         // We do not support conversion from YUV for now
-        if (isYUV(src_encoding) && src_encoding != dst_encoding) {
+        if (src_encoding_property.is_yuv && src_encoding != dst_encoding) {
           EXPECT_THROW((void)cvtColor(cv_image, src_encoding)->image, cv_bridge::Exception);
           continue;
         }

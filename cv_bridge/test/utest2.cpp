@@ -297,3 +297,9 @@ INSTANTIATE_TEST_SUITE_P(
     testing::ValuesIn(encodingProperties),
     testing::ValuesIn(encodingProperties)),
   generateName);
+
+// TIP: To test conversion of one cv type to another, run the following.
+//
+//  ./build/cv_bridge/test/cv_bridge-utest --gtest_filter=TestCVConversion.mono8_to_mono16
+//
+// Replace mono8 with your source encoding, and mono16 with your target encoding

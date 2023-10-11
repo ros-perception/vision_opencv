@@ -63,7 +63,8 @@ struct EncodingProperty
   bool has_channel_info;
 };
 
-static std::map<std::string, EncodingProperty> encodingProperties = {
+typedef std::map<std::string, EncodingProperty> EncodingProperties;
+static EncodingProperties encodingProperties = {
   {RGB8, {3, false, true}},
   {RGBA8, {4, false, true}},
   {RGB16, {3, false, true}},
@@ -137,8 +138,9 @@ static std::map<std::string, EncodingProperty> encodingProperties = {
 
 TEST(OpencvTests, testCase_encode_decode)
 {
-  for (const auto& [src_encoding, src_encoding_property] : encodingProperties) {
-    bool is_src_color_format = isColor(src_encoding) || isMono(src_encoding) || src_encoding_property.is_yuv;
+  for (const auto & [src_encoding, src_encoding_property] : encodingProperties) {
+    bool is_src_color_format = isColor(src_encoding) || isMono(src_encoding) ||
+      src_encoding_property.is_yuv;
     cv::Mat image_original(cv::Size(400, 400), cv_bridge::getCvType(src_encoding));
     cv::RNG r(77);
     r.fill(image_original, cv::RNG::UNIFORM, 0, 127);
@@ -149,8 +151,9 @@ TEST(OpencvTests, testCase_encode_decode)
     // Convert to a sensor_msgs::Image
     sensor_msgs::msg::Image::SharedPtr image_msg = image_bridge.toImageMsg();
 
-    for (const auto& [dst_encoding, dst_encoding_property] : encodingProperties) {
-      bool is_dst_color_format = isColor(dst_encoding) || isMono(dst_encoding) || dst_encoding_property.is_yuv;
+    for (const auto & [dst_encoding, dst_encoding_property] : encodingProperties) {
+      bool is_dst_color_format = isColor(dst_encoding) || isMono(dst_encoding) ||
+        dst_encoding_property.is_yuv;
       bool is_num_channels_the_same = (numChannels(src_encoding) == numChannels(dst_encoding));
 
       cv_bridge::CvImageConstPtr cv_image;
@@ -209,20 +212,88 @@ TEST(OpencvTests, testCase_encode_decode)
       }
       if (bitDepth(src_encoding) >= 32) {
         // In the case where the input has floats, we will lose precision but no more than 1
-        EXPECT_LT(cv::norm(image_original, image_back, cv::NORM_INF),
+        EXPECT_LT(
+          cv::norm(image_original, image_back, cv::NORM_INF),
           1) << "problem converting from " << src_encoding << " to " << dst_encoding <<
           " and back.";
       } else if ((bitDepth(src_encoding) == 16) && (bitDepth(dst_encoding) == 8)) {
         // In the case where the input has floats, we
         // will lose precision but no more than 1 * max(127)
-        EXPECT_LT(cv::norm(image_original, image_back, cv::NORM_INF),
+        EXPECT_LT(
+          cv::norm(image_original, image_back, cv::NORM_INF),
           128) << "problem converting from " << src_encoding << " to " << dst_encoding <<
           " and back.";
       } else {
-        EXPECT_EQ(cv::norm(image_original, image_back, cv::NORM_INF),
+        EXPECT_EQ(
+          cv::norm(image_original, image_back, cv::NORM_INF),
           0) << "problem converting from " << src_encoding << " to " << dst_encoding <<
           " and back.";
       }
     }
   }
 }
+
+static bool conversionPossible(const std::string & src_encoding, const std::string & dst_encoding)
+{
+  return true;
+}
+
+class TestCVConversion : public testing::TestWithParam<std::tuple<EncodingProperties::value_type,
+    EncodingProperties::value_type>>
+{
+public:
+  struct PrintToStringParamName
+  {
+    template<class ParamType>
+    std::string operator()(const testing::TestParamInfo<ParamType> & info) const
+    {
+      const auto & [src_property, dst_property] = info.param;
+      const auto & [src_encoding, _1] = src_property;
+      const auto & [dst_encoding, _2] = dst_property;
+      std::string name = src_encoding + "_to_" + dst_encoding;
+      return name;
+    }
+  };
+};
+
+TEST_P(TestCVConversion, )
+{
+  const auto & [src_property, dst_property] = GetParam();
+  const auto & [src_encoding, src_encoding_property] = src_property;
+  const auto & [dst_encoding, dst_encoding_property] = dst_property;
+
+  // Generate a random image
+  cv::Mat image_original(cv::Size(400, 400), cv_bridge::getCvType(src_encoding));
+  cv::RNG r(77);
+  r.fill(image_original, cv::RNG::UNIFORM, 0, 127);
+
+  sensor_msgs::msg::Image image_message;
+  cv_bridge::CvImage image_bridge(std_msgs::msg::Header(), src_encoding, image_original);
+
+  // Convert to a sensor_msgs::Image
+  sensor_msgs::msg::Image::SharedPtr image_msg = image_bridge.toImageMsg();
+
+  if (conversionPossible(src_encoding, dst_encoding)) {
+    cv_bridge::CvImageConstPtr cv_image;
+    EXPECT_NO_THROW(
+      auto cv_image = cv_bridge::toCvShare(image_msg, dst_encoding)
+    ) << "problem converting from " << src_encoding << " to " << dst_encoding;
+  } else {
+    EXPECT_THROW(cv_bridge::toCvShare(image_msg, dst_encoding), cv_bridge::Exception);
+  }
+}
+
+static std::string generateName(const testing::TestParamInfo<TestCVConversion::ParamType>& info)
+{
+  const auto & [src_property, dst_property] = info.param;
+  const auto & [src_encoding, _1] = src_property;
+  const auto & [dst_encoding, _2] = dst_property;
+  return src_encoding + "_to_" + dst_encoding;
+}
+
+INSTANTIATE_TEST_SUITE_P(
+  ,
+  TestCVConversion, testing::Combine(
+    testing::ValuesIn(encodingProperties),
+    testing::ValuesIn(encodingProperties)),
+  generateName);

@@ -122,12 +122,6 @@ int getCvType(const std::string & encoding)
   throw Exception("Unrecognized image encoding [" + encoding + "]");
 }
 
-static bool isYUV(const std::string& encoding)
-{
-  return encoding == enc::YUYV || encoding == enc::UYVY || encoding == enc::YUV422 ||
-         encoding == enc::YUV422_YUY2 || encoding == enc::NV21 || encoding == enc::NV24;
-}
-
 /// @cond DOXYGEN_IGNORE
 
 enum Encoding { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, UYVY, YUYV, BAYER_RGGB, BAYER_BGGR,
@@ -227,9 +221,9 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
   Encoding src_encod = getEncoding(src_encoding);
   Encoding dst_encod = getEncoding(dst_encoding);
   bool is_src_color_format = enc::isColor(src_encoding) || enc::isMono(src_encoding) ||
-    enc::isBayer(src_encoding) || isYUV(src_encoding);
+    enc::isBayer(src_encoding);
   bool is_dst_color_format = enc::isColor(dst_encoding) || enc::isMono(dst_encoding) ||
-    enc::isBayer(dst_encoding) || isYUV(dst_encoding);
+    enc::isBayer(dst_encoding);
   bool is_num_channels_the_same =
     (enc::numChannels(src_encoding) == enc::numChannels(dst_encoding));
 

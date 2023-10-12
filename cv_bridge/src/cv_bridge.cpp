@@ -39,7 +39,7 @@
 #include <boost/endian/conversion.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <sensor_msgs/image_encodings.hpp>
+#include "sensor_msgs/image_encodings.hpp"
 #include "rcpputils/endian.hpp"
 
 #include <map>

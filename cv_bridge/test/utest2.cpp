@@ -35,7 +35,7 @@
 
 #include <gtest/gtest.h>
 #include <sensor_msgs/msg/image.hpp>
-#include <sensor_msgs/image_encodings.hpp>
+#include "sensor_msgs/image_encodings.hpp"
 
 #include <string>
 #include <vector>

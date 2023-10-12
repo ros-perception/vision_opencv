@@ -64,7 +64,7 @@ struct EncodingProperty
 };
 
 typedef std::map<std::string, EncodingProperty> EncodingProperties;
-static EncodingProperties encodingProperties = {
+static EncodingProperties encoding_properties = {
   {RGB8, {3, false, true}},
   {RGBA8, {4, false, true}},
   {RGB16, {3, false, true}},
@@ -138,20 +138,19 @@ static EncodingProperties encodingProperties = {
 
 TEST(OpencvTests, testCase_encode_decode)
 {
-  for (const auto & [src_encoding, src_encoding_property] : encodingProperties) {
+  for (const auto & [src_encoding, src_encoding_property] : encoding_properties) {
     bool is_src_color_format = isColor(src_encoding) || isMono(src_encoding) ||
       src_encoding_property.is_yuv;
     cv::Mat image_original(cv::Size(400, 400), cv_bridge::getCvType(src_encoding));
     cv::RNG r(77);
     r.fill(image_original, cv::RNG::UNIFORM, 0, 127);
 
-    sensor_msgs::msg::Image image_message;
     cv_bridge::CvImage image_bridge(std_msgs::msg::Header(), src_encoding, image_original);
 
     // Convert to a sensor_msgs::Image
     sensor_msgs::msg::Image::SharedPtr image_msg = image_bridge.toImageMsg();
 
-    for (const auto & [dst_encoding, dst_encoding_property] : encodingProperties) {
+    for (const auto & [dst_encoding, dst_encoding_property] : encoding_properties) {
       bool is_dst_color_format = isColor(dst_encoding) || isMono(dst_encoding) ||
         dst_encoding_property.is_yuv;
       bool is_num_channels_the_same = (numChannels(src_encoding) == numChannels(dst_encoding));
@@ -294,8 +293,8 @@ static std::string generateName(const testing::TestParamInfo<TestCVConversion::P
 INSTANTIATE_TEST_SUITE_P(
   ,
   TestCVConversion, testing::Combine(
-    testing::ValuesIn(encodingProperties),
-    testing::ValuesIn(encodingProperties)),
+    testing::ValuesIn(encoding_properties),
+    testing::ValuesIn(encoding_properties)),
   generateName);
 
 // TIP: To test conversion of one cv type to another, run the following.

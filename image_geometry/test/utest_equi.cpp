@@ -1,6 +1,23 @@
-#include "image_geometry/pinhole_camera_model.hpp"
-#include <sensor_msgs/distortion_models.hpp>
+// Copyright 2023 Open Source Robotics Foundation, Inc.
+// Copyright 2023 Homalozoa, Direct Drive Technology, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #include <gtest/gtest.h>
+
+#include <sensor_msgs/distortion_models.hpp>
+
+#include "image_geometry/pinhole_camera_model.hpp"
 
 /// @todo Tests with simple values (R = identity, D = 0, P = K or simple scaling)
 /// @todo Test projection functions for right stereo values, P(:,3) != 0
@@ -15,26 +32,33 @@ protected:
   {
     /// @todo Just load these from file
     // These parameters are taken from a real camera calibration
-    double D[] = {-0.08857683871674071, 0.0708113094372378, -0.09127623055964429, 0.04006922269778478};
-    double K[] = {403.603063319358,               0.0, 306.15842863283063,
-                               0.0, 403.7028851121003, 261.09715697592696,
-                               0.0,               0.0,                1.0};
-    double R[] = {0.999963944103842, -0.008484152966323483, 0.00036005656766869323,
-                  0.008484153516269438, 0.9999640089218772, 0.0,
+    double D[] = {
+      -0.08857683871674071, 0.0708113094372378, -0.09127623055964429, 0.04006922269778478};
+    double K[] = {
+      403.603063319358,
+      0.0,
+      306.15842863283063,
+      0.0,
+      403.7028851121003,
+      261.09715697592696,
+      0.0,
+      0.0,
+      1.0};
+    double R[] = {0.999963944103842,      -0.008484152966323483,  0.00036005656766869323,
+                  0.008484153516269438,   0.9999640089218772,     0.0,
                   -0.0003600436088446379, 3.0547751946422504e-06, 0.999999935179632};
-    double P[] = {347.2569964503485, 0.0, 350.5, 0.0,
-                  0.0, 347.2569964503485, 256.0, 0.0,
-                  0.0, 0.0, 1.0, 0.0};
+    double P[] = {
+      347.2569964503485, 0.0, 350.5, 0.0, 0.0, 347.2569964503485, 256.0, 0.0, 0.0, 0.0, 1.0, 0.0};
 
     cam_info_.header.frame_id = "tf_frame";
     cam_info_.height = 512;
-    cam_info_.width  = 640;
+    cam_info_.width = 640;
     // No ROI
     cam_info_.d.resize(4);
-    std::copy(D, D+4, cam_info_.d.begin());
-    std::copy(K, K+9, cam_info_.k.begin());
-    std::copy(R, R+9, cam_info_.r.begin());
-    std::copy(P, P+12, cam_info_.p.begin());
+    std::copy(D, D + 4, cam_info_.d.begin());
+    std::copy(K, K + 9, cam_info_.k.begin());
+    std::copy(R, R + 9, cam_info_.r.begin());
+    std::copy(P, P + 12, cam_info_.p.begin());
     cam_info_.distortion_model = sensor_msgs::distortion_models::EQUIDISTANT;
 
     model_.fromCameraInfo(cam_info_);
@@ -58,7 +82,7 @@ TEST_F(EquidistantTest, projectPoint)
   // Spot test an arbitrary point.
   {
     cv::Point2d uv(100, 100);
-    cv::Point3d xyz =  model_.projectPixelTo3dRay(uv);
+    cv::Point3d xyz = model_.projectPixelTo3dRay(uv);
     EXPECT_NEAR(-0.72136775518018115, xyz.x, 1e-8);
     EXPECT_NEAR(-0.449235009214005, xyz.y, 1e-8);
     EXPECT_DOUBLE_EQ(1.0, xyz.z);
@@ -100,7 +124,7 @@ TEST_F(EquidistantTest, rectifyPoint)
   /// @todo Need R = identity for the principal point tests.
 #if 0
   // Test rectifyPoint takes (c'x, c'y) [from K] -> (cx, cy) [from P].
-  double cxp = model_.intrinsicMatrix()(0,2), cyp = model_.intrinsicMatrix()(1,2);
+  double cxp = model_.intrinsicMatrix()(0, 2), cyp = model_.intrinsicMatrix()(1, 2);
   {
     cv::Point2d uv_raw(cxp, cyp), uv_rect;
     model_.rectifyPoint(uv_raw, uv_rect);
@@ -148,15 +172,14 @@ TEST_F(EquidistantTest, getDeltas)
 
 TEST_F(EquidistantTest, initialization)
 {
+  sensor_msgs::msg::CameraInfo info;
+  image_geometry::PinholeCameraModel camera;
 
-    sensor_msgs::msg::CameraInfo info;
-    image_geometry::PinholeCameraModel camera;
+  camera.fromCameraInfo(info);
 
-    camera.fromCameraInfo(info);
-
-    EXPECT_EQ(camera.initialized(), 1);
-    EXPECT_EQ(camera.projectionMatrix().rows, 3);
-    EXPECT_EQ(camera.projectionMatrix().cols, 4);
+  EXPECT_EQ(camera.initialized(), 1);
+  EXPECT_EQ(camera.projectionMatrix().rows, 3);
+  EXPECT_EQ(camera.projectionMatrix().cols, 4);
 }
 
 TEST_F(EquidistantTest, rectifyIfCalibrated)
@@ -186,7 +209,8 @@ TEST_F(EquidistantTest, rectifyIfCalibrated)
   // the test again.
   // Then zero out all the distortion coefficients and test
   // that the output image is the same as the input.
-  cv::Mat distorted_image(cv::Size(cam_info_.width, cam_info_.height), CV_8UC3, cv::Scalar(0, 0, 0));
+  cv::Mat distorted_image(
+    cv::Size(cam_info_.width, cam_info_.height), CV_8UC3, cv::Scalar(0, 0, 0));
 
   // draw a grid
   const cv::Scalar color = cv::Scalar(255, 255, 255);
@@ -194,18 +218,14 @@ TEST_F(EquidistantTest, rectifyIfCalibrated)
   // interpolation is reduced
   const int thickness = 7;
   const int type = 8;
-  for (size_t y = 0; y <= cam_info_.height; y += cam_info_.height/10)
-  {
-    cv::line(distorted_image,
-             cv::Point(0, y), cv::Point(cam_info_.width, y),
-             color, type, thickness);
+  for (size_t y = 0; y <= cam_info_.height; y += cam_info_.height / 10) {
+    cv::line(
+      distorted_image, cv::Point(0, y), cv::Point(cam_info_.width, y), color, type, thickness);
   }
-  for (size_t x = 0; x <= cam_info_.width; x += cam_info_.width/10)
-  {
+  for (size_t x = 0; x <= cam_info_.width; x += cam_info_.width / 10) {
     // draw the lines thick so the prorportion of interpolation error is reduced
-    cv::line(distorted_image,
-             cv::Point(x, 0), cv::Point(x, cam_info_.height),
-             color, type, thickness);
+    cv::line(
+      distorted_image, cv::Point(x, 0), cv::Point(x, cam_info_.height), color, type, thickness);
   }
 
   cv::Mat rectified_image;
@@ -250,7 +270,7 @@ TEST_F(EquidistantTest, rectifyIfCalibrated)
   model_.fromCameraInfo(cam_info_);
 }
 
-int main(int argc, char** argv)
+int main(int argc, char ** argv)
 {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

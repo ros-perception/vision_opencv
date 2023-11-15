@@ -1,24 +1,35 @@
+// Copyright 2023 Open Source Robotics Foundation, Inc.
+// Copyright 2023 Homalozoa, Direct Drive Technology, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #include "image_geometry/stereo_camera_model.hpp"
 
-namespace image_geometry {
-
-StereoCameraModel::StereoCameraModel()
-  : Q_(0.0)
+namespace image_geometry
 {
-  Q_(0,0) = Q_(1,1) = 1.0;
-}
 
-StereoCameraModel::StereoCameraModel(const StereoCameraModel& other)
-  : left_(other.left_), right_(other.right_),
-    Q_(0.0)
+StereoCameraModel::StereoCameraModel() : Q_(0.0) { Q_(0, 0) = Q_(1, 1) = 1.0; }
+
+StereoCameraModel::StereoCameraModel(const StereoCameraModel & other)
+: left_(other.left_), right_(other.right_), Q_(0.0)
 {
-  Q_(0,0) = Q_(1,1) = 1.0;
+  Q_(0, 0) = Q_(1, 1) = 1.0;
   if (other.initialized()) {
     updateQ();
   }
 }
 
-StereoCameraModel& StereoCameraModel::operator=(const StereoCameraModel& other)
+StereoCameraModel & StereoCameraModel::operator=(const StereoCameraModel & other)
 {
   if (other.initialized()) {
     this->fromCameraInfo(other.left_.cameraInfo(), other.right_.cameraInfo());
@@ -26,18 +37,18 @@ StereoCameraModel& StereoCameraModel::operator=(const StereoCameraModel& other)
   return *this;
 }
 
-bool StereoCameraModel::fromCameraInfo(const sensor_msgs::msg::CameraInfo& left,
-                                       const sensor_msgs::msg::CameraInfo& right)
+bool StereoCameraModel::fromCameraInfo(
+  const sensor_msgs::msg::CameraInfo & left, const sensor_msgs::msg::CameraInfo & right)
 {
-  bool changed_left  = left_.fromCameraInfo(left);
+  bool changed_left = left_.fromCameraInfo(left);
   bool changed_right = right_.fromCameraInfo(right);
   bool changed = changed_left || changed_right;
 
   // Note: don't require identical time stamps to allow imperfectly synced stereo.
-  assert( left_.tfFrame() == right_.tfFrame() );
-  assert( left_.fx() == right_.fx() );
-  assert( left_.fy() == right_.fy() );
-  assert( left_.cy() == right_.cy() );
+  assert(left_.tfFrame() == right_.tfFrame());
+  assert(left_.fx() == right_.fx());
+  assert(left_.fy() == right_.fy());
+  assert(left_.cy() == right_.cy());
   // cx may differ for verged cameras
 
   if (changed) {
@@ -47,8 +58,9 @@ bool StereoCameraModel::fromCameraInfo(const sensor_msgs::msg::CameraInfo& left,
   return changed;
 }
 
-bool StereoCameraModel::fromCameraInfo(const sensor_msgs::msg::CameraInfo::ConstSharedPtr& left,
-                                       const sensor_msgs::msg::CameraInfo::ConstSharedPtr& right)
+bool StereoCameraModel::fromCameraInfo(
+  const sensor_msgs::msg::CameraInfo::ConstSharedPtr & left,
+  const sensor_msgs::msg::CameraInfo::ConstSharedPtr & right)
 {
   return fromCameraInfo(*left, *right);
 }
@@ -105,29 +117,29 @@ void StereoCameraModel::updateQ()
     the full Q matrix.
 
    */
-  double Tx = -baseline(); // The baseline member negates our Tx. Undo this negation
-  Q_(0,0) =  left_.fy() * Tx;
-  Q_(0,3) = -left_.fy() * left_.cx() * Tx;
-  Q_(1,1) =  left_.fx() * Tx;
-  Q_(1,3) = -left_.fx() * left_.cy() * Tx;
-  Q_(2,3) =  left_.fx() * left_.fy() * Tx;
-  Q_(3,2) = -left_.fy();
-  Q_(3,3) =  left_.fy() * (left_.cx() - right_.cx()); // zero when disparities are pre-adjusted
+  double Tx = -baseline();  // The baseline member negates our Tx. Undo this negation
+  Q_(0, 0) = left_.fy() * Tx;
+  Q_(0, 3) = -left_.fy() * left_.cx() * Tx;
+  Q_(1, 1) = left_.fx() * Tx;
+  Q_(1, 3) = -left_.fx() * left_.cy() * Tx;
+  Q_(2, 3) = left_.fx() * left_.fy() * Tx;
+  Q_(3, 2) = -left_.fy();
+  Q_(3, 3) = left_.fy() * (left_.cx() - right_.cx());  // zero when disparities are pre-adjusted
 }
 
-void StereoCameraModel::projectDisparityTo3d(const cv::Point2d& left_uv_rect, float disparity,
-                                             cv::Point3d& xyz) const
+void StereoCameraModel::projectDisparityTo3d(
+  const cv::Point2d & left_uv_rect, float disparity, cv::Point3d & xyz) const
 {
-  assert( initialized() );
+  assert(initialized());
 
   // Do the math inline:
   // [X Y Z W]^T = Q * [u v d 1]^T
   // Point = (X/W, Y/W, Z/W)
   // cv::perspectiveTransform could be used but with more overhead.
   double u = left_uv_rect.x, v = left_uv_rect.y;
-  cv::Point3d XYZ( (Q_(0,0) * u) + Q_(0,3), (Q_(1,1) * v) + Q_(1,3), Q_(2,3));
-  double W = Q_(3,2)*disparity + Q_(3,3);
-  xyz = XYZ * (1.0/W);
+  cv::Point3d XYZ((Q_(0, 0) * u) + Q_(0, 3), (Q_(1, 1) * v) + Q_(1, 3), Q_(2, 3));
+  double W = Q_(3, 2) * disparity + Q_(3, 3);
+  xyz = XYZ * (1.0 / W);
 }
 
 // MISSING_Z is defined as 10000 in
@@ -135,10 +147,10 @@ void StereoCameraModel::projectDisparityTo3d(const cv::Point2d& left_uv_rect, fl
 // Having it as a public member makes this information available for users of cv_bridge.
 const double StereoCameraModel::MISSING_Z = 10000.;
 
-void StereoCameraModel::projectDisparityImageTo3d(const cv::Mat& disparity, cv::Mat& point_cloud,
-                                                  bool handleMissingValues) const
+void StereoCameraModel::projectDisparityImageTo3d(
+  const cv::Mat & disparity, cv::Mat & point_cloud, bool handleMissingValues) const
 {
-  assert( initialized() );
+  assert(initialized());
 
   cv::reprojectImageTo3D(disparity, point_cloud, Q_, handleMissingValues);
 }

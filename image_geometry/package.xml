@@ -20,6 +20,7 @@
   <buildtool_depend>ament_cmake_auto</buildtool_depend>
 
   <depend>OpenCV</depend>
+  <depend>libopencv-dev</depend>
   <depend>sensor_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>

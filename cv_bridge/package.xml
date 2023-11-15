@@ -23,6 +23,7 @@
   <build_depend>libboost-python-dev</build_depend>
 
   <depend>OpenCV</depend>
+  <depend>libopencv-dev</depend>
   <depend>python3-numpy</depend>
   <depend>rclcpp</depend>
   <depend>rcpputils</depend>

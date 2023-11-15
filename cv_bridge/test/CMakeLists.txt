@@ -1,7 +1,3 @@
-# Add all the unit tests for cv_bridge
-find_package(ament_lint_auto REQUIRED)
-ament_lint_auto_find_test_dependencies()
-
 # skip the conversions.py test when necessary, because its
 # test_encode_decode_cv2_compressed and test_encode_decode_cv2
 # spends more than 5 minutes generally

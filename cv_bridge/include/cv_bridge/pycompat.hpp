@@ -1,15 +1,3 @@
-/*M///////////////////////////////////////////////////////////////////////////////////////
-//
-//  IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.
-//
-//  By downloading, copying, installing or using the software you agree to this license.
-//  If you do not agree to this license, do not download, install,
-//  copy or use the software.
-//
-//
-//                           License Agreement
-//                For Open Source Computer Vision Library
-//
 // Copyright (C) 2000-2008, Intel Corporation, all rights reserved.
 // Copyright (C) 2009-2011, Willow Garage Inc., all rights reserved.
 // Copyright (c) 2018 Intel Corporation.
@@ -38,12 +26,10 @@
 // and on any theory of liability, whether in contract, strict liability,
 // or tort (including negligence or otherwise) arising in any way out of
 // the use of this software, even if advised of the possibility of such damage.
-//
-//M*/
 
 // Defines for Python 2/3 compatibility.
-#ifndef PYCOMPAT_HPP_
-#define PYCOMPAT_HPP_
+#ifndef CV_BRIDGE__PYCOMPAT_HPP_
+#define CV_BRIDGE__PYCOMPAT_HPP_
 
 #if PY_MAJOR_VERSION >= 3
 // Python3 treats all ints as longs, PyInt_X functions have been removed.
@@ -68,4 +54,4 @@
 #endif
 #endif
 
-#endif  // PYCOMPAT_HPP_
+#endif  // CV_BRIDGE__PYCOMPAT_HPP_

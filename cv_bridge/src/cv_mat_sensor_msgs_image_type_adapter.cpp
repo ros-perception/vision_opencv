@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "cv_bridge/cv_mat_sensor_msgs_image_type_adapter.hpp"
+
 #include <cstddef>
 #include <memory>
 #include <string>
@@ -19,19 +21,15 @@
 #include <variant>
 
 #include "opencv2/core/mat.hpp"
-
 #include "sensor_msgs/msg/image.hpp"
 #include "std_msgs/msg/header.hpp"
-
-#include "cv_bridge/cv_mat_sensor_msgs_image_type_adapter.hpp"
 
 namespace cv_bridge
 {
 
 namespace
 {
-int
-encoding2mat_type(const std::string & encoding)
+int encoding2mat_type(const std::string & encoding)
 {
   if (encoding == "mono8") {
     return CV_8UC1;
@@ -54,11 +52,10 @@ encoding2mat_type(const std::string & encoding)
   }
 }
 
-template<typename T>
+template <typename T>
 struct NotNull
 {
-  NotNull(const T * pointer_in, const char * msg)
-  : pointer(pointer_in)
+  NotNull(const T * pointer_in, const char * msg) : pointer(pointer_in)
   {
     if (pointer == nullptr) {
       throw std::invalid_argument(msg);
@@ -72,89 +69,66 @@ struct NotNull
 
 ROSCvMatContainer::ROSCvMatContainer(
   std::unique_ptr<sensor_msgs::msg::Image> unique_sensor_msgs_image)
-: header_(NotNull(
-      unique_sensor_msgs_image.get(),
-      "unique_sensor_msgs_image cannot be nullptr"
-).pointer->header),
+: header_(NotNull(unique_sensor_msgs_image.get(), "unique_sensor_msgs_image cannot be nullptr")
+            .pointer->header),
   frame_(
-    unique_sensor_msgs_image->height,
-    unique_sensor_msgs_image->width,
-    encoding2mat_type(unique_sensor_msgs_image->encoding),
-    unique_sensor_msgs_image->data.data(),
+    unique_sensor_msgs_image->height, unique_sensor_msgs_image->width,
+    encoding2mat_type(unique_sensor_msgs_image->encoding), unique_sensor_msgs_image->data.data(),
     unique_sensor_msgs_image->step),
   storage_(std::move(unique_sensor_msgs_image))
-{}
+{
+}
 
 ROSCvMatContainer::ROSCvMatContainer(
   std::shared_ptr<sensor_msgs::msg::Image> shared_sensor_msgs_image)
 : header_(shared_sensor_msgs_image->header),
   frame_(
-    shared_sensor_msgs_image->height,
-    shared_sensor_msgs_image->width,
-    encoding2mat_type(shared_sensor_msgs_image->encoding),
-    shared_sensor_msgs_image->data.data(),
+    shared_sensor_msgs_image->height, shared_sensor_msgs_image->width,
+    encoding2mat_type(shared_sensor_msgs_image->encoding), shared_sensor_msgs_image->data.data(),
     shared_sensor_msgs_image->step),
   storage_(shared_sensor_msgs_image)
-{}
+{
+}
 
 ROSCvMatContainer::ROSCvMatContainer(
-  const cv::Mat & mat_frame,
-  const std_msgs::msg::Header & header,
-  bool is_bigendian,
+  const cv::Mat & mat_frame, const std_msgs::msg::Header & header, bool is_bigendian,
   std::optional<std::string> encoding_override)
 : header_(header),
   frame_(mat_frame),
   storage_(nullptr),
   is_bigendian_(is_bigendian),
   encoding_override_(encoding_override)
-{}
+{
+}
 
 ROSCvMatContainer::ROSCvMatContainer(
-  cv::Mat && mat_frame,
-  const std_msgs::msg::Header & header,
-  bool is_bigendian,
+  cv::Mat && mat_frame, const std_msgs::msg::Header & header, bool is_bigendian,
   std::optional<std::string> encoding_override)
 : header_(header),
   frame_(std::forward<cv::Mat>(mat_frame)),
   storage_(nullptr),
   is_bigendian_(is_bigendian),
   encoding_override_(encoding_override)
-{}
+{
+}
 
-ROSCvMatContainer::ROSCvMatContainer(
-  const sensor_msgs::msg::Image & sensor_msgs_image)
+ROSCvMatContainer::ROSCvMatContainer(const sensor_msgs::msg::Image & sensor_msgs_image)
 : ROSCvMatContainer(std::make_unique<sensor_msgs::msg::Image>(sensor_msgs_image))
-{}
+{
+}
 
-bool
-ROSCvMatContainer::is_owning() const
+bool ROSCvMatContainer::is_owning() const
 {
   return std::holds_alternative<std::nullptr_t>(storage_);
 }
 
-const cv::Mat &
-ROSCvMatContainer::cv_mat() const
-{
-  return frame_;
-}
+const cv::Mat & ROSCvMatContainer::cv_mat() const { return frame_; }
 
-cv::Mat
-ROSCvMatContainer::cv_mat()
-{
-  return frame_;
-}
+cv::Mat ROSCvMatContainer::cv_mat() { return frame_; }
 
-const std_msgs::msg::Header &
-ROSCvMatContainer::header() const
-{
-  return header_;
-}
+const std_msgs::msg::Header & ROSCvMatContainer::header() const { return header_; }
 
-std_msgs::msg::Header &
-ROSCvMatContainer::header()
-{
-  return header_;
-}
+std_msgs::msg::Header & ROSCvMatContainer::header() { return header_; }
 
 std::shared_ptr<const sensor_msgs::msg::Image>
 ROSCvMatContainer::get_sensor_msgs_msg_image_pointer() const
@@ -165,26 +139,22 @@ ROSCvMatContainer::get_sensor_msgs_msg_image_pointer() const
   return std::get<std::shared_ptr<sensor_msgs::msg::Image>>(storage_);
 }
 
-std::unique_ptr<sensor_msgs::msg::Image>
-ROSCvMatContainer::get_sensor_msgs_msg_image_pointer_copy() const
+std::unique_ptr<sensor_msgs::msg::Image> ROSCvMatContainer::get_sensor_msgs_msg_image_pointer_copy()
+  const
 {
   auto unique_image = std::make_unique<sensor_msgs::msg::Image>();
   this->get_sensor_msgs_msg_image_copy(*unique_image);
   return unique_image;
 }
 
-void
-ROSCvMatContainer::get_sensor_msgs_msg_image_copy(
+void ROSCvMatContainer::get_sensor_msgs_msg_image_copy(
   sensor_msgs::msg::Image & sensor_msgs_image) const
 {
   sensor_msgs_image.height = frame_.rows;
   sensor_msgs_image.width = frame_.cols;
-  if (encoding_override_.has_value() && !encoding_override_.value().empty())
-  {
+  if (encoding_override_.has_value() && !encoding_override_.value().empty()) {
     sensor_msgs_image.encoding = encoding_override_.value();
-  }
-  else
-  {
+  } else {
     switch (frame_.type()) {
       case CV_8UC1:
         sensor_msgs_image.encoding = "mono8";
@@ -209,14 +179,9 @@ ROSCvMatContainer::get_sensor_msgs_msg_image_copy(
   sensor_msgs_image.header = header_;
 }
 
-bool
-ROSCvMatContainer::is_bigendian() const
-{
-  return is_bigendian_;
-}
+bool ROSCvMatContainer::is_bigendian() const { return is_bigendian_; }
 
-std::optional<std::string>
-ROSCvMatContainer::encoding_override() const
+std::optional<std::string> ROSCvMatContainer::encoding_override() const
 {
   return encoding_override_;
 }

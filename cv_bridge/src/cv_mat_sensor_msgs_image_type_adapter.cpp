@@ -68,6 +68,16 @@ struct NotNull
   const T * pointer;
 };
 
+cv::Mat
+matFromImage(sensor_msgs::msg::Image & image)
+{
+  return {static_cast<int>(image.height),
+    static_cast<int>(image.width),
+    encoding2mat_type(image.encoding),
+    image.data.data(),
+    image.step};
+}
+
 }  // namespace
 
 ROSCvMatContainer::ROSCvMatContainer(
@@ -76,46 +86,36 @@ ROSCvMatContainer::ROSCvMatContainer(
       unique_sensor_msgs_image.get(),
       "unique_sensor_msgs_image cannot be nullptr"
 ).pointer->header),
-  frame_(
-    unique_sensor_msgs_image->height,
-    unique_sensor_msgs_image->width,
-    encoding2mat_type(unique_sensor_msgs_image->encoding),
-    unique_sensor_msgs_image->data.data(),
-    unique_sensor_msgs_image->step),
+  frame_(matFromImage(*unique_sensor_msgs_image)),
   storage_(std::move(unique_sensor_msgs_image))
 {}
 
 ROSCvMatContainer::ROSCvMatContainer(
   std::shared_ptr<sensor_msgs::msg::Image> shared_sensor_msgs_image)
 : header_(shared_sensor_msgs_image->header),
-  frame_(
-    shared_sensor_msgs_image->height,
-    shared_sensor_msgs_image->width,
-    encoding2mat_type(shared_sensor_msgs_image->encoding),
-    shared_sensor_msgs_image->data.data(),
-    shared_sensor_msgs_image->step),
+  frame_(matFromImage(*shared_sensor_msgs_image)),
   storage_(shared_sensor_msgs_image)
 {}
 
 ROSCvMatContainer::ROSCvMatContainer(
-  const cv::Mat & mat_frame,
+  cv::Mat mat_frame,
   const std_msgs::msg::Header & header,
   bool is_bigendian,
   std::optional<std::string> encoding_override)
 : header_(header),
-  frame_(mat_frame),
+  frame_(std::move(mat_frame)),
   storage_(nullptr),
   is_bigendian_(is_bigendian),
   encoding_override_(encoding_override)
 {}
 
 ROSCvMatContainer::ROSCvMatContainer(
-  cv::Mat && mat_frame,
+  cv::cuda::GpuMat mat_frame,
   const std_msgs::msg::Header & header,
   bool is_bigendian,
   std::optional<std::string> encoding_override)
 : header_(header),
-  frame_(std::forward<cv::Mat>(mat_frame)),
+  frame_(std::move(mat_frame)),
   storage_(nullptr),
   is_bigendian_(is_bigendian),
   encoding_override_(encoding_override)
@@ -135,13 +135,25 @@ ROSCvMatContainer::is_owning() const
 const cv::Mat &
 ROSCvMatContainer::cv_mat() const
 {
-  return frame_;
+  return std::get<cv::Mat>(frame_);
 }
 
 cv::Mat
 ROSCvMatContainer::cv_mat()
 {
-  return frame_;
+  return std::get<cv::Mat>(frame_);
+}
+
+cv::cuda::GpuMat
+ROSCvMatContainer::cv_gpu_mat()
+{
+  return std::get<cv::cuda::GpuMat>(frame_);
+}
+
+const cv::cuda::GpuMat &
+ROSCvMatContainer::cv_gpu_mat() const
+{
+  return std::get<cv::cuda::GpuMat>(frame_);
 }
 
 const std_msgs::msg::Header &
@@ -177,15 +189,21 @@ void
 ROSCvMatContainer::get_sensor_msgs_msg_image_copy(
   sensor_msgs::msg::Image & sensor_msgs_image) const
 {
-  sensor_msgs_image.height = frame_.rows;
-  sensor_msgs_image.width = frame_.cols;
-  if (encoding_override_.has_value() && !encoding_override_.value().empty())
-  {
-    sensor_msgs_image.encoding = encoding_override_.value();
+  cv::Mat sourceMat;
+  if (holds_cv_type<cv::Mat>()) {
+    sourceMat = cv_mat();
+  } else if (holds_cv_type<cv::cuda::GpuMat>()) {
+    cv_gpu_mat().download(sourceMat);
+  } else {
+    throw std::runtime_error("unsupported cv type");
   }
-  else
-  {
-    switch (frame_.type()) {
+
+  sensor_msgs_image.height = sourceMat.rows;
+  sensor_msgs_image.width = sourceMat.cols;
+  if (encoding_override_.has_value() && !encoding_override_.value().empty()) {
+    sensor_msgs_image.encoding = encoding_override_.value();
+  } else {
+    switch (sourceMat.type()) {
       case CV_8UC1:
         sensor_msgs_image.encoding = "mono8";
         break;
@@ -202,10 +220,10 @@ ROSCvMatContainer::get_sensor_msgs_msg_image_copy(
         throw std::runtime_error("unsupported encoding type");
     }
   }
-  sensor_msgs_image.step = static_cast<sensor_msgs::msg::Image::_step_type>(frame_.step);
-  size_t size = frame_.step * frame_.rows;
+  sensor_msgs_image.step = static_cast<sensor_msgs::msg::Image::_step_type>(sourceMat.step);
+  size_t size = sourceMat.step * sourceMat.rows;
   sensor_msgs_image.data.resize(size);
-  memcpy(&sensor_msgs_image.data[0], frame_.data, size);
+  memcpy(&sensor_msgs_image.data[0], sourceMat.data, size);
   sensor_msgs_image.header = header_;
 }
 

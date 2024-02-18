@@ -36,9 +36,9 @@
 #ifndef CV_BRIDGE__RGB_COLORS_HPP_
 #define CV_BRIDGE__RGB_COLORS_HPP_
 
-#include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge_export.h>
 
+#include <opencv2/opencv.hpp>
 
 namespace cv_bridge
 {
@@ -50,8 +50,7 @@ namespace rgb_colors
  * @brief
  * 146 rgb colors
  */
-enum Colors
-{
+enum Colors {
   ALICEBLUE,
   ANTIQUEWHITE,
   AQUA,

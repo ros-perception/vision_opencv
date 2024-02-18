@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.14)
 project(cv_bridge)
 
-find_package(ament_cmake_ros REQUIRED)
+find_package(ament_cmake_auto REQUIRED)
+ament_auto_find_build_dependencies()
 
 # Default to C++17
 if(NOT CMAKE_CXX_STANDARD)
@@ -39,34 +40,47 @@ else()
   endif()
 endif()
 
-find_package(rclcpp REQUIRED)
-find_package(rcpputils REQUIRED)
-find_package(sensor_msgs REQUIRED)
-
-find_package(OpenCV 4 QUIET
-  COMPONENTS
-    opencv_core
-    opencv_imgproc
-    opencv_imgcodecs
-  CONFIG
-)
-if(NOT OpenCV_FOUND)
-  find_package(OpenCV 3 REQUIRED
-    COMPONENTS
-      opencv_core
-      opencv_imgproc
-      opencv_imgcodecs
-    CONFIG
-  )
-endif()
-
 if(NOT CV_BRIDGE_DISABLE_PYTHON)
   ament_python_install_package(${PROJECT_NAME}
     PACKAGE_DIR python/${PROJECT_NAME}
   )
 endif()
 
-add_subdirectory(src)
+ament_auto_add_library(
+  ${PROJECT_NAME} SHARED
+  src/cv_bridge.cpp
+  src/cv_mat_sensor_msgs_image_type_adapter.cpp
+  src/rgb_colors.cpp
+)
+include(GenerateExportHeader)
+generate_export_header(${PROJECT_NAME} EXPORT_FILE_NAME ${PROJECT_NAME}/${PROJECT_NAME}_export.h)
+target_include_directories(${PROJECT_NAME} PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}_export.h
+  DESTINATION include/${PROJECT_NAME}/${PROJECT_NAME})
+
+if(NOT CV_BRIDGE_DISABLE_PYTHON)
+  python3_add_library(${PROJECT_NAME}_boost MODULE src/module.cpp src/module_opencv4.cpp)
+  target_link_libraries(${PROJECT_NAME}_boost PRIVATE
+    ${PROJECT_NAME}
+    ${boost_python_target}
+    Python3::NumPy)
+  target_compile_definitions(${PROJECT_NAME}_boost PRIVATE PYTHON3)
+
+  if(OpenCV_VERSION_MAJOR VERSION_EQUAL 4)
+    target_compile_definitions(${PROJECT_NAME}_boost PRIVATE OPENCV_VERSION_4)
+  endif()
+
+  set_target_properties(${PROJECT_NAME}_boost PROPERTIES
+                        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost/
+                        PREFIX ""
+  )
+  install(TARGETS ${PROJECT_NAME}_boost DESTINATION ${PYTHON_INSTALL_DIR}/${PROJECT_NAME}/boost/)
+endif()
 
 # cv_bridge_lib_dir is passed as APPEND_LIBRARY_DIRS for each ament_add_gtest call so
 # the project library that they link against is on the library path.
@@ -75,26 +89,10 @@ add_subdirectory(src)
 set(cv_bridge_lib_dir "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
 
 if(BUILD_TESTING)
+  # Add all the unit tests for cv_bridge
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
   add_subdirectory(test)
 endif()
 
-ament_export_dependencies(
-  OpenCV
-  sensor_msgs
-  rclcpp
-)
-
-ament_export_targets(export_${PROJECT_NAME})
-
-# install the include folder
-install(DIRECTORY include/ DESTINATION include/${PROJECT_NAME})
-
-install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION bin
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-)
-
-ament_package(
-  CONFIG_EXTRAS "cmake/cv_bridge-extras.cmake.in"
-)
+ament_auto_package()

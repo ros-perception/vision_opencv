@@ -1,22 +1,39 @@
+// Copyright 2023 Open Source Robotics Foundation, Inc.
+// Copyright 2023 Homalozoa, Direct Drive Technology, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #ifndef IMAGE_GEOMETRY__PINHOLE_CAMERA_MODEL_HPP_
 #define IMAGE_GEOMETRY__PINHOLE_CAMERA_MODEL_HPP_
 
-#include "image_geometry/visibility_control.hpp"
-
-#include <sensor_msgs/msg/camera_info.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
+#include <cmath>
+#include <memory>
 #include <stdexcept>
 #include <string>
-#include <math.h>
 
-namespace image_geometry {
+#include "image_geometry/visibility_control.hpp"
+#include "opencv2/calib3d/calib3d.hpp"
+#include "opencv2/core/core.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "sensor_msgs/msg/camera_info.hpp"
+
+namespace image_geometry
+{
 
 class Exception : public std::runtime_error
 {
 public:
-  Exception(const std::string& description) : std::runtime_error(description) {}
+  explicit Exception(const std::string & description) : std::runtime_error(description) {}
 };
 
 /**
@@ -30,22 +47,22 @@ public:
   PinholeCameraModel();
 
   IMAGE_GEOMETRY_PUBLIC
-  PinholeCameraModel(const PinholeCameraModel& other);
+  PinholeCameraModel(const PinholeCameraModel & other);
 
   IMAGE_GEOMETRY_PUBLIC
-  PinholeCameraModel& operator=(const PinholeCameraModel& other);
-
-  /**
-   * \brief Set the camera parameters from the sensor_msgs/CameraInfo message.
-   */
-  IMAGE_GEOMETRY_PUBLIC
-  bool fromCameraInfo(const sensor_msgs::msg::CameraInfo& msg);
+  PinholeCameraModel & operator=(const PinholeCameraModel & other);
 
   /**
    * \brief Set the camera parameters from the sensor_msgs/CameraInfo message.
    */
   IMAGE_GEOMETRY_PUBLIC
-  bool fromCameraInfo(const sensor_msgs::msg::CameraInfo::ConstSharedPtr& msg);
+  bool fromCameraInfo(const sensor_msgs::msg::CameraInfo & msg);
+
+  /**
+   * \brief Set the camera parameters from the sensor_msgs/CameraInfo message.
+   */
+  IMAGE_GEOMETRY_PUBLIC
+  bool fromCameraInfo(const sensor_msgs::msg::CameraInfo::ConstSharedPtr & msg);
 
   /**
    * \brief Get the name of the camera coordinate frame in tf.
@@ -79,16 +96,16 @@ public:
   cv::Size reducedResolution() const;
 
   IMAGE_GEOMETRY_PUBLIC
-  cv::Point2d toFullResolution(const cv::Point2d& uv_reduced) const;
+  cv::Point2d toFullResolution(const cv::Point2d & uv_reduced) const;
 
   IMAGE_GEOMETRY_PUBLIC
-  cv::Rect toFullResolution(const cv::Rect& roi_reduced) const;
+  cv::Rect toFullResolution(const cv::Rect & roi_reduced) const;
 
   IMAGE_GEOMETRY_PUBLIC
-  cv::Point2d toReducedResolution(const cv::Point2d& uv_full) const;
+  cv::Point2d toReducedResolution(const cv::Point2d & uv_full) const;
 
   IMAGE_GEOMETRY_PUBLIC
-  cv::Rect toReducedResolution(const cv::Rect& roi_full) const;
+  cv::Rect toReducedResolution(const cv::Rect & roi_full) const;
 
   /**
    * \brief The current raw ROI, as used for capture by the camera driver.
@@ -111,7 +128,7 @@ public:
    * \return (u,v) in rectified pixel coordinates
    */
   IMAGE_GEOMETRY_PUBLIC
-  cv::Point2d project3dToPixel(const cv::Point3d& xyz) const;
+  cv::Point2d project3dToPixel(const cv::Point3d & xyz) const;
 
   /**
    * \brief Project a rectified pixel to a 3d ray.
@@ -125,90 +142,92 @@ public:
    * \return 3d ray passing through (u,v)
    */
   IMAGE_GEOMETRY_PUBLIC
-  cv::Point3d projectPixelTo3dRay(const cv::Point2d& uv_rect) const;
-  cv::Point3d projectPixelTo3dRay(const cv::Point2d& uv_rect, const cv::Matx34d& P) const;
+  cv::Point3d projectPixelTo3dRay(const cv::Point2d & uv_rect) const;
+  cv::Point3d projectPixelTo3dRay(const cv::Point2d & uv_rect, const cv::Matx34d & P) const;
 
   /**
    * \brief Rectify a raw camera image.
    */
   IMAGE_GEOMETRY_PUBLIC
-  void rectifyImage(const cv::Mat& raw, cv::Mat& rectified,
-                    int interpolation = cv::INTER_LINEAR) const;
+  void rectifyImage(
+    const cv::Mat & raw, cv::Mat & rectified, int interpolation = cv::INTER_LINEAR) const;
 
   /**
    * \brief Apply camera distortion to a rectified image.
    */
   IMAGE_GEOMETRY_PUBLIC
-  void unrectifyImage(const cv::Mat& rectified, cv::Mat& raw,
-                      int interpolation = cv::INTER_LINEAR) const;
+  void unrectifyImage(
+    const cv::Mat & rectified, cv::Mat & raw, int interpolation = cv::INTER_LINEAR) const;
 
   /**
    * \brief Compute the rectified image coordinates of a pixel in the raw image.
    */
   IMAGE_GEOMETRY_PUBLIC
-  cv::Point2d rectifyPoint(const cv::Point2d& uv_raw) const;
-  cv::Point2d rectifyPoint(const cv::Point2d& uv_raw, const cv::Matx33d& K, const cv::Matx34d& P) const;
+  cv::Point2d rectifyPoint(const cv::Point2d & uv_raw) const;
+  cv::Point2d rectifyPoint(
+    const cv::Point2d & uv_raw, const cv::Matx33d & K, const cv::Matx34d & P) const;
 
   /**
    * \brief Compute the raw image coordinates of a pixel in the rectified image.
    */
   IMAGE_GEOMETRY_PUBLIC
-  cv::Point2d unrectifyPoint(const cv::Point2d& uv_rect) const;
-  cv::Point2d unrectifyPoint(const cv::Point2d& uv_rect, const cv::Matx33d& K, const cv::Matx34d& P) const;
+  cv::Point2d unrectifyPoint(const cv::Point2d & uv_rect) const;
+  cv::Point2d unrectifyPoint(
+    const cv::Point2d & uv_rect, const cv::Matx33d & K, const cv::Matx34d & P) const;
 
   /**
    * \brief Compute the rectified ROI best fitting a raw ROI.
    */
   IMAGE_GEOMETRY_PUBLIC
-  cv::Rect rectifyRoi(const cv::Rect& roi_raw) const;
+  cv::Rect rectifyRoi(const cv::Rect & roi_raw) const;
 
   /**
    * \brief Compute the raw ROI best fitting a rectified ROI.
    */
   IMAGE_GEOMETRY_PUBLIC
-  cv::Rect unrectifyRoi(const cv::Rect& roi_rect) const;
+  cv::Rect unrectifyRoi(const cv::Rect & roi_rect) const;
 
   /**
    * \brief Returns the camera info message held internally
    */
   IMAGE_GEOMETRY_PUBLIC
-  const sensor_msgs::msg::CameraInfo& cameraInfo() const;
+  const sensor_msgs::msg::CameraInfo & cameraInfo() const;
 
   /**
    * \brief Returns the original camera matrix.
    */
   IMAGE_GEOMETRY_PUBLIC
-  const cv::Matx33d& intrinsicMatrix() const;
+  const cv::Matx33d & intrinsicMatrix() const;
 
   /**
    * \brief Returns the distortion coefficients.
    */
   IMAGE_GEOMETRY_PUBLIC
-  const cv::Mat_<double>& distortionCoeffs() const;
+  const cv::Mat_<double> & distortionCoeffs() const;
 
   /**
    * \brief Returns the rotation matrix.
    */
   IMAGE_GEOMETRY_PUBLIC
-  const cv::Matx33d& rotationMatrix() const;
+  const cv::Matx33d & rotationMatrix() const;
 
   /**
    * \brief Returns the projection matrix.
    */
   IMAGE_GEOMETRY_PUBLIC
-  const cv::Matx34d& projectionMatrix() const;
+  const cv::Matx34d & projectionMatrix() const;
 
   /**
    * \brief Returns the original camera matrix for full resolution.
    */
   IMAGE_GEOMETRY_PUBLIC
-  const cv::Matx33d& fullIntrinsicMatrix() const;
+  const cv::Matx33d & fullIntrinsicMatrix() const;
 
   /**
    * \brief Returns the projection matrix for full resolution.
    */
   IMAGE_GEOMETRY_PUBLIC
-  const cv::Matx34d& fullProjectionMatrix() const;
+  const cv::Matx34d & fullProjectionMatrix() const;
 
   /**
    * \brief Returns the focal length (pixels) in x direction of the rectified image.
@@ -316,20 +335,20 @@ public:
    * \brief Returns true if the camera has been initialized
    */
   IMAGE_GEOMETRY_PUBLIC
-  bool initialized() const { return (bool)cache_; }
+  bool initialized() const { return static_cast<bool>(cache_); }
 
 protected:
   sensor_msgs::msg::CameraInfo cam_info_;
-  cv::Mat_<double> D_;           // Unaffected by binning, ROI
-  cv::Matx33d R_;           // Unaffected by binning, ROI
-  cv::Matx33d K_;           // Describe current image (includes binning, ROI)
-  cv::Matx34d P_;           // Describe current image (includes binning, ROI)
-  cv::Matx33d K_full_; // Describe full-res image, needed for full maps
-  cv::Matx34d P_full_; // Describe full-res image, needed for full maps
+  cv::Mat_<double> D_;  // Unaffected by binning, ROI
+  cv::Matx33d R_;       // Unaffected by binning, ROI
+  cv::Matx33d K_;       // Describe current image (includes binning, ROI)
+  cv::Matx34d P_;       // Describe current image (includes binning, ROI)
+  cv::Matx33d K_full_;  // Describe full-res image, needed for full maps
+  cv::Matx34d P_full_;  // Describe full-res image, needed for full maps
 
   // Use PIMPL here so we can change internals in patch updates if needed
   struct Cache;
-  std::shared_ptr<Cache> cache_; // Holds cached data for internal use
+  std::shared_ptr<Cache> cache_;  // Holds cached data for internal use
 
   IMAGE_GEOMETRY_PUBLIC
   void initRectificationMaps() const;
@@ -338,56 +357,54 @@ protected:
   friend class StereoCameraModel;
 };
 
-
 /* Trivial inline functions */
 IMAGE_GEOMETRY_PUBLIC
 inline std::string PinholeCameraModel::tfFrame() const
 {
-  assert( initialized() );
+  assert(initialized());
   return cam_info_.header.frame_id;
 }
 
 IMAGE_GEOMETRY_PUBLIC
 inline builtin_interfaces::msg::Time PinholeCameraModel::stamp() const
 {
-  assert( initialized() );
+  assert(initialized());
   return cam_info_.header.stamp;
 }
 
 IMAGE_GEOMETRY_PUBLIC
-inline const sensor_msgs::msg::CameraInfo& PinholeCameraModel::cameraInfo() const  { return cam_info_; }
+inline const sensor_msgs::msg::CameraInfo & PinholeCameraModel::cameraInfo() const
+{
+  return cam_info_;
+}
 IMAGE_GEOMETRY_PUBLIC
-inline const cv::Matx33d& PinholeCameraModel::intrinsicMatrix() const  { return K_; }
+inline const cv::Matx33d & PinholeCameraModel::intrinsicMatrix() const { return K_; }
 IMAGE_GEOMETRY_PUBLIC
-inline const cv::Mat_<double>& PinholeCameraModel::distortionCoeffs() const { return D_; }
+inline const cv::Mat_<double> & PinholeCameraModel::distortionCoeffs() const { return D_; }
 IMAGE_GEOMETRY_PUBLIC
-inline const cv::Matx33d& PinholeCameraModel::rotationMatrix() const   { return R_; }
+inline const cv::Matx33d & PinholeCameraModel::rotationMatrix() const { return R_; }
 IMAGE_GEOMETRY_PUBLIC
-inline const cv::Matx34d& PinholeCameraModel::projectionMatrix() const { return P_; }
+inline const cv::Matx34d & PinholeCameraModel::projectionMatrix() const { return P_; }
 IMAGE_GEOMETRY_PUBLIC
-inline const cv::Matx33d& PinholeCameraModel::fullIntrinsicMatrix() const  { return K_full_; }
+inline const cv::Matx33d & PinholeCameraModel::fullIntrinsicMatrix() const { return K_full_; }
 IMAGE_GEOMETRY_PUBLIC
-inline const cv::Matx34d& PinholeCameraModel::fullProjectionMatrix() const { return P_full_; }
+inline const cv::Matx34d & PinholeCameraModel::fullProjectionMatrix() const { return P_full_; }
 
 IMAGE_GEOMETRY_PUBLIC
-inline double PinholeCameraModel::fx() const { return P_(0,0); }
+inline double PinholeCameraModel::fx() const { return P_(0, 0); }
 IMAGE_GEOMETRY_PUBLIC
-inline double PinholeCameraModel::fy() const { return P_(1,1); }
+inline double PinholeCameraModel::fy() const { return P_(1, 1); }
 IMAGE_GEOMETRY_PUBLIC
-inline double PinholeCameraModel::cx() const { return P_(0,2); }
+inline double PinholeCameraModel::cx() const { return P_(0, 2); }
 IMAGE_GEOMETRY_PUBLIC
-inline double PinholeCameraModel::cy() const { return P_(1,2); }
+inline double PinholeCameraModel::cy() const { return P_(1, 2); }
 IMAGE_GEOMETRY_PUBLIC
-inline double PinholeCameraModel::Tx() const { return P_(0,3); }
+inline double PinholeCameraModel::Tx() const { return P_(0, 3); }
 IMAGE_GEOMETRY_PUBLIC
-inline double PinholeCameraModel::Ty() const { return P_(1,3); }
+inline double PinholeCameraModel::Ty() const { return P_(1, 3); }
 
-inline double PinholeCameraModel::fovX() const {
-        return 2 * atan(rawRoi().width / (2 * fx()));
-}
-inline double PinholeCameraModel::fovY() const {
-        return 2 * atan(rawRoi().height / (2 * fy()));
-}
+inline double PinholeCameraModel::fovX() const { return 2 * atan(rawRoi().width / (2 * fx())); }
+inline double PinholeCameraModel::fovY() const { return 2 * atan(rawRoi().height / (2 * fy())); }
 
 IMAGE_GEOMETRY_PUBLIC
 inline uint32_t PinholeCameraModel::binningX() const { return cam_info_.binning_x; }
@@ -397,28 +414,28 @@ inline uint32_t PinholeCameraModel::binningY() const { return cam_info_.binning_
 IMAGE_GEOMETRY_PUBLIC
 inline double PinholeCameraModel::getDeltaU(double deltaX, double Z) const
 {
-  assert( initialized() );
+  assert(initialized());
   return fx() * deltaX / Z;
 }
 
 IMAGE_GEOMETRY_PUBLIC
 inline double PinholeCameraModel::getDeltaV(double deltaY, double Z) const
 {
-  assert( initialized() );
+  assert(initialized());
   return fy() * deltaY / Z;
 }
 
 IMAGE_GEOMETRY_PUBLIC
 inline double PinholeCameraModel::getDeltaX(double deltaU, double Z) const
 {
-  assert( initialized() );
+  assert(initialized());
   return Z * deltaU / fx();
 }
 
 IMAGE_GEOMETRY_PUBLIC
 inline double PinholeCameraModel::getDeltaY(double deltaV, double Z) const
 {
-  assert( initialized() );
+  assert(initialized());
   return Z * deltaV / fy();
 }
 

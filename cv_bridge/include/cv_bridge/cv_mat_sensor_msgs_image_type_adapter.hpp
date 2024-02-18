@@ -17,16 +17,14 @@
 
 #include <cstddef>
 #include <memory>
+#include <optional>
+#include <string>
 #include <variant>
 
+#include "cv_bridge/visibility_control.h"
 #include "opencv2/core/mat.hpp"
-
 #include "rclcpp/type_adapter.hpp"
 #include "sensor_msgs/msg/image.hpp"
-
-#include "cv_bridge/visibility_control.h"
-
-#include <optional>
 
 namespace cv_bridge
 {
@@ -34,21 +32,19 @@ namespace detail
 {
 // TODO(audrow): Replace with std::endian when C++ 20 is available
 // https://en.cppreference.com/w/cpp/types/endian
-enum class endian
-{
+enum class endian {
 #ifdef _WIN32
   little = 0,
-  big    = 1,
+  big = 1,
   native = little
 #else
   little = __ORDER_LITTLE_ENDIAN__,
-  big    = __ORDER_BIG_ENDIAN__,
+  big = __ORDER_BIG_ENDIAN__,
   native = __BYTE_ORDER__
 #endif
 };
 
 }  // namespace detail
-
 
 /// A potentially owning, potentially non-owning, container of a cv::Mat and ROS header.
 /**
@@ -89,10 +85,8 @@ class ROSCvMatContainer
 
 public:
   using SensorMsgsImageStorageType = std::variant<
-    std::nullptr_t,
-    std::unique_ptr<sensor_msgs::msg::Image>,
-    std::shared_ptr<sensor_msgs::msg::Image>
-  >;
+    std::nullptr_t, std::unique_ptr<sensor_msgs::msg::Image>,
+    std::shared_ptr<sensor_msgs::msg::Image>>;
 
   CV_BRIDGE_PUBLIC
   ROSCvMatContainer() = default;
@@ -139,16 +133,14 @@ public:
   /// Shallow copy the given cv::Mat into this class, but do not own the data directly.
   CV_BRIDGE_PUBLIC
   ROSCvMatContainer(
-    const cv::Mat & mat_frame,
-    const std_msgs::msg::Header & header,
+    const cv::Mat & mat_frame, const std_msgs::msg::Header & header,
     bool is_bigendian = is_bigendian_system,
     std::optional<std::string> encoding_override = std::nullopt);
 
   /// Move the given cv::Mat into this class.
   CV_BRIDGE_PUBLIC
   ROSCvMatContainer(
-    cv::Mat && mat_frame,
-    const std_msgs::msg::Header & header,
+    cv::Mat && mat_frame, const std_msgs::msg::Header & header,
     bool is_bigendian = is_bigendian_system,
     std::optional<std::string> encoding_override = std::nullopt);
 
@@ -162,13 +154,11 @@ public:
    * this class owns a sensor_msgs::msg::Image that the cv::Mat references.
    */
   CV_BRIDGE_PUBLIC
-  bool
-  is_owning() const;
+  bool is_owning() const;
 
   /// Const access the cv::Mat in this class.
   CV_BRIDGE_PUBLIC
-  const cv::Mat &
-  cv_mat() const;
+  const cv::Mat & cv_mat() const;
 
   /// Get a shallow copy of the cv::Mat that is in this class.
   /**
@@ -176,48 +166,39 @@ public:
    * make a deep copy with cv::Mat::clone() beforehand.
    */
   CV_BRIDGE_PUBLIC
-  cv::Mat
-  cv_mat();
+  cv::Mat cv_mat();
 
   /// Const access the ROS Header.
   CV_BRIDGE_PUBLIC
-  const std_msgs::msg::Header &
-  header() const;
+  const std_msgs::msg::Header & header() const;
 
   /// Access the ROS Header.
   CV_BRIDGE_PUBLIC
-  std_msgs::msg::Header &
-  header();
+  std_msgs::msg::Header & header();
 
   /// Get shared const pointer to the sensor_msgs::msg::Image if available, otherwise nullptr.
   CV_BRIDGE_PUBLIC
-  std::shared_ptr<const sensor_msgs::msg::Image>
-  get_sensor_msgs_msg_image_pointer() const;
+  std::shared_ptr<const sensor_msgs::msg::Image> get_sensor_msgs_msg_image_pointer() const;
 
   /// Get copy as a unique pointer to the sensor_msgs::msg::Image.
   CV_BRIDGE_PUBLIC
-  std::unique_ptr<sensor_msgs::msg::Image>
-  get_sensor_msgs_msg_image_pointer_copy() const;
+  std::unique_ptr<sensor_msgs::msg::Image> get_sensor_msgs_msg_image_pointer_copy() const;
 
   /// Get a copy of the image as a sensor_msgs::msg::Image.
   CV_BRIDGE_PUBLIC
-  sensor_msgs::msg::Image
-  get_sensor_msgs_msg_image_copy() const;
+  sensor_msgs::msg::Image get_sensor_msgs_msg_image_copy() const;
 
   /// Get a copy of the image as a sensor_msgs::msg::Image.
   CV_BRIDGE_PUBLIC
-  void
-  get_sensor_msgs_msg_image_copy(sensor_msgs::msg::Image & sensor_msgs_image) const;
+  void get_sensor_msgs_msg_image_copy(sensor_msgs::msg::Image & sensor_msgs_image) const;
 
   /// Return true if the data is stored in big endian, otherwise return false.
   CV_BRIDGE_PUBLIC
-  bool
-  is_bigendian() const;
-  
+  bool is_bigendian() const;
+
   /// Return the encoding override if provided.
   CV_BRIDGE_PUBLIC
-  std::optional<std::string>
-  encoding_override() const;
+  std::optional<std::string> encoding_override() const;
 
 private:
   std_msgs::msg::Header header_;
@@ -229,44 +210,37 @@ private:
 
 }  // namespace cv_bridge
 
-template<>
+template <>
 struct rclcpp::TypeAdapter<cv_bridge::ROSCvMatContainer, sensor_msgs::msg::Image>
 {
   using is_specialized = std::true_type;
   using custom_type = cv_bridge::ROSCvMatContainer;
   using ros_message_type = sensor_msgs::msg::Image;
 
-  static
-  void
-  convert_to_ros_message(
-    const custom_type & source,
-    ros_message_type & destination)
+  static void convert_to_ros_message(const custom_type & source, ros_message_type & destination)
   {
     destination.height = source.cv_mat().rows;
     destination.width = source.cv_mat().cols;
-    const auto& encoding_override = source.encoding_override();
-    if (encoding_override.has_value() && !encoding_override.value().empty())
-    {
+    const auto & encoding_override = source.encoding_override();
+    if (encoding_override.has_value() && !encoding_override.value().empty()) {
       destination.encoding = encoding_override.value();
-    }
-    else
-    {
+    } else {
       switch (source.cv_mat().type()) {
-      case CV_8UC1:
-        destination.encoding = "mono8";
-        break;
-      case CV_8UC3:
-        destination.encoding = "bgr8";
-        break;
-      case CV_16SC1:
-        destination.encoding = "mono16";
-        break;
-      case CV_8UC4:
-        destination.encoding = "rgba8";
-        break;
-      default:
-        throw std::runtime_error("unsupported encoding type");
-      }    
+        case CV_8UC1:
+          destination.encoding = "mono8";
+          break;
+        case CV_8UC3:
+          destination.encoding = "bgr8";
+          break;
+        case CV_16SC1:
+          destination.encoding = "mono16";
+          break;
+        case CV_8UC4:
+          destination.encoding = "rgba8";
+          break;
+        default:
+          throw std::runtime_error("unsupported encoding type");
+      }
     }
     destination.step = static_cast<sensor_msgs::msg::Image::_step_type>(source.cv_mat().step);
     size_t size = source.cv_mat().step * source.cv_mat().rows;
@@ -275,11 +249,7 @@ struct rclcpp::TypeAdapter<cv_bridge::ROSCvMatContainer, sensor_msgs::msg::Image
     destination.header = source.header();
   }
 
-  static
-  void
-  convert_to_custom(
-    const ros_message_type & source,
-    custom_type & destination)
+  static void convert_to_custom(const ros_message_type & source, custom_type & destination)
   {
     destination = cv_bridge::ROSCvMatContainer(source);
   }

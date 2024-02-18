@@ -39,7 +39,7 @@
 #include <boost/endian/conversion.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <sensor_msgs/image_encodings.hpp>
+#include "sensor_msgs/image_encodings.hpp"
 #include "rcpputils/endian.hpp"
 
 #include <map>
@@ -97,8 +97,12 @@ int getCvType(const std::string & encoding)
   if (encoding == enc::BAYER_GRBG16) {return CV_16UC1;}
 
   // Miscellaneous
+  if (encoding == enc::UYVY) {return CV_8UC2;}
   if (encoding == enc::YUV422) {return CV_8UC2;}
+  if (encoding == enc::YUYV) {return CV_8UC2;}
   if (encoding == enc::YUV422_YUY2) {return CV_8UC2;}
+  if (encoding == enc::NV21) {return CV_8UC2;}
+  if (encoding == enc::NV24) {return CV_8UC2;}
 
   // Check all the generic content encodings
   std::cmatch m;
@@ -120,7 +124,7 @@ int getCvType(const std::string & encoding)
 
 /// @cond DOXYGEN_IGNORE
 
-enum Encoding { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, YUV422, YUV422_YUY2, BAYER_RGGB, BAYER_BGGR,
+enum Encoding { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, UYVY, YUYV, BAYER_RGGB, BAYER_BGGR,
   BAYER_GBRG, BAYER_GRBG};
 
 Encoding getEncoding(const std::string & encoding)
@@ -130,8 +134,8 @@ Encoding getEncoding(const std::string & encoding)
   if ((encoding == enc::RGB8) || (encoding == enc::RGB16)) {return RGB;}
   if ((encoding == enc::BGRA8) || (encoding == enc::BGRA16)) {return BGRA;}
   if ((encoding == enc::RGBA8) || (encoding == enc::RGBA16)) {return RGBA;}
-  if (encoding == enc::YUV422) {return YUV422;}
-  if (encoding == enc::YUV422_YUY2) {return YUV422_YUY2;}
+  if ((encoding == enc::UYVY) || (encoding == enc::YUV422)){return UYVY;}
+  if ((encoding == enc::YUYV) || (encoding == enc::YUV422_YUY2)) {return YUYV;}
 
   if ((encoding == enc::BAYER_RGGB8) || (encoding == enc::BAYER_RGGB16)) {return BAYER_RGGB;}
   if ((encoding == enc::BAYER_BGGR8) || (encoding == enc::BAYER_BGGR16)) {return BAYER_BGGR;}
@@ -152,62 +156,62 @@ std::map<std::pair<Encoding, Encoding>, std::vector<int>> getConversionCodes()
 {
   std::map<std::pair<Encoding, Encoding>, std::vector<int>> res;
   for (int i = 0; i <= 5; ++i) {
-    res[std::pair<Encoding, Encoding>(Encoding(i), Encoding(i))].push_back(SAME_FORMAT);
+    res[{Encoding(i), Encoding(i)}].push_back(SAME_FORMAT);
   }
 
-  res[std::make_pair(GRAY, RGB)].push_back(cv::COLOR_GRAY2RGB);
-  res[std::make_pair(GRAY, BGR)].push_back(cv::COLOR_GRAY2BGR);
-  res[std::make_pair(GRAY, RGBA)].push_back(cv::COLOR_GRAY2RGBA);
-  res[std::make_pair(GRAY, BGRA)].push_back(cv::COLOR_GRAY2BGRA);
+  res[{GRAY, RGB}].push_back(cv::COLOR_GRAY2RGB);
+  res[{GRAY, BGR}].push_back(cv::COLOR_GRAY2BGR);
+  res[{GRAY, RGBA}].push_back(cv::COLOR_GRAY2RGBA);
+  res[{GRAY, BGRA}].push_back(cv::COLOR_GRAY2BGRA);
 
-  res[std::make_pair(RGB, GRAY)].push_back(cv::COLOR_RGB2GRAY);
-  res[std::make_pair(RGB, BGR)].push_back(cv::COLOR_RGB2BGR);
-  res[std::make_pair(RGB, RGBA)].push_back(cv::COLOR_RGB2RGBA);
-  res[std::make_pair(RGB, BGRA)].push_back(cv::COLOR_RGB2BGRA);
+  res[{RGB, GRAY}].push_back(cv::COLOR_RGB2GRAY);
+  res[{RGB, BGR}].push_back(cv::COLOR_RGB2BGR);
+  res[{RGB, RGBA}].push_back(cv::COLOR_RGB2RGBA);
+  res[{RGB, BGRA}].push_back(cv::COLOR_RGB2BGRA);
 
-  res[std::make_pair(BGR, GRAY)].push_back(cv::COLOR_BGR2GRAY);
-  res[std::make_pair(BGR, RGB)].push_back(cv::COLOR_BGR2RGB);
-  res[std::make_pair(BGR, RGBA)].push_back(cv::COLOR_BGR2RGBA);
-  res[std::make_pair(BGR, BGRA)].push_back(cv::COLOR_BGR2BGRA);
+  res[{BGR, GRAY}].push_back(cv::COLOR_BGR2GRAY);
+  res[{BGR, RGB}].push_back(cv::COLOR_BGR2RGB);
+  res[{BGR, RGBA}].push_back(cv::COLOR_BGR2RGBA);
+  res[{BGR, BGRA}].push_back(cv::COLOR_BGR2BGRA);
 
-  res[std::make_pair(RGBA, GRAY)].push_back(cv::COLOR_RGBA2GRAY);
-  res[std::make_pair(RGBA, RGB)].push_back(cv::COLOR_RGBA2RGB);
-  res[std::make_pair(RGBA, BGR)].push_back(cv::COLOR_RGBA2BGR);
-  res[std::make_pair(RGBA, BGRA)].push_back(cv::COLOR_RGBA2BGRA);
+  res[{RGBA, GRAY}].push_back(cv::COLOR_RGBA2GRAY);
+  res[{RGBA, RGB}].push_back(cv::COLOR_RGBA2RGB);
+  res[{RGBA, BGR}].push_back(cv::COLOR_RGBA2BGR);
+  res[{RGBA, BGRA}].push_back(cv::COLOR_RGBA2BGRA);
 
-  res[std::make_pair(BGRA, GRAY)].push_back(cv::COLOR_BGRA2GRAY);
-  res[std::make_pair(BGRA, RGB)].push_back(cv::COLOR_BGRA2RGB);
-  res[std::make_pair(BGRA, BGR)].push_back(cv::COLOR_BGRA2BGR);
-  res[std::make_pair(BGRA, RGBA)].push_back(cv::COLOR_BGRA2RGBA);
+  res[{BGRA, GRAY}].push_back(cv::COLOR_BGRA2GRAY);
+  res[{BGRA, RGB}].push_back(cv::COLOR_BGRA2RGB);
+  res[{BGRA, BGR}].push_back(cv::COLOR_BGRA2BGR);
+  res[{BGRA, RGBA}].push_back(cv::COLOR_BGRA2RGBA);
 
-  res[std::make_pair(YUV422, GRAY)].push_back(cv::COLOR_YUV2GRAY_UYVY);
-  res[std::make_pair(YUV422, RGB)].push_back(cv::COLOR_YUV2RGB_UYVY);
-  res[std::make_pair(YUV422, BGR)].push_back(cv::COLOR_YUV2BGR_UYVY);
-  res[std::make_pair(YUV422, RGBA)].push_back(cv::COLOR_YUV2RGBA_UYVY);
-  res[std::make_pair(YUV422, BGRA)].push_back(cv::COLOR_YUV2BGRA_UYVY);
+  res[{UYVY, GRAY}].push_back(cv::COLOR_YUV2GRAY_UYVY);
+  res[{UYVY, RGB}].push_back(cv::COLOR_YUV2RGB_UYVY);
+  res[{UYVY, BGR}].push_back(cv::COLOR_YUV2BGR_UYVY);
+  res[{UYVY, RGBA}].push_back(cv::COLOR_YUV2RGBA_UYVY);
+  res[{UYVY, BGRA}].push_back(cv::COLOR_YUV2BGRA_UYVY);
 
-  res[std::make_pair(YUV422_YUY2, GRAY)].push_back(cv::COLOR_YUV2GRAY_YUY2);
-  res[std::make_pair(YUV422_YUY2, RGB)].push_back(cv::COLOR_YUV2RGB_YUY2);
-  res[std::make_pair(YUV422_YUY2, BGR)].push_back(cv::COLOR_YUV2BGR_YUY2);
-  res[std::make_pair(YUV422_YUY2, RGBA)].push_back(cv::COLOR_YUV2RGBA_YUY2);
-  res[std::make_pair(YUV422_YUY2, BGRA)].push_back(cv::COLOR_YUV2BGRA_YUY2);
+  res[{YUYV, GRAY}].push_back(cv::COLOR_YUV2GRAY_YUY2);
+  res[{YUYV, RGB}].push_back(cv::COLOR_YUV2RGB_YUY2);
+  res[{YUYV, BGR}].push_back(cv::COLOR_YUV2BGR_YUY2);
+  res[{YUYV, RGBA}].push_back(cv::COLOR_YUV2RGBA_YUY2);
+  res[{YUYV, BGRA}].push_back(cv::COLOR_YUV2BGRA_YUY2);
 
   // Deal with Bayer
-  res[std::make_pair(BAYER_RGGB, GRAY)].push_back(cv::COLOR_BayerBG2GRAY);
-  res[std::make_pair(BAYER_RGGB, RGB)].push_back(cv::COLOR_BayerBG2RGB);
-  res[std::make_pair(BAYER_RGGB, BGR)].push_back(cv::COLOR_BayerBG2BGR);
+  res[{BAYER_RGGB, GRAY}].push_back(cv::COLOR_BayerBG2GRAY);
+  res[{BAYER_RGGB, RGB}].push_back(cv::COLOR_BayerBG2RGB);
+  res[{BAYER_RGGB, BGR}].push_back(cv::COLOR_BayerBG2BGR);
 
-  res[std::make_pair(BAYER_BGGR, GRAY)].push_back(cv::COLOR_BayerRG2GRAY);
-  res[std::make_pair(BAYER_BGGR, RGB)].push_back(cv::COLOR_BayerRG2RGB);
-  res[std::make_pair(BAYER_BGGR, BGR)].push_back(cv::COLOR_BayerRG2BGR);
+  res[{BAYER_BGGR, GRAY}].push_back(cv::COLOR_BayerRG2GRAY);
+  res[{BAYER_BGGR, RGB}].push_back(cv::COLOR_BayerRG2RGB);
+  res[{BAYER_BGGR, BGR}].push_back(cv::COLOR_BayerRG2BGR);
 
-  res[std::make_pair(BAYER_GBRG, GRAY)].push_back(cv::COLOR_BayerGR2GRAY);
-  res[std::make_pair(BAYER_GBRG, RGB)].push_back(cv::COLOR_BayerGR2RGB);
-  res[std::make_pair(BAYER_GBRG, BGR)].push_back(cv::COLOR_BayerGR2BGR);
+  res[{BAYER_GBRG, GRAY}].push_back(cv::COLOR_BayerGR2GRAY);
+  res[{BAYER_GBRG, RGB}].push_back(cv::COLOR_BayerGR2RGB);
+  res[{BAYER_GBRG, BGR}].push_back(cv::COLOR_BayerGR2BGR);
 
-  res[std::make_pair(BAYER_GRBG, GRAY)].push_back(cv::COLOR_BayerGB2GRAY);
-  res[std::make_pair(BAYER_GRBG, RGB)].push_back(cv::COLOR_BayerGB2RGB);
-  res[std::make_pair(BAYER_GRBG, BGR)].push_back(cv::COLOR_BayerGB2BGR);
+  res[{BAYER_GRBG, GRAY}].push_back(cv::COLOR_BayerGB2GRAY);
+  res[{BAYER_GRBG, RGB}].push_back(cv::COLOR_BayerGB2RGB);
+  res[{BAYER_GRBG, BGR}].push_back(cv::COLOR_BayerGB2BGR);
 
   return res;
 }
@@ -217,9 +221,9 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
   Encoding src_encod = getEncoding(src_encoding);
   Encoding dst_encod = getEncoding(dst_encoding);
   bool is_src_color_format = enc::isColor(src_encoding) || enc::isMono(src_encoding) ||
-    enc::isBayer(src_encoding) || (src_encoding == enc::YUV422) || (src_encoding == enc::YUV422_YUY2);
+    enc::isBayer(src_encoding);
   bool is_dst_color_format = enc::isColor(dst_encoding) || enc::isMono(dst_encoding) ||
-    enc::isBayer(dst_encoding) || (dst_encoding == enc::YUV422) || (dst_encoding == enc::YUV422_YUY2);
+    enc::isBayer(dst_encoding);
   bool is_num_channels_the_same =
     (enc::numChannels(src_encoding) == enc::numChannels(dst_encoding));
 
@@ -599,7 +603,7 @@ CvImageConstPtr cvtColorForDisplay(
       } else {
         // We choose BGR by default here as we assume people will use OpenCV
         if ((enc::bitDepth(source->encoding) == 8) ||
-          (enc::bitDepth(source->encoding) == 16) || 
+          (enc::bitDepth(source->encoding) == 16) ||
           (enc::bitDepth(source->encoding) == 32))
         {
           encoding = enc::BGR8;

@@ -464,13 +464,19 @@ CvImagePtr cvtColor(
 
 /////////////////////////////////////// CompressedImage ///////////////////////////////////////////
 
-sensor_msgs::msg::CompressedImage::SharedPtr CvImage::toCompressedImageMsg(const Format dst_format)
+sensor_msgs::msg::CompressedImage::SharedPtr CvImage::toCompressedImageMsg(const Format dst_format,const std::vector<int> &params)
 const
 {
   sensor_msgs::msg::CompressedImage::SharedPtr ptr =
     std::make_shared<sensor_msgs::msg::CompressedImage>();
-  toCompressedImageMsg(*ptr, dst_format);
+  toCompressedImageMsg(*ptr, dst_format, params);
   return ptr;
+}
+
+sensor_msgs::msg::CompressedImage::SharedPtr CvImage::toCompressedImageMsg(const std::vector<int> &params, const Format dst_format)
+const
+{
+  return toCompressedImageMsg(dst_format, params); 
 }
 
 std::string getFormat(Format format)
@@ -511,7 +517,14 @@ std::string getFormat(Format format)
 
 void CvImage::toCompressedImageMsg(
   sensor_msgs::msg::CompressedImage & ros_image,
-  const Format dst_format) const
+  const std::vector<int> &params, const Format dst_format) const
+{
+  toCompressedImageMsg(ros_image, dst_format, params);
+}
+
+void CvImage::toCompressedImageMsg(
+  sensor_msgs::msg::CompressedImage & ros_image,
+  const Format dst_format, const std::vector<int> &params) const
 {
   ros_image.header = header;
   cv::Mat image;
@@ -531,7 +544,7 @@ void CvImage::toCompressedImageMsg(
 
   std::string format = getFormat(dst_format);
   ros_image.format = format;
-  cv::imencode("." + format, image, ros_image.data);
+  cv::imencode("." + format, image, ros_image.data, params);
 }
 
 // Deep copy data, returnee is mutable

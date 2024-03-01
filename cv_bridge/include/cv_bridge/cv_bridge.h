@@ -117,10 +117,24 @@ public:
    * can be: jpg, jp2, bmp, png, tif at the moment
    * support this format from opencv:
    * http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
+   * params are the options for cv::imencode.
+   * Default value is empty list.
    */
   sensor_msgs::msg::CompressedImage::SharedPtr toCompressedImageMsg(
-    const Format dst_format =
-    JPG) const;
+    const Format dst_format = JPG,
+    const std::vector<int> &params=std::vector<int>()) const;
+
+  /**
+   * dst_format is compress the image to desire format.
+   * Default value is empty string that will convert to jpg format.
+   * can be: jpg, jp2, bmp, png, tif at the moment
+   * support this format from opencv:
+   * http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
+   * params are the options for cv::imencode.
+   * Default value is empty list.
+   */
+  sensor_msgs::msg::CompressedImage::SharedPtr toCompressedImageMsg(
+    const std::vector<int> &params=std::vector<int>(), const Format dst_format = JPG) const;
 
   /**
    * \brief Copy the message data to a ROS sensor_msgs::msg::Image message.
@@ -136,11 +150,25 @@ public:
    * can be: jpg, jp2, bmp, png, tif at the moment
    * support this format from opencv:
    * http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
+   * params are the options for cv::imencode.
+   * Default value is empty list.
    */
   void toCompressedImageMsg(
     sensor_msgs::msg::CompressedImage & ros_image,
-    const Format dst_format = JPG) const;
+    const Format dst_format = JPG, const std::vector<int> &params=std::vector<int>()) const;
 
+  /**
+   * dst_format is compress the image to desire format.
+   * Default value is empty string that will convert to jpg format.
+   * can be: jpg, jp2, bmp, png, tif at the moment
+   * support this format from opencv:
+   * http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
+   * params are the options for cv::imencode.
+   * Default value is empty list.
+   */
+  void toCompressedImageMsg(
+    sensor_msgs::msg::CompressedImage & ros_image,
+    const std::vector<int> &params=std::vector<int>(), const Format dst_format = JPG) const;
 
   typedef std::shared_ptr<CvImage> Ptr;
   typedef std::shared_ptr<CvImage const> ConstPtr;

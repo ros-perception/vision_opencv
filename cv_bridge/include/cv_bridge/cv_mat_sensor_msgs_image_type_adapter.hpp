@@ -17,16 +17,17 @@
 
 #include <cstddef>
 #include <memory>
+#include <optional>
 #include <variant>
+#include <string>
 
 #include "opencv2/core/mat.hpp"
+#include "opencv2/core/cuda.hpp"
 
 #include "rclcpp/type_adapter.hpp"
 #include "sensor_msgs/msg/image.hpp"
 
 #include "cv_bridge/visibility_control.h"
-
-#include <optional>
 
 namespace cv_bridge
 {
@@ -94,18 +95,32 @@ public:
     std::shared_ptr<sensor_msgs::msg::Image>
   >;
 
+  using CvImageStorageType = std::variant<
+    std::nullptr_t,
+    cv::Mat,
+    cv::cuda::GpuMat
+  >;
+
+  using AdaptedType = rclcpp::TypeAdapter<ROSCvMatContainer, sensor_msgs::msg::Image>;
+
   CV_BRIDGE_PUBLIC
   ROSCvMatContainer() = default;
 
   CV_BRIDGE_PUBLIC
   explicit ROSCvMatContainer(const ROSCvMatContainer & other)
-  : header_(other.header_), frame_(other.frame_.clone()), is_bigendian_(other.is_bigendian_)
+  : header_(other.header_), is_bigendian_(other.is_bigendian_)
   {
     if (std::holds_alternative<std::shared_ptr<sensor_msgs::msg::Image>>(other.storage_)) {
       storage_ = std::get<std::shared_ptr<sensor_msgs::msg::Image>>(other.storage_);
     } else if (std::holds_alternative<std::unique_ptr<sensor_msgs::msg::Image>>(other.storage_)) {
       storage_ = std::make_unique<sensor_msgs::msg::Image>(
         *std::get<std::unique_ptr<sensor_msgs::msg::Image>>(other.storage_));
+    }
+
+    if (std::holds_alternative<cv::Mat>(other.frame_)) {
+      frame_ = std::get<cv::Mat>(other.frame_).clone();
+    } else if (std::holds_alternative<cv::cuda::GpuMat>(other.frame_)) {
+      frame_ = std::get<cv::cuda::GpuMat>(other.frame_).clone();
     }
   }
 
@@ -114,8 +129,14 @@ public:
   {
     if (this != &other) {
       header_ = other.header_;
-      frame_ = other.frame_.clone();
       is_bigendian_ = other.is_bigendian_;
+
+      if (std::holds_alternative<cv::Mat>(other.frame_)) {
+        frame_ = std::get<cv::Mat>(other.frame_).clone();
+      } else if (std::holds_alternative<cv::cuda::GpuMat>(other.frame_)) {
+        frame_ = std::get<cv::cuda::GpuMat>(other.frame_).clone();
+      }
+
       if (std::holds_alternative<std::shared_ptr<sensor_msgs::msg::Image>>(other.storage_)) {
         storage_ = std::get<std::shared_ptr<sensor_msgs::msg::Image>>(other.storage_);
       } else if (std::holds_alternative<std::unique_ptr<sensor_msgs::msg::Image>>(other.storage_)) {
@@ -136,18 +157,18 @@ public:
   CV_BRIDGE_PUBLIC
   explicit ROSCvMatContainer(std::shared_ptr<sensor_msgs::msg::Image> shared_sensor_msgs_image);
 
-  /// Shallow copy the given cv::Mat into this class, but do not own the data directly.
+  /// Move the given cv::Mat if passed by r-value reference, otherwise shallow copy it.
   CV_BRIDGE_PUBLIC
   ROSCvMatContainer(
-    const cv::Mat & mat_frame,
+    cv::Mat mat_frame,
     const std_msgs::msg::Header & header,
     bool is_bigendian = is_bigendian_system,
     std::optional<std::string> encoding_override = std::nullopt);
 
-  /// Move the given cv::Mat into this class.
+  /// Move the given cv::cuda::GpuMat if passed by r-value reference, otherwise shallow copy it.
   CV_BRIDGE_PUBLIC
   ROSCvMatContainer(
-    cv::Mat && mat_frame,
+    cv::cuda::GpuMat mat_frame,
     const std_msgs::msg::Header & header,
     bool is_bigendian = is_bigendian_system,
     std::optional<std::string> encoding_override = std::nullopt);
@@ -165,6 +186,15 @@ public:
   bool
   is_owning() const;
 
+  /// Return true if this class held cv type matches passed type
+  template<class T>
+  CV_BRIDGE_PUBLIC
+  bool
+  holds_cv_type() const
+  {
+    return std::holds_alternative<T>(frame_);
+  }
+
   /// Const access the cv::Mat in this class.
   CV_BRIDGE_PUBLIC
   const cv::Mat &
@@ -178,6 +208,16 @@ public:
   CV_BRIDGE_PUBLIC
   cv::Mat
   cv_mat();
+
+  /// Const access the cv::Mat in this class.
+  CV_BRIDGE_PUBLIC
+  const cv::cuda::GpuMat &
+  cv_gpu_mat() const;
+
+  /// Get a shallow copy of the cv::cuda::Mat that is in this class.
+  CV_BRIDGE_PUBLIC
+  cv::cuda::GpuMat
+  cv_gpu_mat();
 
   /// Const access the ROS Header.
   CV_BRIDGE_PUBLIC
@@ -213,7 +253,7 @@ public:
   CV_BRIDGE_PUBLIC
   bool
   is_bigendian() const;
-  
+
   /// Return the encoding override if provided.
   CV_BRIDGE_PUBLIC
   std::optional<std::string>
@@ -221,7 +261,7 @@ public:
 
 private:
   std_msgs::msg::Header header_;
-  cv::Mat frame_;
+  CvImageStorageType frame_;
   SensorMsgsImageStorageType storage_;
   bool is_bigendian_;
   std::optional<std::string> encoding_override_;
@@ -242,37 +282,7 @@ struct rclcpp::TypeAdapter<cv_bridge::ROSCvMatContainer, sensor_msgs::msg::Image
     const custom_type & source,
     ros_message_type & destination)
   {
-    destination.height = source.cv_mat().rows;
-    destination.width = source.cv_mat().cols;
-    const auto& encoding_override = source.encoding_override();
-    if (encoding_override.has_value() && !encoding_override.value().empty())
-    {
-      destination.encoding = encoding_override.value();
-    }
-    else
-    {
-      switch (source.cv_mat().type()) {
-      case CV_8UC1:
-        destination.encoding = "mono8";
-        break;
-      case CV_8UC3:
-        destination.encoding = "bgr8";
-        break;
-      case CV_16SC1:
-        destination.encoding = "mono16";
-        break;
-      case CV_8UC4:
-        destination.encoding = "rgba8";
-        break;
-      default:
-        throw std::runtime_error("unsupported encoding type");
-      }    
-    }
-    destination.step = static_cast<sensor_msgs::msg::Image::_step_type>(source.cv_mat().step);
-    size_t size = source.cv_mat().step * source.cv_mat().rows;
-    destination.data.resize(size);
-    memcpy(&destination.data[0], source.cv_mat().data, size);
-    destination.header = source.header();
+    source.get_sensor_msgs_msg_image_copy(destination);
   }
 
   static

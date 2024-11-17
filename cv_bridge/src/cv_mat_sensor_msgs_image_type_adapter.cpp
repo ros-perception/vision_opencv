@@ -179,12 +179,9 @@ ROSCvMatContainer::get_sensor_msgs_msg_image_copy(
 {
   sensor_msgs_image.height = frame_.rows;
   sensor_msgs_image.width = frame_.cols;
-  if (encoding_override_.has_value() && !encoding_override_.value().empty())
-  {
+  if (encoding_override_.has_value() && !encoding_override_.value().empty()) {
     sensor_msgs_image.encoding = encoding_override_.value();
-  }
-  else
-  {
+  } else {
     switch (frame_.type()) {
       case CV_8UC1:
         sensor_msgs_image.encoding = "mono8";

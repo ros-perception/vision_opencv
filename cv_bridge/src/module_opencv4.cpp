@@ -1,4 +1,5 @@
-/* Taken from opencv/modules/python/src2/cv2.cpp */
+// Copyright (c) 2014, OpenCV
+// Copyright (c) 2024, ROS Perception
 
 #include "module.hpp"
 
@@ -77,9 +78,6 @@ private:
     return 0; \
   }
 
-using namespace cv;
-
-
 [[gnu::unused]] static PyObject * failmsgp(const char * fmt, ...)
 {
   char str[1000];
@@ -93,25 +91,25 @@ using namespace cv;
   return 0;
 }
 
-class NumpyAllocator : public MatAllocator
+class NumpyAllocator : public cv::MatAllocator
 {
 public:
-  NumpyAllocator() {stdAllocator = Mat::getStdAllocator();}
+  NumpyAllocator() {stdAllocator = cv::Mat::getStdAllocator();}
   ~NumpyAllocator() {}
 
 // To compile openCV3 with OpenCV4 APIs.
 #ifndef OPENCV_VERSION_4
-#define AccessFlag int
+#define cv::AccessFlag int
 #endif
 
-  UMatData * allocate(PyObject * o, int dims, const int * sizes, int type, size_t * step) const
+  cv::UMatData * allocate(PyObject * o, int dims, const int * sizes, int type, size_t * step) const
   {
-    UMatData * u = new UMatData(this);
+    cv::UMatData * u = new cv::UMatData(this);
     u->data = u->origdata =
       reinterpret_cast<uchar *>(PyArray_DATA(reinterpret_cast<PyArrayObject *>(o)));
     npy_intp * _strides = PyArray_STRIDES(reinterpret_cast<PyArrayObject *>(o));
     for (int i = 0; i < dims - 1; i++) {
-      step[i] = (size_t)_strides[i];
+      step[i] = static_cast<size_t>(_strides[i]);
     }
     step[dims - 1] = CV_ELEM_SIZE(type);
     u->size = sizes[0] * step[0];
@@ -119,12 +117,12 @@ public:
     return u;
   }
 
-  UMatData * allocate(
-    int dims0, const int * sizes, int type, void * data, size_t * step, AccessFlag flags,
-    UMatUsageFlags usageFlags) const
+  cv::UMatData * allocate(
+    int dims0, const int * sizes, int type, void * data, size_t * step, cv::AccessFlag flags,
+    cv::UMatUsageFlags usageFlags) const
   {
     if (data != 0) {
-      CV_Error(Error::StsAssert, "The data should normally be NULL!");
+      CV_Error(cv::Error::StsAssert, "The data should normally be NULL!");
       // probably this is safe to do in such extreme case
       return stdAllocator->allocate(dims0, sizes, type, data, step, flags, usageFlags);
     }
@@ -147,18 +145,18 @@ public:
     }
     PyObject * o = PyArray_SimpleNew(dims, _sizes, typenum);
     if (!o) {
-      CV_Error_(Error::StsError,
+      CV_Error_(cv::Error::StsError,
         ("The numpy array of typenum=%d, ndims=%d can not be created", typenum, dims));
     }
     return allocate(o, dims0, sizes, type, step);
   }
 
-  bool allocate(UMatData * u, AccessFlag accessFlags, UMatUsageFlags usageFlags) const
+  bool allocate(cv::UMatData * u, cv::AccessFlag accessFlags, cv::UMatUsageFlags usageFlags) const
   {
     return stdAllocator->allocate(u, accessFlags, usageFlags);
   }
 
-  void deallocate(UMatData * u) const
+  void deallocate(cv::UMatData * u) const
   {
     if (u) {
       PyEnsureGIL gil;
@@ -168,7 +166,7 @@ public:
     }
   }
 
-  const MatAllocator * stdAllocator;
+  const cv::MatAllocator * stdAllocator;
 };
 
 NumpyAllocator g_numpyAllocator;
@@ -185,7 +183,7 @@ PyObject * pyopencv_from(const T & src);
 enum { ARG_NONE = 0, ARG_MAT = 1, ARG_SCALAR = 2 };
 
 // special case, when the convertor needs full ArgInfo structure
-static bool pyopencv_to(PyObject * o, Mat & m, const ArgInfo info)
+static bool pyopencv_to(PyObject * o, cv::Mat & m, const ArgInfo info)
 {
   // to avoid PyArray_Check() to crash even with valid array
   do_numpy_import();
@@ -201,17 +199,17 @@ static bool pyopencv_to(PyObject * o, Mat & m, const ArgInfo info)
 
   if (PyInt_Check(o) ) {
     double v[] = {static_cast<double>(PyInt_AsLong(reinterpret_cast<PyObject *>(o))), 0., 0., 0.};
-    m = Mat(4, 1, CV_64F, v).clone();
+    m = cv::Mat(4, 1, CV_64F, v).clone();
     return true;
   }
   if (PyFloat_Check(o) ) {
     double v[] = {PyFloat_AsDouble(reinterpret_cast<PyObject *>(o)), 0., 0., 0.};
-    m = Mat(4, 1, CV_64F, v).clone();
+    m = cv::Mat(4, 1, CV_64F, v).clone();
     return true;
   }
   if (PyTuple_Check(o) ) {
     int i, sz = static_cast<int>(PyTuple_Size(reinterpret_cast<PyObject *>(o)));
-    m = Mat(sz, 1, CV_64F);
+    m = cv::Mat(sz, 1, CV_64F);
     for (i = 0; i < sz; i++) {
       PyObject * oi = PyTuple_GET_ITEM(o, i);
       if (PyInt_Check(oi) ) {
@@ -278,7 +276,7 @@ static bool pyopencv_to(PyObject * o, Mat & m, const ArgInfo info)
     //  a) multi-dimensional (ndims > 2) arrays, as well as simpler 1- and 2-dimensional cases
     //  b) transposed arrays, where _strides[] elements go in non-descending order
     //  c) flipped arrays, where some of _strides[] elements are negative
-    if ( (i == ndims - 1 && (size_t)_strides[i] != elemsize) ||
+    if ( (i == ndims - 1 && static_cast<size_t>(_strides[i]) != elemsize) ||
       (i < ndims - 1 && _strides[i] < _strides[i + 1]) )
     {
       needcopy = true;
@@ -292,8 +290,8 @@ static bool pyopencv_to(PyObject * o, Mat & m, const ArgInfo info)
   if (needcopy) {
     if (info.outputarg) {
       failmsg(
-        "Layout of the output array %s is incompatible with \
-         cv::Mat (step[ndims-1] != elemsize or step[1] != elemsize*nchannels)",
+        "Layout of the output array %s is incompatible with "
+        "cv::Mat (step[ndims-1] != elemsize or step[1] != elemsize*nchannels)",
         info.name);
       return false;
     }
@@ -311,7 +309,7 @@ static bool pyopencv_to(PyObject * o, Mat & m, const ArgInfo info)
 
   for (int i = 0; i < ndims; i++) {
     size[i] = static_cast<int>(_sizes[i]);
-    step[i] = (size_t)_strides[i];
+    step[i] = static_cast<size_t>(_strides[i]);
   }
 
   // handle degenerate case
@@ -331,7 +329,7 @@ static bool pyopencv_to(PyObject * o, Mat & m, const ArgInfo info)
     return false;
   }
 
-  m = Mat(ndims, size, type, PyArray_DATA(oarr), step);
+  m = cv::Mat(ndims, size, type, PyArray_DATA(oarr), step);
   m.u = g_numpyAllocator.allocate(o, ndims, size, type, step);
   m.addref();
 
@@ -344,17 +342,17 @@ static bool pyopencv_to(PyObject * o, Mat & m, const ArgInfo info)
 }
 
 template<>
-bool pyopencv_to(PyObject * o, Mat & m, const char * name)
+bool pyopencv_to(PyObject * o, cv::Mat & m, const char * name)
 {
   return pyopencv_to(o, m, ArgInfo(name, 0));
 }
 
-PyObject * pyopencv_from(const Mat & m)
+PyObject * pyopencv_from(const cv::Mat & m)
 {
   if (!m.data) {
     Py_RETURN_NONE;
   }
-  Mat temp, * p = const_cast<Mat *>(&m);
+  cv::Mat temp, * p = const_cast<cv::Mat *>(&m);
   if (!p->u || p->allocator != &g_numpyAllocator) {
     temp.allocator = &g_numpyAllocator;
     ERRWRAP2(m.copyTo(temp));

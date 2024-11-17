@@ -1,6 +1,8 @@
+import unittest
+
 from cv_bridge import CvBridge, CvBridgeError
 import numpy as np
-import unittest
+
 
 class TestConversions(unittest.TestCase):
 
@@ -40,8 +42,9 @@ class TestConversions(unittest.TestCase):
     # http://docs.opencv.org/2.4/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat
     # imread(const string& filename, int flags)
     def test_encode_decode_cv2_compressed(self):
-        # FIXME: remove jp2(a.k.a JPEG2000) as its JASPER codec is disabled within Ubuntu opencv library
-        # due to security issues, but it works once you rebuild your opencv library with JASPER enabled
+        # FIXME: remove jp2(a.k.a JPEG2000) as its JASPER codec is disabled within Ubuntu opencv
+        # library due to security issues, but it works once you rebuild your opencv library with
+        # JASPER enabled
         formats = ['jpg', 'jpeg', 'jpe', 'png', 'bmp', 'dib',
                    'sr', 'ras', 'tif', 'tiff']  # this formats rviz is not support
 

@@ -46,6 +46,9 @@ install(TARGETS ${PROJECT_NAME} EXPORT export_${PROJECT_NAME}
 
 if(BUILD_TESTING)
   add_subdirectory(test)
+
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
 endif()
 
 ament_export_targets(export_${PROJECT_NAME})

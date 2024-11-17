@@ -1,3 +1,4 @@
+// Copyright (c) 2015, ROS Perception
 #include <gtest/gtest.h>
 #include <opencv2/opencv.hpp>
 

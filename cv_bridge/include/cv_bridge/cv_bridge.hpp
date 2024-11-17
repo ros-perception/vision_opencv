@@ -37,18 +37,19 @@
 #ifndef CV_BRIDGE__CV_BRIDGE_HPP_
 #define CV_BRIDGE__CV_BRIDGE_HPP_
 
-#include <sensor_msgs/msg/image.hpp>
-#include <sensor_msgs/msg/compressed_image.hpp>
-#include <sensor_msgs/image_encodings.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/imgproc/types_c.h>
 #include <cv_bridge/cv_bridge_export.h>
+#include <opencv2/imgproc/types_c.h>
 
 #include <memory>
 #include <ostream>
 #include <stdexcept>
 #include <string>
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <sensor_msgs/image_encodings.hpp>
+#include <sensor_msgs/msg/compressed_image.hpp>
+#include <sensor_msgs/msg/image.hpp>
 
 namespace cv_bridge
 {

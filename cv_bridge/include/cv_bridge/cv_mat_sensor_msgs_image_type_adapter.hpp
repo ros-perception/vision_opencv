@@ -17,6 +17,8 @@
 
 #include <cstddef>
 #include <memory>
+#include <optional>
+#include <string>
 #include <variant>
 
 #include "opencv2/core/mat.hpp"
@@ -26,7 +28,6 @@
 
 #include "cv_bridge/visibility_control.h"
 
-#include <optional>
 
 namespace cv_bridge
 {
@@ -213,7 +214,7 @@ public:
   CV_BRIDGE_PUBLIC
   bool
   is_bigendian() const;
-  
+
   /// Return the encoding override if provided.
   CV_BRIDGE_PUBLIC
   std::optional<std::string>
@@ -244,29 +245,26 @@ struct rclcpp::TypeAdapter<cv_bridge::ROSCvMatContainer, sensor_msgs::msg::Image
   {
     destination.height = source.cv_mat().rows;
     destination.width = source.cv_mat().cols;
-    const auto& encoding_override = source.encoding_override();
-    if (encoding_override.has_value() && !encoding_override.value().empty())
-    {
+    const auto & encoding_override = source.encoding_override();
+    if (encoding_override.has_value() && !encoding_override.value().empty()) {
       destination.encoding = encoding_override.value();
-    }
-    else
-    {
+    } else {
       switch (source.cv_mat().type()) {
-      case CV_8UC1:
-        destination.encoding = "mono8";
-        break;
-      case CV_8UC3:
-        destination.encoding = "bgr8";
-        break;
-      case CV_16SC1:
-        destination.encoding = "mono16";
-        break;
-      case CV_8UC4:
-        destination.encoding = "rgba8";
-        break;
-      default:
-        throw std::runtime_error("unsupported encoding type");
-      }    
+        case CV_8UC1:
+          destination.encoding = "mono8";
+          break;
+        case CV_8UC3:
+          destination.encoding = "bgr8";
+          break;
+        case CV_16SC1:
+          destination.encoding = "mono16";
+          break;
+        case CV_8UC4:
+          destination.encoding = "rgba8";
+          break;
+        default:
+          throw std::runtime_error("unsupported encoding type");
+      }
     }
     destination.step = static_cast<sensor_msgs::msg::Image::_step_type>(source.cv_mat().step);
     size_t size = source.cv_mat().step * source.cv_mat().rows;

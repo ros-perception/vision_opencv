@@ -1,3 +1,5 @@
+// Copyright (c) 2011, Willow Garage
+// Copyright (c) 2013-2024, ROS Perception
 #include <gtest/gtest.h>
 #include <sensor_msgs/image_encodings.hpp>
 

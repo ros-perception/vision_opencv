@@ -35,12 +35,6 @@
 *********************************************************************/
 
 #include <cv_bridge/cv_bridge.hpp>
-#include <cv_bridge/rgb_colors.hpp>
-#include <boost/endian/conversion.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <sensor_msgs/image_encodings.hpp>
-#include "rcpputils/endian.hpp"
 
 #include <map>
 #include <memory>
@@ -48,6 +42,14 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <boost/endian/conversion.hpp>
+#include <cv_bridge/rgb_colors.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <rcpputils/endian.hpp>
+#include <sensor_msgs/image_encodings.hpp>
+
 
 namespace enc = sensor_msgs::image_encodings;
 
@@ -120,8 +122,21 @@ int getCvType(const std::string & encoding)
 
 /// @cond DOXYGEN_IGNORE
 
-enum Encoding { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, YUV422, YUV422_YUY2, BAYER_RGGB, BAYER_BGGR,
-  BAYER_GBRG, BAYER_GRBG};
+enum Encoding
+{
+  INVALID = -1,
+  GRAY = 0,
+  RGB,
+  BGR,
+  RGBA,
+  BGRA,
+  YUV422,
+  YUV422_YUY2,
+  BAYER_RGGB,
+  BAYER_BGGR,
+  BAYER_GBRG,
+  BAYER_GRBG
+};
 
 Encoding getEncoding(const std::string & encoding)
 {
@@ -217,9 +232,11 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
   Encoding src_encod = getEncoding(src_encoding);
   Encoding dst_encod = getEncoding(dst_encoding);
   bool is_src_color_format = enc::isColor(src_encoding) || enc::isMono(src_encoding) ||
-    enc::isBayer(src_encoding) || (src_encoding == enc::YUV422) || (src_encoding == enc::YUV422_YUY2);
+    enc::isBayer(src_encoding) || (src_encoding == enc::YUV422) ||
+    (src_encoding == enc::YUV422_YUY2);
   bool is_dst_color_format = enc::isColor(dst_encoding) || enc::isMono(dst_encoding) ||
-    enc::isBayer(dst_encoding) || (dst_encoding == enc::YUV422) || (dst_encoding == enc::YUV422_YUY2);
+    enc::isBayer(dst_encoding) || (dst_encoding == enc::YUV422) ||
+    (dst_encoding == enc::YUV422_YUY2);
   bool is_num_channels_the_same =
     (enc::numChannels(src_encoding) == enc::numChannels(dst_encoding));
 
@@ -299,7 +316,7 @@ cv::Mat matFromImage(const sensor_msgs::msg::Image & source)
   cv::Mat mat(source.height, source.width, source_type, const_cast<uchar *>(&source.data[0]),
     source.step);
 
-   if ((rcpputils::endian::native == rcpputils::endian::big && source.is_bigendian) ||
+  if ((rcpputils::endian::native == rcpputils::endian::big && source.is_bigendian) ||
     (rcpputils::endian::native == rcpputils::endian::little && !source.is_bigendian) ||
     byte_depth == 1)
   {
@@ -515,7 +532,8 @@ void CvImage::toCompressedImageMsg(
 {
   ros_image.header = header;
   cv::Mat image;
-  if (encoding == enc::BGR8 || encoding == enc::BGRA8  || encoding == enc::MONO8 || encoding == enc::MONO16)
+  if (encoding == enc::BGR8 || encoding == enc::BGRA8 || encoding == enc::MONO8 ||
+    encoding == enc::MONO16)
   {
     image = this->image;
   } else {
@@ -550,8 +568,7 @@ CvImagePtr toCvCopy(const sensor_msgs::msg::CompressedImage & source, const std:
   const cv::Mat rgb_a = cv::imdecode(in, cv::IMREAD_UNCHANGED);
 
   if (encoding != enc::MONO16) {
-    switch (rgb_a.channels())
-    {
+    switch (rgb_a.channels()) {
       case 4:
         return toCvCopyImpl(rgb_a, source.header, enc::BGRA8, encoding);
         break;
@@ -564,8 +581,7 @@ CvImagePtr toCvCopy(const sensor_msgs::msg::CompressedImage & source, const std:
       default:
         return CvImagePtr();
     }
-  }
-  else {
+  } else {
     return toCvCopyImpl(rgb_a, source.header, enc::MONO16, encoding);
   }
 }
@@ -599,7 +615,7 @@ CvImageConstPtr cvtColorForDisplay(
       } else {
         // We choose BGR by default here as we assume people will use OpenCV
         if ((enc::bitDepth(source->encoding) == 8) ||
-          (enc::bitDepth(source->encoding) == 16) || 
+          (enc::bitDepth(source->encoding) == 16) ||
           (enc::bitDepth(source->encoding) == 32))
         {
           encoding = enc::BGR8;
@@ -619,8 +635,8 @@ CvImageConstPtr cvtColorForDisplay(
       (enc::bitDepth(encoding) != 8))
     {
       throw Exception(
-              "cv_bridge.cvtColorForDisplay() does not have an output encoding \
-               that is color or mono, and has is bit in depth");
+              "cv_bridge.cvtColorForDisplay() does not have an output encoding "
+              "that is color or mono, and has is bit in depth");
     }
   }
 
@@ -651,7 +667,7 @@ CvImageConstPtr cvtColorForDisplay(
   // Perform scaling if asked for
   if (options.do_dynamic_scaling) {
     float inf = std::numeric_limits<float>::infinity();
-    cv::Mat mask = ((source->image!=inf) & (source->image!=-inf));
+    cv::Mat mask = ((source->image != inf) & (source->image != -inf));
     cv::minMaxLoc(source->image, &min_image_value, &max_image_value, NULL, NULL, mask);
     if (min_image_value == max_image_value) {
       CvImagePtr result(new CvImage());
@@ -671,8 +687,8 @@ CvImageConstPtr cvtColorForDisplay(
   if (min_image_value != max_image_value) {
     if (enc::numChannels(source->encoding) != 1) {
       throw Exception(
-              "cv_bridge.cvtColorForDisplay() scaling for images \
-               with more than one channel is unsupported");
+              "cv_bridge.cvtColorForDisplay() scaling for images "
+              "with more than one channel is unsupported");
     }
     CvImagePtr img_scaled(new CvImage());
     img_scaled->header = source->header;

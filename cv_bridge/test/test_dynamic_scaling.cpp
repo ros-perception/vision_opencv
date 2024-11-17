@@ -1,8 +1,9 @@
+// Copyright (c) 2022, ROS Perception
+#include <gtest/gtest.h>
+#include <cmath>
 #include <cv_bridge/cv_bridge.hpp>
 #include <sensor_msgs/msg/image.hpp>
 #include <sensor_msgs/image_encodings.hpp>
-#include <gtest/gtest.h>
-#include <cmath>
 
 TEST(TestDynamicScaling, ignoreInfAndNanValues)
 {
@@ -30,9 +31,9 @@ TEST(TestDynamicScaling, ignoreInfAndNanValues)
   auto converted = cv_bridge::cvtColorForDisplay(img, "", options);
 
   // Check that the scaling works for non-inf and non-nan values.
-  std::vector<uint8_t> expected = {0, 0, 0, 128, 128, 128, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  for (unsigned i = 0; i < expected.size(); ++i)
-  {
+  std::vector<uint8_t> expected = {0, 0, 0, 128, 128, 128, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0,
+    0};
+  for (unsigned i = 0; i < expected.size(); ++i) {
     EXPECT_EQ(converted->image.at<uint8_t>(i), expected.at(i));
   }
 }

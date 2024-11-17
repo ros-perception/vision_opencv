@@ -83,7 +83,7 @@ class CvBridge(object):
         self.numpy_type_to_cvtype = {'uint8': '8U', 'int8': '8S', 'uint16': '16U',
                                      'int16': '16S', 'int32': '32S', 'float32': '32F',
                                      'float64': '64F'}
-        self.numpy_type_to_cvtype.update(dict((v, k) for (k, v) in self.numpy_type_to_cvtype.items()))
+        self.numpy_type_to_cvtype.update({v: k for k, v in self.numpy_type_to_cvtype.items()})
 
     def dtype_with_channels_to_cvtype2(self, dtype, n_channels):
         return '%sC%d' % (self.numpy_type_to_cvtype[dtype.name], n_channels)
@@ -170,14 +170,16 @@ class CvBridge(object):
         dtype = np.dtype(dtype)
         dtype = dtype.newbyteorder('>' if img_msg.is_bigendian else '<')
 
-        img_buf = np.asarray(img_msg.data, dtype=dtype) if isinstance(img_msg.data, list) else img_msg.data
+        img_buf = np.asarray(img_msg.data, dtype=dtype) if isinstance(
+            img_msg.data, list) else img_msg.data
 
         if n_channels == 1:
             im = np.ndarray(shape=(img_msg.height, int(img_msg.step/dtype.itemsize)),
                             dtype=dtype, buffer=img_buf)
             im = np.ascontiguousarray(im[:img_msg.height, :img_msg.width])
         else:
-            im = np.ndarray(shape=(img_msg.height, int(img_msg.step/dtype.itemsize/n_channels), n_channels),
+            im = np.ndarray(shape=(img_msg.height, int(img_msg.step/dtype.itemsize/n_channels),
+                                   n_channels),
                             dtype=dtype, buffer=img_buf)
             im = np.ascontiguousarray(im[:img_msg.height, :img_msg.width, :])
 
@@ -236,7 +238,7 @@ class CvBridge(object):
 
         return cmprs_img_msg
 
-    def cv2_to_imgmsg(self, cvim, encoding='passthrough', header = None):
+    def cv2_to_imgmsg(self, cvim, encoding='passthrough', header=None):
         """
         Convert an OpenCV :cpp:type:`cv::Mat` type to a ROS sensor_msgs::Image message.
 

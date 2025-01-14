@@ -99,6 +99,7 @@ int getCvType(const std::string & encoding)
   // Miscellaneous
   if (encoding == enc::YUV422) {return CV_8UC2;}
   if (encoding == enc::YUV422_YUY2) {return CV_8UC2;}
+  if (encoding == enc::NV12) {return CV_8UC1;}
 
   // Check all the generic content encodings
   std::cmatch m;
@@ -120,7 +121,7 @@ int getCvType(const std::string & encoding)
 
 /// @cond DOXYGEN_IGNORE
 
-enum Encoding { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, YUV422, YUV422_YUY2, BAYER_RGGB, BAYER_BGGR,
+enum Encoding { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, YUV422, YUV422_YUY2, NV12, BAYER_RGGB, BAYER_BGGR,
   BAYER_GBRG, BAYER_GRBG, MAX_ENCODING};
 
 Encoding getEncoding(const std::string & encoding)
@@ -132,6 +133,7 @@ Encoding getEncoding(const std::string & encoding)
   if ((encoding == enc::RGBA8) || (encoding == enc::RGBA16)) {return RGBA;}
   if (encoding == enc::YUV422) {return YUV422;}
   if (encoding == enc::YUV422_YUY2) {return YUV422_YUY2;}
+  if (encoding == enc::NV12) {return NV12;}
 
   if ((encoding == enc::BAYER_RGGB8) || (encoding == enc::BAYER_RGGB16)) {return BAYER_RGGB;}
   if ((encoding == enc::BAYER_BGGR8) || (encoding == enc::BAYER_BGGR16)) {return BAYER_BGGR;}
@@ -192,6 +194,12 @@ std::map<std::pair<Encoding, Encoding>, std::vector<int>> getConversionCodes()
   res[std::make_pair(YUV422_YUY2, RGBA)].push_back(cv::COLOR_YUV2RGBA_YUY2);
   res[std::make_pair(YUV422_YUY2, BGRA)].push_back(cv::COLOR_YUV2BGRA_YUY2);
 
+  res[std::make_pair(NV12, GRAY)].push_back(cv::COLOR_YUV2GRAY_NV12);
+  res[std::make_pair(NV12, RGB)].push_back(cv::COLOR_YUV2RGB_NV12);
+  res[std::make_pair(NV12, BGR)].push_back(cv::COLOR_YUV2BGR_NV12);
+  res[std::make_pair(NV12, RGBA)].push_back(cv::COLOR_YUV2RGBA_NV12);
+  res[std::make_pair(NV12, BGRA)].push_back(cv::COLOR_YUV2BGRA_NV12);
+
   // Deal with Bayer
   res[std::make_pair(BAYER_RGGB, GRAY)].push_back(cv::COLOR_BayerBG2GRAY);
   res[std::make_pair(BAYER_RGGB, RGB)].push_back(cv::COLOR_BayerBG2RGB);
@@ -217,9 +225,9 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
   Encoding src_encod = getEncoding(src_encoding);
   Encoding dst_encod = getEncoding(dst_encoding);
   bool is_src_color_format = enc::isColor(src_encoding) || enc::isMono(src_encoding) ||
-    enc::isBayer(src_encoding) || (src_encoding == enc::YUV422) || (src_encoding == enc::YUV422_YUY2);
+    enc::isBayer(src_encoding) || (src_encoding == enc::YUV422) || (src_encoding == enc::YUV422_YUY2) || (src_encoding == enc::NV12);
   bool is_dst_color_format = enc::isColor(dst_encoding) || enc::isMono(dst_encoding) ||
-    enc::isBayer(dst_encoding) || (dst_encoding == enc::YUV422) || (dst_encoding == enc::YUV422_YUY2);
+    enc::isBayer(dst_encoding) || (dst_encoding == enc::YUV422) || (dst_encoding == enc::YUV422_YUY2) || (dst_encoding == enc::NV12);
   bool is_num_channels_the_same =
     (enc::numChannels(src_encoding) == enc::numChannels(dst_encoding));
 
@@ -288,7 +296,7 @@ cv::Mat matFromImage(const sensor_msgs::msg::Image & source)
     throw Exception(ss.str());
   }
 
-  if (source.height * source.step != source.data.size()) {
+  if (source.height * source.step * enc::getHeightScaling(source.encoding) != source.data.size()) {
     std::stringstream ss;
     ss << "Image is wrongly formed: height * step != size  or  " << source.height << " * " <<
       source.step << " != " << source.data.size();
@@ -296,7 +304,7 @@ cv::Mat matFromImage(const sensor_msgs::msg::Image & source)
   }
 
   // If the endianness is the same as locally, share the data
-  cv::Mat mat(source.height, source.width, source_type, const_cast<uchar *>(&source.data[0]),
+  cv::Mat mat(source.height*enc::getHeightScaling(source.encoding), source.width, source_type, const_cast<uchar *>(&source.data[0]),
     source.step);
 
    if ((rcpputils::endian::native == rcpputils::endian::big && source.is_bigendian) ||

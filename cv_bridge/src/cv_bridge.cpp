@@ -298,13 +298,13 @@ cv::Mat matFromImage(const sensor_msgs::msg::Image & source)
 
   if (source.height * source.step * enc::getHeightScaling(source.encoding) != source.data.size()) {
     std::stringstream ss;
-    ss << "Image is wrongly formed: height * step != size  or  " << source.height << " * " <<
-      source.step << " != " << source.data.size();
+    ss << "Image is wrongly formed: height * step * HeightScaling != size  or  " << source.height << " * " <<
+      source.step << "*" << enc::getHeightScaling(source.encoding) << " != " << source.data.size();
     throw Exception(ss.str());
   }
 
   // If the endianness is the same as locally, share the data
-  cv::Mat mat(source.height*enc::getHeightScaling(source.encoding), source.width, source_type, const_cast<uchar *>(&source.data[0]),
+  cv::Mat mat(source.height * enc::getHeightScaling(source.encoding), source.width, source_type, const_cast<uchar *>(&source.data[0]),
     source.step);
 
    if ((rcpputils::endian::native == rcpputils::endian::big && source.is_bigendian) ||

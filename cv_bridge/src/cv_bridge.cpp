@@ -126,6 +126,7 @@ enum Encoding { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, YUV422, YUV422_YUY
 Encoding getEncoding(const std::string & encoding)
 {
   if ((encoding == enc::MONO8) || (encoding == enc::MONO16)) {return GRAY;}
+  if ((encoding == enc::TYPE_8UC1) || (encoding == enc::TYPE_16UC1)) {return GRAY;}
   if ((encoding == enc::BGR8) || (encoding == enc::BGR16)) {return BGR;}
   if ((encoding == enc::RGB8) || (encoding == enc::RGB16)) {return RGB;}
   if ((encoding == enc::BGRA8) || (encoding == enc::BGRA16)) {return BGRA;}

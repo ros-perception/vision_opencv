@@ -54,6 +54,23 @@ namespace enc = sensor_msgs::image_encodings;
 namespace cv_bridge
 {
 
+static inline bool isPlanar(const std::string & encoding)
+{
+  return encoding == enc::NV12 || encoding == enc::NV21 || encoding == enc::NV24;
+}
+
+static inline float getHeightScaling(const std::string & encoding)
+{
+  if (isPlanar(encoding)) {
+    if (encoding == enc::NV12 ||
+      encoding == enc::NV21)
+    {
+      return 1.5f;
+    }
+  }
+  return 1.0f;
+}
+
 static int depthStrToInt(const std::string depth)
 {
   if (depth == "8U") {
@@ -296,15 +313,15 @@ cv::Mat matFromImage(const sensor_msgs::msg::Image & source)
     throw Exception(ss.str());
   }
 
-  if (source.height * source.step * enc::getHeightScaling(source.encoding) != source.data.size()) {
+  if (source.height * source.step * getHeightScaling(source.encoding) != source.data.size()) {
     std::stringstream ss;
     ss << "Image is wrongly formed: height * step * HeightScaling != size  or  " << source.height << " * " <<
-      source.step << "*" << enc::getHeightScaling(source.encoding) << " != " << source.data.size();
+      source.step << " * " << getHeightScaling(source.encoding) << " != " << source.data.size();
     throw Exception(ss.str());
   }
 
   // If the endianness is the same as locally, share the data
-  cv::Mat mat(source.height * enc::getHeightScaling(source.encoding), source.width, source_type, const_cast<uchar *>(&source.data[0]),
+  cv::Mat mat(source.height * getHeightScaling(source.encoding), source.width, source_type, const_cast<uchar *>(&source.data[0]),
     source.step);
 
    if ((rcpputils::endian::native == rcpputils::endian::big && source.is_bigendian) ||
@@ -397,7 +414,7 @@ sensor_msgs::msg::Image::SharedPtr CvImage::toImageMsg() const
 void CvImage::toImageMsg(sensor_msgs::msg::Image & ros_image) const
 {
   ros_image.header = header;
-  ros_image.height = image.rows;
+  ros_image.height = image.rows / getHeightScaling(encoding);
   ros_image.width = image.cols;
   ros_image.encoding = encoding;
   ros_image.is_bigendian = (rcpputils::endian::native == rcpputils::endian::big);

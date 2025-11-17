@@ -18,7 +18,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   rclcpp::rclcpp
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE
-  Boost::headers
   rcpputils::rcpputils)
 
 install(TARGETS ${PROJECT_NAME} EXPORT export_${PROJECT_NAME}
@@ -32,20 +31,28 @@ install(FILES
   DESTINATION include/${PROJECT_NAME}/${PROJECT_NAME})
 
 if(NOT CV_BRIDGE_DISABLE_PYTHON)
-  Python3_add_library(${PROJECT_NAME}_boost MODULE module.cpp module_opencv4.cpp)
-  target_link_libraries(${PROJECT_NAME}_boost PRIVATE
+  find_package(Python 3 COMPONENTS Interpreter Development REQUIRED)
+  include(FetchContent)
+  FetchContent_Declare(
+    nanobind
+    GIT_REPOSITORY https://github.com/wjakob/nanobind.git
+    GIT_TAG v2.9.2
+  )
+
+  FetchContent_MakeAvailable(nanobind)
+  nanobind_add_module(${PROJECT_NAME}_nanobind MODULE module.cpp)
+  target_link_libraries(${PROJECT_NAME}_nanobind PRIVATE
     ${PROJECT_NAME}
-    ${boost_python_target}
-    Python3::NumPy)
-  target_compile_definitions(${PROJECT_NAME}_boost PRIVATE PYTHON3)
+  )
+  target_compile_definitions(${PROJECT_NAME}_nanobind PRIVATE PYTHON3)
 
   if(OpenCV_VERSION_MAJOR VERSION_EQUAL 4)
-    target_compile_definitions(${PROJECT_NAME}_boost PRIVATE OPENCV_VERSION_4)
+    target_compile_definitions(${PROJECT_NAME}_nanobind PRIVATE OPENCV_VERSION_4)
   endif()
 
-  set_target_properties(${PROJECT_NAME}_boost PROPERTIES
-                        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost/
+  set_target_properties(${PROJECT_NAME}_nanobind PROPERTIES
+                        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/nanobind/
                         PREFIX ""
   )
-  install(TARGETS ${PROJECT_NAME}_boost DESTINATION ${PYTHON_INSTALL_DIR}/${PROJECT_NAME}/boost/)
+  install(TARGETS ${PROJECT_NAME}_nanobind DESTINATION ${PYTHON_INSTALL_DIR}/${PROJECT_NAME}/nanobind/)
 endif()

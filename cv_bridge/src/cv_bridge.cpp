@@ -36,7 +36,6 @@
 
 #include <cv_bridge/cv_bridge.hpp>
 #include <cv_bridge/rgb_colors.hpp>
-#include <boost/endian/conversion.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <sensor_msgs/image_encodings.hpp>

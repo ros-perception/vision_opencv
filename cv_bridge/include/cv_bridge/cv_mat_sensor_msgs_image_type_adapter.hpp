@@ -57,7 +57,7 @@ namespace cv_bridge
  * For these reasons, it is advisable to use cv::Mat::clone() if you intend to
  * copy the cv::Mat and let this container go.
  *
- * For more rcpputilss about the ownership behavior of cv::Mat see documentation
+ * For more details about the ownership behavior of cv::Mat see documentation
  * for these methods of cv::Mat:
  *
  *   - template<typename _Tp > cv::Mat::Mat(const std::vector<_Tp> &, bool)

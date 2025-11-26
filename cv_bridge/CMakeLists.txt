@@ -34,8 +34,16 @@ else()
     find_package(Boost REQUIRED COMPONENTS python3)
     set(boost_python_target "Boost::python3")
   else()
-    find_package(Boost REQUIRED COMPONENTS python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR})
-    set(boost_python_target "Boost::python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
+    # Try versioned Python component first
+    find_package(Boost QUIET COMPONENTS python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR})
+
+    if(NOT Boost_python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}_FOUND)
+      # Fallback to generic python component
+      find_package(Boost REQUIRED COMPONENTS python)
+      set(boost_python_target "Boost::python")
+    else()
+      set(boost_python_target "Boost::python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
+    endif()
   endif()
 endif()
 

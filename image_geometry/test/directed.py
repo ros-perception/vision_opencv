@@ -225,7 +225,6 @@ class TestDirected(unittest.TestCase):
         expected = "left_camera"
         actual = self.cam.get_left_camera().get_tf_frame()
         self.assertEqual(expected,actual)
-            self.assertEqual(expected,actual)
         actual = self.cam.get_tf_frame()
         self.assertEqual(expected,actual)
 

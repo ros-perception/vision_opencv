@@ -21,7 +21,6 @@
 
   <depend>libopencv-dev</depend>
   <depend>sensor_msgs</depend>
-  <depend>python3-deprecated</depend>
 
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_cmake_pytest</test_depend>

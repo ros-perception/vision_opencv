@@ -17,6 +17,7 @@ option(CV_BRIDGE_DISABLE_PYTHON "Disable building Python bindings" OFF)
 if(ANDROID)
   set(CV_BRIDGE_DISABLE_PYTHON ON)
 endif()
+# TODO (rmc)
 
 if(CV_BRIDGE_DISABLE_PYTHON)
   find_package(Boost REQUIRED)

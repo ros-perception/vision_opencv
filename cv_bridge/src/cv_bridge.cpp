@@ -144,7 +144,7 @@ Encoding getEncoding(const std::string & encoding)
 
 static const int SAME_ENCODING = -1;
 
-/** Return a lit of OpenCV conversion codes to get from one encoding to the other
+/** Return a list of OpenCV conversion codes to get from one encoding to the other
  * The key is a pair: <FromEncoding, ToEncoding> and the value a succession of OpenCV code conversion
  * It's not efficient code but it is only called once and the structure is small enough
  */

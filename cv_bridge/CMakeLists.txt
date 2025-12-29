@@ -18,27 +18,6 @@ if(ANDROID)
   set(CV_BRIDGE_DISABLE_PYTHON ON)
 endif()
 
-if(CV_BRIDGE_DISABLE_PYTHON)
-  find_package(Boost REQUIRED)
-  set(boost_python_target "")
-else()
-  find_package(Python3 REQUIRED COMPONENTS Development NumPy)
-  find_package(Boost QUIET)
-  if(Boost_VERSION_STRING VERSION_LESS "1.67")
-    # This is a bit of a hack to suppress a warning
-    #   No header defined for python3; skipping header check
-    # Which should only affect Boost versions < 1.67
-    # Resolution for newer versions:
-    #  https://gitlab.kitware.com/cmake/cmake/issues/16391
-    set(_Boost_PYTHON3_HEADERS "boost/python.hpp")
-    find_package(Boost REQUIRED COMPONENTS python3)
-    set(boost_python_target "Boost::python3")
-  else()
-    find_package(Boost REQUIRED COMPONENTS python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR})
-    set(boost_python_target "Boost::python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
-  endif()
-endif()
-
 find_package(rclcpp REQUIRED)
 find_package(rcpputils REQUIRED)
 find_package(sensor_msgs REQUIRED)

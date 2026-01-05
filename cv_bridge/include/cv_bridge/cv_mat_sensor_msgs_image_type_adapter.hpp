@@ -22,6 +22,7 @@
 #include "opencv2/core/mat.hpp"
 
 #include "rclcpp/type_adapter.hpp"
+#include "rcpputils/endian.hpp"
 #include "sensor_msgs/msg/image.hpp"
 
 #include "cv_bridge/visibility_control.h"
@@ -30,24 +31,6 @@
 
 namespace cv_bridge
 {
-namespace detail
-{
-// TODO(audrow): Replace with std::endian when C++ 20 is available
-// https://en.cppreference.com/w/cpp/types/endian
-enum class endian
-{
-#ifdef _WIN32
-  little = 0,
-  big    = 1,
-  native = little
-#else
-  little = __ORDER_LITTLE_ENDIAN__,
-  big    = __ORDER_BIG_ENDIAN__,
-  native = __BYTE_ORDER__
-#endif
-};
-
-}  // namespace detail
 
 
 /// A potentially owning, potentially non-owning, container of a cv::Mat and ROS header.
@@ -85,7 +68,7 @@ enum class endian
  */
 class ROSCvMatContainer
 {
-  static constexpr bool is_bigendian_system = detail::endian::native == detail::endian::big;
+  static constexpr bool is_bigendian_system = rcpputils::endian::native == rcpputils::endian::big;
 
 public:
   using SensorMsgsImageStorageType = std::variant<

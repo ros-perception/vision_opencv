@@ -66,7 +66,13 @@ if(NOT CV_BRIDGE_DISABLE_PYTHON)
   )
 endif()
 
+# add library
+add_library(${PROJECT_NAME})
 add_subdirectory(src)
+target_include_directories(${PROJECT_NAME}
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
 
 # cv_bridge_lib_dir is passed as APPEND_LIBRARY_DIRS for each ament_add_gtest call so
 # the project library that they link against is on the library path.
@@ -87,7 +93,7 @@ ament_export_dependencies(
 ament_export_targets(export_${PROJECT_NAME})
 
 # install the include folder
-install(DIRECTORY include/ DESTINATION include/${PROJECT_NAME})
+install(DIRECTORY include/ DESTINATION include)
 
 install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION bin

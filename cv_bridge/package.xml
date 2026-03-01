@@ -21,16 +21,19 @@
 
   <build_depend>libboost-dev</build_depend>
   <build_depend>libboost-python-dev</build_depend>
+  <build_depend>libopencv-dev</build_depend>
 
-  <depend>libopencv-dev</depend>
   <depend>python3-numpy</depend>
   <depend>rclcpp</depend>
   <depend>rcpputils</depend>
   <depend>sensor_msgs</depend>
-  <depend>python3-opencv</depend>
 
   <exec_depend>ament_index_python</exec_depend>
   <exec_depend>libboost-python</exec_depend>
+  <exec_depend>libopencv-core</exec_depend>
+  <exec_depend>libopencv-imgcodecs</exec_depend>
+  <exec_depend>libopencv-imgproc</exec_depend>
+  <exec_depend>python3-opencv</exec_depend>
 
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_cmake_pytest</test_depend>

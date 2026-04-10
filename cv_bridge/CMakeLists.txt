@@ -48,8 +48,23 @@ find_package(OpenCV 4 QUIET
     opencv_core
     opencv_imgproc
     opencv_imgcodecs
+    opencv_cudaimgproc
   CONFIG
 )
+
+if(OpenCV_FOUND)
+add_compile_definitions("HAVE_OPENCV_CUDAIMGPROC")
+set(WITH_OPENCV_CUDAIMGPROC TRUE)
+else()
+  find_package(OpenCV 4 QUIET
+    COMPONENTS
+      opencv_core
+      opencv_imgproc
+      opencv_imgcodecs
+    CONFIG
+  )
+endif()
+
 if(NOT OpenCV_FOUND)
   find_package(OpenCV 3 REQUIRED
     COMPONENTS

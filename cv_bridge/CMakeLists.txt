@@ -2,11 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 project(cv_bridge)
 
 find_package(ament_cmake_ros REQUIRED)
-
-# Default to C++17
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 17)
-endif()
+find_package(ament_cmake_ros_core REQUIRED)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra)
@@ -40,7 +36,6 @@ else()
 endif()
 
 find_package(rclcpp REQUIRED)
-find_package(rcpputils REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
 find_package(OpenCV 4 QUIET

@@ -16,10 +16,10 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   opencv_imgproc
   opencv_imgcodecs
   rclcpp::rclcpp
+  ament_cmake_ros_core::ament_ros_defaults
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE
-  Boost::headers
-  rcpputils::rcpputils)
+  Boost::headers)
 
 install(TARGETS ${PROJECT_NAME} EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
@@ -36,7 +36,8 @@ if(NOT CV_BRIDGE_DISABLE_PYTHON)
   target_link_libraries(${PROJECT_NAME}_boost PRIVATE
     ${PROJECT_NAME}
     ${boost_python_target}
-    Python3::NumPy)
+    Python3::NumPy
+    ament_cmake_ros_core::ament_ros_defaults)
   target_compile_definitions(${PROJECT_NAME}_boost PRIVATE PYTHON3)
 
   if(OpenCV_VERSION_MAJOR VERSION_EQUAL 4)

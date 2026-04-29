@@ -514,10 +514,10 @@ void CvImage::toCompressedImageMsg(
   const Format dst_format) const
 {
   ros_image.header = header;
-  cv::Mat image;
+  cv::Mat image_to_encode;
   if (encoding == enc::BGR8 || encoding == enc::BGRA8  || encoding == enc::MONO8 || encoding == enc::MONO16)
   {
-    image = this->image;
+    image_to_encode = this->image;
   } else {
     CvImagePtr tempThis = std::make_shared<CvImage>(*this);
     CvImagePtr temp;
@@ -526,12 +526,12 @@ void CvImage::toCompressedImageMsg(
     } else {
       temp = cvtColor(tempThis, enc::BGR8);
     }
-    image = temp->image;
+    image_to_encode = temp->image;
   }
 
   std::string format = getFormat(dst_format);
   ros_image.format = format;
-  cv::imencode("." + format, image, ros_image.data);
+  cv::imencode("." + format, image_to_encode, ros_image.data);
 }
 
 // Deep copy data, returnee is mutable

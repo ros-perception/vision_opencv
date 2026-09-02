@@ -163,7 +163,10 @@ protected:
  * image data.
  *
  * \param source   A shared_ptr to a sensor_msgs::msg::Image message
- * \param encoding The desired encoding of the image data, one of the following strings:
+ * \param encoding The desired encoding of the image data.
+ *
+ * The cv_bridge conversion routines accept any encoding string supported by
+ * sensor_msgs::image_encodings and OpenCV. Common examples include:
  *    - \c "mono8"
  *    - \c "bgr8"
  *    - \c "bgra8"
@@ -187,7 +190,10 @@ CV_BRIDGE_EXPORT CvImagePtr toCvCopy(
  * image data.
  *
  * \param source   A sensor_msgs::msg::Image message
- * \param encoding The desired encoding of the image data, one of the following strings:
+ * \param encoding The desired encoding of the image data.
+ *
+ * The cv_bridge conversion routines accept any encoding string supported by
+ * sensor_msgs::image_encodings and OpenCV. Common examples include:
  *    - \c "mono8"
  *    - \c "bgr8"
  *    - \c "bgra8"
@@ -218,7 +224,10 @@ CV_BRIDGE_EXPORT CvImagePtr toCvCopy(
  * could modify the \a source data.
  *
  * \param source   A shared_ptr to a sensor_msgs::msg::Image message
- * \param encoding The desired encoding of the image data, one of the following strings:
+ * \param encoding The desired encoding of the image data.
+ *
+ * The cv_bridge conversion routines accept any encoding string supported by
+ * sensor_msgs::image_encodings and OpenCV. Common examples include:
  *    - \c "mono8"
  *    - \c "bgr8"
  *    - \c "bgra8"
@@ -246,7 +255,10 @@ CV_BRIDGE_EXPORT CvImageConstPtr toCvShare(
  *
  * \param source         The sensor_msgs::msg::Image message
  * \param tracked_object A shared_ptr to an object owning the sensor_msgs::msg::Image
- * \param encoding       The desired encoding of the image data, one of the following strings:
+ * \param encoding       The desired encoding of the image data.
+ *
+ * The cv_bridge conversion routines accept any encoding string supported by
+ * sensor_msgs::image_encodings and OpenCV. Common examples include:
  *    - \c "mono8"
  *    - \c "bgr8"
  *    - \c "bgra8"

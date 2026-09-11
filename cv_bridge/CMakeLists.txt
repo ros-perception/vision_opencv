@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.14)
 project(cv_bridge)
 
+# CMake 3.30 removed the legacy FindBoost module. Use Boost's config package
+# when the policy is available while retaining compatibility with older ROS 2
+# distributions that use older CMake versions.
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
+
 find_package(ament_cmake_ros REQUIRED)
 
 # Default to C++17

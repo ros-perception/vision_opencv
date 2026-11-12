@@ -15,7 +15,13 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra)
 endif()
 
-find_package(OpenCV REQUIRED COMPONENTS calib3d core highgui imgproc)
+find_package(OpenCV REQUIRED COMPONENTS core)
+if(OpenCV_VERSION_MAJOR VERSION_GREATER_EQUAL 5)
+  set(OPENCV_CALIB3D_COMPONENT calib)
+else()
+  set(OPENCV_CALIB3D_COMPONENT calib3d)
+endif()
+find_package(OpenCV REQUIRED COMPONENTS ${OPENCV_CALIB3D_COMPONENT} core highgui imgproc)
 find_package(sensor_msgs REQUIRED)
 
 add_library(${PROJECT_NAME}
@@ -26,7 +32,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
 target_link_libraries(${PROJECT_NAME} PUBLIC
-  opencv_calib3d
+  opencv_${OPENCV_CALIB3D_COMPONENT}
   opencv_core
   opencv_highgui
   opencv_imgproc

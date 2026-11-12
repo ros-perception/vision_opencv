@@ -43,22 +43,13 @@ find_package(rclcpp REQUIRED)
 find_package(rcpputils REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
-find_package(OpenCV 4 QUIET
+find_package(OpenCV REQUIRED
   COMPONENTS
     opencv_core
     opencv_imgproc
     opencv_imgcodecs
   CONFIG
 )
-if(NOT OpenCV_FOUND)
-  find_package(OpenCV 3 REQUIRED
-    COMPONENTS
-      opencv_core
-      opencv_imgproc
-      opencv_imgcodecs
-    CONFIG
-  )
-endif()
 
 if(NOT CV_BRIDGE_DISABLE_PYTHON)
   ament_python_install_package(${PROJECT_NAME}

@@ -2,8 +2,6 @@
 
 #include "module.hpp"
 
-#include "opencv2/core/types_c.h"
-
 #include "opencv2/opencv_modules.hpp"
 
 #include "pycompat.hpp"

@@ -42,7 +42,6 @@
 #include <sensor_msgs/image_encodings.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/imgproc/types_c.h>
 #include <cv_bridge/cv_bridge_export.h>
 
 #include <memory>

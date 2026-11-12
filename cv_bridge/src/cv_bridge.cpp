@@ -39,6 +39,9 @@
 #include <boost/endian/conversion.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#ifdef HAVE_OPENCV_CUDAIMGPROC
+#include <opencv2/cudaimgproc.hpp>
+#endif
 #include <sensor_msgs/image_encodings.hpp>
 #include "rcpputils/endian.hpp"
 
@@ -193,6 +196,23 @@ std::map<std::pair<Encoding, Encoding>, std::vector<int>> getConversionCodes()
   res[std::make_pair(YUV422_YUY2, BGRA)].push_back(cv::COLOR_YUV2BGRA_YUY2);
 
   // Deal with Bayer
+  #ifdef HAVE_OPENCV_CUDAIMGPROC
+  res[std::make_pair(BAYER_RGGB, GRAY)].push_back(cv::cuda::COLOR_BayerBG2GRAY_MHT);
+  res[std::make_pair(BAYER_RGGB, RGB)].push_back(cv::cuda::COLOR_BayerBG2RGB_MHT);
+  res[std::make_pair(BAYER_RGGB, BGR)].push_back(cv::cuda::COLOR_BayerBG2BGR_MHT);
+
+  res[std::make_pair(BAYER_BGGR, GRAY)].push_back(cv::cuda::COLOR_BayerRG2GRAY_MHT);
+  res[std::make_pair(BAYER_BGGR, RGB)].push_back(cv::cuda::COLOR_BayerRG2RGB_MHT);
+  res[std::make_pair(BAYER_BGGR, BGR)].push_back(cv::cuda::COLOR_BayerRG2BGR_MHT);
+
+  res[std::make_pair(BAYER_GBRG, GRAY)].push_back(cv::cuda::COLOR_BayerGR2GRAY_MHT);
+  res[std::make_pair(BAYER_GBRG, RGB)].push_back(cv::cuda::COLOR_BayerGR2RGB_MHT);
+  res[std::make_pair(BAYER_GBRG, BGR)].push_back(cv::cuda::COLOR_BayerGR2BGR_MHT);
+
+  res[std::make_pair(BAYER_GRBG, GRAY)].push_back(cv::cuda::COLOR_BayerGB2GRAY_MHT);
+  res[std::make_pair(BAYER_GRBG, RGB)].push_back(cv::cuda::COLOR_BayerGB2RGB_MHT);
+  res[std::make_pair(BAYER_GRBG, BGR)].push_back(cv::cuda::COLOR_BayerGB2BGR_MHT);
+  #else
   res[std::make_pair(BAYER_RGGB, GRAY)].push_back(cv::COLOR_BayerBG2GRAY);
   res[std::make_pair(BAYER_RGGB, RGB)].push_back(cv::COLOR_BayerBG2RGB);
   res[std::make_pair(BAYER_RGGB, BGR)].push_back(cv::COLOR_BayerBG2BGR);
@@ -208,7 +228,7 @@ std::map<std::pair<Encoding, Encoding>, std::vector<int>> getConversionCodes()
   res[std::make_pair(BAYER_GRBG, GRAY)].push_back(cv::COLOR_BayerGB2GRAY);
   res[std::make_pair(BAYER_GRBG, RGB)].push_back(cv::COLOR_BayerGB2RGB);
   res[std::make_pair(BAYER_GRBG, BGR)].push_back(cv::COLOR_BayerGB2BGR);
-
+  #endif
   return res;
 }
 
@@ -366,7 +386,27 @@ CvImagePtr toCvCopyImpl(
         }
       } else {
         // Perform color conversion
+        #ifdef HAVE_OPENCV_CUDAIMGPROC
+        if (cv::cuda::getCudaEnabledDeviceCount() > 0) {          
+          if (src_encoding == enc::BAYER_RGGB8 || src_encoding == enc::BAYER_BGGR8 || src_encoding == enc::BAYER_GBRG8 ||
+            src_encoding == enc::BAYER_GRBG8)
+          {
+            cv::cuda::GpuMat gpu_image1(image1);
+            cv::cuda::GpuMat gpu_image2;
+            cv::cuda::demosaicing(gpu_image1, gpu_image2, conversion_code);
+            gpu_image2.download(image2);
+          } else {
+            cv::cuda::GpuMat gpu_image1(image1);
+            cv::cuda::GpuMat gpu_image2;
+            cv::cuda::cvtColor(gpu_image1, gpu_image2, conversion_code);
+            gpu_image2.download(image2);
+          }
+        } else {
+          cv::cvtColor(image1, image2, conversion_code);
+        }
+        #else
         cv::cvtColor(image1, image2, conversion_code);
+        #endif
       }
       image1 = image2;
     }

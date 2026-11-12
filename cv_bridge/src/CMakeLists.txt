@@ -14,9 +14,16 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   ${sensor_msgs_TARGETS}
   opencv_core
   opencv_imgproc
+
   opencv_imgcodecs
   rclcpp::rclcpp
-)
+  opencv_imgcodecs)
+
+if(WITH_OPENCV_CUDAIMGPROC)
+    target_link_libraries(${PROJECT_NAME} PUBLIC
+      opencv_cudaimgproc)
+endif()
+
 target_link_libraries(${PROJECT_NAME} PRIVATE
   Boost::headers
   rcpputils::rcpputils)

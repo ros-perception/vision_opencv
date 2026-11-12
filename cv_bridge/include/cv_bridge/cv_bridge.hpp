@@ -163,13 +163,17 @@ protected:
  * image data.
  *
  * \param source   A shared_ptr to a sensor_msgs::msg::Image message
- * \param encoding The desired encoding of the image data, one of the following strings:
+ * \param encoding The desired encoding of the image data. Common encodings include:
  *    - \c "mono8"
  *    - \c "bgr8"
  *    - \c "bgra8"
  *    - \c "rgb8"
  *    - \c "rgba8"
  *    - \c "mono16"
+ *
+ * Generic encodings with an explicit depth and channel count, such as
+ * \c "32FC1" and \c "16SC1", are also supported subject to the usual
+ * cv_bridge conversion rules.
  *
  * If \a encoding is the empty string (the default), the returned CvImage has the same encoding
  * as \a source.
@@ -187,13 +191,17 @@ CV_BRIDGE_EXPORT CvImagePtr toCvCopy(
  * image data.
  *
  * \param source   A sensor_msgs::msg::Image message
- * \param encoding The desired encoding of the image data, one of the following strings:
+ * \param encoding The desired encoding of the image data. Common encodings include:
  *    - \c "mono8"
  *    - \c "bgr8"
  *    - \c "bgra8"
  *    - \c "rgb8"
  *    - \c "rgba8"
  *    - \c "mono16"
+ *
+ * Generic encodings with an explicit depth and channel count, such as
+ * \c "32FC1" and \c "16SC1", are also supported subject to the usual
+ * cv_bridge conversion rules.
  *
  * If \a encoding is the empty string (the default), the returned CvImage has the same encoding
  * as \a source.
@@ -218,13 +226,17 @@ CV_BRIDGE_EXPORT CvImagePtr toCvCopy(
  * could modify the \a source data.
  *
  * \param source   A shared_ptr to a sensor_msgs::msg::Image message
- * \param encoding The desired encoding of the image data, one of the following strings:
+ * \param encoding The desired encoding of the image data. Common encodings include:
  *    - \c "mono8"
  *    - \c "bgr8"
  *    - \c "bgra8"
  *    - \c "rgb8"
  *    - \c "rgba8"
  *    - \c "mono16"
+ *
+ * Generic encodings with an explicit depth and channel count, such as
+ * \c "32FC1" and \c "16SC1", are also supported subject to the usual
+ * cv_bridge conversion rules.
  *
  * If \a encoding is the empty string (the default), the returned CvImage has the same encoding
  * as \a source.
@@ -246,13 +258,17 @@ CV_BRIDGE_EXPORT CvImageConstPtr toCvShare(
  *
  * \param source         The sensor_msgs::msg::Image message
  * \param tracked_object A shared_ptr to an object owning the sensor_msgs::msg::Image
- * \param encoding       The desired encoding of the image data, one of the following strings:
+ * \param encoding       The desired encoding of the image data. Common encodings include:
  *    - \c "mono8"
  *    - \c "bgr8"
  *    - \c "bgra8"
  *    - \c "rgb8"
  *    - \c "rgba8"
  *    - \c "mono16"
+ *
+ * Generic encodings with an explicit depth and channel count, such as
+ * \c "32FC1" and \c "16SC1", are also supported subject to the usual
+ * cv_bridge conversion rules.
  *
  * If \a encoding is the empty string (the default), the returned CvImage has the same encoding
  * as \a source.

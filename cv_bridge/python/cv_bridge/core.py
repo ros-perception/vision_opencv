@@ -227,7 +227,11 @@ class CvBridge(object):
         if not isinstance(cvim, (np.ndarray, np.generic)):
             raise TypeError('Your input type is not a numpy array')
         cmprs_img_msg = sensor_msgs.msg.CompressedImage()
-        cmprs_img_msg.format = dst_format
+        if len(cvim.shape) < 3:
+            cv_type = self.dtype_with_channels_to_cvtype2(cvim.dtype, 1)
+        else:
+            cv_type = self.dtype_with_channels_to_cvtype2(cvim.dtype, cvim.shape[2])
+        cmprs_img_msg.format = f"{cv_type}; {dst_format} compressed"
         ext_format = '.' + dst_format
         try:
             cmprs_img_msg.data.frombytes(np.array(cv2.imencode(ext_format, cvim)[1]).tobytes())

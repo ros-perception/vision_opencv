@@ -130,6 +130,15 @@ void StereoCameraModel::projectDisparityTo3d(const cv::Point2d& left_uv_rect, fl
   xyz = XYZ * (1.0/W);
 }
 
+void StereoCameraModel::project3dToDisparity(const cv::Point3d& xyz, cv::Point2d& left_uv_rect,
+                                             float& disparity) const
+{
+  assert( initialized() );
+
+  left_uv_rect = left_.project3dToPixel(xyz);
+  disparity = static_cast<float>(getDisparity(xyz.z));
+}
+
 // MISSING_Z is defined as 10000 in
 // https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga1bc1152bd57d63bc524204f21fde6e02
 // Having it as a public member makes this information available for users of cv_bridge.

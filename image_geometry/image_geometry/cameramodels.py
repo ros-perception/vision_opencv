@@ -128,18 +128,24 @@ class PinholeCameraModel:
         else:
             return (float('nan'), float('nan'))
     
-    def project_pixel_to_3d_ray(self, uv)->tuple[float,float,float]:
+    def project_pixel_to_3d_ray(self, uv, *, normalize=True)->tuple[float,float,float]:
         """
         :param uv:        rectified pixel coordinates
         :type uv:         (u, v)
+        :param normalize: if True (the default), return a unit vector. If False, return the
+                          point on the ray with z = 1.0, which matches the C++
+                          ``PinholeCameraModel::projectPixelTo3dRay()``.
+        :type normalize:  bool
         :rtype:           tuple[float,float,float]
 
-        Returns the unit vector which passes from the camera center to through rectified pixel (u, v),
+        Returns the vector which passes from the camera center to through rectified pixel (u, v),
         using the camera :math:`P` matrix.
         This is the inverse of project_3d_to_pixel().
         """
         x = (uv[0] - self.cx()) / self.fx()
         y = (uv[1] - self.cy()) / self.fy()
+        if not normalize:
+            return (x, y, 1.0)
         norm = math.sqrt(x*x + y*y + 1)
         x /= norm
         y /= norm
@@ -649,20 +655,22 @@ class PinholeCameraModel:
         return np.matrix(self.projection_matrix(), dtype='float64')
 
     @deprecated(version="J-turtle", reason="The projectPixelTo3dRay() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the project_pixel_to_3d_ray() method instead.")
-    def projectPixelTo3dRay(self, uv)->tuple[float,float,float]:
+    def projectPixelTo3dRay(self, uv, *, normalize=True)->tuple[float,float,float]:
         """
         .. warning::
             The projectPixelTo3dRay() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the project_pixel_to_3d_ray() method instead.
         
         :param uv:        rectified pixel coordinates
         :type uv:         (u, v)
+        :param normalize: if True (the default), return a unit vector, else the point with z = 1.0
+        :type normalize:  bool
         :rtype:           tuple[float,float,float]
 
-        Returns the unit vector which passes from the camera center to through rectified pixel (u, v),
+        Returns the vector which passes from the camera center to through rectified pixel (u, v),
         using the camera :math:`P` matrix.
         This is the inverse of :math:`project_3d_to_pixel`.
         """
-        return self.project_pixel_to_3d_ray(uv)
+        return self.project_pixel_to_3d_ray(uv, normalize=normalize)
 
     @deprecated(version="J-turtle", reason="The rectifyImage() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the rectify_image() method instead.")
     def rectifyImage(self, raw, rectified):

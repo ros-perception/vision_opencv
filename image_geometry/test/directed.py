@@ -116,6 +116,20 @@ class TestDirected(unittest.TestCase):
             actual = self.cam.get_left_camera().projectPixelTo3dRay(uv)
             assert_almost_equal(expected,actual,3)
 
+    def test_project_pixel_to_3d_ray_not_normalized(self):
+        cam = self.cam.get_left_camera()
+        uv = (1.0, 2.0)
+        unit = cam.project_pixel_to_3d_ray(uv)
+        actual = cam.project_pixel_to_3d_ray(uv, normalize=False)
+        self.assertEqual(actual[2], 1.0)
+        assert_almost_equal([unit[0] / unit[2], unit[1] / unit[2], 1.0], actual, 9)
+        # The point on the ray with z = 1 projects back onto the same pixel
+        assert_almost_equal(uv, cam.project_3d_to_pixel(actual), 9)
+        assert_almost_equal(unit, cam.project_pixel_to_3d_ray(uv, normalize=True), 9)
+        with self.assertWarns(DeprecationWarning):
+            deprecated = cam.projectPixelTo3dRay(uv, normalize=False)
+            assert_almost_equal(actual, deprecated, 9)
+
     def test_get_delta_u(self):
         delta_x = 1.0
         z = 2.0
@@ -378,6 +392,7 @@ if __name__ == '__main__':
     suite.addTest(TestDirected('test_rectify_point'))
     suite.addTest(TestDirected('test_project_3d_to_pixel'))
     suite.addTest(TestDirected('test_project_pixel_to_3d_ray'))
+    suite.addTest(TestDirected('test_project_pixel_to_3d_ray_not_normalized'))
     suite.addTest(TestDirected('test_get_delta_u'))
     suite.addTest(TestDirected('test_get_delta_v'))
     suite.addTest(TestDirected('test_get_delta_x'))

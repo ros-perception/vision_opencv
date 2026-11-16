@@ -515,7 +515,10 @@ void CvImage::toCompressedImageMsg(
 {
   ros_image.header = header;
   cv::Mat image;
-  if (encoding == enc::BGR8 || encoding == enc::BGRA8  || encoding == enc::MONO8 || encoding == enc::MONO16)
+  // 16UC1 has the same layout as mono16 (e.g. depth images), so it is encoded as is
+  // instead of being converted to an 8 bit color image.
+  if (encoding == enc::BGR8 || encoding == enc::BGRA8  || encoding == enc::MONO8 ||
+    encoding == enc::MONO16 || encoding == enc::TYPE_16UC1)
   {
     image = this->image;
   } else {
@@ -549,7 +552,11 @@ CvImagePtr toCvCopy(const sensor_msgs::msg::CompressedImage & source, const std:
   // Loads as BGR or BGRA.
   const cv::Mat rgb_a = cv::imdecode(in, cv::IMREAD_UNCHANGED);
 
-  if (encoding != enc::MONO16) {
+  // Formats such as PNG and TIFF keep 16 bit single channel images, so imdecode returns them
+  // as CV_16UC1. Label them as mono16 rather than mono8 so the data is not misinterpreted.
+  const bool is_16bit_mono = (rgb_a.channels() == 1 && rgb_a.depth() == CV_16U);
+
+  if (encoding != enc::MONO16 && !is_16bit_mono) {
     switch (rgb_a.channels())
     {
       case 4:

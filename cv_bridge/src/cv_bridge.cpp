@@ -227,8 +227,9 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
   // was resolved in the previous condition. Otherwise, fail
   if (!is_src_color_encoding) {
     if (is_dst_color_encoding) {
-      throw Exception("[" + src_encoding + "] is not a color encoding. but [" + dst_encoding +
-              "] is. The conversion does not make sense");
+      throw Exception("Cannot convert from [" + src_encoding + "] to [" + dst_encoding +
+              "]: source encoding is not a known image format (e.g. mono or color), "
+              "so conversion is semantically invalid.");
     }
     if (!is_num_channels_the_same) {
       throw Exception(

@@ -98,9 +98,9 @@ public:
    * \brief Constructor.
    */
   CvImage(
-    const std_msgs::msg::Header & header, const std::string & encoding,
-    const cv::Mat & image = cv::Mat())
-  : header(header), encoding(encoding), image(image)
+    const std_msgs::msg::Header & header_, const std::string & encoding_,
+    const cv::Mat & image_ = cv::Mat())
+  : header(header_), encoding(encoding_), image(image_)
   {
   }
 

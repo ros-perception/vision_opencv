@@ -172,14 +172,17 @@ class CvBridge(object):
 
         img_buf = np.asarray(img_msg.data, dtype=dtype) if isinstance(img_msg.data, list) else img_msg.data
 
+        # Rows are img_msg.step bytes apart, and the padding at the end of a row
+        # need not be a whole number of pixels, so pass step as the row stride.
         if n_channels == 1:
-            im = np.ndarray(shape=(img_msg.height, int(img_msg.step/dtype.itemsize)),
-                            dtype=dtype, buffer=img_buf)
-            im = np.ascontiguousarray(im[:img_msg.height, :img_msg.width])
+            im = np.ndarray(shape=(img_msg.height, img_msg.width),
+                            dtype=dtype, buffer=img_buf,
+                            strides=(img_msg.step, dtype.itemsize))
         else:
-            im = np.ndarray(shape=(img_msg.height, int(img_msg.step/dtype.itemsize/n_channels), n_channels),
-                            dtype=dtype, buffer=img_buf)
-            im = np.ascontiguousarray(im[:img_msg.height, :img_msg.width, :])
+            im = np.ndarray(shape=(img_msg.height, img_msg.width, n_channels),
+                            dtype=dtype, buffer=img_buf,
+                            strides=(img_msg.step, dtype.itemsize * n_channels, dtype.itemsize))
+        im = np.ascontiguousarray(im)
 
         # If the byte order is different between the message and the system.
         if img_msg.is_bigendian == (sys.byteorder == 'little'):

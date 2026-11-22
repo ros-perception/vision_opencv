@@ -1,6 +1,9 @@
+import sys
+import unittest
+
 from cv_bridge import CvBridge, CvBridgeError
 import numpy as np
-import unittest
+import sensor_msgs.msg
 
 class TestConversions(unittest.TestCase):
 
@@ -77,6 +80,25 @@ class TestConversions(unittest.TestCase):
         self.assertTrue(msg.is_bigendian)
         self.assertTrue((br.imgmsg_to_cv2(msg) == img).all())
 
+    def test_row_padding(self):
+        # Rows padded to a 4-byte boundary: the padding is not a whole number of pixels.
+        br = CvBridge()
+        for encoding, dtype, channels in [('rgb8', np.uint8, 3), ('mono8', np.uint8, 1),
+                                          ('16UC3', np.uint16, 3)]:
+            h, w = 3, 5
+            shape = (h, w, channels) if channels > 1 else (h, w)
+            img = np.random.randint(0, 255, size=shape).astype(dtype)
+            row_bytes = w * channels * np.dtype(dtype).itemsize
+            step = (row_bytes + 3) // 4 * 4
+            if step == row_bytes:
+                step += 4
+            data = np.zeros((h, step), dtype=np.uint8)
+            data[:, :row_bytes] = img.view(np.uint8).reshape(h, row_bytes)
+            msg = sensor_msgs.msg.Image(height=h, width=w, encoding=encoding, step=step,
+                                        is_bigendian=(sys.byteorder == 'big'),
+                                        data=data.tobytes())
+            np.testing.assert_array_equal(br.imgmsg_to_cv2(msg), img, err_msg=encoding)
+
 
 if __name__ == '__main__':
 
@@ -85,4 +107,5 @@ if __name__ == '__main__':
     suite.addTest(TestConversions('test_encode_decode_cv2'))
     suite.addTest(TestConversions('test_encode_decode_cv2_compressed'))
     suite.addTest(TestConversions('test_endianness'))
+    suite.addTest(TestConversions('test_row_padding'))
     unittest.TextTestRunner(verbosity=2).run(suite)

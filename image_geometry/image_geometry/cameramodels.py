@@ -313,7 +313,9 @@ class PinholeCameraModel:
         Returns the horizontal field of view in radians.
         Horizontal FoV = 2 * arctan((width) / (2 * Horizontal Focal Length) )
         """
-        return 2 * math.atan(self._width / (2 * self.fx()))
+        # width is the full resolution, so pair it with the full-resolution focal
+        # length: fx() is divided by binning_x.
+        return 2 * math.atan(self._width / (2 * self._full_p[0, 0]))
 
 
     def fov_y(self)->float:
@@ -323,7 +325,9 @@ class PinholeCameraModel:
         Returns the vertical field of view in radians.
         Vertical FoV = 2 * arctan((height) / (2 * Vertical Focal Length) )
         """
-        return 2 * math.atan(self._height / (2 * self.fy()))
+        # height is the full resolution, so pair it with the full-resolution focal
+        # length: fy() is divided by binning_y.
+        return 2 * math.atan(self._height / (2 * self._full_p[1, 1]))
 
     def get_tf_frame(self)->str:
         """ 

@@ -24,7 +24,7 @@
 #include "rclcpp/type_adapter.hpp"
 #include "sensor_msgs/msg/image.hpp"
 
-#include "cv_bridge/visibility_control.h"
+#include "cv_bridge/visibility_control.hpp"
 
 #include <optional>
 

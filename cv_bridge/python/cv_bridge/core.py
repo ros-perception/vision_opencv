@@ -183,7 +183,7 @@ class CvBridge(object):
 
         # If the byte order is different between the message and the system.
         if img_msg.is_bigendian == (sys.byteorder == 'little'):
-            im = im.byteswap().newbyteorder()
+            im = im.byteswap().view(im.dtype.newbyteorder())
 
         if desired_encoding == 'passthrough':
             return im

@@ -67,6 +67,9 @@ class CvBridge(object):
 
     """
 
+    # Compressed formats that store 16 bit images without reducing them to 8 bits.
+    _16bit_formats = ('png', 'tiff', 'tif', 'pgm', 'ppm', 'pnm')
+
     def __init__(self):
         import cv2
         self.cvtype_to_name = {}
@@ -241,6 +244,13 @@ class CvBridge(object):
             raise TypeError('Your input type is not a numpy array')
         cmprs_img_msg = sensor_msgs.msg.CompressedImage()
         cmprs_img_msg.format = dst_format
+        # A reader cannot tell the depth from the bare format and assumes 8 bits, so 16 bit
+        # images are announced as '<type>; <format> compressed', the form used by
+        # compressed_image_transport. Only for formats that keep the 16 bits.
+        if cvim.dtype == np.uint16 and dst_format.lower() in self._16bit_formats:
+            n_channels = 1 if cvim.ndim < 3 else cvim.shape[2]
+            cv_type = self.dtype_with_channels_to_cvtype2(cvim.dtype, n_channels)
+            cmprs_img_msg.format = '%s; %s compressed' % (cv_type, dst_format)
         ext_format = '.' + dst_format
         try:
             cmprs_img_msg.data.frombytes(np.array(cv2.imencode(ext_format, cvim)[1]).tobytes())

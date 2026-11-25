@@ -325,10 +325,45 @@ class TestDirected(unittest.TestCase):
         expected = 1.1234
         actual = self.cam.get_disparity(z)
         assert_almost_equal(expected, actual, 6)
-<<<<<<< HEAD
         with self.assertWarns(DeprecationWarning):
             actual = self.cam.getDisparity(z)
             assert_almost_equal(expected, actual, 6)
+
+    def test_binned_tx_ty(self):
+        # Tx and Ty in P are in full-resolution pixels, so binning has to
+        # scale them like fx and fy, or a binned right camera projects to the
+        # wrong pixel and the stereo depth is off by the binning factor.
+        def stereo(binning, ty=0.0):
+            lmsg = sensor_msgs.msg.CameraInfo()
+            rmsg = sensor_msgs.msg.CameraInfo()
+            for m, tx in ((lmsg, 0.0), (rmsg, -50.0)):
+                m.width = self.width
+                m.height = self.height
+                m.binning_x = m.binning_y = binning
+                m.k = [500.0, 0.0, 320.0, 0.0, 500.0, 240.0, 0.0, 0.0, 1.0]
+                m.r = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+                m.p = [500.0, 0.0, 320.0, tx, 0.0, 500.0, 240.0, ty, 0.0, 0.0, 1.0, 0.0]
+            cam = StereoCameraModel()
+            cam.from_camera_info(lmsg, rmsg)
+            return cam
+
+        full = stereo(1)
+        binned = stereo(2)
+        point = (0.2, 0.1, 2.0)
+        ((lu, lv), (ru, rv)) = full.project_3d_to_pixel(point)
+        expected = ((lu / 2, lv / 2), (ru / 2, rv / 2))
+        assert_almost_equal(binned.project_3d_to_pixel(point), expected, 6)
+        assert_almost_equal(binned.get_right_camera().tx(), -25.0, 6)
+
+        disparity = (lu - ru) / 2
+        assert_almost_equal(binned.get_z(disparity), point[2], 6)
+        assert_almost_equal(binned.get_disparity(point[2]), disparity, 6)
+        assert_almost_equal(binned.project_pixel_to_3d(expected[0], disparity), point, 6)
+
+        # Ty scales with binning_y in the same way
+        full_ty = stereo(1, ty=-30.0).get_right_camera().project_3d_to_pixel(point)
+        binned_ty = stereo(2, ty=-30.0).get_right_camera().project_3d_to_pixel(point)
+        assert_almost_equal(binned_ty, (full_ty[0] / 2, full_ty[1] / 2), 6)
 
     def test_deprecation(self):
         pinholeCam = self.cam.get_left_camera()
@@ -368,44 +403,6 @@ class TestDirected(unittest.TestCase):
             self.assertEqual(self.cam.right, self.cam.get_right_camera())
         with self.assertWarns(DeprecationWarning):
             assert_almost_equal(self.cam.Q, self.cam._q)
-=======
-
-    def test_binned_tx_ty(self):
-        # Tx and Ty in P are in full-resolution pixels, so binning has to
-        # scale them like fx and fy, or a binned right camera projects to the
-        # wrong pixel and the stereo depth is off by the binning factor.
-        def stereo(binning, ty=0.0):
-            lmsg = sensor_msgs.msg.CameraInfo()
-            rmsg = sensor_msgs.msg.CameraInfo()
-            for m, tx in ((lmsg, 0.0), (rmsg, -50.0)):
-                m.width = self.width
-                m.height = self.height
-                m.binning_x = m.binning_y = binning
-                m.k = [500.0, 0.0, 320.0, 0.0, 500.0, 240.0, 0.0, 0.0, 1.0]
-                m.r = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
-                m.p = [500.0, 0.0, 320.0, tx, 0.0, 500.0, 240.0, ty, 0.0, 0.0, 1.0, 0.0]
-            cam = StereoCameraModel()
-            cam.from_camera_info(lmsg, rmsg)
-            return cam
-
-        full = stereo(1)
-        binned = stereo(2)
-        point = (0.2, 0.1, 2.0)
-        ((lu, lv), (ru, rv)) = full.project_3d_to_pixel(point)
-        expected = ((lu / 2, lv / 2), (ru / 2, rv / 2))
-        assert_almost_equal(binned.project_3d_to_pixel(point), expected, 6)
-        assert_almost_equal(binned.get_right_camera().tx(), -25.0, 6)
-
-        disparity = (lu - ru) / 2
-        assert_almost_equal(binned.get_z(disparity), point[2], 6)
-        assert_almost_equal(binned.get_disparity(point[2]), disparity, 6)
-        assert_almost_equal(binned.project_pixel_to_3d(expected[0], disparity), point, 6)
-
-        # Ty scales with binning_y in the same way
-        full_ty = stereo(1, ty=-30.0).get_right_camera().project_3d_to_pixel(point)
-        binned_ty = stereo(2, ty=-30.0).get_right_camera().project_3d_to_pixel(point)
-        assert_almost_equal(binned_ty, (full_ty[0] / 2, full_ty[1] / 2), 6)
->>>>>>> 030ba0d (Scale Tx and Ty in P for binning in the Python camera model (#591))
         
 
 

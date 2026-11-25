@@ -89,6 +89,49 @@ class TestDirected(unittest.TestCase):
             assert_almost_equal(expected, rectified[56,47])
 
 
+    def test_rectify_image_binning_and_roi(self):
+        # The raw image of a binned or ROI camera is smaller than the full
+        # sensor, so the rectified image must keep that reduced size.
+        msg = sensor_msgs.msg.CameraInfo()
+        msg.width = self.width
+        msg.height = self.height
+        msg.d = [0.0] * 5
+        msg.k = [430.0, 0.0, 320.0, 0.0, 430.0, 240.0, 0.0, 0.0, 1.0]
+        msg.r = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+        msg.p = [430.0, 0.0, 320.0, 0.0, 0.0, 430.0, 240.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+        rng = np.random.default_rng(0)
+        for binning, roi in ((2, None), (1, (100, 50, 320, 240)), (2, (100, 50, 320, 240))):
+            msg.binning_x = msg.binning_y = binning
+            if roi is not None:
+                (msg.roi.x_offset, msg.roi.y_offset,
+                 msg.roi.width, msg.roi.height) = roi
+            cam = PinholeCameraModel()
+            cam.from_camera_info(msg)
+            width, height = roi[2:] if roi is not None else (self.width, self.height)
+            raw = rng.integers(1, 256, (height // binning, width // binning), dtype=np.uint8)
+            rectified = np.zeros_like(raw)
+            cam.rectify_image(raw, rectified)
+            # With no distortion and R = I, rectification leaves the image as it is
+            np.testing.assert_array_equal(rectified, raw)
+
+    def test_rectify_image_output_buffer(self):
+        # The result is always written to the output image, or an error is raised
+        cam = self.cam.get_left_camera()
+        rng = np.random.default_rng(0)
+        raw = rng.integers(1, 256, (self.height, self.width), dtype=np.uint8)
+        expected = np.zeros_like(raw)
+        cam.rectify_image(raw, expected)
+        self.assertTrue(expected.any())
+
+        # An output image of another type cannot be used by cv2.remap directly
+        rectified = np.zeros(raw.shape, dtype=np.float32)
+        cam.rectify_image(raw, rectified)
+        assert_almost_equal(rectified, expected)
+
+        # An output image of the wrong size is an error, it used to be left untouched
+        with self.assertRaises(ValueError):
+            cam.rectify_image(raw, np.zeros((self.height // 2, self.width // 2), dtype=np.uint8))
+
     def test_rectify_point(self):
         uv_raw = (1.0, 2.0)
         expected = [48.16447369,45.49210841]
@@ -411,6 +454,8 @@ if __name__ == '__main__':
     suite = unittest.TestSuite()
     suite.addTest(TestDirected('test_stereo'))
     suite.addTest(TestDirected('test_rectify_image'))
+    suite.addTest(TestDirected('test_rectify_image_binning_and_roi'))
+    suite.addTest(TestDirected('test_rectify_image_output_buffer'))
     suite.addTest(TestDirected('test_rectify_point'))
     suite.addTest(TestDirected('test_project_3d_to_pixel'))
     suite.addTest(TestDirected('test_project_pixel_to_3d_ray'))

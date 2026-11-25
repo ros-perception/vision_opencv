@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <sensor_msgs/image_encodings.hpp>
 
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -246,6 +247,28 @@ TEST(CvBridgeTest, semiPlanarYUV420TypeAdapter)
     sensor_msgs::msg::Image odd = msg;
     odd.height = height - 1;
     EXPECT_THROW(cv_bridge::ROSCvMatContainer{odd}, std::runtime_error);
+
+    // Only the Y plane: the cv::Mat would read past the end of data
+    sensor_msgs::msg::Image y_only = msg;
+    y_only.data.resize(static_cast<size_t>(y_only.step) * y_only.height);
+    EXPECT_THROW(cv_bridge::ROSCvMatContainer{y_only}, std::runtime_error);
+    EXPECT_THROW(
+      cv_bridge::ROSCvMatContainer(std::make_shared<sensor_msgs::msg::Image>(y_only)),
+      std::runtime_error);
+
+    // step shorter than a row
+    sensor_msgs::msg::Image short_step = msg;
+    short_step.step = width - 2;
+    short_step.data.resize(static_cast<size_t>(short_step.step) * height * 3 / 2);
+    EXPECT_THROW(cv_bridge::ROSCvMatContainer{short_step}, std::runtime_error);
+
+    // A padded step is valid
+    sensor_msgs::msg::Image padded = msg;
+    padded.step = width + 4;
+    padded.data.assign(static_cast<size_t>(padded.step) * height * 3 / 2, 0);
+    cv_bridge::ROSCvMatContainer from_padded(padded);
+    EXPECT_EQ(from_padded.cv_mat().rows, height * 3 / 2);
+    EXPECT_EQ(from_padded.cv_mat().step[0], padded.step);
   }
 }
 

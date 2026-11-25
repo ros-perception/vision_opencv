@@ -21,7 +21,6 @@
   <buildtool_depend>ament_cmake_ros_core</buildtool_depend>
   <buildtool_export_depend>ament_cmake_ros_core</buildtool_export_depend>
 
-  <build_depend>libboost-dev</build_depend>
   <build_depend>libboost-python-dev</build_depend>
   <build_depend>libopencv-dev</build_depend>
 

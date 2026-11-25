@@ -18,8 +18,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   rclcpp::rclcpp
   ament_cmake_ros_core::ament_ros_defaults
 )
-target_link_libraries(${PROJECT_NAME} PRIVATE
-  Boost::headers)
 
 install(TARGETS ${PROJECT_NAME} EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib

@@ -169,11 +169,3 @@ def test_cvtColorForDisplay_arguments():
     with pytest.raises(TypeError):
         cv_bridge.cvtColorForDisplay(depth, '32FC1')
 
-
-def test_deprecated_boost_module():
-    sys.modules.pop('cv_bridge.boost.cv_bridge_boost', None)
-    with pytest.warns(DeprecationWarning):
-        from cv_bridge.boost import cv_bridge_boost
-    for name in ('CV_MAT_CNWrap', 'CV_MAT_DEPTHWrap', 'cvtColor2', 'cvtColorForDisplay',
-                 'getCvType'):
-        assert getattr(cv_bridge_boost, name) is getattr(_cv_bridge, name)

@@ -1,7 +1,12 @@
 #include <gtest/gtest.h>
 #include <sensor_msgs/image_encodings.hpp>
 
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "cv_bridge/cv_bridge.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
 
 // Tests conversion of non-continuous cv::Mat. #5206
 TEST(CvBridgeTest, NonContinuous)
@@ -132,6 +137,70 @@ TEST(CvBridgeTest, imageMessageConversion)
   ASSERT_EQ(static_cast<int>(imgmsg.width), cv_ptr->image.cols);
   ASSERT_EQ(10, cv_ptr->image.channels());
   ASSERT_EQ(imgmsg.step, cv_ptr->image.step[0]);
+}
+
+TEST(CvBridgeTest, semiPlanarYUV420)
+{
+  namespace enc = sensor_msgs::image_encodings;
+  const int width = 64;
+  const int height = 48;
+
+  const std::vector<std::pair<std::string, int>> cases = {
+    {enc::NV12, cv::COLOR_YUV2BGR_NV12},
+    {enc::NV21, cv::COLOR_YUV2BGR_NV21}};
+
+  for (const auto & c : cases) {
+    const std::string & encoding = c.first;
+    SCOPED_TRACE(encoding);
+
+    // Y plane (height rows) followed by the interleaved UV plane (height / 2 rows)
+    cv::Mat yuv(height * 3 / 2, width, CV_8UC1);
+    cv::randu(yuv, 0, 256);
+
+    // cv::Mat -> message: height is the image height, not the number of cv::Mat rows
+    sensor_msgs::msg::Image::SharedPtr msg =
+      cv_bridge::CvImage(std_msgs::msg::Header(), encoding, yuv).toImageMsg();
+    EXPECT_EQ(static_cast<int>(msg->height), height);
+    EXPECT_EQ(static_cast<int>(msg->width), width);
+    EXPECT_EQ(static_cast<int>(msg->step), width);
+    EXPECT_EQ(msg->data.size(), static_cast<size_t>(width * height * 3 / 2));
+
+    // message -> cv::Mat, same encoding: both planes are kept
+    cv_bridge::CvImageConstPtr same = cv_bridge::toCvShare(msg, encoding);
+    EXPECT_EQ(same->image.rows, height * 3 / 2);
+    EXPECT_EQ(same->image.cols, width);
+    EXPECT_EQ(cv::norm(same->image, yuv, cv::NORM_INF), 0);
+
+    // message -> cv::Mat, color conversion matches OpenCV
+    cv::Mat expected;
+    cv::cvtColor(yuv, expected, c.second);
+    cv_bridge::CvImagePtr bgr = cv_bridge::toCvCopy(msg, enc::BGR8);
+    EXPECT_EQ(bgr->image.rows, height);
+    EXPECT_EQ(bgr->image.cols, width);
+    EXPECT_EQ(cv::norm(bgr->image, expected, cv::NORM_INF), 0);
+
+    cv_bridge::CvImagePtr mono = cv_bridge::toCvCopy(msg, enc::MONO8);
+    EXPECT_EQ(cv::norm(mono->image, yuv.rowRange(0, height), cv::NORM_INF), 0);
+
+    // Converting to these encodings is not supported
+    EXPECT_THROW(cv_bridge::toCvCopy(bgr->toImageMsg(), encoding), cv_bridge::Exception);
+
+    // Malformed messages are rejected
+    sensor_msgs::msg::Image bad = *msg;
+    bad.data.resize(width * height);  // missing UV plane
+    EXPECT_THROW(cv_bridge::toCvShare(bad, nullptr, encoding), cv_bridge::Exception);
+
+    bad = *msg;
+    bad.height = height - 1;  // odd height
+    bad.data.resize(width * (height - 1) * 3 / 2);
+    EXPECT_THROW(cv_bridge::toCvShare(bad, nullptr, encoding), cv_bridge::Exception);
+
+    // cv::Mat that cannot hold both planes is rejected
+    cv::Mat wrong_rows(height + 1, width, CV_8UC1);
+    EXPECT_THROW(
+      cv_bridge::CvImage(std_msgs::msg::Header(), encoding, wrong_rows).toImageMsg(),
+      cv_bridge::Exception);
+  }
 }
 
 int main(int argc, char ** argv)

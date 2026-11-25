@@ -1,10 +1,13 @@
 #ifndef IMAGE_GEOMETRY__STEREO_CAMERA_MODEL_HPP_
 #define IMAGE_GEOMETRY__STEREO_CAMERA_MODEL_HPP_
 
+#include <string>
+
 #include "image_geometry/pinhole_camera_model.hpp"
 #include "image_geometry/visibility_control.hpp"
 
-namespace image_geometry {
+namespace image_geometry
+{
 
 /**
  * \brief Simplifies interpreting stereo image pairs geometrically using the
@@ -17,36 +20,38 @@ public:
   StereoCameraModel();
 
   IMAGE_GEOMETRY_PUBLIC
-  StereoCameraModel(const StereoCameraModel& other);
+  StereoCameraModel(const StereoCameraModel & other);
 
   IMAGE_GEOMETRY_PUBLIC
-  StereoCameraModel& operator=(const StereoCameraModel& other);
-
-  /**
-   * \brief Set the camera parameters from the sensor_msgs/CameraInfo messages.
-   */
-  IMAGE_GEOMETRY_PUBLIC
-  bool fromCameraInfo(const sensor_msgs::msg::CameraInfo& left,
-                      const sensor_msgs::msg::CameraInfo& right);
+  StereoCameraModel & operator=(const StereoCameraModel & other);
 
   /**
    * \brief Set the camera parameters from the sensor_msgs/CameraInfo messages.
    */
   IMAGE_GEOMETRY_PUBLIC
-  bool fromCameraInfo(const sensor_msgs::msg::CameraInfo::ConstSharedPtr& left,
-                      const sensor_msgs::msg::CameraInfo::ConstSharedPtr& right);
+  bool fromCameraInfo(
+    const sensor_msgs::msg::CameraInfo & left,
+    const sensor_msgs::msg::CameraInfo & right);
+
+  /**
+   * \brief Set the camera parameters from the sensor_msgs/CameraInfo messages.
+   */
+  IMAGE_GEOMETRY_PUBLIC
+  bool fromCameraInfo(
+    const sensor_msgs::msg::CameraInfo::ConstSharedPtr & left,
+    const sensor_msgs::msg::CameraInfo::ConstSharedPtr & right);
 
   /**
    * \brief Get the left monocular camera model.
    */
   IMAGE_GEOMETRY_PUBLIC
-  const PinholeCameraModel& left() const;
+  const PinholeCameraModel & left() const;
 
   /**
    * \brief Get the right monocular camera model.
    */
   IMAGE_GEOMETRY_PUBLIC
-  const PinholeCameraModel& right() const;
+  const PinholeCameraModel & right() const;
 
   /**
    * \brief Get the name of the camera coordinate frame in tf.
@@ -61,7 +66,25 @@ public:
    * \brief Project a rectified pixel with disparity to a 3d point.
    */
   IMAGE_GEOMETRY_PUBLIC
-  void projectDisparityTo3d(const cv::Point2d& left_uv_rect, float disparity, cv::Point3d& xyz) const;
+  void projectDisparityTo3d(
+    const cv::Point2d & left_uv_rect, float disparity,
+    cv::Point3d & xyz) const;
+
+  /**
+   * \brief Project a 3d point to a rectified pixel in the left image and its disparity.
+   *
+   * This is the inverse of projectDisparityTo3d(). The pixel in the right image is
+   * (left_uv_rect.x - disparity, left_uv_rect.y).
+   *
+   * \param xyz 3d point in the left camera coordinate frame. Its z has to be positive for the
+   * point to be visible: the outputs are not finite for z == 0.
+   * \param left_uv_rect Output rectified pixel coordinates in the left image
+   * \param disparity Output disparity (x_left - x_right) at which the point is observed
+   */
+  IMAGE_GEOMETRY_PUBLIC
+  void project3dToDisparity(
+    const cv::Point3d & xyz, cv::Point2d & left_uv_rect,
+    float & disparity) const;
 
   /**
    * \brief Project a disparity image to a 3d point cloud.
@@ -70,8 +93,9 @@ public:
    * Z set to MISSING_Z (currently 10000.0).
    */
   IMAGE_GEOMETRY_PUBLIC
-  void projectDisparityImageTo3d(const cv::Mat& disparity, cv::Mat& point_cloud,
-                                 bool handleMissingValues = false) const;
+  void projectDisparityImageTo3d(
+    const cv::Mat & disparity, cv::Mat & point_cloud,
+    bool handleMissingValues = false) const;
   IMAGE_GEOMETRY_PUBLIC
   static const double MISSING_Z;
 
@@ -79,7 +103,7 @@ public:
    * \brief Returns the disparity reprojection matrix.
    */
   IMAGE_GEOMETRY_PUBLIC
-  const cv::Matx44d& reprojectionMatrix() const;
+  const cv::Matx44d & reprojectionMatrix() const;
 
   /**
    * \brief Returns the horizontal baseline in world coordinates.
@@ -107,7 +131,8 @@ public:
    * \brief Returns true if the camera has been initialized
    */
   IMAGE_GEOMETRY_PUBLIC
-  bool initialized() const { return left_.initialized() && right_.initialized(); }
+  bool initialized() const {return left_.initialized() && right_.initialized();}
+
 protected:
   PinholeCameraModel left_, right_;
   cv::Matx44d Q_;
@@ -119,15 +144,15 @@ protected:
 
 /* Trivial inline functions */
 IMAGE_GEOMETRY_PUBLIC
-inline const PinholeCameraModel& StereoCameraModel::left() const  { return left_; }
+inline const PinholeCameraModel & StereoCameraModel::left() const  {return left_;}
 IMAGE_GEOMETRY_PUBLIC
-inline const PinholeCameraModel& StereoCameraModel::right() const { return right_; }
+inline const PinholeCameraModel & StereoCameraModel::right() const {return right_;}
 
 IMAGE_GEOMETRY_PUBLIC
-inline std::string StereoCameraModel::tfFrame() const { return left_.tfFrame(); }
+inline std::string StereoCameraModel::tfFrame() const {return left_.tfFrame();}
 
 IMAGE_GEOMETRY_PUBLIC
-inline const cv::Matx44d& StereoCameraModel::reprojectionMatrix() const { return Q_; }
+inline const cv::Matx44d & StereoCameraModel::reprojectionMatrix() const {return Q_;}
 
 IMAGE_GEOMETRY_PUBLIC
 inline double StereoCameraModel::baseline() const
@@ -139,15 +164,15 @@ inline double StereoCameraModel::baseline() const
 IMAGE_GEOMETRY_PUBLIC
 inline double StereoCameraModel::getZ(double disparity) const
 {
-  assert( initialized() );
+  assert(initialized() );
   return -right_.Tx() / (disparity - (left().cx() - right().cx()));
 }
 
 IMAGE_GEOMETRY_PUBLIC
 inline double StereoCameraModel::getDisparity(double Z) const
 {
-  assert( initialized() );
-  return -right_.Tx() / Z + (left().cx() - right().cx()); ;
+  assert(initialized() );
+  return -right_.Tx() / Z + (left().cx() - right().cx());
 }
 
 }  // namespace image_geometry

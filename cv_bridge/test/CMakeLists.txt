@@ -22,7 +22,6 @@ ament_add_gtest(${PROJECT_NAME}-utest
   APPEND_LIBRARY_DIRS "${cv_bridge_lib_dir}")
 target_link_libraries(${PROJECT_NAME}-utest
   ${PROJECT_NAME}
-  Boost::headers
   opencv_core
   opencv_imgcodecs
   ${sensor_msgs_TARGETS})

@@ -19,7 +19,6 @@ if(ANDROID)
 endif()
 
 if(CV_BRIDGE_DISABLE_PYTHON)
-  find_package(Boost REQUIRED)
   set(boost_python_target "")
 else()
   find_package(Python3 REQUIRED COMPONENTS Development NumPy)
@@ -82,6 +81,7 @@ ament_export_dependencies(
   OpenCV
   sensor_msgs
   rclcpp
+  rcpputils
 )
 
 ament_export_targets(export_${PROJECT_NAME})

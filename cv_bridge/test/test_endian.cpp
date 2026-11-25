@@ -12,32 +12,13 @@ TEST(CvBridgeTest, endianness)
   msg.encoding = "32SC2";
   msg.step = 8;
 
-  msg.data.resize(msg.step);
-  uint8_t * raw = msg.data.data();
-
   // Write 1 and 2 in order, but with an endianness opposite to the platform
   if (rcpputils::endian::native == rcpputils::endian::little) {
     msg.is_bigendian = true;
-    raw[0] = 0x00;
-    raw[1] = 0x00;
-    raw[2] = 0x00;
-    raw[3] = 0x01;
-
-    raw[4] = 0x00;
-    raw[5] = 0x00;
-    raw[6] = 0x00;
-    raw[7] = 0x02;
+    msg.data = {0, 0, 0, 1, 0, 0, 0, 2};
   } else {
     msg.is_bigendian = false;
-    raw[0] = 0x01;
-    raw[1] = 0x00;
-    raw[2] = 0x00;
-    raw[3] = 0x00;
-
-    raw[4] = 0x02;
-    raw[5] = 0x00;
-    raw[6] = 0x00;
-    raw[7] = 0x00;
+    msg.data = {1, 0, 0, 0, 2, 0, 0, 0};
   }
 
   // Make sure the values are still the same

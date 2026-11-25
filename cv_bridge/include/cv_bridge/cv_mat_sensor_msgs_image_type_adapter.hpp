@@ -32,7 +32,6 @@
 namespace cv_bridge
 {
 
-
 /// A potentially owning, potentially non-owning, container of a cv::Mat and ROS header.
 /**
  * The two main use cases for this are publishing user controlled data, and

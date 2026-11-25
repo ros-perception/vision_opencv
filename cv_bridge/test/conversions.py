@@ -68,7 +68,6 @@ class TestConversions(unittest.TestCase):
                         self.assertTrue(len(original.tostring()) == len(newimg.tostring()))
 
     def test_compressed_format(self):
-        import cv2
         br = CvBridge()
 
         # 8 bit images keep the bare format: readers then assume mono8 or bgr8.
@@ -78,18 +77,41 @@ class TestConversions(unittest.TestCase):
                          'png')
 
         # 16 bit images announce their type when the format keeps the 16 bits.
-        for shape, cv_type in (((4, 4), '16UC1'), ((4, 4, 3), '16UC3')):
+        # pgm only stores one channel and ppm only three.
+        cases = (('png', (4, 4), '16UC1'), ('png', (4, 4, 3), '16UC3'),
+                 ('png', (4, 4, 4), '16UC4'), ('png', (4, 4, 1), '16UC1'),
+                 ('PNG', (4, 4), '16UC1'),
+                 ('tiff', (4, 4), '16UC1'), ('tiff', (4, 4, 3), '16UC3'),
+                 ('tif', (4, 4), '16UC1'), ('tif', (4, 4, 3), '16UC3'),
+                 ('pgm', (4, 4), '16UC1'), ('ppm', (4, 4, 3), '16UC3'),
+                 ('pnm', (4, 4), '16UC1'), ('pnm', (4, 4, 3), '16UC3'))
+        for dst_format, shape, cv_type in cases:
             img = (np.arange(np.prod(shape)) * 4000).astype(np.uint16).reshape(shape)
-            msg = br.cv2_to_compressed_imgmsg(img, 'png')
-            self.assertEqual(msg.format, cv_type + '; png compressed')
+            msg = br.cv2_to_compressed_imgmsg(img, dst_format)
+            self.assertEqual(msg.format, '%s; %s compressed' % (cv_type, dst_format))
             decoded = br.compressed_imgmsg_to_cv2(msg)
-            self.assertEqual(decoded.dtype, np.uint16)
-            np.testing.assert_array_equal(decoded, img)
+            self.assertEqual(decoded.dtype, np.uint16, msg=(dst_format, shape))
+            np.testing.assert_array_equal(decoded, img.squeeze(), err_msg=dst_format)
 
-        # jpg reduces the image to 8 bits, so the format must not announce 16.
-        msg = br.cv2_to_compressed_imgmsg(np.zeros((4, 4), np.uint16), 'jpg')
-        self.assertEqual(msg.format, 'jpg')
-        self.assertEqual(br.compressed_imgmsg_to_cv2(msg).dtype, np.uint8)
+        # Signed and floating point images are stored as 8 bits, so no type is announced.
+        for dtype in (np.int8, np.int16, np.int32, np.float32, np.float64):
+            for shape in ((4, 4), (4, 4, 3)):
+                msg = br.cv2_to_compressed_imgmsg(np.zeros(shape, dtype), 'png')
+                self.assertEqual(msg.format, 'png', msg=(dtype, shape))
+                self.assertEqual(br.compressed_imgmsg_to_cv2(msg).dtype, np.uint8)
+
+        # These formats reduce the image to 8 bits, so the format must not announce 16.
+        for dst_format in ('jpg', 'jpeg', 'bmp'):
+            for shape in ((4, 4), (4, 4, 3)):
+                msg = br.cv2_to_compressed_imgmsg(np.zeros(shape, np.uint16), dst_format)
+                self.assertEqual(msg.format, dst_format)
+                self.assertEqual(br.compressed_imgmsg_to_cv2(msg).dtype, np.uint8)
+
+        # 8 bit images never announce a type, also in the formats that could keep 16 bits.
+        for dst_format in ('png', 'tiff', 'pnm'):
+            for shape in ((4, 4), (4, 4, 3)):
+                msg = br.cv2_to_compressed_imgmsg(np.zeros(shape, np.uint8), dst_format)
+                self.assertEqual(msg.format, dst_format)
 
     def test_endianness(self):
         br = CvBridge()

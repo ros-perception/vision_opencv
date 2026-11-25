@@ -46,6 +46,7 @@ if(BUILD_TESTING)
 endif()
 
 ament_export_targets(export_${PROJECT_NAME})
+ament_export_dependencies(ament_cmake_ros_core)
 ament_export_dependencies(OpenCV)
 ament_export_dependencies(sensor_msgs)
 

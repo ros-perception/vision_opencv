@@ -1,20 +1,11 @@
-<<<<<<< HEAD
-#include <boost/endian/conversion.hpp>
-#include <cv_bridge/cv_bridge.hpp>
-=======
 // Copyright (c) 2015, ROS Perception
->>>>>>> 72c4058 (enable ament_lint_auto in cv_bridge and image_geometry (#542))
 #include <gtest/gtest.h>
-
-#include <bit>
 #include <memory>
-
+#include <boost/endian/conversion.hpp>
 #include <cv_bridge/cv_bridge.hpp>
 
 TEST(CvBridgeTest, endianness)
 {
-  using namespace boost::endian;
-
   // Create an image of the type opposite to the platform
   sensor_msgs::msg::Image msg;
   msg.height = 1;
@@ -26,14 +17,14 @@ TEST(CvBridgeTest, endianness)
   int32_t * data = reinterpret_cast<int32_t *>(&msg.data[0]);
 
   // Write 1 and 2 in order, but with an endianness opposite to the platform
-  if (order::native == order::little) {
+  if (boost::endian::order::native == boost::endian::order::little) {
     msg.is_bigendian = true;
-    *(data++) = native_to_big(static_cast<int32_t>(1));
-    *data = native_to_big(static_cast<int32_t>(2));
+    *(data++) = boost::endian::native_to_big(static_cast<int32_t>(1));
+    *data = boost::endian::native_to_big(static_cast<int32_t>(2));
   } else {
     msg.is_bigendian = false;
-    *(data++) = native_to_little(static_cast<int32_t>(1));
-    *data = native_to_little(static_cast<int32_t>(2));
+    *(data++) = boost::endian::native_to_little(static_cast<int32_t>(1));
+    *data = boost::endian::native_to_little(static_cast<int32_t>(2));
   }
 
   // Make sure the values are still the same

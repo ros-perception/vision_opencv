@@ -2,10 +2,9 @@ import copy
 import math
 
 import cv2
+from deprecated.sphinx import deprecated
 import numpy
 import numpy as np
-import warnings
-from deprecated.sphinx import deprecated
 
 
 def _mkmat(rows, cols, L) -> numpy.ndarray:
@@ -366,252 +365,351 @@ class PinholeCameraModel:
         """
         return self._tf_frame
 
-<<<<<<< HEAD
     # Deprecated members planned for removal in K-turtle
     # --------------------------------------------------
     @property
-    @deprecated(version="J-turtle", reason="The binning_x property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
+    @deprecated(
+        version='J-turtle',
+        reason='The binning_x property is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. It is not meant to be an exposed member.')
     def binning_x(self):
-        """ 
+        """
+        Do not use, this is deprecated and not meant to be an exposed member.
+
         .. warning::
-            The binning_x property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+            The binning_x property is deprecated as of J-turtle, and will be removed in K-turtle.
+            It is not meant to be an exposed member.
         """
         return self._binning_x
 
     @property
-    @deprecated(version="J-turtle", reason="The binning_y property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
+    @deprecated(
+        version='J-turtle',
+        reason='The binning_y property is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. It is not meant to be an exposed member.')
     def binning_y(self):
-        """ 
+        """
+        Do not use, this is deprecated and not meant to be an exposed member.
+
         .. warning::
-            The binning_y property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
-=======
-    def stamp(self):
-        """
-        Return the time stamp of the :class:`sensor_msgs.msg.CameraInfo` message.
-
-        :rtype:                 builtin_interfaces.msg.Time
-        """
-        return self._stamp
-
-    def raw_roi(self):
-        """
-        Return the region of interest of the camera, in the full resolution image.
-
-        A region of interest that is all zeros in the :class:`sensor_msgs.msg.CameraInfo`
-        message is returned as the full resolution.
-
-        :rtype:                 sensor_msgs.msg.RegionOfInterest
-        """
-        return self._raw_roi
-
-    def binning_x(self) -> int:
-        """
-        Return the number of pixels combined in the horizontal direction.
-
-        :rtype:                 int
-        """
-        return self._binning_x
-
-    def binning_y(self) -> int:
-        """
-        Return the number of pixels combined in the vertical direction.
-
-        :rtype:                 int
->>>>>>> 72c4058 (enable ament_lint_auto in cv_bridge and image_geometry (#542))
+            The binning_y property is deprecated as of J-turtle, and will be removed in K-turtle.
+            It is not meant to be an exposed member.
         """
         return self._binning_y
 
     @property
-    @deprecated(version="J-turtle", reason="The D->numpy.matrix property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the distortion_coeffs()->numpy.ndarray method instead.")
-    def D(self)->numpy.matrix:
-        """ 
-        .. warning::
-            The D property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+    @deprecated(
+        version='J-turtle',
+        reason='The D->numpy.matrix property is deprecated as of J-turtle, and will be removed '
+               'in K-turtle. Please use the distortion_coeffs()->numpy.ndarray method instead.')
+    def D(self) -> numpy.matrix:
         """
-        return numpy.matrix(self._d, dtype="float64")
+        Use :meth:`distortion_coeffs` instead, this is deprecated.
+
+        .. warning::
+            The D property is deprecated as of J-turtle, and will be removed in K-turtle. It is not
+            meant to be an exposed member.
+        """
+        return numpy.matrix(self._d, dtype='float64')
 
     @property
-    @deprecated(version="J-turtle", reason="The full_K->numpy.matrix property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the full_intrinsic_matrix()->numpy.ndarray method instead.")
-    def full_K(self)->numpy.matrix:
-        """ 
-        .. warning::
-            The full_K property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+    @deprecated(
+        version='J-turtle',
+        reason='The full_K->numpy.matrix property is deprecated as of J-turtle, and will be '
+               'removed in K-turtle. Please use the full_intrinsic_matrix()->numpy.ndarray '
+               'method instead.')
+    def full_K(self) -> numpy.matrix:
         """
-        return numpy.matrix(self._full_k, dtype="float64")
+        Use :meth:`full_intrinsic_matrix` instead, this is deprecated.
+
+        .. warning::
+            The full_K property is deprecated as of J-turtle, and will be removed in K-turtle. It
+            is not meant to be an exposed member.
+        """
+        return numpy.matrix(self._full_k, dtype='float64')
 
     @property
-    @deprecated(version="J-turtle", reason="The full_P->numpy.matrix property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the full_projection_matrix()->numpy.ndarray method instead.")
-    def full_P(self)->numpy.matrix:
-        """ 
-        .. warning::
-            The full_P property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+    @deprecated(
+        version='J-turtle',
+        reason='The full_P->numpy.matrix property is deprecated as of J-turtle, and will be '
+               'removed in K-turtle. Please use the full_projection_matrix()->numpy.ndarray '
+               'method instead.')
+    def full_P(self) -> numpy.matrix:
         """
-        return numpy.matrix(self._full_p, dtype="float64")
+        Use :meth:`full_projection_matrix` instead, this is deprecated.
+
+        .. warning::
+            The full_P property is deprecated as of J-turtle, and will be removed in K-turtle. It
+            is not meant to be an exposed member.
+        """
+        return numpy.matrix(self._full_p, dtype='float64')
 
     @property
-    @deprecated(version="J-turtle", reason="The height property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
+    @deprecated(
+        version='J-turtle',
+        reason='The height property is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. It is not meant to be an exposed member.')
     def height(self):
-        """ 
+        """
+        Do not use, this is deprecated and not meant to be an exposed member.
+
         .. warning::
-            The height property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+            The height property is deprecated as of J-turtle, and will be removed in K-turtle. It
+            is not meant to be an exposed member.
         """
         return self._height
 
     @property
-    @deprecated(version="J-turtle", reason="The K->numpy.matrix property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the intrinsic_matrix()->numpy.ndarray method instead.")
-    def K(self)->numpy.matrix:
-        """ 
-        .. warning::
-            The K property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+    @deprecated(
+        version='J-turtle',
+        reason='The K->numpy.matrix property is deprecated as of J-turtle, and will be removed '
+               'in K-turtle. Please use the intrinsic_matrix()->numpy.ndarray method instead.')
+    def K(self) -> numpy.matrix:
         """
-        return numpy.matrix(self._k, dtype="float64")
+        Use :meth:`intrinsic_matrix` instead, this is deprecated.
+
+        .. warning::
+            The K property is deprecated as of J-turtle, and will be removed in K-turtle. It is not
+            meant to be an exposed member.
+        """
+        return numpy.matrix(self._k, dtype='float64')
 
     @property
-    @deprecated(version="J-turtle", reason="The P->numpy.matrix property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the projection_matrix()->numpy.ndarray method instead.")
-    def P(self)->numpy.matrix:
-        """ 
-        .. warning::
-            The P property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+    @deprecated(
+        version='J-turtle',
+        reason='The P->numpy.matrix property is deprecated as of J-turtle, and will be removed '
+               'in K-turtle. Please use the projection_matrix()->numpy.ndarray method instead.')
+    def P(self) -> numpy.matrix:
         """
-        return numpy.matrix(self._p, dtype="float64")
+        Use :meth:`projection_matrix` instead, this is deprecated.
+
+        .. warning::
+            The P property is deprecated as of J-turtle, and will be removed in K-turtle. It is not
+            meant to be an exposed member.
+        """
+        return numpy.matrix(self._p, dtype='float64')
 
     @property
-    @deprecated(version="J-turtle", reason="The R->numpy.matrix property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the rotation_matrix()->numpy.ndarray method instead.")
-    def R(self)->numpy.matrix:
-        """ 
+    @deprecated(
+        version='J-turtle',
+        reason='The R->numpy.matrix property is deprecated as of J-turtle, and will be removed '
+               'in K-turtle. Please use the rotation_matrix()->numpy.ndarray method instead.')
+    def R(self) -> numpy.matrix:
+        """
+        Use :meth:`rotation_matrix` instead, this is deprecated.
+
         .. warning::
-            The R property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+            The R property is deprecated as of J-turtle, and will be removed in K-turtle. It is not
+            meant to be an exposed member.
         """
         return numpy.matrix(self._r)
 
     @property
-    @deprecated(version="J-turtle", reason="The binning_y property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
+    @deprecated(
+        version='J-turtle',
+        reason='The binning_y property is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. It is not meant to be an exposed member.')
     def raw_roi(self):
-        """ 
+        """
+        Do not use, this is deprecated and not meant to be an exposed member.
+
         .. warning::
-            The raw_roi property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+            The raw_roi property is deprecated as of J-turtle, and will be removed in K-turtle. It
+            is not meant to be an exposed member.
         """
         return self._raw_roi
 
     @property
-    @deprecated(version="J-turtle", reason="The stamp property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
+    @deprecated(
+        version='J-turtle',
+        reason='The stamp property is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. It is not meant to be an exposed member.')
     def stamp(self):
-        """ 
+        """
+        Do not use, this is deprecated and not meant to be an exposed member.
+
         .. warning::
-            The stamp property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+            The stamp property is deprecated as of J-turtle, and will be removed in K-turtle. It is
+            not meant to be an exposed member.
         """
         return self._stamp
 
     @property
-    @deprecated(version="J-turtle", reason="The tf_frame property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_tf_frame() method.")
+    @deprecated(
+        version='J-turtle',
+        reason='The tf_frame property is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. Please use the get_tf_frame() method.')
     def tf_frame(self):
-        """ 
+        """
+        Use :meth:`get_tf_frame` instead, this is deprecated.
+
         .. warning::
-            The tf_frame property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+            The tf_frame property is deprecated as of J-turtle, and will be removed in K-turtle. It
+            is not meant to be an exposed member.
         """
         return self._tf_frame
 
     @property
-    @deprecated(version="J-turtle", reason="The width property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
+    @deprecated(
+        version='J-turtle',
+        reason='The width property is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. It is not meant to be an exposed member.')
     def width(self):
-        """ 
+        """
+        Do not use, this is deprecated and not meant to be an exposed member.
+
         .. warning::
-            The width property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+            The width property is deprecated as of J-turtle, and will be removed in K-turtle. It is
+            not meant to be an exposed member.
         """
         return self._width
-    
-    @deprecated(version="J-turtle", reason="The distortionCoeffs()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the distortion_coeffs()->numpy.ndarray method instead.")
-    def distortionCoeffs(self)->numpy.matrix:
-        """ 
-        .. warning::
-            The distortionCoeffs()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the distortion_coeffs()->numpy.ndarray method instead."
-        
-        :rtype:                 numpy.matrix
-        
-        Returns :math:`D` 
+
+    @deprecated(
+        version='J-turtle',
+        reason='The distortionCoeffs()->numpy.matrix method is deprecated as of J-turtle, and '
+               'will be removed in K-turtle. Please use the distortion_coeffs()->numpy.ndarray '
+               'method instead.')
+    def distortionCoeffs(self) -> numpy.matrix:
         """
-        return numpy.matrix(self.distortion_coeffs(), dtype="float64")
+        Use :meth:`distortion_coeffs` instead, this is deprecated.
 
-    @deprecated(version="J-turtle", reason="The fovX() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the fov_x() method instead.")
-    def fovX(self)->float:
-        """ 
         .. warning::
-            The fovX() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the fov_x() method instead.
+            The distortionCoeffs()->numpy.matrix method is deprecated as of J-turtle, and will be
+            removed in K-turtle. Please use the distortion_coeffs()->numpy.ndarray method instead."
 
-        :rtype:                 float      
-        
+        :rtype:                 numpy.matrix
+
+        Returns :math:`D`
+        """
+        return numpy.matrix(self.distortion_coeffs(), dtype='float64')
+
+    @deprecated(
+        version='J-turtle',
+        reason='The fovX() method is deprecated as of J-turtle, and will be removed in K-turtle. '
+               'Please use the fov_x() method instead.')
+    def fovX(self) -> float:
+        """
+        Use :meth:`fov_x` instead, this is deprecated.
+
+        .. warning::
+            The fovX() method is deprecated as of J-turtle, and will be removed in K-turtle. Please
+            use the fov_x() method instead.
+
+        :rtype:                 float
+
         Returns the horizontal field of view in radians.
         Horizontal FoV = 2 * arctan((width) / (2 * Horizontal Focal Length) )
         """
         return self.fov_x()
 
-    @deprecated(version="J-turtle", reason="The fovY() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the fov_y() method instead.")
-    def fovY(self)->float:
-        """ 
+    @deprecated(
+        version='J-turtle',
+        reason='The fovY() method is deprecated as of J-turtle, and will be removed in K-turtle. '
+               'Please use the fov_y() method instead.')
+    def fovY(self) -> float:
+        """
+        Use :meth:`fov_y` instead, this is deprecated.
+
         .. warning::
-            The fovY() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the fov_y() method instead.
-        
-        :rtype:                 float      
-        
+            The fovY() method is deprecated as of J-turtle, and will be removed in K-turtle. Please
+            use the fov_y() method instead.
+
+        :rtype:                 float
+
         Returns the vertical field of view in radians.
         Vertical FoV = 2 * arctan((height) / (2 * Vertical Focal Length) )
         """
         return self.fov_y()
 
-    @deprecated(version="J-turtle", reason="The fromCameraInfo() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the from_camera_info() method instead.")
-    def fromCameraInfo(self,msg)->None:
+    @deprecated(
+        version='J-turtle',
+        reason='The fromCameraInfo() method is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. Please use the from_camera_info() method instead.')
+    def fromCameraInfo(self, msg) -> None:
         """
+        Use :meth:`from_camera_info` instead, this is deprecated.
+
         .. warning::
-            The fromCameraInfo() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the from_camera_info() method instead.
+            The fromCameraInfo() method is deprecated as of J-turtle, and will be removed in
+            K-turtle. Please use the from_camera_info() method instead.
 
         :param msg: camera parameters
         :type msg:  sensor_msgs.msg.CameraInfo
-        
+
         Set the camera parameters from the :class:`sensor_msgs.msg.CameraInfo` message.
         """
         self.from_camera_info(msg)
 
-    @deprecated(version="J-turtle", reason="The fullIntrinsicMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the full_intrinsic_matrix()->numpy.ndarray method instead.")
+    @deprecated(
+        version='J-turtle',
+        reason='The fullIntrinsicMatrix()->numpy.matrix method is deprecated as of J-turtle, and '
+               'will be removed in K-turtle. Please use the '
+               'full_intrinsic_matrix()->numpy.ndarray method instead.')
     def fullIntrinsicMatrix(self) -> numpy.matrix:
-        """ 
+        """
+        Use :meth:`full_intrinsic_matrix` instead, this is deprecated.
+
         .. warning::
-            The fullIntrinsicMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the full_intrinsic_matrix()->numpy.ndarray method instead.
-        
+            The fullIntrinsicMatrix()->numpy.matrix method is deprecated as of J-turtle, and will
+            be removed in K-turtle. Please use the full_intrinsic_matrix()->numpy.ndarray method
+            instead.
+
         :rtype:                 numpy.matrix
 
-        Return the original camera matrix for full resolution 
+        Return the original camera matrix for full resolution
         """
         return numpy.matrix(self.full_intrinsic_matrix(), dtype='float64')
 
-    @deprecated(version="J-turtle", reason="The fullProjectionMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the full_projection_matrix()->numpy.ndarray method instead.")
-    def fullProjectionMatrix(self)->numpy.matrix:
-        """ 
+    @deprecated(
+        version='J-turtle',
+        reason='The fullProjectionMatrix()->numpy.matrix method is deprecated as of J-turtle, '
+               'and will be removed in K-turtle. Please use the '
+               'full_projection_matrix()->numpy.ndarray method instead.')
+    def fullProjectionMatrix(self) -> numpy.matrix:
+        """
+        Use :meth:`full_projection_matrix` instead, this is deprecated.
+
         .. warning::
-            The fullProjectionMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the full_projection_matrix()->numpy.ndarray method instead.
-        
+            The fullProjectionMatrix()->numpy.matrix method is deprecated as of J-turtle, and will
+            be removed in K-turtle. Please use the full_projection_matrix()->numpy.ndarray method
+            instead.
+
         :rtype:                 numpy.matrix
 
-        Return the projection matrix for full resolution """
-        return numpy.matrix(self.full_projection_matrix(), dtype='float64')
- 
-    @deprecated(version="J-turtle", reason="The fullResolution() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the full_resolution() method instead.")
-    def fullResolution(self)->tuple[int, int]:
+        Return the projection matrix for full resolution
         """
+        return numpy.matrix(self.full_projection_matrix(), dtype='float64')
+
+    @deprecated(
+        version='J-turtle',
+        reason='The fullResolution() method is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. Please use the full_resolution() method instead.')
+    def fullResolution(self) -> tuple[int, int]:
+        """
+        Use :meth:`full_resolution` instead, this is deprecated.
+
         .. warning::
-            The fullResolution() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the full_resolution() method instead.
-            
+            The fullResolution() method is deprecated as of J-turtle, and will be removed in
+            K-turtle. Please use the full_resolution() method instead.
+
         :rtype:                 tuple[int, int]
 
         Returns the full resolution of the camera as a tuple in the format (width, height)
         """
         return self.full_resolution()
 
-    @deprecated(version="J-turtle", reason="The getDeltaU() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_delta_u() method instead.")
-    def getDeltaU(self, deltaX, Z)->float:
+    @deprecated(
+        version='J-turtle',
+        reason='The getDeltaU() method is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. Please use the get_delta_u() method instead.')
+    def getDeltaU(self, deltaX, Z) -> float:
         """
+        Use :meth:`get_delta_u` instead, this is deprecated.
+
         .. warning::
-            The getDeltaU() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_delta_u() method instead.
-        
+            The getDeltaU() method is deprecated as of J-turtle, and will be removed in K-turtle.
+            Please use the get_delta_u() method instead.
+
         :param deltaX:          delta X, in cartesian space
         :type deltaX:           float
         :param Z:               Z, in cartesian space
@@ -623,11 +721,17 @@ class PinholeCameraModel:
         """
         return self.get_delta_u(deltaX, Z)
 
-    @deprecated(version="J-turtle", reason="The getDeltaV() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_delta_v() method instead.")
-    def getDeltaV(self, deltaY, Z)->float:
+    @deprecated(
+        version='J-turtle',
+        reason='The getDeltaV() method is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. Please use the get_delta_v() method instead.')
+    def getDeltaV(self, deltaY, Z) -> float:
         """
+        Use :meth:`get_delta_v` instead, this is deprecated.
+
         .. warning::
-            he getDeltaV() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_delta_v() method instead.
+            he getDeltaV() method is deprecated as of J-turtle, and will be removed in K-turtle.
+            Please use the get_delta_v() method instead.
 
         :param deltaY:          delta Y, in cartesian space
         :type deltaY:           float
@@ -637,16 +741,21 @@ class PinholeCameraModel:
 
         Compute delta v, given Z and delta Y in Cartesian space.
         For given Z, this is the inverse of :math:`get_delta_y`.
-
         """
-        return(self.get_delta_v(deltaY,Z))    
+        return self.get_delta_v(deltaY, Z)
 
-    @deprecated(version="J-turtle", reason="The getDeltaX() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_delta_x() method instead.")
-    def getDeltaX(self, deltaU, Z)->float:
+    @deprecated(
+        version='J-turtle',
+        reason='The getDeltaX() method is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. Please use the get_delta_x() method instead.')
+    def getDeltaX(self, deltaU, Z) -> float:
         """
+        Use :meth:`get_delta_x` instead, this is deprecated.
+
         .. warning::
-            The getDeltaX() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_delta_x() method instead.
-        
+            The getDeltaX() method is deprecated as of J-turtle, and will be removed in K-turtle.
+            Please use the get_delta_x() method instead.
+
         :param deltaU:          delta u in pixels
         :type deltaU:           float
         :param Z:               Z, in cartesian space
@@ -656,13 +765,19 @@ class PinholeCameraModel:
         Compute delta X, given Z in cartesian space and delta u in pixels.
         For given Z, this is the inverse of :math:`get_delta_u`.
         """
-        return self.get_delta_x(deltaU,Z)
-    
-    @deprecated(version="J-turtle", reason="The getDeltaY() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_delta_y() method instead.")
-    def getDeltaY(self, deltaV, Z)->float:
+        return self.get_delta_x(deltaU, Z)
+
+    @deprecated(
+        version='J-turtle',
+        reason='The getDeltaY() method is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. Please use the get_delta_y() method instead.')
+    def getDeltaY(self, deltaV, Z) -> float:
         """
+        Use :meth:`get_delta_y` instead, this is deprecated.
+
         .. warning::
-            The getDeltaY() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_delta_y() method instead.
+            The getDeltaY() method is deprecated as of J-turtle, and will be removed in K-turtle.
+            Please use the get_delta_y() method instead.
 
         :param deltaV:          delta v in pixels
         :type deltaV:           float
@@ -673,145 +788,208 @@ class PinholeCameraModel:
         Compute delta Y, given Z in cartesian space and delta v in pixels.
         For given Z, this is the inverse of :math:`get_delta_v`.
         """
-        return self.get_delta_y(deltaV,Z)
+        return self.get_delta_y(deltaV, Z)
 
-    @deprecated(version="J-turtle", reason="The intrinsicMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the intrinsic_matrix()->numpy.ndarray method instead.")
-    def intrinsicMatrix(self)->numpy.matrix:
-        """ 
+    @deprecated(
+        version='J-turtle',
+        reason='The intrinsicMatrix()->numpy.matrix method is deprecated as of J-turtle, and '
+               'will be removed in K-turtle. Please use the intrinsic_matrix()->numpy.ndarray '
+               'method instead.')
+    def intrinsicMatrix(self) -> numpy.matrix:
+        """
+        Use :meth:`intrinsic_matrix` instead, this is deprecated.
+
         .. warning::
-            The intrinsicMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the intrinsic_matrix()->numpy.ndarray method instead.
-        
+            The intrinsicMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be
+            removed in K-turtle. Please use the intrinsic_matrix()->numpy.ndarray method instead.
+
         :rtype:                 numpy.matrix
 
-        Returns :math:`K`, also called camera_matrix in cv docs 
+        Returns :math:`K`, also called camera_matrix in cv docs
         """
-        return numpy.matrix(self.intrinsic_matrix(), dtype="float64")
+        return numpy.matrix(self.intrinsic_matrix(), dtype='float64')
 
-    @deprecated(version="J-turtle", reason="The project3dToPixel() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the project_3d_to_pixel() method instead.")
-    def project3dToPixel(self, point)->tuple[float,float]:
+    @deprecated(
+        version='J-turtle',
+        reason='The project3dToPixel() method is deprecated as of J-turtle, and will be removed '
+               'in K-turtle. Please use the project_3d_to_pixel() method instead.')
+    def project3dToPixel(self, point) -> tuple[float, float]:
         """
+        Use :meth:`project_3d_to_pixel` instead, this is deprecated.
+
         .. warning::
-            The project3dToPixel() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the project_3d_to_pixel() method instead.
+            The project3dToPixel() method is deprecated as of J-turtle, and will be removed in
+            K-turtle. Please use the project_3d_to_pixel() method instead.
 
         :param point:     3D point
         :type point:      (x, y, z)
         :rtype:            tuple[float,float]
-        
+
         Returns the rectified pixel coordinates (u, v) of the 3D point,
         using the camera :math:`P` matrix.
         This is the inverse of :math:`projectPixelTo3dRay`.
         """
         return self.project_3d_to_pixel(point)
-    
-    @deprecated(version="J-turtle", reason="The projectionMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the projection_matrix()->numpy.ndarray method instead.")
+
+    @deprecated(
+        version='J-turtle',
+        reason='The projectionMatrix()->numpy.matrix method is deprecated as of J-turtle, and '
+               'will be removed in K-turtle. Please use the projection_matrix()->numpy.ndarray '
+               'method instead.')
     def projectionMatrix(self) -> numpy.matrix:
-        """ 
+        """
+        Use :meth:`projection_matrix` instead, this is deprecated.
+
         .. warning::
-            The projectionMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the projection_matrix()->numpy.ndarray method instead.
-        
+            The projectionMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be
+            removed in K-turtle. Please use the projection_matrix()->numpy.ndarray method instead.
+
         :rtype:                 numpy.matrix
 
-        Returns :math:`P` 
+        Returns :math:`P`
         """
         return np.matrix(self.projection_matrix(), dtype='float64')
 
-    @deprecated(version="J-turtle", reason="The projectPixelTo3dRay() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the project_pixel_to_3d_ray() method instead.")
-    def projectPixelTo3dRay(self, uv)->tuple[float,float,float]:
+    @deprecated(
+        version='J-turtle',
+        reason='The projectPixelTo3dRay() method is deprecated as of J-turtle, and will be '
+               'removed in K-turtle. Please use the project_pixel_to_3d_ray() method instead.')
+    def projectPixelTo3dRay(self, uv) -> tuple[float, float, float]:
         """
+        Use :meth:`project_pixel_to_3d_ray` instead, this is deprecated.
+
         .. warning::
-            The projectPixelTo3dRay() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the project_pixel_to_3d_ray() method instead.
-        
+            The projectPixelTo3dRay() method is deprecated as of J-turtle, and will be removed in
+            K-turtle. Please use the project_pixel_to_3d_ray() method instead.
+
         :param uv:        rectified pixel coordinates
         :type uv:         (u, v)
         :rtype:           tuple[float,float,float]
 
-        Returns the unit vector which passes from the camera center to through rectified pixel (u, v),
+        Returns the unit vector which passes from the camera center to through rectified pixel (u,
+        v),
         using the camera :math:`P` matrix.
         This is the inverse of :math:`project_3d_to_pixel`.
         """
         return self.project_pixel_to_3d_ray(uv)
 
-    @deprecated(version="J-turtle", reason="The rectifyImage() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the rectify_image() method instead.")
+    @deprecated(
+        version='J-turtle',
+        reason='The rectifyImage() method is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. Please use the rectify_image() method instead.')
     def rectifyImage(self, raw, rectified):
         """
+        Use :meth:`rectify_image` instead, this is deprecated.
+
         .. warning::
-            The rectifyImage() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the rectify_image() method instead.
+            The rectifyImage() method is deprecated as of J-turtle, and will be removed in
+            K-turtle. Please use the rectify_image() method instead.
 
         :param raw:       input image
         :type raw:        :class:`CvMat` or :class:`IplImage`
         :param rectified: rectified output image
         :type rectified:  :class:`CvMat` or :class:`IplImage`
-        
-        Applies the rectification specified by camera parameters :math:`K` and and :math:`D` to image `raw` and writes the resulting image `rectified`.
+
+        Applies the rectification specified by camera parameters :math:`K` and and :math:`D` to
+        image `raw` and writes the resulting image `rectified`.
         """
         self.rectify_image(raw, rectified)
 
-    @deprecated(version="J-turtle", reason="The rectifyPoint() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the rectify_point() method instead.")
-    def rectifyPoint(self, uv_raw)->numpy.ndarray:
+    @deprecated(
+        version='J-turtle',
+        reason='The rectifyPoint() method is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. Please use the rectify_point() method instead.')
+    def rectifyPoint(self, uv_raw) -> numpy.ndarray:
         """
+        Use :meth:`rectify_point` instead, this is deprecated.
+
         .. warning::
-            The rectifyPoint() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the rectify_point() method instead.
-        
+            The rectifyPoint() method is deprecated as of J-turtle, and will be removed in
+            K-turtle. Please use the rectify_point() method instead.
+
         :param uv_raw:    pixel coordinates
         :type uv_raw:     (u, v)
         :rtype:           numpy.ndarray
-        
+
         Applies the rectification specified by camera parameters
         :math:`K` and and :math:`D` to point (u, v) and returns the
         pixel coordinates of the rectified point.
         """
         return self.rectify_point(uv_raw)
 
-    @deprecated(version="J-turtle", reason="The rotationMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the rotation_matrix()->numpy.ndarray method instead.")
-    def rotationMatrix(self)->numpy.matrix:
-        """ 
+    @deprecated(
+        version='J-turtle',
+        reason='The rotationMatrix()->numpy.matrix method is deprecated as of J-turtle, and will '
+               'be removed in K-turtle. Please use the rotation_matrix()->numpy.ndarray method '
+               'instead.')
+    def rotationMatrix(self) -> numpy.matrix:
+        """
+        Use :meth:`rotation_matrix` instead, this is deprecated.
+
         .. warning::
-            The rotationMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the rotation_matrix()->numpy.ndarray method instead.
-        
+            The rotationMatrix()->numpy.matrix method is deprecated as of J-turtle, and will be
+            removed in K-turtle. Please use the rotation_matrix()->numpy.ndarray method instead.
+
         :rtype:                 numpy.matrix
 
-        Returns :math:`R` 
+        Returns :math:`R`
         """
         return np.matrix(self.rotation_matrix(), dtype='float64')
 
-    @deprecated(version="J-turtle", reason="The tfFrame() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_tf_frame() method instead.")
-    def tfFrame(self)->str:
-        """ 
-        .. warning::
-            The tfFrame() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_tf_frame() method instead.
+    @deprecated(
+        version='J-turtle',
+        reason='The tfFrame() method is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. Please use the get_tf_frame() method instead.')
+    def tfFrame(self) -> str:
+        """
+        Use :meth:`get_tf_frame` instead, this is deprecated.
 
-        :rtype:                 str      
-        
+        .. warning::
+            The tfFrame() method is deprecated as of J-turtle, and will be removed in K-turtle.
+            Please use the get_tf_frame() method instead.
+
+        :rtype:                 str
+
         Returns the tf frame name - a string - of the camera.
         This is the frame of the :class:`sensor_msgs.msg.CameraInfo` message.
         """
         return self.get_tf_frame()
 
-    @deprecated(version="J-turtle", reason="The Tx() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the tx() method instead.")
-    def Tx(self)->float:
-        """ 
-        .. warning::
-            The Tx() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the tx() method instead.
-        
-        :rtype:                 float      
+    @deprecated(
+        version='J-turtle',
+        reason='The Tx() method is deprecated as of J-turtle, and will be removed in K-turtle. '
+               'Please use the tx() method instead.')
+    def Tx(self) -> float:
+        """
+        Use :meth:`tx` instead, this is deprecated.
 
-        Return the x-translation term of the projection matrix 
+        .. warning::
+            The Tx() method is deprecated as of J-turtle, and will be removed in K-turtle. Please
+            use the tx() method instead.
+
+        :rtype:                 float
+
+        Return the x-translation term of the projection matrix
         """
         return self.tx()
 
-    @deprecated(version="J-turtle", reason="The Ty() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the ty() method instead.")
-    def Ty(self)->float:
-        """ 
+    @deprecated(
+        version='J-turtle',
+        reason='The Ty() method is deprecated as of J-turtle, and will be removed in K-turtle. '
+               'Please use the ty() method instead.')
+    def Ty(self) -> float:
+        """
+        Use :meth:`ty` instead, this is deprecated.
+
         .. warning::
-            The Ty() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the ty() method instead.
-        
-        :rtype:                 float      
-        
-        Return the y-translation term of the projection matrix 
+            The Ty() method is deprecated as of J-turtle, and will be removed in K-turtle. Please
+            use the ty() method instead.
+
+        :rtype:                 float
+
+        Return the y-translation term of the projection matrix
         """
         return self.ty()
-
-
 
 
 class StereoCameraModel:
@@ -868,21 +1046,7 @@ class StereoCameraModel:
         """
         return self._left.get_tf_frame()
 
-<<<<<<< HEAD
-    def project_3d_to_pixel(self, point)->tuple[tuple[float,float],tuple[float,float]]:
-=======
-    def reprojection_matrix(self) -> numpy.ndarray:
-        """
-        Return the 4x4 matrix Q that reprojects a disparity image to 3D.
-
-        This is the matrix used by :func:`cv2.reprojectImageTo3D`.
-
-        :rtype:                 numpy.ndarray
-        """
-        return self._q
-
     def project_3d_to_pixel(self, point) -> tuple[tuple[float, float], tuple[float, float]]:
->>>>>>> 72c4058 (enable ament_lint_auto in cv_bridge and image_geometry (#542))
         """
         Return the rectified pixel coordinates (u, v) of the 3D point, for each camera.
 
@@ -971,42 +1135,66 @@ class StereoCameraModel:
         :rtype: PinholeCameraModel
         """
         return self._right
-    
+
     # Deprecated members planned for removal in K-turtle
     # --------------------------------------------------
     @property
-    @deprecated(version="J-turtle", reason="The left property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_left_camera() method.")
+    @deprecated(
+        version='J-turtle',
+        reason='The left property is deprecated as of J-turtle, and will be removed in K-turtle. '
+               'Please use the get_left_camera() method.')
     def left(self):
-        """ 
+        """
+        Use :meth:`get_left_camera` instead, this is deprecated.
+
         .. warning::
-            The left property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+            The left property is deprecated as of J-turtle, and will be removed in K-turtle. It is
+            not meant to be an exposed member.
         """
         return self._left
 
     @property
-    @deprecated(version="J-turtle", reason="The right property is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_right_camera() method.")
+    @deprecated(
+        version='J-turtle',
+        reason='The right property is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. Please use the get_right_camera() method.')
     def right(self):
-        """ 
+        """
+        Use :meth:`get_right_camera` instead, this is deprecated.
+
         .. warning::
-            The right property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+            The right property is deprecated as of J-turtle, and will be removed in K-turtle. It is
+            not meant to be an exposed member.
         """
         return self._right
 
     @property
-    @deprecated(version="J-turtle", reason="The Q property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.")
+    @deprecated(
+        version='J-turtle',
+        reason='The Q property is deprecated as of J-turtle, and will be removed in K-turtle. It '
+               'is not meant to be an exposed member.')
     def Q(self):
-        """ 
+        """
+        Do not use, this is deprecated and not meant to be an exposed member.
+
         .. warning::
-            The Q property is deprecated as of J-turtle, and will be removed in K-turtle. It is not meant to be an exposed member.
+            The Q property is deprecated as of J-turtle, and will be removed in K-turtle. It is not
+            meant to be an exposed member.
         """
         return self._q
 
-    @deprecated(version="J-turtle", reason="The fromCameraInfo() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the from_camera_info() method instead.")
+    @deprecated(
+        version='J-turtle',
+        reason='The fromCameraInfo() method is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. Please use the from_camera_info() method instead.')
     def fromCameraInfo(self, left_msg, right_msg):
         """
+        Use :meth:`from_camera_info` instead, this is deprecated.
+
         .. warning::
-            The fromCameraInfo() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the from_camera_info() method instead.
-        
+            The fromCameraInfo() method is deprecated as of J-turtle, and will be removed in
+            K-turtle. Please use the from_camera_info() method instead.
+
         :param left_msg: left camera parameters
         :type left_msg:  sensor_msgs.msg.CameraInfo
         :param right_msg: right camera parameters
@@ -1014,15 +1202,20 @@ class StereoCameraModel:
 
         Set the camera parameters from the :class:`sensor_msgs.msg.CameraInfo` messages.
         """
+        self.from_camera_info(left_msg, right_msg)
 
-        self.from_camera_info(left_msg,right_msg)
-
-    @deprecated(version="J-turtle", reason="The getDisparity() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_disparity() method instead.")
-    def getDisparity(self, Z)->float:
+    @deprecated(
+        version='J-turtle',
+        reason='The getDisparity() method is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. Please use the get_disparity() method instead.')
+    def getDisparity(self, Z) -> float:
         """
+        Use :meth:`get_disparity` instead, this is deprecated.
+
         .. warning::
-            The getDisparity() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_disparity() method instead.
-        
+            The getDisparity() method is deprecated as of J-turtle, and will be removed in
+            K-turtle. Please use the get_disparity() method instead.
+
         :param Z:          Z (depth), in cartesian space
         :type Z:           float
         :rtype:            float
@@ -1031,13 +1224,19 @@ class StereoCameraModel:
         This is the inverse of :math:`getZ`.
         """
         return self.get_disparity(Z)
-    
-    @deprecated(version="J-turtle", reason="The getZ() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_z() method instead.")
-    def getZ(self, disparity)->float:
+
+    @deprecated(
+        version='J-turtle',
+        reason='The getZ() method is deprecated as of J-turtle, and will be removed in K-turtle. '
+               'Please use the get_z() method instead.')
+    def getZ(self, disparity) -> float:
         """
+        Use :meth:`get_z` instead, this is deprecated.
+
         .. warning::
-            The getZ() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_z() method instead.
-        
+            The getZ() method is deprecated as of J-turtle, and will be removed in K-turtle. Please
+            use the get_z() method instead.
+
         :param disparity:        disparity, in pixels
         :type disparity:         float
         :rtype:                  float
@@ -1049,33 +1248,46 @@ class StereoCameraModel:
         """
         return self.get_z(disparity)
 
-    @deprecated(version="J-turtle", reason="The project3dToPixel() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the project_3d_to_pixel() method instead.")
-    def project3dToPixel(self, point)->tuple[tuple[float,float],tuple[float,float]]:
+    @deprecated(
+        version='J-turtle',
+        reason='The project3dToPixel() method is deprecated as of J-turtle, and will be removed '
+               'in K-turtle. Please use the project_3d_to_pixel() method instead.')
+    def project3dToPixel(self, point) -> tuple[tuple[float, float], tuple[float, float]]:
         """
+        Use :meth:`project_3d_to_pixel` instead, this is deprecated.
+
         .. warning::
-            The project3dToPixel() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the project_3d_to_pixel() method instead.
+            The project3dToPixel() method is deprecated as of J-turtle, and will be removed in
+            K-turtle. Please use the project_3d_to_pixel() method instead.
 
         :param point:     3D point
         :type point:      (x, y, z)
         :rtype:           tuple[tuple[float,float],tuple[float,float]]
-        
-        Returns the rectified pixel coordinates (u, v) of the 3D point, for each camera, as ((u_left, v_left), (u_right, v_right))
+
+        Returns the rectified pixel coordinates (u, v) of the 3D point, for each camera, as
+        ((u_left, v_left), (u_right, v_right))
         using the cameras' :math:`P` matrices.
         This is the inverse of :math:`projectPixelTo3d`.
         """
         return self.project_3d_to_pixel(point)
 
-    @deprecated(version="J-turtle", reason="The projectPixelTo3d() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the project_pixel_to_3d() method instead.")
-    def projectPixelTo3d(self, left_uv, disparity)->tuple[float,float,float]:
+    @deprecated(
+        version='J-turtle',
+        reason='The projectPixelTo3d() method is deprecated as of J-turtle, and will be removed '
+               'in K-turtle. Please use the project_pixel_to_3d() method instead.')
+    def projectPixelTo3d(self, left_uv, disparity) -> tuple[float, float, float]:
         """
+        Use :meth:`project_pixel_to_3d` instead, this is deprecated.
+
         .. warning::
-            The projectPixelTo3d() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the project_pixel_to_3d() method instead.
-        
+            The projectPixelTo3d() method is deprecated as of J-turtle, and will be removed in
+            K-turtle. Please use the project_pixel_to_3d() method instead.
+
         :param left_uv:        rectified pixel coordinates
         :type left_uv:         (u, v)
         :param disparity:      disparity, in pixels
         :type disparity:       float
-        :rtype:                tuple[float,float,float] 
+        :rtype:                tuple[float,float,float]
 
         Returns the 3D point (x, y, z) for the given pixel position,
         using the cameras' :math:`P` matrices.
@@ -1083,18 +1295,23 @@ class StereoCameraModel:
 
         Note that a disparity of zero implies that the 3D point is at infinity.
         """
-        return self.project_pixel_to_3d(left_uv,disparity)
+        return self.project_pixel_to_3d(left_uv, disparity)
 
-    @deprecated(version="J-turtle", reason="The tfFrame() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the tf_frame() method instead.")
-    def tfFrame(self)->str:
-        """ 
+    @deprecated(
+        version='J-turtle',
+        reason='The tfFrame() method is deprecated as of J-turtle, and will be removed in '
+               'K-turtle. Please use the tf_frame() method instead.')
+    def tfFrame(self) -> str:
+        """
+        Use :meth:`tf_frame` instead, this is deprecated.
+
         .. warning::
-            The tfFrame() method is deprecated as of J-turtle, and will be removed in K-turtle. Please use the get_tf_frame() method instead.
-        
-        :rtype:                 str      
-        
+            The tfFrame() method is deprecated as of J-turtle, and will be removed in K-turtle.
+            Please use the get_tf_frame() method instead.
+
+        :rtype:                 str
+
         Returns the tf frame name - a string - of the camera.
         This is the frame of the :class:`sensor_msgs.msg.CameraInfo` message.
         """
         return self.get_tf_frame()
-

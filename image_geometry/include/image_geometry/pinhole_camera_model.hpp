@@ -1,24 +1,13 @@
 #ifndef IMAGE_GEOMETRY__PINHOLE_CAMERA_MODEL_HPP_
 #define IMAGE_GEOMETRY__PINHOLE_CAMERA_MODEL_HPP_
 
-<<<<<<< HEAD
-#include "image_geometry/visibility_control.hpp"
-
-#include <sensor_msgs/msg/camera_info.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
-#include <stdexcept>
-#include <string>
-=======
->>>>>>> 72c4058 (enable ament_lint_auto in cv_bridge and image_geometry (#542))
 #include <math.h>
 
 #include <memory>
 #include <stdexcept>
 #include <string>
 
-#include <opencv2/calib3d.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <sensor_msgs/msg/camera_info.hpp>

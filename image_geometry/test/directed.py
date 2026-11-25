@@ -264,6 +264,15 @@ class TestDirected(unittest.TestCase):
         actual = self.cam.get_left_camera().fov_y()
         assert_almost_equal(expected,actual,6)
 
+    def test_fov_with_binning(self):
+        # Binning lowers the image resolution, not the field of view.
+        self.lmsg.binning_x = 2
+        self.lmsg.binning_y = 4
+        binned = PinholeCameraModel()
+        binned.from_camera_info(self.lmsg)
+        assert_almost_equal(1.6502496354, binned.fov_x(), 6)
+        assert_almost_equal(1.364138172, binned.fov_y(), 6)
+
     def test_get_tf_frame(self):
         expected = "left_camera"
         actual = self.cam.get_left_camera().get_tf_frame()
@@ -404,6 +413,7 @@ if __name__ == '__main__':
     suite.addTest(TestDirected('test_ty'))
     suite.addTest(TestDirected('test_fov_x'))
     suite.addTest(TestDirected('test_fov_y'))
+    suite.addTest(TestDirected('test_fov_with_binning'))
     suite.addTest(TestDirected('test_get_tf_frame'))
     suite.addTest(TestDirected('test_stereo_project_3d_to_pixel'))
     suite.addTest(TestDirected('test_stereo_project_pixel_to_3d'))

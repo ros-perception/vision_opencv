@@ -73,6 +73,8 @@ class PinholeCameraModel:
         self._p[1,1] /= self._binning_y
         self._p[0,2] = (self._p[0,2] - self._raw_roi.x_offset) / self._binning_x
         self._p[1,2] = (self._p[1,2] - self._raw_roi.y_offset) / self._binning_y
+        self._p[0,3] /= self._binning_x
+        self._p[1,3] /= self._binning_y
 
     def rectify_image(self, raw, rectified)->None:
         """

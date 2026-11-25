@@ -332,6 +332,40 @@ class PinholeCameraModel:
         """
         return self._tf_frame
 
+    def stamp(self):
+        """
+        :rtype:                 builtin_interfaces.msg.Time
+
+        Returns the time stamp of the :class:`sensor_msgs.msg.CameraInfo` message.
+        """
+        return self._stamp
+
+    def raw_roi(self):
+        """
+        :rtype:                 sensor_msgs.msg.RegionOfInterest
+
+        Returns the region of interest of the camera, in the full resolution image.
+        A region of interest that is all zeros in the :class:`sensor_msgs.msg.CameraInfo`
+        message is returned as the full resolution.
+        """
+        return self._raw_roi
+
+    def binning_x(self)->int:
+        """
+        :rtype:                 int
+
+        Returns the number of pixels combined in the horizontal direction.
+        """
+        return self._binning_x
+
+    def binning_y(self)->int:
+        """
+        :rtype:                 int
+
+        Returns the number of pixels combined in the vertical direction.
+        """
+        return self._binning_y
+
 
 class StereoCameraModel:
     """
@@ -386,6 +420,15 @@ class StereoCameraModel:
         This is the frame of the :class:`sensor_msgs.msg.CameraInfo` message.
         """
         return self._left.get_tf_frame()
+
+    def reprojection_matrix(self)->numpy.ndarray:
+        """
+        :rtype:                 numpy.ndarray
+
+        Returns the 4x4 matrix Q that reprojects a disparity image to 3D,
+        as used by :func:`cv2.reprojectImageTo3D`.
+        """
+        return self._q
 
     def project_3d_to_pixel(self, point)->tuple[tuple[float,float],tuple[float,float]]:
         """

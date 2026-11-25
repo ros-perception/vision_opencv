@@ -204,7 +204,7 @@ class TestDirected(unittest.TestCase):
     def test_tx(self):
         expected = 0.0
         actual = self.cam.get_left_camera().tx()
-        assert_almost_equal(expected,actual,6)  
+        assert_almost_equal(expected,actual,6)
 
     def test_ty(self):
         expected = 0.0
@@ -214,12 +214,12 @@ class TestDirected(unittest.TestCase):
     def test_fov_x(self):
         expected = 1.6502496354
         actual = self.cam.get_left_camera().fov_x()
-        assert_almost_equal(expected,actual,6)  
+        assert_almost_equal(expected,actual,6)
 
     def test_fov_y(self):
         expected = 1.364138172
         actual = self.cam.get_left_camera().fov_y()
-        assert_almost_equal(expected,actual,6)  
+        assert_almost_equal(expected,actual,6)
 
     def test_get_tf_frame(self):
         expected = "left_camera"
@@ -228,6 +228,46 @@ class TestDirected(unittest.TestCase):
         actual = self.cam.get_tf_frame()
         self.assertEqual(expected,actual)
 
+
+    def test_stamp(self):
+        self.lmsg.header.stamp.sec = 12
+        self.lmsg.header.stamp.nanosec = 34
+        self.cam.from_camera_info(self.lmsg, self.rmsg)
+        actual = self.cam.get_left_camera().stamp()
+        self.assertEqual(self.lmsg.header.stamp, actual)
+
+    def test_raw_roi(self):
+        # A region of interest that is all zeros is the full resolution
+        actual = self.cam.get_left_camera().raw_roi()
+        self.assertEqual((0, 0, 640, 480), (actual.x_offset, actual.y_offset, actual.width, actual.height))
+
+        self.lmsg.roi.x_offset = 10
+        self.lmsg.roi.y_offset = 20
+        self.lmsg.roi.width = 100
+        self.lmsg.roi.height = 50
+        self.cam.from_camera_info(self.lmsg, self.rmsg)
+        actual = self.cam.get_left_camera().raw_roi()
+        self.assertEqual((10, 20, 100, 50), (actual.x_offset, actual.y_offset, actual.width, actual.height))
+
+    def test_binning(self):
+        # No binning in the message is a binning of 1
+        self.assertEqual(1, self.cam.get_left_camera().binning_x())
+        self.assertEqual(1, self.cam.get_left_camera().binning_y())
+
+        self.lmsg.binning_x = 2
+        self.lmsg.binning_y = 4
+        self.cam.from_camera_info(self.lmsg, self.rmsg)
+        self.assertEqual(2, self.cam.get_left_camera().binning_x())
+        self.assertEqual(4, self.cam.get_left_camera().binning_y())
+
+    def test_stereo_reprojection_matrix(self):
+        q = self.cam.reprojection_matrix()
+        self.assertEqual((4, 4), q.shape)
+        # Reprojecting a pixel and its disparity gives the same point as project_pixel_to_3d
+        left_uv = (1.0, 2.0)
+        disparity = 1.1234
+        point = q @ np.array([left_uv[0], left_uv[1], disparity, 1.0])
+        assert_almost_equal(self.cam.project_pixel_to_3d(left_uv, disparity), point[:3] / point[3], 6)
 
     def test_stereo_project_3d_to_pixel(self):
         point = (1.0,2.0,3.0)

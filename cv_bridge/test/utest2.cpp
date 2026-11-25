@@ -35,6 +35,7 @@
 
 #include <gtest/gtest.h>
 
+#include <iterator>
 #include <string>
 #include <vector>
 
@@ -44,6 +45,13 @@
 #include <sensor_msgs/msg/image.hpp>
 
 namespace enc = sensor_msgs::image_encodings;
+
+// NV12 / NV21 hold a full resolution Y plane plus a half height interleaved UV plane, so the
+// single channel cv::Mat backing them has height * 3 / 2 rows.
+int matRows(const std::string & encoding, int height)
+{
+  return (encoding == enc::NV12 || encoding == enc::NV21) ? height + height / 2 : height;
+}
 
 bool isUnsigned(const std::string & encoding)
 {
@@ -132,9 +140,11 @@ getEncodings()
     // enc::BAYER_GBRG16,
     // enc::BAYER_GRBG16,
     enc::YUV422,
-    enc::YUV422_YUY2
+    enc::YUV422_YUY2,
+    enc::NV12,
+    enc::NV21
   };
-  return std::vector<std::string>(encodings, encodings + 48 - 8 - 7);
+  return std::vector<std::string>(std::begin(encodings), std::end(encodings));
 }
 
 TEST(OpencvTests, testCase_encode_decode)
@@ -150,7 +160,8 @@ TEST(OpencvTests, testCase_encode_decode)
     bool is_src_color_format = isColor(src_encoding) || isMono(src_encoding) ||
       (src_encoding == enc::YUV422) ||
       (src_encoding == enc::YUV422_YUY2);
-    cv::Mat image_original(cv::Size(400, 400), cv_bridge::getCvType(src_encoding));
+    cv::Mat image_original(cv::Size(400, matRows(src_encoding, 400)),
+      cv_bridge::getCvType(src_encoding));
     cv::RNG r(77);
     r.fill(image_original, cv::RNG::UNIFORM, 0, 127);
 
@@ -194,9 +205,11 @@ TEST(OpencvTests, testCase_encode_decode)
           EXPECT_THROW((void)cvtColor(cv_image, src_encoding)->image, cv_bridge::Exception);
           continue;
         }
-        // We do not support conversion to YUV422 for now, except from YUV422
+        // We do not support conversion to YUV422/NV12/NV21 for now, except from themselves
         if (((dst_encoding == enc::YUV422) && (src_encoding != enc::YUV422)) ||
-          ((dst_encoding == enc::YUV422_YUY2) && (src_encoding != enc::YUV422_YUY2)))
+          ((dst_encoding == enc::YUV422_YUY2) && (src_encoding != enc::YUV422_YUY2)) ||
+          ((dst_encoding == enc::NV12) && (src_encoding != enc::NV12)) ||
+          ((dst_encoding == enc::NV21) && (src_encoding != enc::NV21)))
         {
           EXPECT_THROW(cv_bridge::toCvShare(image_msg, dst_encoding), cv_bridge::Exception);
           continue;
@@ -204,9 +217,11 @@ TEST(OpencvTests, testCase_encode_decode)
 
         cv_image = cv_bridge::toCvShare(image_msg, dst_encoding);
 
-        // We do not support conversion to YUV422 for now, except from YUV422
+        // We do not support conversion to YUV422/NV12/NV21 for now, except from themselves
         if (((src_encoding == enc::YUV422) && (dst_encoding != enc::YUV422)) ||
-          ((src_encoding == enc::YUV422_YUY2) && (dst_encoding != enc::YUV422_YUY2)))
+          ((src_encoding == enc::YUV422_YUY2) && (dst_encoding != enc::YUV422_YUY2)) ||
+          ((src_encoding == enc::NV12) && (dst_encoding != enc::NV12)) ||
+          ((src_encoding == enc::NV21) && (dst_encoding != enc::NV21)))
         {
           EXPECT_THROW((void)cvtColor(cv_image, src_encoding)->image, cv_bridge::Exception);
           continue;

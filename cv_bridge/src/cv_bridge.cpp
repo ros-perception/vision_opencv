@@ -56,6 +56,20 @@ namespace enc = sensor_msgs::image_encodings;
 namespace cv_bridge
 {
 
+// Semi-planar YUV 4:2:0 encodings (NV12, NV21) store a full resolution Y plane followed by a
+// half resolution interleaved UV plane, i.e. height * 3 / 2 rows of `step` bytes each. OpenCV
+// handles them as a single channel cv::Mat holding both planes (see cv::COLOR_YUV2BGR_NV12).
+static inline bool isYUV420SemiPlanar(const std::string & encoding)
+{
+  return encoding == enc::NV12 || encoding == enc::NV21;
+}
+
+// Number of cv::Mat rows needed to hold an image of the given encoding and height.
+static inline size_t getMatRows(const std::string & encoding, size_t height)
+{
+  return isYUV420SemiPlanar(encoding) ? height + height / 2 : height;
+}
+
 static int depthStrToInt(const std::string depth)
 {
   if (depth == "8U") {
@@ -101,6 +115,8 @@ int getCvType(const std::string & encoding)
   // Miscellaneous
   if (encoding == enc::YUV422) {return CV_8UC2;}
   if (encoding == enc::YUV422_YUY2) {return CV_8UC2;}
+  if (encoding == enc::NV12) {return CV_8UC1;}
+  if (encoding == enc::NV21) {return CV_8UC1;}
 
   // Check all the generic content encodings
   std::cmatch m;
@@ -122,8 +138,8 @@ int getCvType(const std::string & encoding)
 
 /// @cond DOXYGEN_IGNORE
 
-enum Encoding { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, YUV422, YUV422_YUY2, BAYER_RGGB,
-  BAYER_BGGR, BAYER_GBRG, BAYER_GRBG, MAX_ENCODING};
+enum Encoding { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, YUV422, YUV422_YUY2, NV12, NV21,
+  BAYER_RGGB, BAYER_BGGR, BAYER_GBRG, BAYER_GRBG, MAX_ENCODING};
 
 Encoding getEncoding(const std::string & encoding)
 {
@@ -134,6 +150,8 @@ Encoding getEncoding(const std::string & encoding)
   if ((encoding == enc::RGBA8) || (encoding == enc::RGBA16)) {return RGBA;}
   if (encoding == enc::YUV422) {return YUV422;}
   if (encoding == enc::YUV422_YUY2) {return YUV422_YUY2;}
+  if (encoding == enc::NV12) {return NV12;}
+  if (encoding == enc::NV21) {return NV21;}
 
   if ((encoding == enc::BAYER_RGGB8) || (encoding == enc::BAYER_RGGB16)) {return BAYER_RGGB;}
   if ((encoding == enc::BAYER_BGGR8) || (encoding == enc::BAYER_BGGR16)) {return BAYER_BGGR;}
@@ -193,6 +211,18 @@ std::map<std::pair<Encoding, Encoding>, std::vector<int>> getConversionCodes()
   res[std::make_pair(YUV422_YUY2, BGR)].push_back(cv::COLOR_YUV2BGR_YUY2);
   res[std::make_pair(YUV422_YUY2, RGBA)].push_back(cv::COLOR_YUV2RGBA_YUY2);
   res[std::make_pair(YUV422_YUY2, BGRA)].push_back(cv::COLOR_YUV2BGRA_YUY2);
+
+  res[std::make_pair(NV12, GRAY)].push_back(cv::COLOR_YUV2GRAY_NV12);
+  res[std::make_pair(NV12, RGB)].push_back(cv::COLOR_YUV2RGB_NV12);
+  res[std::make_pair(NV12, BGR)].push_back(cv::COLOR_YUV2BGR_NV12);
+  res[std::make_pair(NV12, RGBA)].push_back(cv::COLOR_YUV2RGBA_NV12);
+  res[std::make_pair(NV12, BGRA)].push_back(cv::COLOR_YUV2BGRA_NV12);
+
+  res[std::make_pair(NV21, GRAY)].push_back(cv::COLOR_YUV2GRAY_NV21);
+  res[std::make_pair(NV21, RGB)].push_back(cv::COLOR_YUV2RGB_NV21);
+  res[std::make_pair(NV21, BGR)].push_back(cv::COLOR_YUV2BGR_NV21);
+  res[std::make_pair(NV21, RGBA)].push_back(cv::COLOR_YUV2RGBA_NV21);
+  res[std::make_pair(NV21, BGRA)].push_back(cv::COLOR_YUV2BGRA_NV21);
 
   // Deal with Bayer
   res[std::make_pair(BAYER_RGGB, GRAY)].push_back(cv::COLOR_BayerBG2GRAY);
@@ -292,16 +322,26 @@ cv::Mat matFromImage(const sensor_msgs::msg::Image & source)
     throw Exception(ss.str());
   }
 
-  if (source.height * source.step != source.data.size()) {
+  if (isYUV420SemiPlanar(source.encoding) &&
+    ((source.height % 2) != 0 || (source.width % 2) != 0))
+  {
     std::stringstream ss;
-    ss << "Image is wrongly formed: height * step != size  or  " << source.height << " * " <<
+    ss << "Image is wrongly formed: " << source.encoding <<
+      " requires even width and height, got " << source.width << " x " << source.height;
+    throw Exception(ss.str());
+  }
+
+  const size_t rows = getMatRows(source.encoding, source.height);
+  if (rows * source.step != source.data.size()) {
+    std::stringstream ss;
+    ss << "Image is wrongly formed: rows * step != size  or  " << rows << " * " <<
       source.step << " != " << source.data.size();
     throw Exception(ss.str());
   }
 
   // If the endianness is the same as locally, share the data
-  cv::Mat mat(source.height, source.width, source_type, const_cast<uchar *>(&source.data[0]),
-    source.step);
+  cv::Mat mat(static_cast<int>(rows), source.width, source_type,
+    const_cast<uchar *>(&source.data[0]), source.step);
 
   if ((std::endian::native == std::endian::big && source.is_bigendian) ||
     (std::endian::native == std::endian::little && !source.is_bigendian) ||
@@ -392,8 +432,15 @@ sensor_msgs::msg::Image::SharedPtr CvImage::toImageMsg() const
 
 void CvImage::toImageMsg(sensor_msgs::msg::Image & ros_image) const
 {
+  if (isYUV420SemiPlanar(encoding) && ((image.rows % 3) != 0 || (image.cols % 2) != 0)) {
+    std::stringstream ss;
+    ss << "cv::Mat of " << image.cols << " x " << image.rows << " cannot hold a " << encoding <<
+      " image: expected an even number of columns and a number of rows multiple of 3";
+    throw Exception(ss.str());
+  }
+
   ros_image.header = header;
-  ros_image.height = image.rows;
+  ros_image.height = isYUV420SemiPlanar(encoding) ? image.rows / 3 * 2 : image.rows;
   ros_image.width = image.cols;
   ros_image.encoding = encoding;
   ros_image.is_bigendian = (std::endian::native == std::endian::big);

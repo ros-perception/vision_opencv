@@ -18,6 +18,8 @@
 #include <bit>
 #include <cstddef>
 #include <memory>
+#include <stdexcept>
+#include <string>
 #include <variant>
 
 #include "opencv2/core/mat.hpp"
@@ -216,7 +218,19 @@ static void fill_sensor_msgs_image_from_cvmat(
   const std_msgs::msg::Header& header,
   const std::optional<std::string>& encoding_override = std::nullopt)
 {
-  image.height = cv_mat.rows;
+  const bool yuv420_semi_planar = encoding_override.has_value() &&
+    (encoding_override.value() == "nv12" || encoding_override.value() == "nv21");
+  if (yuv420_semi_planar) {
+    // The cv::Mat holds the Y plane followed by the half height interleaved UV plane
+    if (cv_mat.type() != CV_8UC1 || (cv_mat.rows % 3) != 0 || (cv_mat.cols % 2) != 0) {
+      throw std::runtime_error(
+              "a " + encoding_override.value() + " image needs a CV_8UC1 cv::Mat with an even "
+              "number of columns and a number of rows multiple of 3");
+    }
+    image.height = cv_mat.rows / 3 * 2;
+  } else {
+    image.height = cv_mat.rows;
+  }
   image.width = cv_mat.cols;
 
   if (encoding_override.has_value() && !encoding_override.value().empty()) {

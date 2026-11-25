@@ -1,11 +1,13 @@
 #include <gtest/gtest.h>
 #include <sensor_msgs/image_encodings.hpp>
 
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "cv_bridge/cv_bridge.hpp"
+#include "cv_bridge/cv_mat_sensor_msgs_image_type_adapter.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
 // Tests conversion of non-continuous cv::Mat. #5206
@@ -200,6 +202,50 @@ TEST(CvBridgeTest, semiPlanarYUV420)
     EXPECT_THROW(
       cv_bridge::CvImage(std_msgs::msg::Header(), encoding, wrong_rows).toImageMsg(),
       cv_bridge::Exception);
+  }
+}
+
+TEST(CvBridgeTest, semiPlanarYUV420TypeAdapter)
+{
+  namespace enc = sensor_msgs::image_encodings;
+  const int width = 4;
+  const int height = 4;
+
+  for (const std::string encoding : {enc::NV12, enc::NV21}) {
+    SCOPED_TRACE(encoding);
+
+    cv::Mat yuv(height * 3 / 2, width, CV_8UC1);
+    cv::randu(yuv, 0, 256);
+
+    // cv::Mat -> message: height is the image height, not the number of cv::Mat rows
+    cv_bridge::ROSCvMatContainer from_mat(yuv, std_msgs::msg::Header(), false, encoding);
+    sensor_msgs::msg::Image msg;
+    from_mat.get_sensor_msgs_msg_image_copy(msg);
+    EXPECT_EQ(static_cast<int>(msg.height), height);
+    EXPECT_EQ(static_cast<int>(msg.width), width);
+    EXPECT_EQ(msg.encoding, encoding);
+    EXPECT_EQ(msg.data.size(), static_cast<size_t>(width * height * 3 / 2));
+
+    // ... which cv_bridge accepts
+    cv_bridge::CvImagePtr copy;
+    ASSERT_NO_THROW(copy = cv_bridge::toCvCopy(msg, encoding));
+    EXPECT_EQ(cv::norm(copy->image, yuv, cv::NORM_INF), 0);
+
+    // message -> cv::Mat: both planes are visible
+    cv_bridge::ROSCvMatContainer from_msg(msg);
+    EXPECT_EQ(from_msg.cv_mat().rows, height * 3 / 2);
+    EXPECT_EQ(from_msg.cv_mat().cols, width);
+    EXPECT_EQ(from_msg.cv_mat().type(), CV_8UC1);
+    EXPECT_EQ(cv::norm(from_msg.cv_mat(), yuv, cv::NORM_INF), 0);
+
+    // Malformed input is rejected
+    cv::Mat wrong_rows(height + 1, width, CV_8UC1);
+    cv_bridge::ROSCvMatContainer bad_mat(wrong_rows, std_msgs::msg::Header(), false, encoding);
+    EXPECT_THROW(bad_mat.get_sensor_msgs_msg_image_copy(msg), std::runtime_error);
+
+    sensor_msgs::msg::Image odd = msg;
+    odd.height = height - 1;
+    EXPECT_THROW(cv_bridge::ROSCvMatContainer{odd}, std::runtime_error);
   }
 }
 

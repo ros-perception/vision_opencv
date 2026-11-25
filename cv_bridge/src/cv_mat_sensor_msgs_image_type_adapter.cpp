@@ -14,6 +14,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <variant>
@@ -49,9 +50,26 @@ encoding2mat_type(const std::string & encoding)
     return CV_8UC3;
   } else if (encoding == "yuv422") {
     return CV_8UC2;
+  } else if (encoding == "nv12" || encoding == "nv21") {
+    return CV_8UC1;
   } else {
     throw std::runtime_error("Unsupported encoding type");
   }
+}
+
+// Number of cv::Mat rows backing an image: NV12 and NV21 store the Y plane followed by the
+// half height interleaved UV plane
+int
+image2mat_rows(const sensor_msgs::msg::Image & image)
+{
+  if (image.encoding == "nv12" || image.encoding == "nv21") {
+    if ((image.height % 2) != 0 || (image.width % 2) != 0) {
+      throw std::runtime_error(
+              "a " + image.encoding + " image needs an even width and height");
+    }
+    return static_cast<int>(image.height + image.height / 2);
+  }
+  return static_cast<int>(image.height);
 }
 
 template<typename T>
@@ -77,7 +95,7 @@ ROSCvMatContainer::ROSCvMatContainer(
       "unique_sensor_msgs_image cannot be nullptr"
 ).pointer->header),
   frame_(
-    unique_sensor_msgs_image->height,
+    image2mat_rows(*unique_sensor_msgs_image),
     unique_sensor_msgs_image->width,
     encoding2mat_type(unique_sensor_msgs_image->encoding),
     unique_sensor_msgs_image->data.data(),
@@ -89,7 +107,7 @@ ROSCvMatContainer::ROSCvMatContainer(
   std::shared_ptr<sensor_msgs::msg::Image> shared_sensor_msgs_image)
 : header_(shared_sensor_msgs_image->header),
   frame_(
-    shared_sensor_msgs_image->height,
+    image2mat_rows(*shared_sensor_msgs_image),
     shared_sensor_msgs_image->width,
     encoding2mat_type(shared_sensor_msgs_image->encoding),
     shared_sensor_msgs_image->data.data(),

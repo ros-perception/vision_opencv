@@ -1,2 +1,3 @@
 from __future__ import absolute_import
-from .cameramodels import PinholeCameraModel, StereoCameraModel
+
+from .cameramodels import PinholeCameraModel, StereoCameraModel  # noqa: F401

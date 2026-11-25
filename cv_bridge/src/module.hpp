@@ -13,8 +13,11 @@
 // limitations under the License.
 //
 
-#ifndef CV_BRIDGE_MODULE_HPP_
-#define CV_BRIDGE_MODULE_HPP_
+#ifndef MODULE_HPP_
+#define MODULE_HPP_
+
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#include <numpy/ndarrayobject.h>
 
 #include <iostream>
 
@@ -33,9 +36,6 @@
 #include <cv_bridge/cv_bridge.hpp>
 #include <Python.h>
 
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#include <numpy/ndarrayobject.h>
-
 #include <opencv2/core/core.hpp>
 
 namespace bp = boost::python;
@@ -50,4 +50,4 @@ static void * do_numpy_import()
   return nullptr;
 }
 
-#endif  // CV_BRIDGE_MODULE_HPP_
+#endif  // MODULE_HPP_

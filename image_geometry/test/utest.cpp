@@ -1,6 +1,8 @@
-#include "image_geometry/pinhole_camera_model.hpp"
-#include <sensor_msgs/distortion_models.hpp>
 #include <gtest/gtest.h>
+
+#include <sensor_msgs/distortion_models.hpp>
+
+#include "image_geometry/pinhole_camera_model.hpp"
 
 /// @todo Tests with simple values (R = identity, D = 0, P = K or simple scaling)
 /// @todo Test projection functions for right stereo values, P(:,3) != 0
@@ -15,28 +17,29 @@ protected:
   {
     /// @todo Just load these from file
     // These parameters taken from a real camera calibration
-    double D[] = {-0.363528858080088, 0.16117037733986861, -8.1109585007538829e-05, -0.00044776712298447841, 0.0};
-    double K[] = {430.15433020105519,                0.0, 311.71339830549732,
-                                 0.0, 430.60920415473657, 221.06824942698509,
-                                 0.0,                0.0,                1.0};
+    double D[] = {-0.363528858080088, 0.16117037733986861, -8.1109585007538829e-05,
+      -0.00044776712298447841, 0.0};
+    double K[] = {430.15433020105519, 0.0, 311.71339830549732,
+      0.0, 430.60920415473657, 221.06824942698509,
+      0.0, 0.0, 1.0};
     double R[] = {0.99806560714807102, 0.0068562422224214027, 0.061790256276695904,
-                  -0.0067522959054715113, 0.99997541519165112, -0.0018909025066874664,
-                  -0.061801701660692349, 0.0014700186639396652, 0.99808736527268516};
+      -0.0067522959054715113, 0.99997541519165112, -0.0018909025066874664,
+      -0.061801701660692349, 0.0014700186639396652, 0.99808736527268516};
     double P[] = {295.53402059708782, 0.0, 285.55760765075684, 0.0,
-                  0.0, 295.53402059708782, 223.29617881774902, 0.0,
-                  0.0, 0.0, 1.0, 0.0};
+      0.0, 295.53402059708782, 223.29617881774902, 0.0,
+      0.0, 0.0, 1.0, 0.0};
 
 
     cam_info_.header.frame_id = "tf_frame";
     cam_info_.height = 480;
-    cam_info_.width  = 640;
+    cam_info_.width = 640;
     cam_info_.distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;
     // No ROI
     cam_info_.d.resize(5);
-    std::copy(D, D+5, cam_info_.d.begin());
-    std::copy(K, K+9, cam_info_.k.begin());
-    std::copy(R, R+9, cam_info_.r.begin());
-    std::copy(P, P+12, cam_info_.p.begin());
+    std::copy(D, D + 5, cam_info_.d.begin());
+    std::copy(K, K + 9, cam_info_.k.begin());
+    std::copy(R, R + 9, cam_info_.r.begin());
+    std::copy(P, P + 12, cam_info_.p.begin());
 
     model_.fromCameraInfo(cam_info_);
   }
@@ -59,7 +62,7 @@ TEST_F(PinholeTest, projectPoint)
   // Spot test an arbitrary point.
   {
     cv::Point2d uv(100, 100);
-    cv::Point3d xyz =  model_.projectPixelTo3dRay(uv);
+    cv::Point3d xyz = model_.projectPixelTo3dRay(uv);
     EXPECT_NEAR(-0.62787224048135637, xyz.x, 1e-8);
     EXPECT_NEAR(-0.41719792045817677, xyz.y, 1e-8);
     EXPECT_DOUBLE_EQ(1.0, xyz.z);
@@ -101,7 +104,7 @@ TEST_F(PinholeTest, rectifyPoint)
   /// @todo Need R = identity for the principal point tests.
 #if 0
   // Test rectifyPoint takes (c'x, c'y) [from K] -> (cx, cy) [from P].
-  double cxp = model_.intrinsicMatrix()(0,2), cyp = model_.intrinsicMatrix()(1,2);
+  double cxp = model_.intrinsicMatrix()(0, 2), cyp = model_.intrinsicMatrix()(1, 2);
   {
     cv::Point2d uv_raw(cxp, cyp), uv_rect;
     model_.rectifyPoint(uv_raw, uv_rect);
@@ -120,7 +123,7 @@ TEST_F(PinholeTest, rectifyPoint)
 
   // Check rectifying then unrectifying over most of the image is accurate.
   const size_t step = 5;
-  const size_t border = 65; // Expect bad accuracy far from the center of the image.
+  const size_t border = 65;  // Expect bad accuracy far from the center of the image.
   for (size_t row = border; row <= cam_info_.height - border; row += step) {
     for (size_t col = border; col <= cam_info_.width - border; col += step) {
       cv::Point2d uv_raw(static_cast<double>(row), static_cast<double>(col)), uv_rect, uv_unrect;
@@ -147,6 +150,21 @@ TEST_F(PinholeTest, getDeltas)
   EXPECT_NEAR(model_.getDeltaV(xyz1.y - xyz0.y, Z), dv, 1e-4);
   EXPECT_NEAR(model_.getDeltaX(du, Z), xyz1.x - xyz0.x, 1e-4);
   EXPECT_NEAR(model_.getDeltaY(dv, Z), xyz1.y - xyz0.y, 1e-4);
+}
+
+// Binning lowers the image resolution, not the field of view
+TEST_F(PinholeTest, fovWithBinning)
+{
+  const double fov_x = model_.fovX();
+  const double fov_y = model_.fovY();
+  EXPECT_NEAR(fov_x, 1.6502496354, 1e-6);
+  EXPECT_NEAR(fov_y, 1.364138172, 1e-6);
+
+  cam_info_.binning_x = 2;
+  cam_info_.binning_y = 4;
+  model_.fromCameraInfo(cam_info_);
+  EXPECT_NEAR(model_.fovX(), fov_x, 1e-9);
+  EXPECT_NEAR(model_.fovY(), fov_y, 1e-9);
 }
 
 TEST_F(PinholeTest, initialization)
@@ -183,7 +201,8 @@ TEST_F(PinholeTest, rectifyIfCalibrated)
   // the test again.
   // Then zero out all the distortion coefficients and test
   // that the output image is the same as the input.
-  cv::Mat distorted_image(cv::Size(cam_info_.width, cam_info_.height), CV_8UC3, cv::Scalar(0, 0, 0));
+  cv::Mat distorted_image(cv::Size(cam_info_.width, cam_info_.height), CV_8UC3,
+    cv::Scalar(0, 0, 0));
 
   // draw a grid
   const cv::Scalar color = cv::Scalar(255, 255, 255);
@@ -246,7 +265,9 @@ TEST_F(PinholeTest, rectifyIfCalibrated)
   EXPECT_EQ(error, 0);
 }
 
-void testUnrectifyImage(const sensor_msgs::msg::CameraInfo& cam_info, const image_geometry::PinholeCameraModel& model)
+void testUnrectifyImage(
+  const sensor_msgs::msg::CameraInfo & cam_info,
+  const image_geometry::PinholeCameraModel & model)
 {
   // test for unrectifyImage: call unrectifyImage, call unrectifyPoint in a loop, compare
 
@@ -257,14 +278,12 @@ void testUnrectifyImage(const sensor_msgs::msg::CameraInfo& cam_info, const imag
   const cv::Scalar color = cv::Scalar(255, 255, 255);
   const int thickness = 7;
   const int type = 8;
-  for (int y = 0; y <= rectified_image.rows; y += rectified_image.rows / 10)
-  {
+  for (int y = 0; y <= rectified_image.rows; y += rectified_image.rows / 10) {
     cv::line(rectified_image,
              cv::Point(0, y), cv::Point(cam_info.width, y),
              color, type, thickness);
   }
-  for (int x = 0; x <= rectified_image.cols; x += rectified_image.cols / 10)
-  {
+  for (int x = 0; x <= rectified_image.cols; x += rectified_image.cols / 10) {
     cv::line(rectified_image,
              cv::Point(x, 0), cv::Point(x, cam_info.height),
              color, type, thickness);
@@ -272,7 +291,8 @@ void testUnrectifyImage(const sensor_msgs::msg::CameraInfo& cam_info, const imag
 
   // restrict rectified_image to ROI and resize to new binning
   rectified_image = rectified_image(model.rawRoi());
-  cv::resize(rectified_image, rectified_image, cv::Size(), 1.0 / model.binningX(), 1.0 / model.binningY(),
+  cv::resize(rectified_image, rectified_image, cv::Size(), 1.0 / model.binningX(),
+    1.0 / model.binningY(),
              cv::INTER_NEAREST);
 
   // unrectify image in one go using unrectifyImage
@@ -294,24 +314,25 @@ void testUnrectifyImage(const sensor_msgs::msg::CameraInfo& cam_info, const imag
   assert(rectified_image.type() == CV_8UC3);  // need this for at<cv::Vec3b> to be correct
   cv::Mat distorted_image_by_pixel = cv::Mat::zeros(rectified_image.size(), rectified_image.type());
   cv::Mat mask = cv::Mat::zeros(rectified_image.size(), CV_8UC1);
-  for (int y = 0; y < rectified_image.rows; y++)
-  {
-    for (int x = 0; x < rectified_image.cols; x++)
-    {
+  for (int y = 0; y < rectified_image.rows; y++) {
+    for (int x = 0; x < rectified_image.cols; x++) {
       cv::Point2i uv_rect(x, y), uv_raw;
 
       uv_raw = model.unrectifyPoint(uv_rect);
 
-      if (0 <= uv_raw.x && uv_raw.x < distorted_image_by_pixel.cols && 0 <= uv_raw.y
-          && uv_raw.y < distorted_image_by_pixel.rows)
+      if (0 <= uv_raw.x && uv_raw.x < distorted_image_by_pixel.cols && 0 <= uv_raw.y &&
+        uv_raw.y < distorted_image_by_pixel.rows)
       {
         distorted_image_by_pixel.at<cv::Vec3b>(uv_raw) = rectified_image.at<cv::Vec3b>(uv_rect);
         mask.at<uchar>(uv_raw) = 255;
-        // Test that both methods produce similar values at the pixels that unrectifyPoint hits; don't test for all
-        // other pixels (the images will differ there, because unrectifyPoint doesn't interpolate missing pixels).
-        // Also don't check for absolute equality, but allow a color difference of up to 200. This still catches
-        // complete misses (color difference would be 255) while allowing for interpolation at the grid borders.
-        EXPECT_LT(distorted_image.at<cv::Vec3b>(uv_raw)[0] - distorted_image_by_pixel.at<cv::Vec3b>(uv_raw)[0], 200);
+        // Test that both methods produce similar values at the pixels that unrectifyPoint hits;
+        // don't test for all other pixels (the images will differ there, because unrectifyPoint
+        // doesn't interpolate missing pixels).
+        // Also don't check for absolute equality, but allow a color difference of up to 200.
+        // This still catches complete misses (color difference would be 255) while allowing for
+        // interpolation at the grid borders.
+        EXPECT_LT(distorted_image.at<cv::Vec3b>(uv_raw)[0] -
+          distorted_image_by_pixel.at<cv::Vec3b>(uv_raw)[0], 200);
       }
     }
   }
@@ -321,8 +342,9 @@ void testUnrectifyImage(const sensor_msgs::msg::CameraInfo& cam_info, const imag
   EXPECT_LT(error / (distorted_image.size[0] * distorted_image.size[1] * 255), 0.06);
 
   // Test that unrectifyPoint hits more than 50% of the output image
-  EXPECT_GT((double) cv::countNonZero(mask) / (distorted_image.size[0] * distorted_image.size[1]), 0.5);
-};
+  EXPECT_GT((double) cv::countNonZero(mask) / (distorted_image.size[0] * distorted_image.size[1]),
+    0.5);
+}
 
 TEST_F(PinholeTest, unrectifyImage)
 {
@@ -365,7 +387,6 @@ TEST_F(PinholeTest, unrectifyImageWithBinningAndRoi)
 }
 
 TEST_F(PinholeTest, rectifiedRoiSize) {
-
   cv::Rect rectified_roi = model_.rectifiedRoi();
   cv::Size reduced_resolution = model_.reducedResolution();
   EXPECT_EQ(0, rectified_roi.x);
@@ -454,7 +475,7 @@ TEST_F(PinholeTest, rectifiedRoiCaching)
   EXPECT_EQ(expected_roi_b, actual_roi_b);
 }
 
-int main(int argc, char** argv)
+int main(int argc, char ** argv)
 {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

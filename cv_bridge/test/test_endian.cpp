@@ -1,7 +1,15 @@
+<<<<<<< HEAD
 #include <boost/endian/conversion.hpp>
 #include <cv_bridge/cv_bridge.hpp>
+=======
+// Copyright (c) 2015, ROS Perception
+>>>>>>> 72c4058 (enable ament_lint_auto in cv_bridge and image_geometry (#542))
 #include <gtest/gtest.h>
+
+#include <bit>
 #include <memory>
+
+#include <cv_bridge/cv_bridge.hpp>
 
 TEST(CvBridgeTest, endianness)
 {

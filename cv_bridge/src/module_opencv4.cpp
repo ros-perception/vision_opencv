@@ -2,8 +2,6 @@
 
 #include "module.hpp"
 
-#include "opencv2/core/types_c.h"
-
 #include "opencv2/opencv_modules.hpp"
 
 static PyObject * opencv_error = 0;
@@ -96,11 +94,6 @@ class NumpyAllocator : public MatAllocator
 public:
   NumpyAllocator() {stdAllocator = Mat::getStdAllocator();}
   ~NumpyAllocator() {}
-
-// To compile openCV3 with OpenCV4 APIs.
-#ifndef OPENCV_VERSION_4
-#define AccessFlag int
-#endif
 
   UMatData * allocate(PyObject * o, int dims, const int * sizes, int type, size_t * step) const
   {

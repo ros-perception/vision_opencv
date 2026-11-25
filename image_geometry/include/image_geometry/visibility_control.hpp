@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef IMAGE_GEOMETRY__VISIBILITY_CONTROL_H_
-#define IMAGE_GEOMETRY__VISIBILITY_CONTROL_H_
+#ifndef IMAGE_GEOMETRY__VISIBILITY_CONTROL_HPP_
+#define IMAGE_GEOMETRY__VISIBILITY_CONTROL_HPP_
 
 #if __cplusplus
 extern "C"
@@ -55,4 +55,4 @@ extern "C"
 }
 #endif
 
-#endif  // IMAGE_GEOMETRY__VISIBILITY_CONTROL_H_
+#endif  // IMAGE_GEOMETRY__VISIBILITY_CONTROL_HPP_

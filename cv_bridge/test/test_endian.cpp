@@ -1,12 +1,10 @@
-#include <boost/endian/conversion.hpp>
+#include <bit>
 #include <cv_bridge/cv_bridge.hpp>
 #include <gtest/gtest.h>
 #include <memory>
 
 TEST(CvBridgeTest, endianness)
 {
-  using namespace boost::endian;
-
   // Create an image of the type opposite to the platform
   sensor_msgs::msg::Image msg;
   msg.height = 1;
@@ -14,18 +12,13 @@ TEST(CvBridgeTest, endianness)
   msg.encoding = "32SC2";
   msg.step = 8;
 
-  msg.data.resize(msg.step);
-  int32_t * data = reinterpret_cast<int32_t *>(&msg.data[0]);
-
   // Write 1 and 2 in order, but with an endianness opposite to the platform
-  if (order::native == order::little) {
+  if (std::endian::native == std::endian::little) {
     msg.is_bigendian = true;
-    *(data++) = native_to_big(static_cast<int32_t>(1));
-    *data = native_to_big(static_cast<int32_t>(2));
+    msg.data = {0, 0, 0, 1, 0, 0, 0, 2};
   } else {
     msg.is_bigendian = false;
-    *(data++) = native_to_little(static_cast<int32_t>(1));
-    *data = native_to_little(static_cast<int32_t>(2));
+    msg.data = {1, 0, 0, 0, 2, 0, 0, 0};
   }
 
   // Make sure the values are still the same

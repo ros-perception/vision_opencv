@@ -40,8 +40,9 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <sensor_msgs/image_encodings.hpp>
-#include "rcpputils/endian.hpp"
 
+#include <bit>
+#include <limits>
 #include <map>
 #include <memory>
 #include <regex>
@@ -299,8 +300,8 @@ cv::Mat matFromImage(const sensor_msgs::msg::Image & source)
   cv::Mat mat(source.height, source.width, source_type, const_cast<uchar *>(&source.data[0]),
     source.step);
 
-   if ((rcpputils::endian::native == rcpputils::endian::big && source.is_bigendian) ||
-    (rcpputils::endian::native == rcpputils::endian::little && !source.is_bigendian) ||
+   if ((std::endian::native == std::endian::big && source.is_bigendian) ||
+    (std::endian::native == std::endian::little && !source.is_bigendian) ||
     byte_depth == 1)
   {
     return mat;
@@ -392,7 +393,7 @@ void CvImage::toImageMsg(sensor_msgs::msg::Image & ros_image) const
   ros_image.height = image.rows;
   ros_image.width = image.cols;
   ros_image.encoding = encoding;
-  ros_image.is_bigendian = (rcpputils::endian::native == rcpputils::endian::big);
+  ros_image.is_bigendian = (std::endian::native == std::endian::big);
   ros_image.step = image.cols * image.elemSize();
   size_t size = ros_image.step * image.rows;
   ros_image.data.resize(size);
@@ -442,7 +443,7 @@ CvImageConstPtr toCvShare(
 {
   // If the encoding different or the endianness different, you have to copy
   if ((!encoding.empty() && source.encoding != encoding) || (!source.is_bigendian !=
-    (rcpputils::endian::native != rcpputils::endian::big)))
+    (std::endian::native != std::endian::big)))
   {
     return toCvCopy(source, encoding);
   }
@@ -570,6 +571,18 @@ CvImagePtr toCvCopy(const sensor_msgs::msg::CompressedImage & source, const std:
   }
 }
 
+// Sets to zero the pixels of scaled whose value in source is infinite or NaN.
+// How cv::Mat::convertTo() saturates those values depends on the OpenCV version.
+static void zeroNonFinite(const cv::Mat & source, cv::Mat & scaled)
+{
+  if (source.depth() != CV_32F && source.depth() != CV_64F) {
+    return;
+  }
+  const double inf = std::numeric_limits<double>::infinity();
+  const cv::Mat non_finite = (source != source) | (source == inf) | (source == -inf);
+  scaled.setTo(0, non_finite);
+}
+
 CvImageConstPtr cvtColorForDisplay(
   const CvImageConstPtr & source,
   const std::string & encoding_out,
@@ -680,10 +693,12 @@ CvImageConstPtr cvtColorForDisplay(
       img_scaled->encoding = enc::MONO8;
       cv::Mat(source->image - min_image_value).convertTo(img_scaled->image, CV_8UC1, 255.0 /
         (max_image_value - min_image_value));
+      zeroNonFinite(source->image, img_scaled->image);
     } else {
       img_scaled->encoding = enc::BGR8;
       cv::Mat(source->image - min_image_value).convertTo(img_scaled->image, CV_8UC3, 255.0 /
         (max_image_value - min_image_value));
+      zeroNonFinite(source->image, img_scaled->image);
       cv::applyColorMap(img_scaled->image, img_scaled->image, options.colormap);
       // Fill black color to the nan region.
       if (source->encoding == enc::TYPE_32FC1) {

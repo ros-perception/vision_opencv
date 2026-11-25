@@ -2,11 +2,7 @@
 
 #include "module.hpp"
 
-#include "opencv2/core/types_c.h"
-
 #include "opencv2/opencv_modules.hpp"
-
-#include "pycompat.hpp"
 
 static PyObject * opencv_error = 0;
 
@@ -98,11 +94,6 @@ class NumpyAllocator : public MatAllocator
 public:
   NumpyAllocator() {stdAllocator = Mat::getStdAllocator();}
   ~NumpyAllocator() {}
-
-// To compile openCV3 with OpenCV4 APIs.
-#ifndef OPENCV_VERSION_4
-#define AccessFlag int
-#endif
 
   UMatData * allocate(PyObject * o, int dims, const int * sizes, int type, size_t * step) const
   {
@@ -199,8 +190,8 @@ static bool pyopencv_to(PyObject * o, Mat & m, const ArgInfo info)
     return true;
   }
 
-  if (PyInt_Check(o) ) {
-    double v[] = {static_cast<double>(PyInt_AsLong(reinterpret_cast<PyObject *>(o))), 0., 0., 0.};
+  if (PyLong_Check(o) ) {
+    double v[] = {static_cast<double>(PyLong_AsLong(reinterpret_cast<PyObject *>(o))), 0., 0., 0.};
     m = Mat(4, 1, CV_64F, v).clone();
     return true;
   }
@@ -214,8 +205,8 @@ static bool pyopencv_to(PyObject * o, Mat & m, const ArgInfo info)
     m = Mat(sz, 1, CV_64F);
     for (i = 0; i < sz; i++) {
       PyObject * oi = PyTuple_GET_ITEM(o, i);
-      if (PyInt_Check(oi) ) {
-        m.at<double>(i) = static_cast<double>(PyInt_AsLong(oi));
+      if (PyLong_Check(oi) ) {
+        m.at<double>(i) = static_cast<double>(PyLong_AsLong(oi));
       } else if (PyFloat_Check(oi) ) {
         m.at<double>(i) = static_cast<double>(PyFloat_AsDouble(oi));
       } else {

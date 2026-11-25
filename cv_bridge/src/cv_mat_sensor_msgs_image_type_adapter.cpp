@@ -52,35 +52,54 @@ encoding2mat_type(const std::string & encoding)
     return CV_8UC3;
   } else if (encoding == "yuv422") {
     return CV_8UC2;
+  } else if (encoding == "nv12" || encoding == "nv21") {
+    return CV_8UC1;
   } else {
     throw std::runtime_error("Unsupported encoding type");
   }
+}
+
+// Number of cv::Mat rows backing an image: NV12 and NV21 store the Y plane followed by the
+// half height interleaved UV plane
+uint64_t
+image2mat_rows(const sensor_msgs::msg::Image & image)
+{
+  if (image.encoding == "nv12" || image.encoding == "nv21") {
+    if ((image.height % 2) != 0 || (image.width % 2) != 0) {
+      throw std::runtime_error(
+              "a " + image.encoding + " image needs an even width and height");
+    }
+    return static_cast<uint64_t>(image.height) + image.height / 2;
+  }
+  return image.height;
 }
 
 /// Create a cv::Mat that references the data of image, after checking that the data is as
 /// large as the geometry of the image claims.
 /**
  * The image may come straight from the network, so nothing in it can be trusted: without these
- * checks a message with a short data field makes every user of the cv::Mat read out of bounds.
+ * checks a message with a short data field (for example an NV12 image without its UV plane)
+ * makes every user of the cv::Mat read out of bounds.
  * The products are computed in 64 bits because the fields of the message are 32 bits wide.
  */
 cv::Mat
 mat_referencing_image(sensor_msgs::msg::Image & image)
 {
   const int type = encoding2mat_type(image.encoding);
+  const uint64_t rows = image2mat_rows(image);
   const uint64_t max_dimension = static_cast<uint64_t>(std::numeric_limits<int>::max());
-  if (image.height > max_dimension || image.width > max_dimension) {
+  if (rows > max_dimension || image.width > max_dimension) {
     throw std::runtime_error("Image is wrongly formed: height or width is too large");
   }
   const uint64_t min_step = static_cast<uint64_t>(image.width) * CV_ELEM_SIZE(type);
   if (image.step < min_step) {
     throw std::runtime_error("Image is wrongly formed: step < width * pixel size");
   }
-  if (static_cast<uint64_t>(image.height) * image.step != image.data.size()) {
-    throw std::runtime_error("Image is wrongly formed: height * step != size");
+  if (rows * image.step != image.data.size()) {
+    throw std::runtime_error("Image is wrongly formed: rows * step != size");
   }
   return cv::Mat(
-    static_cast<int>(image.height), static_cast<int>(image.width), type,
+    static_cast<int>(rows), static_cast<int>(image.width), type,
     image.data.data(), image.step);
 }
 
@@ -197,7 +216,7 @@ ROSCvMatContainer::get_sensor_msgs_msg_image_pointer_copy() const
 }
 
 void ROSCvMatContainer::get_sensor_msgs_msg_image_copy(
-  sensor_msgs::msg::Image& sensor_msgs_image) const
+  sensor_msgs::msg::Image & sensor_msgs_image) const
 {
   fill_sensor_msgs_image_from_cvmat(frame_, sensor_msgs_image, header_, encoding_override_);
 }

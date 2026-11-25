@@ -18,13 +18,16 @@
 
   <buildtool_depend>ament_cmake_python</buildtool_depend>
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
+  <buildtool_depend>ament_cmake_ros_core</buildtool_depend>
+  <buildtool_export_depend>ament_cmake_ros_core</buildtool_export_depend>
 
   <depend>libopencv-dev</depend>
   <depend>sensor_msgs</depend>
-  <depend>python3-deprecated</depend>
 
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_cmake_pytest</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

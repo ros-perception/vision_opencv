@@ -30,16 +30,11 @@ install(FILES
   DESTINATION include/${PROJECT_NAME}/${PROJECT_NAME})
 
 if(NOT CV_BRIDGE_DISABLE_PYTHON)
-  Python3_add_library(${PROJECT_NAME}_boost MODULE module.cpp module_opencv4.cpp)
-  target_link_libraries(${PROJECT_NAME}_boost PRIVATE
+  # NB_STATIC builds the nanobind runtime into the module, so nothing else has to be installed.
+  nanobind_add_module(_${PROJECT_NAME} NB_STATIC module.cpp)
+  target_link_libraries(_${PROJECT_NAME} PRIVATE
     ${PROJECT_NAME}
-    ${boost_python_target}
-    Python3::NumPy
     ament_cmake_ros_core::ament_ros_defaults)
 
-  set_target_properties(${PROJECT_NAME}_boost PROPERTIES
-                        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost/
-                        PREFIX ""
-  )
-  install(TARGETS ${PROJECT_NAME}_boost DESTINATION ${PYTHON_INSTALL_DIR}/${PROJECT_NAME}/boost/)
+  install(TARGETS _${PROJECT_NAME} DESTINATION ${PYTHON_INSTALL_DIR}/${PROJECT_NAME})
 endif()

@@ -36,13 +36,8 @@ if(NOT CV_BRIDGE_DISABLE_PYTHON)
   target_link_libraries(${PROJECT_NAME}_boost PRIVATE
     ${PROJECT_NAME}
     ${boost_python_target}
-<<<<<<< HEAD
-    Python3::NumPy)
-  target_compile_definitions(${PROJECT_NAME}_boost PRIVATE PYTHON3)
-=======
     Python3::NumPy
     ament_cmake_ros_core::ament_ros_defaults)
->>>>>>> 830a296 (Replace rcpputils::endian with std::endian (#565))
 
   if(OpenCV_VERSION_MAJOR VERSION_EQUAL 4)
     target_compile_definitions(${PROJECT_NAME}_boost PRIVATE OPENCV_VERSION_4)

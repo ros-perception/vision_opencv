@@ -35,15 +35,6 @@
 *********************************************************************/
 
 #include <cv_bridge/cv_bridge.hpp>
-<<<<<<< HEAD
-#include <cv_bridge/rgb_colors.hpp>
-#include <boost/endian/conversion.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <sensor_msgs/image_encodings.hpp>
-#include "rcpputils/endian.hpp"
-=======
->>>>>>> 72c4058 (enable ament_lint_auto in cv_bridge and image_geometry (#542))
 
 #include <map>
 #include <memory>
@@ -57,6 +48,8 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <sensor_msgs/image_encodings.hpp>
+
+#include "rcpputils/endian.hpp"
 
 namespace enc = sensor_msgs::image_encodings;
 
@@ -310,13 +303,8 @@ cv::Mat matFromImage(const sensor_msgs::msg::Image & source)
   cv::Mat mat(source.height, source.width, source_type, const_cast<uchar *>(&source.data[0]),
     source.step);
 
-<<<<<<< HEAD
-   if ((rcpputils::endian::native == rcpputils::endian::big && source.is_bigendian) ||
+  if ((rcpputils::endian::native == rcpputils::endian::big && source.is_bigendian) ||
     (rcpputils::endian::native == rcpputils::endian::little && !source.is_bigendian) ||
-=======
-  if ((std::endian::native == std::endian::big && source.is_bigendian) ||
-    (std::endian::native == std::endian::little && !source.is_bigendian) ||
->>>>>>> 72c4058 (enable ament_lint_auto in cv_bridge and image_geometry (#542))
     byte_depth == 1)
   {
     return mat;

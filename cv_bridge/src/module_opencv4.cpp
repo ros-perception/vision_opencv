@@ -95,16 +95,12 @@ public:
   NumpyAllocator() {stdAllocator = cv::Mat::getStdAllocator();}
   ~NumpyAllocator() {}
 
-<<<<<<< HEAD
 // To compile openCV3 with OpenCV4 APIs.
 #ifndef OPENCV_VERSION_4
 #define AccessFlag int
 #endif
 
-  UMatData * allocate(PyObject * o, int dims, const int * sizes, int type, size_t * step) const
-=======
   cv::UMatData * allocate(PyObject * o, int dims, const int * sizes, int type, size_t * step) const
->>>>>>> 72c4058 (enable ament_lint_auto in cv_bridge and image_geometry (#542))
   {
     cv::UMatData * u = new cv::UMatData(this);
     u->data = u->origdata =

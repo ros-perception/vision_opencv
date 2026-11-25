@@ -15,6 +15,7 @@
 #ifndef CV_BRIDGE__CV_MAT_SENSOR_MSGS_IMAGE_TYPE_ADAPTER_HPP_
 #define CV_BRIDGE__CV_MAT_SENSOR_MSGS_IMAGE_TYPE_ADAPTER_HPP_
 
+#include <bit>
 #include <cstddef>
 #include <memory>
 #include <optional>
@@ -28,29 +29,8 @@
 
 #include "cv_bridge/visibility_control.h"
 
-
 namespace cv_bridge
 {
-namespace detail
-{
-// TODO(audrow): Replace with std::endian when C++ 20 is available
-// https://en.cppreference.com/w/cpp/types/endian
-enum class endian
-{
-#ifdef _WIN32
-  little = 0,
-  big    = 1,
-  native = little
-#else
-  little = __ORDER_LITTLE_ENDIAN__,
-  big    = __ORDER_BIG_ENDIAN__,
-  native = __BYTE_ORDER__
-#endif
-};
-
-}  // namespace detail
-
-
 /// A potentially owning, potentially non-owning, container of a cv::Mat and ROS header.
 /**
  * The two main use cases for this are publishing user controlled data, and
@@ -86,7 +66,7 @@ enum class endian
  */
 class ROSCvMatContainer
 {
-  static constexpr bool is_bigendian_system = detail::endian::native == detail::endian::big;
+  static constexpr bool is_bigendian_system = std::endian::native == std::endian::big;
 
 public:
   using SensorMsgsImageStorageType = std::variant<
@@ -230,6 +210,43 @@ private:
 
 }  // namespace cv_bridge
 
+static void fill_sensor_msgs_image_from_cvmat(
+  const cv::Mat & cv_mat,
+  sensor_msgs::msg::Image & image,
+  const std_msgs::msg::Header & header,
+  const std::optional<std::string> & encoding_override = std::nullopt)
+{
+  image.height = cv_mat.rows;
+  image.width = cv_mat.cols;
+
+  if (encoding_override.has_value() && !encoding_override.value().empty()) {
+    image.encoding = encoding_override.value();
+  } else {
+    switch (cv_mat.type()) {
+      case CV_8UC1:
+        image.encoding = "mono8";
+        break;
+      case CV_8UC3:
+        image.encoding = "bgr8";
+        break;
+      case CV_16SC1:
+        image.encoding = "mono16";
+        break;
+      case CV_8UC4:
+        image.encoding = "rgba8";
+        break;
+      default:
+        throw std::runtime_error("unsupported encoding type");
+    }
+  }
+
+  image.step = static_cast<sensor_msgs::msg::Image::_step_type>(cv_mat.step);
+  const size_t size = cv_mat.step * cv_mat.rows;
+  image.data.resize(size);
+  memcpy(&image.data[0], cv_mat.data, size);
+  image.header = header;
+}
+
 template<>
 struct rclcpp::TypeAdapter<cv_bridge::ROSCvMatContainer, sensor_msgs::msg::Image>
 {
@@ -237,45 +254,15 @@ struct rclcpp::TypeAdapter<cv_bridge::ROSCvMatContainer, sensor_msgs::msg::Image
   using custom_type = cv_bridge::ROSCvMatContainer;
   using ros_message_type = sensor_msgs::msg::Image;
 
-  static
-  void
-  convert_to_ros_message(
+  static void convert_to_ros_message(
     const custom_type & source,
     ros_message_type & destination)
   {
-    destination.height = source.cv_mat().rows;
-    destination.width = source.cv_mat().cols;
-    const auto & encoding_override = source.encoding_override();
-    if (encoding_override.has_value() && !encoding_override.value().empty()) {
-      destination.encoding = encoding_override.value();
-    } else {
-      switch (source.cv_mat().type()) {
-        case CV_8UC1:
-          destination.encoding = "mono8";
-          break;
-        case CV_8UC3:
-          destination.encoding = "bgr8";
-          break;
-        case CV_16SC1:
-          destination.encoding = "mono16";
-          break;
-        case CV_8UC4:
-          destination.encoding = "rgba8";
-          break;
-        default:
-          throw std::runtime_error("unsupported encoding type");
-      }
-    }
-    destination.step = static_cast<sensor_msgs::msg::Image::_step_type>(source.cv_mat().step);
-    size_t size = source.cv_mat().step * source.cv_mat().rows;
-    destination.data.resize(size);
-    memcpy(&destination.data[0], source.cv_mat().data, size);
-    destination.header = source.header();
+    fill_sensor_msgs_image_from_cvmat(
+      source.cv_mat(), destination, source.header(), source.encoding_override());
   }
 
-  static
-  void
-  convert_to_custom(
+  static void convert_to_custom(
     const ros_message_type & source,
     custom_type & destination)
   {

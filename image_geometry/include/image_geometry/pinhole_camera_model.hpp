@@ -6,7 +6,7 @@
 #include <sensor_msgs/msg/camera_info.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
+#include <opencv2/calib3d.hpp>
 #include <stdexcept>
 #include <string>
 #include <math.h>
@@ -382,11 +382,13 @@ inline double PinholeCameraModel::Tx() const { return P_(0,3); }
 IMAGE_GEOMETRY_PUBLIC
 inline double PinholeCameraModel::Ty() const { return P_(1,3); }
 
+// rawRoi() is in full resolution pixels, so it is paired with the full resolution focal
+// length: fx() and fy() are divided by the binning.
 inline double PinholeCameraModel::fovX() const {
-        return 2 * atan(rawRoi().width / (2 * fx()));
+        return 2 * atan(rawRoi().width / (2 * P_full_(0,0)));
 }
 inline double PinholeCameraModel::fovY() const {
-        return 2 * atan(rawRoi().height / (2 * fy()));
+        return 2 * atan(rawRoi().height / (2 * P_full_(1,1)));
 }
 
 IMAGE_GEOMETRY_PUBLIC

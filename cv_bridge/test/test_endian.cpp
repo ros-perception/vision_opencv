@@ -1,7 +1,9 @@
 // Copyright (c) 2015, ROS Perception
 #include <gtest/gtest.h>
+
+#include <bit>
 #include <memory>
-#include <boost/endian/conversion.hpp>
+
 #include <cv_bridge/cv_bridge.hpp>
 
 TEST(CvBridgeTest, endianness)
@@ -13,18 +15,13 @@ TEST(CvBridgeTest, endianness)
   msg.encoding = "32SC2";
   msg.step = 8;
 
-  msg.data.resize(msg.step);
-  int32_t * data = reinterpret_cast<int32_t *>(&msg.data[0]);
-
   // Write 1 and 2 in order, but with an endianness opposite to the platform
-  if (boost::endian::order::native == boost::endian::order::little) {
+  if (std::endian::native == std::endian::little) {
     msg.is_bigendian = true;
-    *(data++) = boost::endian::native_to_big(static_cast<int32_t>(1));
-    *data = boost::endian::native_to_big(static_cast<int32_t>(2));
+    msg.data = {0, 0, 0, 1, 0, 0, 0, 2};
   } else {
     msg.is_bigendian = false;
-    *(data++) = boost::endian::native_to_little(static_cast<int32_t>(1));
-    *data = boost::endian::native_to_little(static_cast<int32_t>(2));
+    msg.data = {1, 0, 0, 0, 2, 0, 0, 0};
   }
 
   // Make sure the values are still the same

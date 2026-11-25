@@ -36,6 +36,8 @@
 
 #include <cv_bridge/cv_bridge.hpp>
 
+#include <bit>
+#include <limits>
 #include <map>
 #include <memory>
 #include <regex>
@@ -47,9 +49,7 @@
 #include <cv_bridge/rgb_colors.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <rcpputils/endian.hpp>
 #include <sensor_msgs/image_encodings.hpp>
-
 
 namespace enc = sensor_msgs::image_encodings;
 
@@ -122,21 +122,8 @@ int getCvType(const std::string & encoding)
 
 /// @cond DOXYGEN_IGNORE
 
-enum Encoding
-{
-  INVALID = -1,
-  GRAY = 0,
-  RGB,
-  BGR,
-  RGBA,
-  BGRA,
-  YUV422,
-  YUV422_YUY2,
-  BAYER_RGGB,
-  BAYER_BGGR,
-  BAYER_GBRG,
-  BAYER_GRBG
-};
+enum Encoding { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, YUV422, YUV422_YUY2, BAYER_RGGB,
+  BAYER_BGGR, BAYER_GBRG, BAYER_GRBG, MAX_ENCODING};
 
 Encoding getEncoding(const std::string & encoding)
 {
@@ -157,17 +144,17 @@ Encoding getEncoding(const std::string & encoding)
   return INVALID;
 }
 
-static const int SAME_FORMAT = -1;
+static const int SAME_ENCODING = -1;
 
-/** Return a lit of OpenCV conversion codes to get from one Format to the other
- * The key is a pair: <FromFormat, ToFormat> and the value a succession of OpenCV code conversion
+/** Return a list of OpenCV conversion codes to get from one encoding to the other
+ * The key is a pair: <FromEncoding, ToEncoding> and the value a succession of OpenCV code conversion
  * It's not efficient code but it is only called once and the structure is small enough
  */
 std::map<std::pair<Encoding, Encoding>, std::vector<int>> getConversionCodes()
 {
   std::map<std::pair<Encoding, Encoding>, std::vector<int>> res;
-  for (int i = 0; i <= 5; ++i) {
-    res[std::pair<Encoding, Encoding>(Encoding(i), Encoding(i))].push_back(SAME_FORMAT);
+  for (int i = 0; i < MAX_ENCODING; ++i) {
+    res[std::pair<Encoding, Encoding>(Encoding(i), Encoding(i))].push_back(SAME_ENCODING);
   }
 
   res[std::make_pair(GRAY, RGB)].push_back(cv::COLOR_GRAY2RGB);
@@ -231,20 +218,20 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
 {
   Encoding src_encod = getEncoding(src_encoding);
   Encoding dst_encod = getEncoding(dst_encoding);
-  bool is_src_color_format = enc::isColor(src_encoding) || enc::isMono(src_encoding) ||
+  bool is_src_color_encoding = enc::isColor(src_encoding) || enc::isMono(src_encoding) ||
     enc::isBayer(src_encoding) || (src_encoding == enc::YUV422) ||
     (src_encoding == enc::YUV422_YUY2);
-  bool is_dst_color_format = enc::isColor(dst_encoding) || enc::isMono(dst_encoding) ||
+  bool is_dst_color_encoding = enc::isColor(dst_encoding) || enc::isMono(dst_encoding) ||
     enc::isBayer(dst_encoding) || (dst_encoding == enc::YUV422) ||
     (dst_encoding == enc::YUV422_YUY2);
   bool is_num_channels_the_same =
     (enc::numChannels(src_encoding) == enc::numChannels(dst_encoding));
 
-  // If we have no color info in the source, we can only convert to the same format which
+  // If we have no color info in the source, we can only convert to the same encoding which
   // was resolved in the previous condition. Otherwise, fail
-  if (!is_src_color_format) {
-    if (is_dst_color_format) {
-      throw Exception("[" + src_encoding + "] is not a color format. but [" + dst_encoding +
+  if (!is_src_color_encoding) {
+    if (is_dst_color_encoding) {
+      throw Exception("[" + src_encoding + "] is not a color encoding. but [" + dst_encoding +
               "] is. The conversion does not make sense");
     }
     if (!is_num_channels_the_same) {
@@ -252,17 +239,17 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
               "[" + src_encoding + "] and [" + dst_encoding +
               "] do not have the same number of channel");
     }
-    return std::vector<int>(1, SAME_FORMAT);
+    return std::vector<int>(1, SAME_ENCODING);
   }
 
   // If we are converting from a color type to a non color type, we can only do so if we stick
   // to the number of channels
-  if (!is_dst_color_format) {
+  if (!is_dst_color_encoding) {
     if (!is_num_channels_the_same) {
-      throw Exception("[" + src_encoding + "] is a color format but [" + dst_encoding + "] " +
+      throw Exception("[" + src_encoding + "] is a color encoding but [" + dst_encoding + "] " +
               "is not so they must have the same OpenCV type, CV_8UC3, CV16UC1 ....");
     }
-    return std::vector<int>(1, SAME_FORMAT);
+    return std::vector<int>(1, SAME_ENCODING);
   }
 
   // If we are converting from a color type to another type, then everything is fine
@@ -282,7 +269,7 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
   if ((enc::bitDepth(src_encoding) != enc::bitDepth(dst_encoding)) &&
     (getEncoding(src_encoding) != getEncoding(dst_encoding)))
   {
-    res.push_back(SAME_FORMAT);
+    res.push_back(SAME_ENCODING);
   }
 
   return res;
@@ -316,8 +303,8 @@ cv::Mat matFromImage(const sensor_msgs::msg::Image & source)
   cv::Mat mat(source.height, source.width, source_type, const_cast<uchar *>(&source.data[0]),
     source.step);
 
-  if ((rcpputils::endian::native == rcpputils::endian::big && source.is_bigendian) ||
-    (rcpputils::endian::native == rcpputils::endian::little && !source.is_bigendian) ||
+  if ((std::endian::native == std::endian::big && source.is_bigendian) ||
+    (std::endian::native == std::endian::little && !source.is_bigendian) ||
     byte_depth == 1)
   {
     return mat;
@@ -366,7 +353,7 @@ CvImagePtr toCvCopyImpl(
     cv::Mat image2;
     for (size_t i = 0; i < conversion_codes.size(); ++i) {
       int conversion_code = conversion_codes[i];
-      if (conversion_code == SAME_FORMAT) {
+      if (conversion_code == SAME_ENCODING) {
         // Same number of channels, but different bit depth
         int src_depth = enc::bitDepth(src_encoding);
         int dst_depth = enc::bitDepth(dst_encoding);
@@ -409,7 +396,7 @@ void CvImage::toImageMsg(sensor_msgs::msg::Image & ros_image) const
   ros_image.height = image.rows;
   ros_image.width = image.cols;
   ros_image.encoding = encoding;
-  ros_image.is_bigendian = (rcpputils::endian::native == rcpputils::endian::big);
+  ros_image.is_bigendian = (std::endian::native == std::endian::big);
   ros_image.step = image.cols * image.elemSize();
   size_t size = ros_image.step * image.rows;
   ros_image.data.resize(size);
@@ -459,7 +446,7 @@ CvImageConstPtr toCvShare(
 {
   // If the encoding different or the endianness different, you have to copy
   if ((!encoding.empty() && source.encoding != encoding) || (!source.is_bigendian !=
-    (rcpputils::endian::native != rcpputils::endian::big)))
+    (std::endian::native != std::endian::big)))
   {
     return toCvCopy(source, encoding);
   }
@@ -526,14 +513,32 @@ std::string getFormat(Format format)
   throw Exception("Unrecognized image format");
 }
 
+// Whether the format stores 16 bit images. The others store 8 bits per channel.
+static bool keeps16Bits(Format format)
+{
+  switch (format) {
+    case JP2:
+    case PNG:
+    case PGM:
+    case PPM:
+    case TIF:
+    case TIFF:
+      return true;
+    default:
+      return false;
+  }
+}
+
 void CvImage::toCompressedImageMsg(
   sensor_msgs::msg::CompressedImage & ros_image,
   const Format dst_format) const
 {
   ros_image.header = header;
   cv::Mat image;
+  // 16UC1 has the same layout as mono16 (e.g. depth images), so it is encoded as is
+  // instead of being converted to an 8 bit color image.
   if (encoding == enc::BGR8 || encoding == enc::BGRA8 || encoding == enc::MONO8 ||
-    encoding == enc::MONO16)
+    encoding == enc::MONO16 || encoding == enc::TYPE_16UC1)
   {
     image = this->image;
   } else {
@@ -545,6 +550,14 @@ void CvImage::toCompressedImageMsg(
       temp = cvtColor(tempThis, enc::BGR8);
     }
     image = temp->image;
+  }
+
+  if (image.depth() == CV_16U && !keeps16Bits(dst_format)) {
+    // cv::imencode would saturate every value above 255. Scale to 8 bit, as the conversion
+    // from mono16 to mono8 does.
+    cv::Mat image8;
+    image.convertTo(image8, CV_8U, 255.0 / 65535.0);
+    image = image8;
   }
 
   std::string format = getFormat(dst_format);
@@ -567,23 +580,31 @@ CvImagePtr toCvCopy(const sensor_msgs::msg::CompressedImage & source, const std:
   // Loads as BGR or BGRA.
   const cv::Mat rgb_a = cv::imdecode(in, cv::IMREAD_UNCHANGED);
 
-  if (encoding != enc::MONO16) {
-    switch (rgb_a.channels()) {
-      case 4:
-        return toCvCopyImpl(rgb_a, source.header, enc::BGRA8, encoding);
-        break;
-      case 3:
-        return toCvCopyImpl(rgb_a, source.header, enc::BGR8, encoding);
-        break;
-      case 1:
-        return toCvCopyImpl(rgb_a, source.header, enc::MONO8, encoding);
-        break;
-      default:
-        return CvImagePtr();
-    }
-  } else {
-    return toCvCopyImpl(rgb_a, source.header, enc::MONO16, encoding);
+  // Formats such as PNG and TIFF keep 16 bit images, so imdecode returns them as CV_16U.
+  // Label what was decoded with its real depth, so the data is not misinterpreted.
+  const bool is_16bit = rgb_a.depth() == CV_16U;
+  switch (rgb_a.channels()) {
+    case 4:
+      return toCvCopyImpl(rgb_a, source.header, is_16bit ? enc::BGRA16 : enc::BGRA8, encoding);
+    case 3:
+      return toCvCopyImpl(rgb_a, source.header, is_16bit ? enc::BGR16 : enc::BGR8, encoding);
+    case 1:
+      return toCvCopyImpl(rgb_a, source.header, is_16bit ? enc::MONO16 : enc::MONO8, encoding);
+    default:
+      return CvImagePtr();
   }
+}
+
+// Sets to zero the pixels of scaled whose value in source is infinite or NaN.
+// How cv::Mat::convertTo() saturates those values depends on the OpenCV version.
+static void zeroNonFinite(const cv::Mat & source, cv::Mat & scaled)
+{
+  if (source.depth() != CV_32F && source.depth() != CV_64F) {
+    return;
+  }
+  const double inf = std::numeric_limits<double>::infinity();
+  const cv::Mat non_finite = (source != source) | (source == inf) | (source == -inf);
+  scaled.setTo(0, non_finite);
 }
 
 CvImageConstPtr cvtColorForDisplay(
@@ -601,7 +622,7 @@ CvImageConstPtr cvtColorForDisplay(
   std::string encoding = encoding_out;
   if (encoding.empty()) {
     try {
-      // Let's decide upon an output format
+      // Let's decide upon an output encoding
       if (enc::numChannels(source->encoding) == 1) {
         if ((source->encoding == enc::TYPE_32SC1) ||
           (enc::bitDepth(source->encoding) == 8) ||
@@ -696,10 +717,12 @@ CvImageConstPtr cvtColorForDisplay(
       img_scaled->encoding = enc::MONO8;
       cv::Mat(source->image - min_image_value).convertTo(img_scaled->image, CV_8UC1, 255.0 /
         (max_image_value - min_image_value));
+      zeroNonFinite(source->image, img_scaled->image);
     } else {
       img_scaled->encoding = enc::BGR8;
       cv::Mat(source->image - min_image_value).convertTo(img_scaled->image, CV_8UC3, 255.0 /
         (max_image_value - min_image_value));
+      zeroNonFinite(source->image, img_scaled->image);
       cv::applyColorMap(img_scaled->image, img_scaled->image, options.colormap);
       // Fill black color to the nan region.
       if (source->encoding == enc::TYPE_32FC1) {
@@ -716,13 +739,13 @@ CvImageConstPtr cvtColorForDisplay(
     return cvtColor(img_scaled, encoding);
   }
 
-  // If no color conversion is possible, we must "guess" the input format
+  // If no color conversion is possible, we must "guess" the input encoding
   CvImagePtr source_typed(new CvImage());
   source_typed->image = source->image;
   source_typed->header = source->header;
   source_typed->encoding = source->encoding;
 
-  // If we get the OpenCV format, if we have 1,3 or 4 channels,
+  // If we get the OpenCV encoding, if we have 1,3 or 4 channels,
   // :we are most likely in mono, BGR or BGRA modes
   if (source->encoding == "CV_8UC1") {
     source_typed->encoding = enc::MONO8;
@@ -744,7 +767,7 @@ CvImageConstPtr cvtColorForDisplay(
   }
 
   try {
-    // Now that the output is a proper color format, try to see if any conversion is possible
+    // Now that the output is a proper color encoding, try to see if any conversion is possible
     return cvtColor(source_typed, encoding);
   } catch (cv_bridge::Exception & e) {
     throw Exception(

@@ -37,19 +37,22 @@
 #ifndef CV_BRIDGE__CV_BRIDGE_HPP_
 #define CV_BRIDGE__CV_BRIDGE_HPP_
 
-#include <cv_bridge/cv_bridge_export.h>
+#include <sensor_msgs/msg/image.hpp>
+#include <sensor_msgs/msg/compressed_image.hpp>
+#include <sensor_msgs/image_encodings.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#if CV_VERSION_MAJOR < 5
+// Kept so code that gets the C constants (CV_BGR2GRAY, ...) through this header keeps compiling.
+// The header was removed in OpenCV 5.
 #include <opencv2/imgproc/types_c.h>
+#endif
+#include <cv_bridge/cv_bridge_export.h>
 
 #include <memory>
 #include <ostream>
 #include <stdexcept>
 #include <string>
-
-#include <opencv2/core/core.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <sensor_msgs/image_encodings.hpp>
-#include <sensor_msgs/msg/compressed_image.hpp>
-#include <sensor_msgs/msg/image.hpp>
 
 namespace cv_bridge
 {
@@ -301,7 +304,7 @@ struct CvtColorForDisplayOptions
  * encoding image is passed.
  * - if the output encoding is not empty, it must have sensor_msgs::msg::image_encodings::isColor and
  * isMono return true. It must also be 8 bit in depth
- * - if the input encoding is an OpenCV format (e.g. 8UC1), and if we have 1,3 or 4 channels, it is
+ * - if the input encoding is an OpenCV encoding (e.g. 8UC1), and if we have 1,3 or 4 channels, it is
  * respectively converted to mono, BGR or BGRA.
  * - if the input encoding is 32SC1, this estimate that image as label image and will convert it as
  * bgr image with different colors for each label.

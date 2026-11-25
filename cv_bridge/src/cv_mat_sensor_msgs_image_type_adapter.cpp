@@ -173,37 +173,10 @@ ROSCvMatContainer::get_sensor_msgs_msg_image_pointer_copy() const
   return unique_image;
 }
 
-void
-ROSCvMatContainer::get_sensor_msgs_msg_image_copy(
+void ROSCvMatContainer::get_sensor_msgs_msg_image_copy(
   sensor_msgs::msg::Image & sensor_msgs_image) const
 {
-  sensor_msgs_image.height = frame_.rows;
-  sensor_msgs_image.width = frame_.cols;
-  if (encoding_override_.has_value() && !encoding_override_.value().empty()) {
-    sensor_msgs_image.encoding = encoding_override_.value();
-  } else {
-    switch (frame_.type()) {
-      case CV_8UC1:
-        sensor_msgs_image.encoding = "mono8";
-        break;
-      case CV_8UC3:
-        sensor_msgs_image.encoding = "bgr8";
-        break;
-      case CV_16SC1:
-        sensor_msgs_image.encoding = "mono16";
-        break;
-      case CV_8UC4:
-        sensor_msgs_image.encoding = "rgba8";
-        break;
-      default:
-        throw std::runtime_error("unsupported encoding type");
-    }
-  }
-  sensor_msgs_image.step = static_cast<sensor_msgs::msg::Image::_step_type>(frame_.step);
-  size_t size = frame_.step * frame_.rows;
-  sensor_msgs_image.data.resize(size);
-  memcpy(&sensor_msgs_image.data[0], frame_.data, size);
-  sensor_msgs_image.header = header_;
+  fill_sensor_msgs_image_from_cvmat(frame_, sensor_msgs_image, header_, encoding_override_);
 }
 
 bool

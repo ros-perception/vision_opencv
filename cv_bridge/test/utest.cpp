@@ -1,13 +1,14 @@
 // Copyright (c) 2011, Willow Garage
 // Copyright (c) 2013-2024, ROS Perception
 #include <gtest/gtest.h>
-#include <sensor_msgs/image_encodings.hpp>
 
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <sensor_msgs/image_encodings.hpp>
 
 #include "cv_bridge/cv_bridge.hpp"
 #include "cv_bridge/cv_mat_sensor_msgs_image_type_adapter.hpp"

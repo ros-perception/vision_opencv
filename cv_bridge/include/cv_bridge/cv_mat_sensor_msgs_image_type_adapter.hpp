@@ -15,6 +15,7 @@
 #ifndef CV_BRIDGE__CV_MAT_SENSOR_MSGS_IMAGE_TYPE_ADAPTER_HPP_
 #define CV_BRIDGE__CV_MAT_SENSOR_MSGS_IMAGE_TYPE_ADAPTER_HPP_
 
+#include <bit>
 #include <cstddef>
 #include <memory>
 #include <variant>
@@ -30,26 +31,6 @@
 
 namespace cv_bridge
 {
-namespace detail
-{
-// TODO(audrow): Replace with std::endian when C++ 20 is available
-// https://en.cppreference.com/w/cpp/types/endian
-enum class endian
-{
-#ifdef _WIN32
-  little = 0,
-  big    = 1,
-  native = little
-#else
-  little = __ORDER_LITTLE_ENDIAN__,
-  big    = __ORDER_BIG_ENDIAN__,
-  native = __BYTE_ORDER__
-#endif
-};
-
-}  // namespace detail
-
-
 /// A potentially owning, potentially non-owning, container of a cv::Mat and ROS header.
 /**
  * The two main use cases for this are publishing user controlled data, and
@@ -85,7 +66,7 @@ enum class endian
  */
 class ROSCvMatContainer
 {
-  static constexpr bool is_bigendian_system = detail::endian::native == detail::endian::big;
+  static constexpr bool is_bigendian_system = std::endian::native == std::endian::big;
 
 public:
   using SensorMsgsImageStorageType = std::variant<

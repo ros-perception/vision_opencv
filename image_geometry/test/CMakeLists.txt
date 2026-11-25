@@ -8,3 +8,6 @@ target_link_libraries(${PROJECT_NAME}-utest ${PROJECT_NAME})
 
 ament_add_gtest(${PROJECT_NAME}-utest-equi utest_equi.cpp)
 target_link_libraries(${PROJECT_NAME}-utest-equi ${PROJECT_NAME})
+
+ament_add_gtest(${PROJECT_NAME}-utest-stereo utest_stereo.cpp)
+target_link_libraries(${PROJECT_NAME}-utest-stereo ${PROJECT_NAME})

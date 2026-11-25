@@ -37,7 +37,6 @@ if(NOT CV_BRIDGE_DISABLE_PYTHON)
     ${PROJECT_NAME}
     ${boost_python_target}
     Python3::NumPy)
-  target_compile_definitions(${PROJECT_NAME}_boost PRIVATE PYTHON3)
 
   if(OpenCV_VERSION_MAJOR VERSION_EQUAL 4)
     target_compile_definitions(${PROJECT_NAME}_boost PRIVATE OPENCV_VERSION_4)

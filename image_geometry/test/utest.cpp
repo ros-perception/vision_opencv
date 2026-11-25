@@ -149,6 +149,21 @@ TEST_F(PinholeTest, getDeltas)
   EXPECT_NEAR(model_.getDeltaY(dv, Z), xyz1.y - xyz0.y, 1e-4);
 }
 
+// Binning lowers the image resolution, not the field of view
+TEST_F(PinholeTest, fovWithBinning)
+{
+  const double fov_x = model_.fovX();
+  const double fov_y = model_.fovY();
+  EXPECT_NEAR(fov_x, 1.6502496354, 1e-6);
+  EXPECT_NEAR(fov_y, 1.364138172, 1e-6);
+
+  cam_info_.binning_x = 2;
+  cam_info_.binning_y = 4;
+  model_.fromCameraInfo(cam_info_);
+  EXPECT_NEAR(model_.fovX(), fov_x, 1e-9);
+  EXPECT_NEAR(model_.fovY(), fov_y, 1e-9);
+}
+
 TEST_F(PinholeTest, initialization)
 {
   EXPECT_EQ(model_.initialized(), true);

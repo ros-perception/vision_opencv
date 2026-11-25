@@ -167,14 +167,64 @@ class TestDirected(unittest.TestCase):
 
     def test_project_pixel_to_3d_ray_not_normalized(self):
         cam = self.cam.get_left_camera()
+        for uv in ((1.0, 2.0), (0.0, 0.0), (self.width - 1.0, self.height - 1.0)):
+            unit = cam.project_pixel_to_3d_ray(uv)
+            actual = cam.project_pixel_to_3d_ray(uv, normalize=False)
+            self.assertEqual(actual[2], 1.0)
+            assert_almost_equal([unit[0] / unit[2], unit[1] / unit[2], 1.0], actual, 9)
+            # The point on the ray with z = 1 projects back onto the same pixel
+            assert_almost_equal(uv, cam.project_3d_to_pixel(actual), 9)
+            assert_almost_equal(unit, cam.project_pixel_to_3d_ray(uv, normalize=True), 9)
+        # Top-left corner points up and left, bottom-right corner down and right
+        assert_almost_equal(
+            [-0.966243, -0.755568, 1.0],
+            cam.project_pixel_to_3d_ray((0.0, 0.0), normalize=False), 6)
+        assert_almost_equal(
+            [1.195945, 0.865226, 1.0],
+            cam.project_pixel_to_3d_ray((self.width - 1.0, self.height - 1.0), normalize=False),
+            6)
+
+    def test_project_pixel_to_3d_ray_principal_point(self):
+        cam = self.cam.get_left_camera()
+        uv = (cam.cx(), cam.cy())
+        self.assertEqual(cam.project_pixel_to_3d_ray(uv, normalize=False), (0.0, 0.0, 1.0))
+        assert_almost_equal([0.0, 0.0, 1.0], cam.project_pixel_to_3d_ray(uv), 12)
+
+    def test_project_pixel_to_3d_ray_not_normalized_right_camera(self):
+        # The right camera has Tx != 0. The ray starts at its own center, so Tx is not
+        # subtracted (unlike the C++ projectPixelTo3dRay()).
+        left = self.cam.get_left_camera()
+        right = self.cam.get_right_camera()
+        self.assertNotEqual(right.tx(), 0.0)
         uv = (1.0, 2.0)
-        unit = cam.project_pixel_to_3d_ray(uv)
-        actual = cam.project_pixel_to_3d_ray(uv, normalize=False)
+        unit = right.project_pixel_to_3d_ray(uv)
+        actual = right.project_pixel_to_3d_ray(uv, normalize=False)
         self.assertEqual(actual[2], 1.0)
         assert_almost_equal([unit[0] / unit[2], unit[1] / unit[2], 1.0], actual, 9)
-        # The point on the ray with z = 1 projects back onto the same pixel
-        assert_almost_equal(uv, cam.project_3d_to_pixel(actual), 9)
-        assert_almost_equal(unit, cam.project_pixel_to_3d_ray(uv, normalize=True), 9)
+        # Both cameras share fx, fy, cx and cy, so the directions are the same
+        assert_almost_equal(left.project_pixel_to_3d_ray(uv, normalize=False), actual, 9)
+        # Offset by the right camera's center (-Tx / fx, 0, 0), the point projects back onto uv
+        center_x = -right.tx() / right.fx()
+        assert_almost_equal(
+            uv, right.project_3d_to_pixel((center_x + actual[0], actual[1], actual[2])), 9)
+
+    def test_project_pixel_to_3d_ray_not_normalized_fx_fy(self):
+        # Different focal lengths and principal point coordinates, so swapping them is caught
+        msg = sensor_msgs.msg.CameraInfo()
+        msg.width = self.width
+        msg.height = self.height
+        msg.k = [400.0, 0.0, 300.0, 0.0, 200.0, 250.0, 0.0, 0.0, 1.0]
+        msg.r = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+        msg.p = [400.0, 0.0, 300.0, 0.0, 0.0, 200.0, 250.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+        cam = PinholeCameraModel()
+        cam.from_camera_info(msg)
+        actual = cam.project_pixel_to_3d_ray((500.0, 150.0), normalize=False)
+        assert_almost_equal([0.5, -0.5, 1.0], actual, 12)
+        assert_almost_equal((500.0, 150.0), cam.project_3d_to_pixel(actual), 9)
+
+    def test_project_pixel_to_3d_ray_normalize_is_keyword_only(self):
+        with self.assertRaises(TypeError):
+            self.cam.get_left_camera().project_pixel_to_3d_ray((1.0, 2.0), False)
 
     def test_get_delta_u(self):
         delta_x = 1.0
@@ -425,6 +475,10 @@ if __name__ == '__main__':
     suite.addTest(TestDirected('test_project_3d_to_pixel'))
     suite.addTest(TestDirected('test_project_pixel_to_3d_ray'))
     suite.addTest(TestDirected('test_project_pixel_to_3d_ray_not_normalized'))
+    suite.addTest(TestDirected('test_project_pixel_to_3d_ray_principal_point'))
+    suite.addTest(TestDirected('test_project_pixel_to_3d_ray_not_normalized_right_camera'))
+    suite.addTest(TestDirected('test_project_pixel_to_3d_ray_not_normalized_fx_fy'))
+    suite.addTest(TestDirected('test_project_pixel_to_3d_ray_normalize_is_keyword_only'))
     suite.addTest(TestDirected('test_get_delta_u'))
     suite.addTest(TestDirected('test_get_delta_v'))
     suite.addTest(TestDirected('test_get_delta_x'))

@@ -67,6 +67,10 @@ class CvBridge(object):
 
     """
 
+    # Semi-planar YUV 4:2:0 encodings: a full resolution Y plane followed by a half height
+    # interleaved UV plane, stored in a single channel array of height * 3 / 2 rows.
+    _yuv420_semi_planar_encodings = ('nv12', 'nv21')
+
     def __init__(self):
         import cv2
         self.cvtype_to_name = {}
@@ -172,12 +176,17 @@ class CvBridge(object):
 
         img_buf = np.asarray(img_msg.data, dtype=dtype) if isinstance(img_msg.data, list) else img_msg.data
 
+        rows = img_msg.height
+        if img_msg.encoding in self._yuv420_semi_planar_encodings:
+            # Y plane followed by the half height interleaved UV plane
+            rows = img_msg.height * 3 // 2
+
         row_bytes = img_msg.width * n_channels * dtype.itemsize
         if img_msg.step < row_bytes:
             raise CvBridgeError('Image is wrongly formed: step (%d) < width * byte_depth * '
                                 'num_channels (%d)' % (img_msg.step, row_bytes))
         # The padding after the last row may be missing.
-        min_size = (img_msg.height - 1) * img_msg.step + row_bytes if img_msg.height else 0
+        min_size = (rows - 1) * img_msg.step + row_bytes if rows else 0
         if len(img_msg.data) < min_size:
             raise CvBridgeError('Image is wrongly formed: data has %d bytes, but height, width '
                                 'and step need at least %d' % (len(img_msg.data), min_size))
@@ -185,11 +194,11 @@ class CvBridge(object):
         # Rows are img_msg.step bytes apart, and the padding at the end of a row
         # need not be a whole number of pixels, so pass step as the row stride.
         if n_channels == 1:
-            im = np.ndarray(shape=(img_msg.height, img_msg.width),
+            im = np.ndarray(shape=(rows, img_msg.width),
                             dtype=dtype, buffer=img_buf,
                             strides=(img_msg.step, dtype.itemsize))
         else:
-            im = np.ndarray(shape=(img_msg.height, img_msg.width, n_channels),
+            im = np.ndarray(shape=(rows, img_msg.width, n_channels),
                             dtype=dtype, buffer=img_buf,
                             strides=(img_msg.step, dtype.itemsize * n_channels, dtype.itemsize))
         im = np.ascontiguousarray(im)
@@ -275,6 +284,13 @@ class CvBridge(object):
         img_msg = sensor_msgs.msg.Image()
         img_msg.height = cvim.shape[0]
         img_msg.width = cvim.shape[1]
+        if encoding in self._yuv420_semi_planar_encodings:
+            # The array holds the Y plane followed by the half height interleaved UV plane
+            if len(cvim.shape) != 2 or cvim.shape[0] % 3 != 0 or cvim.shape[1] % 2 != 0:
+                raise CvBridgeError('%s image needs a 2D array with an even number of columns '
+                                    'and a number of rows multiple of 3, got shape %s'
+                                    % (encoding, cvim.shape))
+            img_msg.height = cvim.shape[0] // 3 * 2
         if header is not None:
             img_msg.header = header
         if len(cvim.shape) < 3:
@@ -292,6 +308,6 @@ class CvBridge(object):
         if cvim.dtype.byteorder == '>':
             img_msg.is_bigendian = True
         img_msg.data.frombytes(cvim.tobytes())
-        img_msg.step = len(img_msg.data) // img_msg.height
+        img_msg.step = len(img_msg.data) // cvim.shape[0]
 
         return img_msg

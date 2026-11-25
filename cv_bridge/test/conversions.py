@@ -70,6 +70,26 @@ class TestConversions(unittest.TestCase):
                             self.assertTrue(original.shape == newimg.shape)
                         self.assertTrue(len(original.tostring()) == len(newimg.tostring()))
 
+    def test_yuv420_semi_planar(self):
+        import cv2
+        br = CvBridge()
+        w, h = 64, 48
+        for encoding, code in (('nv12', cv2.COLOR_YUV2BGR_NV12), ('nv21', cv2.COLOR_YUV2BGR_NV21)):
+            yuv = np.uint8(np.random.randint(0, 255, size=(h * 3 // 2, w)))
+            msg = br.cv2_to_imgmsg(yuv, encoding)
+            self.assertEqual(msg.height, h)
+            self.assertEqual(msg.width, w)
+            self.assertEqual(msg.step, w)
+            self.assertEqual(len(msg.data), w * h * 3 // 2)
+
+            self.assertTrue((br.imgmsg_to_cv2(msg) == yuv).all())
+            bgr = br.imgmsg_to_cv2(msg, 'bgr8')
+            self.assertEqual(bgr.shape, (h, w, 3))
+            self.assertTrue((bgr == cv2.cvtColor(yuv, code)).all())
+
+            self.assertRaises(CvBridgeError,
+                              lambda: br.cv2_to_imgmsg(np.zeros((h + 1, w), np.uint8), encoding))
+
     def test_endianness(self):
         br = CvBridge()
         dtype = np.dtype('int32')
@@ -121,6 +141,7 @@ if __name__ == '__main__':
     suite.addTest(TestConversions('test_mono16_cv2'))
     suite.addTest(TestConversions('test_encode_decode_cv2'))
     suite.addTest(TestConversions('test_encode_decode_cv2_compressed'))
+    suite.addTest(TestConversions('test_yuv420_semi_planar'))
     suite.addTest(TestConversions('test_endianness'))
     suite.addTest(TestConversions('test_row_padding'))
     suite.addTest(TestConversions('test_malformed_image'))

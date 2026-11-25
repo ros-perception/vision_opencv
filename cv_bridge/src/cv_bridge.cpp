@@ -35,11 +35,6 @@
 *********************************************************************/
 
 #include <cv_bridge/cv_bridge.hpp>
-#include <cv_bridge/rgb_colors.hpp>
-#include <boost/endian/conversion.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <sensor_msgs/image_encodings.hpp>
 
 #include <bit>
 #include <limits>
@@ -49,6 +44,12 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <boost/endian/conversion.hpp>
+#include <cv_bridge/rgb_colors.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <sensor_msgs/image_encodings.hpp>
 
 namespace enc = sensor_msgs::image_encodings;
 
@@ -248,9 +249,11 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
   Encoding src_encod = getEncoding(src_encoding);
   Encoding dst_encod = getEncoding(dst_encoding);
   bool is_src_color_encoding = enc::isColor(src_encoding) || enc::isMono(src_encoding) ||
-    enc::isBayer(src_encoding) || (src_encoding == enc::YUV422) || (src_encoding == enc::YUV422_YUY2);
+    enc::isBayer(src_encoding) || (src_encoding == enc::YUV422) ||
+    (src_encoding == enc::YUV422_YUY2);
   bool is_dst_color_encoding = enc::isColor(dst_encoding) || enc::isMono(dst_encoding) ||
-    enc::isBayer(dst_encoding) || (dst_encoding == enc::YUV422) || (dst_encoding == enc::YUV422_YUY2);
+    enc::isBayer(dst_encoding) || (dst_encoding == enc::YUV422) ||
+    (dst_encoding == enc::YUV422_YUY2);
   bool is_num_channels_the_same =
     (enc::numChannels(src_encoding) == enc::numChannels(dst_encoding));
 
@@ -340,7 +343,7 @@ cv::Mat matFromImage(const sensor_msgs::msg::Image & source)
   cv::Mat mat(static_cast<int>(rows), source.width, source_type,
     const_cast<uchar *>(&source.data[0]), source.step);
 
-   if ((std::endian::native == std::endian::big && source.is_bigendian) ||
+  if ((std::endian::native == std::endian::big && source.is_bigendian) ||
     (std::endian::native == std::endian::little && !source.is_bigendian) ||
     byte_depth == 1)
   {
@@ -557,13 +560,32 @@ std::string getFormat(Format format)
   throw Exception("Unrecognized image format");
 }
 
+// Whether the format stores 16 bit images. The others store 8 bits per channel.
+static bool keeps16Bits(Format format)
+{
+  switch (format) {
+    case JP2:
+    case PNG:
+    case PGM:
+    case PPM:
+    case TIF:
+    case TIFF:
+      return true;
+    default:
+      return false;
+  }
+}
+
 void CvImage::toCompressedImageMsg(
   sensor_msgs::msg::CompressedImage & ros_image,
   const Format dst_format) const
 {
   ros_image.header = header;
   cv::Mat image;
-  if (encoding == enc::BGR8 || encoding == enc::BGRA8  || encoding == enc::MONO8 || encoding == enc::MONO16)
+  // 16UC1 has the same layout as mono16 (e.g. depth images), so it is encoded as is
+  // instead of being converted to an 8 bit color image.
+  if (encoding == enc::BGR8 || encoding == enc::BGRA8 || encoding == enc::MONO8 ||
+    encoding == enc::MONO16 || encoding == enc::TYPE_16UC1)
   {
     image = this->image;
   } else {
@@ -575,6 +597,14 @@ void CvImage::toCompressedImageMsg(
       temp = cvtColor(tempThis, enc::BGR8);
     }
     image = temp->image;
+  }
+
+  if (image.depth() == CV_16U && !keeps16Bits(dst_format)) {
+    // cv::imencode would saturate every value above 255. Scale to 8 bit, as the conversion
+    // from mono16 to mono8 does.
+    cv::Mat image8;
+    image.convertTo(image8, CV_8U, 255.0 / 65535.0);
+    image = image8;
   }
 
   std::string format = getFormat(dst_format);
@@ -597,24 +627,18 @@ CvImagePtr toCvCopy(const sensor_msgs::msg::CompressedImage & source, const std:
   // Loads as BGR or BGRA.
   const cv::Mat rgb_a = cv::imdecode(in, cv::IMREAD_UNCHANGED);
 
-  if (encoding != enc::MONO16) {
-    switch (rgb_a.channels())
-    {
-      case 4:
-        return toCvCopyImpl(rgb_a, source.header, enc::BGRA8, encoding);
-        break;
-      case 3:
-        return toCvCopyImpl(rgb_a, source.header, enc::BGR8, encoding);
-        break;
-      case 1:
-        return toCvCopyImpl(rgb_a, source.header, enc::MONO8, encoding);
-        break;
-      default:
-        return CvImagePtr();
-    }
-  }
-  else {
-    return toCvCopyImpl(rgb_a, source.header, enc::MONO16, encoding);
+  // Formats such as PNG and TIFF keep 16 bit images, so imdecode returns them as CV_16U.
+  // Label what was decoded with its real depth, so the data is not misinterpreted.
+  const bool is_16bit = rgb_a.depth() == CV_16U;
+  switch (rgb_a.channels()) {
+    case 4:
+      return toCvCopyImpl(rgb_a, source.header, is_16bit ? enc::BGRA16 : enc::BGRA8, encoding);
+    case 3:
+      return toCvCopyImpl(rgb_a, source.header, is_16bit ? enc::BGR16 : enc::BGR8, encoding);
+    case 1:
+      return toCvCopyImpl(rgb_a, source.header, is_16bit ? enc::MONO16 : enc::MONO8, encoding);
+    default:
+      return CvImagePtr();
   }
 }
 
@@ -679,8 +703,8 @@ CvImageConstPtr cvtColorForDisplay(
       (enc::bitDepth(encoding) != 8))
     {
       throw Exception(
-              "cv_bridge.cvtColorForDisplay() does not have an output encoding \
-               that is color or mono, and has is bit in depth");
+              "cv_bridge.cvtColorForDisplay() does not have an output encoding "
+              "that is color or mono, and has is bit in depth");
     }
   }
 
@@ -711,7 +735,7 @@ CvImageConstPtr cvtColorForDisplay(
   // Perform scaling if asked for
   if (options.do_dynamic_scaling) {
     float inf = std::numeric_limits<float>::infinity();
-    cv::Mat mask = ((source->image!=inf) & (source->image!=-inf));
+    cv::Mat mask = ((source->image != inf) & (source->image != -inf));
     cv::minMaxLoc(source->image, &min_image_value, &max_image_value, NULL, NULL, mask);
     if (min_image_value == max_image_value) {
       CvImagePtr result(new CvImage());
@@ -731,8 +755,8 @@ CvImageConstPtr cvtColorForDisplay(
   if (min_image_value != max_image_value) {
     if (enc::numChannels(source->encoding) != 1) {
       throw Exception(
-              "cv_bridge.cvtColorForDisplay() scaling for images \
-               with more than one channel is unsupported");
+              "cv_bridge.cvtColorForDisplay() scaling for images "
+              "with more than one channel is unsupported");
     }
     CvImagePtr img_scaled(new CvImage());
     img_scaled->header = source->header;

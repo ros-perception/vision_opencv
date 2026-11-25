@@ -1,7 +1,10 @@
-#include <bit>
-#include <cv_bridge/cv_bridge.hpp>
+// Copyright (c) 2015, ROS Perception
 #include <gtest/gtest.h>
+
+#include <bit>
 #include <memory>
+
+#include <cv_bridge/cv_bridge.hpp>
 
 TEST(CvBridgeTest, endianness)
 {

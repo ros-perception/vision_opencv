@@ -49,6 +49,14 @@ install(TARGETS ${PROJECT_NAME} EXPORT export_${PROJECT_NAME}
 
 if(BUILD_TESTING)
   add_subdirectory(test)
+
+  find_package(ament_lint_auto REQUIRED)
+  # The copyright check is disabled. cpplint is run below, without its own copyright check.
+  list(APPEND AMENT_LINT_AUTO_EXCLUDE ament_cmake_copyright ament_cmake_cpplint)
+  ament_lint_auto_find_test_dependencies()
+
+  find_package(ament_cmake_cpplint REQUIRED)
+  ament_cpplint(FILTERS "-legal/copyright")
 endif()
 
 ament_export_targets(export_${PROJECT_NAME})

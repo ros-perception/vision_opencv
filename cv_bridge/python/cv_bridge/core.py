@@ -67,6 +67,9 @@ class CvBridge(object):
 
     """
 
+    # Compressed formats that store 16 bit images without reducing them to 8 bits.
+    _16bit_formats = ('png', 'tiff', 'tif', 'pgm', 'ppm', 'pnm')
+
     # Semi-planar YUV 4:2:0 encodings: a full resolution Y plane followed by a half height
     # interleaved UV plane, stored in a single channel array of height * 3 / 2 rows.
     _yuv420_semi_planar_encodings = ('nv12', 'nv21')
@@ -87,7 +90,7 @@ class CvBridge(object):
         self.numpy_type_to_cvtype = {'uint8': '8U', 'int8': '8S', 'uint16': '16U',
                                      'int16': '16S', 'int32': '32S', 'float32': '32F',
                                      'float64': '64F'}
-        self.numpy_type_to_cvtype.update(dict((v, k) for (k, v) in self.numpy_type_to_cvtype.items()))
+        self.numpy_type_to_cvtype.update({v: k for k, v in self.numpy_type_to_cvtype.items()})
 
     def dtype_with_channels_to_cvtype2(self, dtype, n_channels):
         return '%sC%d' % (self.numpy_type_to_cvtype[dtype.name], n_channels)
@@ -174,7 +177,8 @@ class CvBridge(object):
         dtype = np.dtype(dtype)
         dtype = dtype.newbyteorder('>' if img_msg.is_bigendian else '<')
 
-        img_buf = np.asarray(img_msg.data, dtype=dtype) if isinstance(img_msg.data, list) else img_msg.data
+        img_buf = np.asarray(img_msg.data, dtype=dtype) if isinstance(
+            img_msg.data, list) else img_msg.data
 
         rows = img_msg.height
         if img_msg.encoding in self._yuv420_semi_planar_encodings:
@@ -254,6 +258,13 @@ class CvBridge(object):
             raise TypeError('Your input type is not a numpy array')
         cmprs_img_msg = sensor_msgs.msg.CompressedImage()
         cmprs_img_msg.format = dst_format
+        # A reader cannot tell the depth from the bare format and assumes 8 bits, so 16 bit
+        # images are announced as '<type>; <format> compressed', the form used by
+        # compressed_image_transport. Only for formats that keep the 16 bits.
+        if cvim.dtype == np.uint16 and dst_format.lower() in self._16bit_formats:
+            n_channels = 1 if cvim.ndim < 3 else cvim.shape[2]
+            cv_type = self.dtype_with_channels_to_cvtype2(cvim.dtype, n_channels)
+            cmprs_img_msg.format = '%s; %s compressed' % (cv_type, dst_format)
         ext_format = '.' + dst_format
         try:
             cmprs_img_msg.data.frombytes(np.array(cv2.imencode(ext_format, cvim)[1]).tobytes())
@@ -262,7 +273,7 @@ class CvBridge(object):
 
         return cmprs_img_msg
 
-    def cv2_to_imgmsg(self, cvim, encoding='passthrough', header = None):
+    def cv2_to_imgmsg(self, cvim, encoding='passthrough', header=None):
         """
         Convert an OpenCV :cpp:type:`cv::Mat` type to a ROS sensor_msgs::Image message.
 

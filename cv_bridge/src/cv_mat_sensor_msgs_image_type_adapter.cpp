@@ -213,7 +213,7 @@ ROSCvMatContainer::get_sensor_msgs_msg_image_pointer_copy() const
 }
 
 void ROSCvMatContainer::get_sensor_msgs_msg_image_copy(
-  sensor_msgs::msg::Image& sensor_msgs_image) const
+  sensor_msgs::msg::Image & sensor_msgs_image) const
 {
   fill_sensor_msgs_image_from_cvmat(frame_, sensor_msgs_image, header_, encoding_override_);
 }

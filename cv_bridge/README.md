@@ -50,7 +50,7 @@ The methods raise `cv_bridge.CvBridgeError` if the conversion is not possible.
 
 ## Encodings
 
-When a ROS image is converted to an OpenCV image, `cv_bridge` can convert between the grayscale and color encodings (`mono8`, `mono16`, `bgr8`, `rgb8`, `bgra8`, `rgba8`, ...), and from Bayer and YUV 4:2:2 images.
+When a ROS image is converted to an OpenCV image, `cv_bridge` can convert between the grayscale and color encodings (`mono8`, `mono16`, `bgr8`, `rgb8`, `bgra8`, `rgba8`, ...), and from Bayer, YUV 4:2:2 and NV12/NV21 images.
 If no encoding is requested, the image keeps the encoding of the message.
 
 Images with a generic encoding, like the `16UC1` and `32FC1` depth images, cannot be converted to a color encoding.

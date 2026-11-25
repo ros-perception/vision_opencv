@@ -17,6 +17,8 @@
 
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
   <buildtool_depend>python_cmake_module</buildtool_depend>
+  <buildtool_depend>ament_cmake_ros_core</buildtool_depend>
+  <buildtool_export_depend>ament_cmake_ros_core</buildtool_export_depend>
 
   <build_depend>libboost-dev</build_depend>
   <build_depend>libboost-python-dev</build_depend>
@@ -24,7 +26,6 @@
 
   <depend>python3-numpy</depend>
   <depend>rclcpp</depend>
-  <depend>rcpputils</depend>
   <depend>sensor_msgs</depend>
 
   <exec_depend>ament_index_python</exec_depend>

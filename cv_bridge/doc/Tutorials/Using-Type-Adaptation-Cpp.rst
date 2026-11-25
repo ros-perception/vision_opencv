@@ -4,7 +4,7 @@ Publishing cv::Mat images with type adaptation (C++)
 Overview
 ~~~~~~~~
 
-With `type adaptation <https://docs.ros.org/en/rolling/How-To-Guides/Defining-custom-type-adaptations.html>`_, a node can publish and subscribe to its own data type instead of a ROS message.
+With `type adaptation <https://ros.org/reps/rep-2007.html>`_, a node can publish and subscribe to its own data type instead of a ROS message.
 ``cv_bridge`` provides an adapter between ``cv::Mat`` images and ``sensor_msgs/msg/Image``:
 
 * The node works with ``cv::Mat`` directly, and the conversion to a message is done by ROS 2 only when it is needed.
@@ -46,7 +46,7 @@ Create a new file ``src/type_adapter_example.cpp`` inside your package, with the
     explicit CvMatPublisher(const rclcpp::NodeOptions & options)
     : Node("cv_mat_publisher", options)
     {
-      publisher_ = create_publisher<cv_bridge::ROSCvMatContainer>("image", 10);
+      publisher_ = create_publisher<cv_bridge::ROSCvMatContainer>("cv_mat_image", 10);
       timer_ = create_wall_timer(std::chrono::milliseconds(500), [this]() {publish_frame();});
     }
 
@@ -80,7 +80,7 @@ Create a new file ``src/type_adapter_example.cpp`` inside your package, with the
     : Node("cv_mat_subscriber", options)
     {
       subscription_ = create_subscription<cv_bridge::ROSCvMatContainer>(
-        "image", 10,
+        "cv_mat_image", 10,
         [this](std::unique_ptr<cv_bridge::ROSCvMatContainer> container) {
           const cv::Mat & frame = container->cv_mat();
           RCLCPP_INFO(
@@ -132,7 +132,7 @@ After this, publishers and subscriptions can be created with ``ROSCvMatContainer
 
 .. code-block:: C++
 
-      publisher_ = create_publisher<cv_bridge::ROSCvMatContainer>("image", 10);
+      publisher_ = create_publisher<cv_bridge::ROSCvMatContainer>("cv_mat_image", 10);
 
 The publisher is created with the container type.
 The topic it advertises is a ``sensor_msgs/msg/Image`` topic.
@@ -156,7 +156,7 @@ For any other type, or to use a different encoding, give the encoding as the fou
 .. code-block:: C++
 
       subscription_ = create_subscription<cv_bridge::ROSCvMatContainer>(
-        "image", 10,
+        "cv_mat_image", 10,
         [this](std::unique_ptr<cv_bridge::ROSCvMatContainer> container) {
           const cv::Mat & frame = container->cv_mat();
 
@@ -174,6 +174,7 @@ The subscription is also created with the container type, and its callback recei
     options.use_intra_process_comms(true);
 
 Intra-process communication has to be enabled in the nodes to pass the images without copying them.
+See `Intra-Process Communication <https://docs.ros.org/en/rolling/ROS-Framework/nodes/Working-with-nodes/intra-process/Intra-Process-Communication.html>`_ for the details.
 
 3. Add the executable to CMakeLists.txt
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -227,8 +228,13 @@ For those subscribers the image is converted to a message:
 .. code-block:: console
 
   $ ros2 topic list -t
-  /image [sensor_msgs/msg/Image]
+  /cv_mat_image [sensor_msgs/msg/Image]
   ...
-  $ ros2 topic echo --once /image --field encoding
+  $ ros2 topic echo --once /cv_mat_image --field encoding
   bgr8
   ---
+
+.. note::
+
+   While a subscriber in another process is connected, some middlewares (like the default, Fast DDS) also deliver a copy of every image to the subscriber of this example, which then prints two lines for each image: one with the address of the published image and one with a different address.
+   This is not caused by the type adapter: it happens with regular messages too.

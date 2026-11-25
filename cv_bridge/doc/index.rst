@@ -68,15 +68,17 @@ The supported conversions are:
 * **Color conversions** between the grayscale and the color encodings (``mono``, ``bgr``, ``rgb``, ``bgra`` and ``rgba``).
 * **From Bayer and YUV 4:2:2** images to grayscale and color images. Converting *to* these encodings is not supported.
 * **Bit depth conversions** between the 8-bit and 16-bit variants of the encodings above. The values are scaled, so ``255`` becomes ``65535`` and the other way around.
-* **Between generic encodings** with the same number of channels, for example from ``16UC1`` to ``32FC1``. The values are converted without scaling.
+* **To a generic encoding** with the same number of channels, from a generic or from a color encoding, for example from ``16UC1`` to ``32FC1`` or from ``bgr8`` to ``8UC3``.
+  The values are scaled between 8 and 16 bits as above, and converted without scaling otherwise: ``1000`` stays ``1000`` from ``16UC1`` to ``32FC1``, but it becomes ``4`` from ``16UC1`` to ``8UC1``.
 
 .. warning::
 
-   The generic encodings do not describe the color of the pixels, so they cannot be converted to the color encodings, or the other way around.
+   The generic encodings do not describe the color of the pixels, so they cannot be converted to the color encodings.
    For example, a ``16UC1`` depth image cannot be converted to ``mono8``: the conversion fails with the error ``[16UC1] is not a color encoding. but [mono8] is``.
    To show such an image use ``cvtColorForDisplay()``, see `4. Displaying images`_.
 
-A conversion that is not supported raises an exception: ``cv_bridge::Exception`` in C++ and ``cv_bridge.CvBridgeError`` in Python.
+A conversion that is not supported, or a message with an unknown or malformed encoding, raises an exception: ``cv_bridge::Exception`` in C++ and ``cv_bridge.CvBridgeError`` in Python.
+In C++, requesting an encoding that does not exist (for example a misspelled one) throws a ``std::runtime_error`` instead.
 
 2. C++ API
 ----------
@@ -153,7 +155,8 @@ There are two use cases, with a function for each of them:
 
   The second overload is convenient when you have a pointer to some other message that contains the ``sensor_msgs/msg/Image`` to convert, like a ``stereo_msgs/msg/DisparityImage``.
 
-If ``encoding`` is the empty string, the image keeps the encoding of the message, and ``toCvShare()`` is guaranteed not to copy the data.
+If ``encoding`` is the empty string, the image keeps the encoding of the message, and ``toCvShare()`` does not copy the data.
+The only exception is a message whose byte order (``is_bigendian``) is not the one of the computer, which is always copied.
 
 Compressed images can be converted too.
 ``toCvCopy()`` also accepts a ``sensor_msgs/msg/CompressedImage`` message, which it decodes with OpenCV.
@@ -178,7 +181,8 @@ Use the member functions of ``CvImage``:
        const Format dst_format = JPG) const;
    };
 
-The image is not converted: the message has the ``encoding`` of the ``CvImage``, which must match the type of its ``cv::Mat``.
+The image is not converted: the message has the ``encoding`` of the ``CvImage``.
+It must match the type of its ``cv::Mat``, which is not checked.
 If the ``CvImage`` is one you have created yourself, do not forget to fill in the ``header`` and ``encoding`` fields:
 
 .. code-block:: C++
@@ -230,11 +234,14 @@ The methods raise ``cv_bridge.CvBridgeError`` when a conversion is not possible.
 4. Displaying images
 --------------------
 
-``cvtColorForDisplay()`` converts any image to an 8-bit image that can be shown on screen, using practical rules for the encodings that have no color information:
+``cvtColorForDisplay()`` converts an image to an 8-bit grayscale or color image that can be shown on screen, using practical rules for the encodings that have no color information:
 
-* Images with a generic encoding of 1, 3 or 4 channels are interpreted as grayscale, BGR or BGRA images.
+* Images with a color or grayscale encoding are converted to the output encoding.
 * Images with one channel, like depth images, can be scaled to the range of the output: between their minimum and maximum values (``do_dynamic_scaling``) or between two given values (``min_image_value`` and ``max_image_value``). A color map can be applied too (``colormap``).
+  Scaling is the way to display ``32FC1`` and ``8UC1`` images, which fail otherwise. ``16UC1`` images are also accepted without scaling.
 * ``32SC1`` images are interpreted as label images, and every label gets a different color.
+
+Images with a generic encoding of more than one channel, like ``8UC3``, are not supported.
 
 It is available in C++ (with ``cv_bridge::CvtColorForDisplayOptions``) and in Python:
 
@@ -249,7 +256,7 @@ It is available in C++ (with ``cv_bridge::CvtColorForDisplayOptions``) and in Py
 5. Publishing cv::Mat directly
 ------------------------------
 
-In C++, ``cv_bridge`` provides a `type adapter <https://docs.ros.org/en/rolling/How-To-Guides/Defining-custom-type-adaptations.html>`_ to publish and subscribe to ``cv::Mat`` images directly, without converting them to a message in your code.
+In C++, ``cv_bridge`` provides a `type adapter <https://ros.org/reps/rep-2007.html>`_ to publish and subscribe to ``cv::Mat`` images directly, without converting them to a message in your code.
 With intra-process communication, the images are passed between the nodes of a process without copying them.
 
 The adapted type is :cpp:class:`cv_bridge::ROSCvMatContainer`, declared in ``cv_bridge/cv_mat_sensor_msgs_image_type_adapter.hpp``.

@@ -67,6 +67,30 @@ class TestConversions(unittest.TestCase):
                             self.assertTrue(original.shape == newimg.shape)
                         self.assertTrue(len(original.tostring()) == len(newimg.tostring()))
 
+    def test_compressed_format(self):
+        import cv2
+        br = CvBridge()
+
+        # 8 bit images keep the bare format: readers then assume mono8 or bgr8.
+        self.assertEqual(br.cv2_to_compressed_imgmsg(np.zeros((4, 4, 3), np.uint8), 'jpg').format,
+                         'jpg')
+        self.assertEqual(br.cv2_to_compressed_imgmsg(np.zeros((4, 4), np.uint8), 'png').format,
+                         'png')
+
+        # 16 bit images announce their type when the format keeps the 16 bits.
+        for shape, cv_type in (((4, 4), '16UC1'), ((4, 4, 3), '16UC3')):
+            img = (np.arange(np.prod(shape)) * 4000).astype(np.uint16).reshape(shape)
+            msg = br.cv2_to_compressed_imgmsg(img, 'png')
+            self.assertEqual(msg.format, cv_type + '; png compressed')
+            decoded = br.compressed_imgmsg_to_cv2(msg)
+            self.assertEqual(decoded.dtype, np.uint16)
+            np.testing.assert_array_equal(decoded, img)
+
+        # jpg reduces the image to 8 bits, so the format must not announce 16.
+        msg = br.cv2_to_compressed_imgmsg(np.zeros((4, 4), np.uint16), 'jpg')
+        self.assertEqual(msg.format, 'jpg')
+        self.assertEqual(br.compressed_imgmsg_to_cv2(msg).dtype, np.uint8)
+
     def test_endianness(self):
         br = CvBridge()
         dtype = np.dtype('int32')
@@ -84,5 +108,6 @@ if __name__ == '__main__':
     suite.addTest(TestConversions('test_mono16_cv2'))
     suite.addTest(TestConversions('test_encode_decode_cv2'))
     suite.addTest(TestConversions('test_encode_decode_cv2_compressed'))
+    suite.addTest(TestConversions('test_compressed_format'))
     suite.addTest(TestConversions('test_endianness'))
     unittest.TextTestRunner(verbosity=2).run(suite)

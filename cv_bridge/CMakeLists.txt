@@ -76,6 +76,10 @@ set(cv_bridge_lib_dir "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
 
 if(BUILD_TESTING)
   add_subdirectory(test)
+
+  find_package(ament_lint_auto REQUIRED)
+  set(ament_cmake_copyright_FOUND TRUE)  # Setting this flag disables the copyright check
+  ament_lint_auto_find_test_dependencies()
 endif()
 
 ament_export_dependencies(

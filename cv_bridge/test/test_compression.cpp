@@ -1,9 +1,11 @@
-#include <cv_bridge/cv_bridge.hpp>
-#include <opencv2/imgcodecs.hpp>
+// Copyright (c) 2017, ROS Perception
 #include <stdio.h>
 #include <gtest/gtest.h>
 
 #include <string>
+
+#include <cv_bridge/cv_bridge.hpp>
+#include <opencv2/imgcodecs.hpp>
 
 TEST(CvBridgeTest, compression)
 {

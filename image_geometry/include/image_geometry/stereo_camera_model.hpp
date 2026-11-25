@@ -69,12 +69,15 @@ public:
    * This is the inverse of projectDisparityTo3d(). The pixel in the right image is
    * (left_uv_rect.x - disparity, left_uv_rect.y).
    *
-   * \param xyz 3d point in the left camera coordinate frame
+   * \param xyz 3d point in the left camera coordinate frame. Its z has to be positive for the
+   * point to be visible: the outputs are not finite for z == 0.
    * \param left_uv_rect Output rectified pixel coordinates in the left image
    * \param disparity Output disparity (x_left - x_right) at which the point is observed
    */
   IMAGE_GEOMETRY_PUBLIC
-  void project3dToDisparity(const cv::Point3d& xyz, cv::Point2d& left_uv_rect, float& disparity) const;
+  void project3dToDisparity(
+    const cv::Point3d & xyz, cv::Point2d & left_uv_rect,
+    float & disparity) const;
 
   /**
    * \brief Project a disparity image to a 3d point cloud.

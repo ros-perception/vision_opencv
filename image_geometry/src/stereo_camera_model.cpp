@@ -130,10 +130,11 @@ void StereoCameraModel::projectDisparityTo3d(const cv::Point2d& left_uv_rect, fl
   xyz = XYZ * (1.0/W);
 }
 
-void StereoCameraModel::project3dToDisparity(const cv::Point3d& xyz, cv::Point2d& left_uv_rect,
-                                             float& disparity) const
+void StereoCameraModel::project3dToDisparity(
+  const cv::Point3d & xyz, cv::Point2d & left_uv_rect,
+  float & disparity) const
 {
-  assert( initialized() );
+  assert(initialized());
 
   left_uv_rect = left_.project3dToPixel(xyz);
   disparity = static_cast<float>(getDisparity(xyz.z));

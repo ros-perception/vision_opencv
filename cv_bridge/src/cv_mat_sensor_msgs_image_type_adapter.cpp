@@ -13,7 +13,10 @@
 // limitations under the License.
 
 #include <cstddef>
+#include <cstdint>
+#include <limits>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <variant>
@@ -54,6 +57,33 @@ encoding2mat_type(const std::string & encoding)
   }
 }
 
+/// Create a cv::Mat that references the data of image, after checking that the data is as
+/// large as the geometry of the image claims.
+/**
+ * The image may come straight from the network, so nothing in it can be trusted: without these
+ * checks a message with a short data field makes every user of the cv::Mat read out of bounds.
+ * The products are computed in 64 bits because the fields of the message are 32 bits wide.
+ */
+cv::Mat
+mat_referencing_image(sensor_msgs::msg::Image & image)
+{
+  const int type = encoding2mat_type(image.encoding);
+  const uint64_t max_dimension = static_cast<uint64_t>(std::numeric_limits<int>::max());
+  if (image.height > max_dimension || image.width > max_dimension) {
+    throw std::runtime_error("Image is wrongly formed: height or width is too large");
+  }
+  const uint64_t min_step = static_cast<uint64_t>(image.width) * CV_ELEM_SIZE(type);
+  if (image.step < min_step) {
+    throw std::runtime_error("Image is wrongly formed: step < width * pixel size");
+  }
+  if (static_cast<uint64_t>(image.height) * image.step != image.data.size()) {
+    throw std::runtime_error("Image is wrongly formed: height * step != size");
+  }
+  return cv::Mat(
+    static_cast<int>(image.height), static_cast<int>(image.width), type,
+    image.data.data(), image.step);
+}
+
 template<typename T>
 struct NotNull
 {
@@ -76,24 +106,17 @@ ROSCvMatContainer::ROSCvMatContainer(
       unique_sensor_msgs_image.get(),
       "unique_sensor_msgs_image cannot be nullptr"
 ).pointer->header),
-  frame_(
-    unique_sensor_msgs_image->height,
-    unique_sensor_msgs_image->width,
-    encoding2mat_type(unique_sensor_msgs_image->encoding),
-    unique_sensor_msgs_image->data.data(),
-    unique_sensor_msgs_image->step),
+  frame_(mat_referencing_image(*unique_sensor_msgs_image)),
   storage_(std::move(unique_sensor_msgs_image))
 {}
 
 ROSCvMatContainer::ROSCvMatContainer(
   std::shared_ptr<sensor_msgs::msg::Image> shared_sensor_msgs_image)
-: header_(shared_sensor_msgs_image->header),
-  frame_(
-    shared_sensor_msgs_image->height,
-    shared_sensor_msgs_image->width,
-    encoding2mat_type(shared_sensor_msgs_image->encoding),
-    shared_sensor_msgs_image->data.data(),
-    shared_sensor_msgs_image->step),
+: header_(NotNull(
+      shared_sensor_msgs_image.get(),
+      "shared_sensor_msgs_image cannot be nullptr"
+).pointer->header),
+  frame_(mat_referencing_image(*shared_sensor_msgs_image)),
   storage_(shared_sensor_msgs_image)
 {}
 

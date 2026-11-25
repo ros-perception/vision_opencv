@@ -111,6 +111,24 @@ class TestDirected(unittest.TestCase):
             # With no distortion and R = I, rectification leaves the image as it is
             np.testing.assert_array_equal(rectified, raw)
 
+    def test_rectify_image_output_buffer(self):
+        # The result is always written to the output image, or an error is raised
+        cam = self.cam.get_left_camera()
+        rng = np.random.default_rng(0)
+        raw = rng.integers(1, 256, (self.height, self.width), dtype=np.uint8)
+        expected = np.zeros_like(raw)
+        cam.rectify_image(raw, expected)
+        self.assertTrue(expected.any())
+
+        # An output image of another type cannot be used by cv2.remap directly
+        rectified = np.zeros(raw.shape, dtype=np.float32)
+        cam.rectify_image(raw, rectified)
+        assert_almost_equal(rectified, expected)
+
+        # An output image of the wrong size is an error, it used to be left untouched
+        with self.assertRaises(ValueError):
+            cam.rectify_image(raw, np.zeros((self.height // 2, self.width // 2), dtype=np.uint8))
+
     def test_rectify_point(self):
         uv_raw = (1.0, 2.0)
         expected = [48.16447369,45.49210841]
@@ -363,6 +381,7 @@ if __name__ == '__main__':
     suite.addTest(TestDirected('test_stereo'))
     suite.addTest(TestDirected('test_rectify_image'))
     suite.addTest(TestDirected('test_rectify_image_binning_and_roi'))
+    suite.addTest(TestDirected('test_rectify_image_output_buffer'))
     suite.addTest(TestDirected('test_rectify_point'))
     suite.addTest(TestDirected('test_project_3d_to_pixel'))
     suite.addTest(TestDirected('test_project_pixel_to_3d_ray'))

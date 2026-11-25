@@ -82,6 +82,9 @@ class PinholeCameraModel:
         :type rectified:  :class:`CvMat` or :class:`IplImage`
 
         Applies the rectification specified by camera parameters :math:`K` and and :math:`D` to image `raw` and writes the resulting image `rectified`.
+
+        `rectified` must have the size of the image the camera publishes, which is the
+        region of interest divided by the binning. A :exc:`ValueError` is raised otherwise.
         """
 
         # K and P are already adjusted for binning and ROI, so the maps must
@@ -94,7 +97,14 @@ class PinholeCameraModel:
                            dtype='float32')
         cv2.initUndistortRectifyMap(self._k, self._d, self._r, self._p,
                 (width, height), cv2.CV_32FC1, self.mapx, self.mapy)
-        cv2.remap(raw, self.mapx, self.mapy, cv2.INTER_CUBIC, rectified)
+        result = cv2.remap(raw, self.mapx, self.mapy, cv2.INTER_CUBIC, rectified)
+        if result is not rectified:
+            # remap only writes into rectified when its size and type fit the result.
+            # Otherwise it returns a new image and leaves rectified untouched.
+            if rectified.shape != result.shape:
+                raise ValueError(
+                    f'rectified has shape {rectified.shape}, but the rectified image has shape {result.shape}')
+            rectified[...] = result
 
     def rectify_point(self, uv_raw)->numpy.ndarray:
         """

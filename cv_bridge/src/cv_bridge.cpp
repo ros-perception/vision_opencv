@@ -35,13 +35,8 @@
 *********************************************************************/
 
 #include <cv_bridge/cv_bridge.hpp>
-#include <cv_bridge/rgb_colors.hpp>
-#include <boost/endian/conversion.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <sensor_msgs/image_encodings.hpp>
-#include "rcpputils/endian.hpp"
 
+#include <bit>
 #include <cstdint>
 #include <limits>
 #include <map>
@@ -51,10 +46,30 @@
 #include <utility>
 #include <vector>
 
+#include <boost/endian/conversion.hpp>
+#include <cv_bridge/rgb_colors.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <sensor_msgs/image_encodings.hpp>
+
 namespace enc = sensor_msgs::image_encodings;
 
 namespace cv_bridge
 {
+
+// Semi-planar YUV 4:2:0 encodings (NV12, NV21) store a full resolution Y plane followed by a
+// half resolution interleaved UV plane, i.e. height * 3 / 2 rows of `step` bytes each. OpenCV
+// handles them as a single channel cv::Mat holding both planes (see cv::COLOR_YUV2BGR_NV12).
+static inline bool isYUV420SemiPlanar(const std::string & encoding)
+{
+  return encoding == enc::NV12 || encoding == enc::NV21;
+}
+
+// Number of cv::Mat rows needed to hold an image of the given encoding and height.
+static inline size_t getMatRows(const std::string & encoding, size_t height)
+{
+  return isYUV420SemiPlanar(encoding) ? height + height / 2 : height;
+}
 
 static int depthStrToInt(const std::string depth)
 {
@@ -101,6 +116,8 @@ int getCvType(const std::string & encoding)
   // Miscellaneous
   if (encoding == enc::YUV422) {return CV_8UC2;}
   if (encoding == enc::YUV422_YUY2) {return CV_8UC2;}
+  if (encoding == enc::NV12) {return CV_8UC1;}
+  if (encoding == enc::NV21) {return CV_8UC1;}
 
   // Check all the generic content encodings
   std::cmatch m;
@@ -122,8 +139,8 @@ int getCvType(const std::string & encoding)
 
 /// @cond DOXYGEN_IGNORE
 
-enum Encoding { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, YUV422, YUV422_YUY2, BAYER_RGGB, BAYER_BGGR,
-  BAYER_GBRG, BAYER_GRBG, MAX_ENCODING};
+enum Encoding { INVALID = -1, GRAY = 0, RGB, BGR, RGBA, BGRA, YUV422, YUV422_YUY2, NV12, NV21,
+  BAYER_RGGB, BAYER_BGGR, BAYER_GBRG, BAYER_GRBG, MAX_ENCODING};
 
 Encoding getEncoding(const std::string & encoding)
 {
@@ -134,6 +151,8 @@ Encoding getEncoding(const std::string & encoding)
   if ((encoding == enc::RGBA8) || (encoding == enc::RGBA16)) {return RGBA;}
   if (encoding == enc::YUV422) {return YUV422;}
   if (encoding == enc::YUV422_YUY2) {return YUV422_YUY2;}
+  if (encoding == enc::NV12) {return NV12;}
+  if (encoding == enc::NV21) {return NV21;}
 
   if ((encoding == enc::BAYER_RGGB8) || (encoding == enc::BAYER_RGGB16)) {return BAYER_RGGB;}
   if ((encoding == enc::BAYER_BGGR8) || (encoding == enc::BAYER_BGGR16)) {return BAYER_BGGR;}
@@ -194,6 +213,18 @@ std::map<std::pair<Encoding, Encoding>, std::vector<int>> getConversionCodes()
   res[std::make_pair(YUV422_YUY2, RGBA)].push_back(cv::COLOR_YUV2RGBA_YUY2);
   res[std::make_pair(YUV422_YUY2, BGRA)].push_back(cv::COLOR_YUV2BGRA_YUY2);
 
+  res[std::make_pair(NV12, GRAY)].push_back(cv::COLOR_YUV2GRAY_NV12);
+  res[std::make_pair(NV12, RGB)].push_back(cv::COLOR_YUV2RGB_NV12);
+  res[std::make_pair(NV12, BGR)].push_back(cv::COLOR_YUV2BGR_NV12);
+  res[std::make_pair(NV12, RGBA)].push_back(cv::COLOR_YUV2RGBA_NV12);
+  res[std::make_pair(NV12, BGRA)].push_back(cv::COLOR_YUV2BGRA_NV12);
+
+  res[std::make_pair(NV21, GRAY)].push_back(cv::COLOR_YUV2GRAY_NV21);
+  res[std::make_pair(NV21, RGB)].push_back(cv::COLOR_YUV2RGB_NV21);
+  res[std::make_pair(NV21, BGR)].push_back(cv::COLOR_YUV2BGR_NV21);
+  res[std::make_pair(NV21, RGBA)].push_back(cv::COLOR_YUV2RGBA_NV21);
+  res[std::make_pair(NV21, BGRA)].push_back(cv::COLOR_YUV2BGRA_NV21);
+
   // Deal with Bayer
   res[std::make_pair(BAYER_RGGB, GRAY)].push_back(cv::COLOR_BayerBG2GRAY);
   res[std::make_pair(BAYER_RGGB, RGB)].push_back(cv::COLOR_BayerBG2RGB);
@@ -219,9 +250,11 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
   Encoding src_encod = getEncoding(src_encoding);
   Encoding dst_encod = getEncoding(dst_encoding);
   bool is_src_color_encoding = enc::isColor(src_encoding) || enc::isMono(src_encoding) ||
-    enc::isBayer(src_encoding) || (src_encoding == enc::YUV422) || (src_encoding == enc::YUV422_YUY2);
+    enc::isBayer(src_encoding) || (src_encoding == enc::YUV422) ||
+    (src_encoding == enc::YUV422_YUY2);
   bool is_dst_color_encoding = enc::isColor(dst_encoding) || enc::isMono(dst_encoding) ||
-    enc::isBayer(dst_encoding) || (dst_encoding == enc::YUV422) || (dst_encoding == enc::YUV422_YUY2);
+    enc::isBayer(dst_encoding) || (dst_encoding == enc::YUV422) ||
+    (dst_encoding == enc::YUV422_YUY2);
   bool is_num_channels_the_same =
     (enc::numChannels(src_encoding) == enc::numChannels(dst_encoding));
 
@@ -289,8 +322,9 @@ cv::Mat matFromImage(const sensor_msgs::msg::Image & source)
     throw Exception(ss.str());
   }
 
-  // cv::Mat stores its dimensions as int
-  if (source.height > static_cast<uint32_t>(std::numeric_limits<int>::max()) ||
+  // cv::Mat stores its dimensions as int. NV12/NV21 need 1.5x more rows than the image height.
+  const uint64_t rows = getMatRows(source.encoding, source.height);
+  if (rows > static_cast<uint64_t>(std::numeric_limits<int>::max()) ||
     source.width > static_cast<uint32_t>(std::numeric_limits<int>::max()))
   {
     std::stringstream ss;
@@ -303,7 +337,6 @@ cv::Mat matFromImage(const sensor_msgs::msg::Image & source)
   // products wrap around and a message whose data is far smaller than its declared geometry
   // passes the checks below.
   const uint64_t width = source.width;
-  const uint64_t height = source.height;
   const uint64_t step = source.step;
   const uint64_t min_step =
     width * static_cast<uint64_t>(byte_depth) * static_cast<uint64_t>(num_channels);
@@ -316,19 +349,28 @@ cv::Mat matFromImage(const sensor_msgs::msg::Image & source)
     throw Exception(ss.str());
   }
 
-  if (height * step != static_cast<uint64_t>(source.data.size())) {
+  if (isYUV420SemiPlanar(source.encoding) &&
+    ((source.height % 2) != 0 || (source.width % 2) != 0))
+  {
     std::stringstream ss;
-    ss << "Image is wrongly formed: height * step != size  or  " << source.height << " * " <<
+    ss << "Image is wrongly formed: " << source.encoding <<
+      " requires even width and height, got " << source.width << " x " << source.height;
+    throw Exception(ss.str());
+  }
+
+  if (rows * step != static_cast<uint64_t>(source.data.size())) {
+    std::stringstream ss;
+    ss << "Image is wrongly formed: rows * step != size  or  " << rows << " * " <<
       source.step << " != " << source.data.size();
     throw Exception(ss.str());
   }
 
   // If the endianness is the same as locally, share the data
-  cv::Mat mat(source.height, source.width, source_type, const_cast<uchar *>(source.data.data()),
-    source.step);
+  cv::Mat mat(static_cast<int>(rows), source.width, source_type,
+    const_cast<uchar *>(source.data.data()), source.step);
 
-   if ((rcpputils::endian::native == rcpputils::endian::big && source.is_bigendian) ||
-    (rcpputils::endian::native == rcpputils::endian::little && !source.is_bigendian) ||
+  if ((std::endian::native == std::endian::big && source.is_bigendian) ||
+    (std::endian::native == std::endian::little && !source.is_bigendian) ||
     byte_depth == 1)
   {
     return mat;
@@ -416,11 +458,18 @@ sensor_msgs::msg::Image::SharedPtr CvImage::toImageMsg() const
 
 void CvImage::toImageMsg(sensor_msgs::msg::Image & ros_image) const
 {
+  if (isYUV420SemiPlanar(encoding) && ((image.rows % 3) != 0 || (image.cols % 2) != 0)) {
+    std::stringstream ss;
+    ss << "cv::Mat of " << image.cols << " x " << image.rows << " cannot hold a " << encoding <<
+      " image: expected an even number of columns and a number of rows multiple of 3";
+    throw Exception(ss.str());
+  }
+
   ros_image.header = header;
-  ros_image.height = image.rows;
+  ros_image.height = isYUV420SemiPlanar(encoding) ? image.rows / 3 * 2 : image.rows;
   ros_image.width = image.cols;
   ros_image.encoding = encoding;
-  ros_image.is_bigendian = (rcpputils::endian::native == rcpputils::endian::big);
+  ros_image.is_bigendian = (std::endian::native == std::endian::big);
   ros_image.step = image.cols * image.elemSize();
   size_t size = ros_image.step * image.rows;
   ros_image.data.resize(size);
@@ -470,7 +519,7 @@ CvImageConstPtr toCvShare(
 {
   // If the encoding different or the endianness different, you have to copy
   if ((!encoding.empty() && source.encoding != encoding) || (!source.is_bigendian !=
-    (rcpputils::endian::native != rcpputils::endian::big)))
+    (std::endian::native != std::endian::big)))
   {
     return toCvCopy(source, encoding);
   }
@@ -537,13 +586,32 @@ std::string getFormat(Format format)
   throw Exception("Unrecognized image format");
 }
 
+// Whether the format stores 16 bit images. The others store 8 bits per channel.
+static bool keeps16Bits(Format format)
+{
+  switch (format) {
+    case JP2:
+    case PNG:
+    case PGM:
+    case PPM:
+    case TIF:
+    case TIFF:
+      return true;
+    default:
+      return false;
+  }
+}
+
 void CvImage::toCompressedImageMsg(
   sensor_msgs::msg::CompressedImage & ros_image,
   const Format dst_format) const
 {
   ros_image.header = header;
   cv::Mat image;
-  if (encoding == enc::BGR8 || encoding == enc::BGRA8  || encoding == enc::MONO8 || encoding == enc::MONO16)
+  // 16UC1 has the same layout as mono16 (e.g. depth images), so it is encoded as is
+  // instead of being converted to an 8 bit color image.
+  if (encoding == enc::BGR8 || encoding == enc::BGRA8 || encoding == enc::MONO8 ||
+    encoding == enc::MONO16 || encoding == enc::TYPE_16UC1)
   {
     image = this->image;
   } else {
@@ -555,6 +623,14 @@ void CvImage::toCompressedImageMsg(
       temp = cvtColor(tempThis, enc::BGR8);
     }
     image = temp->image;
+  }
+
+  if (image.depth() == CV_16U && !keeps16Bits(dst_format)) {
+    // cv::imencode would saturate every value above 255. Scale to 8 bit, as the conversion
+    // from mono16 to mono8 does.
+    cv::Mat image8;
+    image.convertTo(image8, CV_8U, 255.0 / 65535.0);
+    image = image8;
   }
 
   std::string format = getFormat(dst_format);
@@ -577,25 +653,31 @@ CvImagePtr toCvCopy(const sensor_msgs::msg::CompressedImage & source, const std:
   // Loads as BGR or BGRA.
   const cv::Mat rgb_a = cv::imdecode(in, cv::IMREAD_UNCHANGED);
 
-  if (encoding != enc::MONO16) {
-    switch (rgb_a.channels())
-    {
-      case 4:
-        return toCvCopyImpl(rgb_a, source.header, enc::BGRA8, encoding);
-        break;
-      case 3:
-        return toCvCopyImpl(rgb_a, source.header, enc::BGR8, encoding);
-        break;
-      case 1:
-        return toCvCopyImpl(rgb_a, source.header, enc::MONO8, encoding);
-        break;
-      default:
-        return CvImagePtr();
-    }
+  // Formats such as PNG and TIFF keep 16 bit images, so imdecode returns them as CV_16U.
+  // Label what was decoded with its real depth, so the data is not misinterpreted.
+  const bool is_16bit = rgb_a.depth() == CV_16U;
+  switch (rgb_a.channels()) {
+    case 4:
+      return toCvCopyImpl(rgb_a, source.header, is_16bit ? enc::BGRA16 : enc::BGRA8, encoding);
+    case 3:
+      return toCvCopyImpl(rgb_a, source.header, is_16bit ? enc::BGR16 : enc::BGR8, encoding);
+    case 1:
+      return toCvCopyImpl(rgb_a, source.header, is_16bit ? enc::MONO16 : enc::MONO8, encoding);
+    default:
+      return CvImagePtr();
   }
-  else {
-    return toCvCopyImpl(rgb_a, source.header, enc::MONO16, encoding);
+}
+
+// Sets to zero the pixels of scaled whose value in source is infinite or NaN.
+// How cv::Mat::convertTo() saturates those values depends on the OpenCV version.
+static void zeroNonFinite(const cv::Mat & source, cv::Mat & scaled)
+{
+  if (source.depth() != CV_32F && source.depth() != CV_64F) {
+    return;
   }
+  const double inf = std::numeric_limits<double>::infinity();
+  const cv::Mat non_finite = (source != source) | (source == inf) | (source == -inf);
+  scaled.setTo(0, non_finite);
 }
 
 CvImageConstPtr cvtColorForDisplay(
@@ -647,8 +729,8 @@ CvImageConstPtr cvtColorForDisplay(
       (enc::bitDepth(encoding) != 8))
     {
       throw Exception(
-              "cv_bridge.cvtColorForDisplay() does not have an output encoding \
-               that is color or mono, and has is bit in depth");
+              "cv_bridge.cvtColorForDisplay() does not have an output encoding "
+              "that is color or mono, and has is bit in depth");
     }
   }
 
@@ -679,7 +761,7 @@ CvImageConstPtr cvtColorForDisplay(
   // Perform scaling if asked for
   if (options.do_dynamic_scaling) {
     float inf = std::numeric_limits<float>::infinity();
-    cv::Mat mask = ((source->image!=inf) & (source->image!=-inf));
+    cv::Mat mask = ((source->image != inf) & (source->image != -inf));
     cv::minMaxLoc(source->image, &min_image_value, &max_image_value, NULL, NULL, mask);
     if (min_image_value == max_image_value) {
       CvImagePtr result(new CvImage());
@@ -699,8 +781,8 @@ CvImageConstPtr cvtColorForDisplay(
   if (min_image_value != max_image_value) {
     if (enc::numChannels(source->encoding) != 1) {
       throw Exception(
-              "cv_bridge.cvtColorForDisplay() scaling for images \
-               with more than one channel is unsupported");
+              "cv_bridge.cvtColorForDisplay() scaling for images "
+              "with more than one channel is unsupported");
     }
     CvImagePtr img_scaled(new CvImage());
     img_scaled->header = source->header;
@@ -708,10 +790,12 @@ CvImageConstPtr cvtColorForDisplay(
       img_scaled->encoding = enc::MONO8;
       cv::Mat(source->image - min_image_value).convertTo(img_scaled->image, CV_8UC1, 255.0 /
         (max_image_value - min_image_value));
+      zeroNonFinite(source->image, img_scaled->image);
     } else {
       img_scaled->encoding = enc::BGR8;
       cv::Mat(source->image - min_image_value).convertTo(img_scaled->image, CV_8UC3, 255.0 /
         (max_image_value - min_image_value));
+      zeroNonFinite(source->image, img_scaled->image);
       cv::applyColorMap(img_scaled->image, img_scaled->image, options.colormap);
       // Fill black color to the nan region.
       if (source->encoding == enc::TYPE_32FC1) {

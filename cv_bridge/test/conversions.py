@@ -37,7 +37,7 @@ class TestConversions(unittest.TestCase):
                             self.assertTrue(original.shape[:2] == newimg.shape[:2])
                         else:
                             self.assertTrue(original.shape == newimg.shape)
-                        self.assertTrue(len(original.tostring()) == len(newimg.tostring()))
+                        self.assertTrue(len(original.tobytes()) == len(newimg.tobytes()))
 
     # From:
     # http://docs.opencv.org/2.4/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat
@@ -68,7 +68,7 @@ class TestConversions(unittest.TestCase):
                             self.assertTrue(original.shape[:2] == newimg.shape[:2])
                         else:
                             self.assertTrue(original.shape == newimg.shape)
-                        self.assertTrue(len(original.tostring()) == len(newimg.tostring()))
+                        self.assertTrue(len(original.tobytes()) == len(newimg.tobytes()))
 
     def test_yuv420_semi_planar(self):
         import cv2

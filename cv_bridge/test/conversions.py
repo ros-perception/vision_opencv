@@ -118,6 +118,34 @@ class TestConversions(unittest.TestCase):
                 msg = br.cv2_to_compressed_imgmsg(np.zeros(shape, np.uint8), dst_format)
                 self.assertEqual(msg.format, dst_format)
 
+    def test_yuv420_semi_planar(self):
+        import cv2
+        br = CvBridge()
+        rng = np.random.default_rng(0)
+        w, h = 64, 48
+        for encoding, code in (('nv12', cv2.COLOR_YUV2BGR_NV12), ('nv21', cv2.COLOR_YUV2BGR_NV21)):
+            yuv = rng.integers(0, 256, size=(h * 3 // 2, w), dtype=np.uint8)
+            msg = br.cv2_to_imgmsg(yuv, encoding)
+            self.assertEqual(msg.height, h)
+            self.assertEqual(msg.width, w)
+            self.assertEqual(msg.step, w)
+            self.assertEqual(len(msg.data), w * h * 3 // 2)
+
+            self.assertTrue((br.imgmsg_to_cv2(msg) == yuv).all())
+            bgr = br.imgmsg_to_cv2(msg, 'bgr8')
+            self.assertEqual(bgr.shape, (h, w, 3))
+            self.assertTrue((bgr == cv2.cvtColor(yuv, code)).all())
+
+            self.assertRaises(CvBridgeError,
+                              lambda: br.cv2_to_imgmsg(np.zeros((h + 1, w), np.uint8), encoding))
+
+            # Odd width or height is rejected, as in C++
+            for odd_w, odd_h in ((w - 1, h), (w, h - 1)):
+                odd = br.cv2_to_imgmsg(np.zeros((odd_h, odd_w), np.uint8), 'mono8')
+                odd.encoding = encoding
+                odd.data = bytes(odd_w * odd_h * 3 // 2 + odd_w)  # large enough for any layout
+                self.assertRaises(CvBridgeError, lambda: br.imgmsg_to_cv2(odd))
+
     def test_endianness(self):
         br = CvBridge()
         dtype = np.dtype('int32')
@@ -170,6 +198,7 @@ if __name__ == '__main__':
     suite.addTest(TestConversions('test_encode_decode_cv2'))
     suite.addTest(TestConversions('test_encode_decode_cv2_compressed'))
     suite.addTest(TestConversions('test_compressed_format'))
+    suite.addTest(TestConversions('test_yuv420_semi_planar'))
     suite.addTest(TestConversions('test_endianness'))
     suite.addTest(TestConversions('test_row_padding'))
     suite.addTest(TestConversions('test_malformed_image'))

@@ -178,6 +178,10 @@ class CvBridge(object):
 
         rows = img_msg.height
         if img_msg.encoding in self._yuv420_semi_planar_encodings:
+            if img_msg.height % 2 != 0 or img_msg.width % 2 != 0:
+                raise CvBridgeError('Image is wrongly formed: %s requires even width and height, '
+                                    'got %d x %d' % (img_msg.encoding, img_msg.width,
+                                                     img_msg.height))
             # Y plane followed by the half height interleaved UV plane
             rows = img_msg.height * 3 // 2
 

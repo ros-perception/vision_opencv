@@ -73,9 +73,10 @@ class TestConversions(unittest.TestCase):
     def test_yuv420_semi_planar(self):
         import cv2
         br = CvBridge()
+        rng = np.random.default_rng(0)
         w, h = 64, 48
         for encoding, code in (('nv12', cv2.COLOR_YUV2BGR_NV12), ('nv21', cv2.COLOR_YUV2BGR_NV21)):
-            yuv = np.uint8(np.random.randint(0, 255, size=(h * 3 // 2, w)))
+            yuv = rng.integers(0, 256, size=(h * 3 // 2, w), dtype=np.uint8)
             msg = br.cv2_to_imgmsg(yuv, encoding)
             self.assertEqual(msg.height, h)
             self.assertEqual(msg.width, w)
@@ -89,6 +90,13 @@ class TestConversions(unittest.TestCase):
 
             self.assertRaises(CvBridgeError,
                               lambda: br.cv2_to_imgmsg(np.zeros((h + 1, w), np.uint8), encoding))
+
+            # Odd width or height is rejected, as in C++
+            for odd_w, odd_h in ((w - 1, h), (w, h - 1)):
+                odd = br.cv2_to_imgmsg(np.zeros((odd_h, odd_w), np.uint8), 'mono8')
+                odd.encoding = encoding
+                odd.data = bytes(odd_w * odd_h * 3 // 2 + odd_w)  # large enough for any layout
+                self.assertRaises(CvBridgeError, lambda: br.imgmsg_to_cv2(odd))
 
     def test_endianness(self):
         br = CvBridge()

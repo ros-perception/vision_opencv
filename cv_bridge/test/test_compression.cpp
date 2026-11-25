@@ -77,3 +77,54 @@ TEST(CvBridgeTest, compression16bit)
     EXPECT_EQ(out8->image.at<uint8_t>(0, 2), 255);
   }
 }
+
+// Formats that store 8 bits get the 16 bit image scaled down, not saturated at 255.
+TEST(CvBridgeTest, compression16bitTo8bitFormat)
+{
+  std_msgs::msg::Header header;
+  cv::Mat_<uint16_t> in(8, 8);
+  in.setTo(40000);
+
+  for (const std::string src_encoding : {"mono16", "16UC1"}) {
+    const sensor_msgs::msg::CompressedImage::SharedPtr msg =
+      cv_bridge::CvImage(header, src_encoding, in).toCompressedImageMsg(cv_bridge::BMP);
+    const cv_bridge::CvImageConstPtr out = cv_bridge::toCvCopy(msg, "");
+    EXPECT_EQ(out->encoding, "mono8") << src_encoding;
+    EXPECT_EQ(out->image.type(), CV_8UC1) << src_encoding;
+    // 40000 * 255 / 65535
+    EXPECT_EQ(out->image.at<uint8_t>(0, 0), 156) << src_encoding;
+  }
+}
+
+// What is decoded is labelled with its real depth, also for color images.
+TEST(CvBridgeTest, decompressionDepth)
+{
+  const auto compressed = [](const cv::Mat & image) {
+      sensor_msgs::msg::CompressedImage msg;
+      msg.format = "png";
+      cv::imencode(".png", image, msg.data);
+      return msg;
+    };
+
+  const cv::Mat bgr16(4, 4, CV_16UC3, cv::Scalar(1000, 20000, 65535));
+  cv_bridge::CvImageConstPtr out = cv_bridge::toCvCopy(compressed(bgr16), "");
+  EXPECT_EQ(out->encoding, "bgr16");
+  EXPECT_EQ(out->image.type(), CV_16UC3);
+  EXPECT_EQ(cv::norm(out->image, bgr16, cv::NORM_INF), 0);
+
+  out = cv_bridge::toCvCopy(compressed(bgr16), "bgr8");
+  EXPECT_EQ(out->image.type(), CV_8UC3);
+  EXPECT_EQ(out->image.at<cv::Vec3b>(0, 0), cv::Vec3b(4, 78, 255));
+
+  const cv::Mat bgra16(4, 4, CV_16UC4, cv::Scalar(1000, 20000, 65535, 65535));
+  out = cv_bridge::toCvCopy(compressed(bgra16), "");
+  EXPECT_EQ(out->encoding, "bgra16");
+  EXPECT_EQ(out->image.type(), CV_16UC4);
+
+  // An 8 bit image requested as mono16 is converted, not just relabelled.
+  const cv::Mat mono8(4, 4, CV_8UC1, cv::Scalar(200));
+  out = cv_bridge::toCvCopy(compressed(mono8), "mono16");
+  EXPECT_EQ(out->encoding, "mono16");
+  EXPECT_EQ(out->image.type(), CV_16UC1);
+  EXPECT_EQ(out->image.at<uint16_t>(0, 0), 200 * 65535 / 255);
+}

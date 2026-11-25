@@ -509,6 +509,22 @@ std::string getFormat(Format format)
   throw Exception("Unrecognized image format");
 }
 
+// Whether the format stores 16 bit images. The others store 8 bits per channel.
+static bool keeps16Bits(Format format)
+{
+  switch (format) {
+    case JP2:
+    case PNG:
+    case PGM:
+    case PPM:
+    case TIF:
+    case TIFF:
+      return true;
+    default:
+      return false;
+  }
+}
+
 void CvImage::toCompressedImageMsg(
   sensor_msgs::msg::CompressedImage & ros_image,
   const Format dst_format) const
@@ -532,6 +548,14 @@ void CvImage::toCompressedImageMsg(
     image = temp->image;
   }
 
+  if (image.depth() == CV_16U && !keeps16Bits(dst_format)) {
+    // cv::imencode would saturate every value above 255. Scale to 8 bit, as the conversion
+    // from mono16 to mono8 does.
+    cv::Mat image8;
+    image.convertTo(image8, CV_8U, 255.0 / 65535.0);
+    image = image8;
+  }
+
   std::string format = getFormat(dst_format);
   ros_image.format = format;
   cv::imencode("." + format, image, ros_image.data);
@@ -552,28 +576,18 @@ CvImagePtr toCvCopy(const sensor_msgs::msg::CompressedImage & source, const std:
   // Loads as BGR or BGRA.
   const cv::Mat rgb_a = cv::imdecode(in, cv::IMREAD_UNCHANGED);
 
-  // Formats such as PNG and TIFF keep 16 bit single channel images, so imdecode returns them
-  // as CV_16UC1. Label them as mono16 rather than mono8 so the data is not misinterpreted.
-  const bool is_16bit_mono = (rgb_a.channels() == 1 && rgb_a.depth() == CV_16U);
-
-  if (encoding != enc::MONO16 && !is_16bit_mono) {
-    switch (rgb_a.channels())
-    {
-      case 4:
-        return toCvCopyImpl(rgb_a, source.header, enc::BGRA8, encoding);
-        break;
-      case 3:
-        return toCvCopyImpl(rgb_a, source.header, enc::BGR8, encoding);
-        break;
-      case 1:
-        return toCvCopyImpl(rgb_a, source.header, enc::MONO8, encoding);
-        break;
-      default:
-        return CvImagePtr();
-    }
-  }
-  else {
-    return toCvCopyImpl(rgb_a, source.header, enc::MONO16, encoding);
+  // Formats such as PNG and TIFF keep 16 bit images, so imdecode returns them as CV_16U.
+  // Label what was decoded with its real depth, so the data is not misinterpreted.
+  const bool is_16bit = rgb_a.depth() == CV_16U;
+  switch (rgb_a.channels()) {
+    case 4:
+      return toCvCopyImpl(rgb_a, source.header, is_16bit ? enc::BGRA16 : enc::BGRA8, encoding);
+    case 3:
+      return toCvCopyImpl(rgb_a, source.header, is_16bit ? enc::BGR16 : enc::BGR8, encoding);
+    case 1:
+      return toCvCopyImpl(rgb_a, source.header, is_16bit ? enc::MONO16 : enc::MONO8, encoding);
+    default:
+      return CvImagePtr();
   }
 }
 

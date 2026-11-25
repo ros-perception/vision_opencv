@@ -18,6 +18,8 @@
 #include <bit>
 #include <cstddef>
 #include <memory>
+#include <optional>
+#include <string>
 #include <variant>
 
 #include "opencv2/core/mat.hpp"
@@ -26,8 +28,6 @@
 #include "sensor_msgs/msg/image.hpp"
 
 #include "cv_bridge/visibility_control.h"
-
-#include <optional>
 
 namespace cv_bridge
 {
@@ -211,10 +211,10 @@ private:
 }  // namespace cv_bridge
 
 static void fill_sensor_msgs_image_from_cvmat(
-  const cv::Mat& cv_mat,
-  sensor_msgs::msg::Image& image,
-  const std_msgs::msg::Header& header,
-  const std::optional<std::string>& encoding_override = std::nullopt)
+  const cv::Mat & cv_mat,
+  sensor_msgs::msg::Image & image,
+  const std_msgs::msg::Header & header,
+  const std::optional<std::string> & encoding_override = std::nullopt)
 {
   image.height = cv_mat.rows;
   image.width = cv_mat.cols;
@@ -255,16 +255,16 @@ struct rclcpp::TypeAdapter<cv_bridge::ROSCvMatContainer, sensor_msgs::msg::Image
   using ros_message_type = sensor_msgs::msg::Image;
 
   static void convert_to_ros_message(
-    const custom_type& source,
-    ros_message_type& destination)
+    const custom_type & source,
+    ros_message_type & destination)
   {
     fill_sensor_msgs_image_from_cvmat(
       source.cv_mat(), destination, source.header(), source.encoding_override());
   }
 
   static void convert_to_custom(
-    const ros_message_type& source,
-    custom_type& destination)
+    const ros_message_type & source,
+    custom_type & destination)
   {
     destination = cv_bridge::ROSCvMatContainer(source);
   }

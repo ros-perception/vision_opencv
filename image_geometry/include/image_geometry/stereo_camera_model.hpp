@@ -16,9 +16,11 @@ public:
   IMAGE_GEOMETRY_PUBLIC
   StereoCameraModel();
 
+  /// Copy constructor.
   IMAGE_GEOMETRY_PUBLIC
   StereoCameraModel(const StereoCameraModel& other);
 
+  /// Copy assignment.
   IMAGE_GEOMETRY_PUBLIC
   StereoCameraModel& operator=(const StereoCameraModel& other);
 
@@ -72,6 +74,7 @@ public:
   IMAGE_GEOMETRY_PUBLIC
   void projectDisparityImageTo3d(const cv::Mat& disparity, cv::Mat& point_cloud,
                                  bool handleMissingValues = false) const;
+  /// Z of the points with minimal disparity in projectDisparityImageTo3d()
   IMAGE_GEOMETRY_PUBLIC
   static const double MISSING_Z;
 
@@ -109,9 +112,11 @@ public:
   IMAGE_GEOMETRY_PUBLIC
   bool initialized() const { return left_.initialized() && right_.initialized(); }
 protected:
-  PinholeCameraModel left_, right_;
-  cv::Matx44d Q_;
+  PinholeCameraModel left_;  ///< Model of the left camera
+  PinholeCameraModel right_;  ///< Model of the right camera
+  cv::Matx44d Q_;  ///< Disparity reprojection matrix
 
+  /// Compute the disparity reprojection matrix from the camera models.
   IMAGE_GEOMETRY_PUBLIC
   void updateQ();
 };

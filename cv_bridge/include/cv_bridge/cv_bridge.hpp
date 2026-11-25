@@ -42,6 +42,11 @@
 #include <sensor_msgs/image_encodings.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#if CV_VERSION_MAJOR < 5
+// Kept so code that gets the C constants (CV_BGR2GRAY, ...) through this header keeps compiling.
+// The header was removed in OpenCV 5.
+#include <opencv2/imgproc/types_c.h>
+#endif
 #include <cv_bridge/cv_bridge_export.h>
 
 #include <memory>

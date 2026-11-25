@@ -23,11 +23,11 @@ sudo apt install python3-numpy
 
 ```
 
-The cv_bridge python backend still has a dependency on python boost (`equal or higher than 1.58.0`), and install them as follows in Ubuntu:
+The cv_bridge python bindings are built with [nanobind](https://github.com/wjakob/nanobind), install it as follows in Ubuntu:
 
 ```bash
 
-sudo apt install libboost-python-dev
+sudo apt install nanobind-dev
 
 ```
 

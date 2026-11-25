@@ -40,8 +40,8 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <sensor_msgs/image_encodings.hpp>
-#include "rcpputils/endian.hpp"
 
+#include <bit>
 #include <limits>
 #include <map>
 #include <memory>
@@ -300,8 +300,8 @@ cv::Mat matFromImage(const sensor_msgs::msg::Image & source)
   cv::Mat mat(source.height, source.width, source_type, const_cast<uchar *>(&source.data[0]),
     source.step);
 
-   if ((rcpputils::endian::native == rcpputils::endian::big && source.is_bigendian) ||
-    (rcpputils::endian::native == rcpputils::endian::little && !source.is_bigendian) ||
+   if ((std::endian::native == std::endian::big && source.is_bigendian) ||
+    (std::endian::native == std::endian::little && !source.is_bigendian) ||
     byte_depth == 1)
   {
     return mat;
@@ -393,7 +393,7 @@ void CvImage::toImageMsg(sensor_msgs::msg::Image & ros_image) const
   ros_image.height = image.rows;
   ros_image.width = image.cols;
   ros_image.encoding = encoding;
-  ros_image.is_bigendian = (rcpputils::endian::native == rcpputils::endian::big);
+  ros_image.is_bigendian = (std::endian::native == std::endian::big);
   ros_image.step = image.cols * image.elemSize();
   size_t size = ros_image.step * image.rows;
   ros_image.data.resize(size);
@@ -443,7 +443,7 @@ CvImageConstPtr toCvShare(
 {
   // If the encoding different or the endianness different, you have to copy
   if ((!encoding.empty() && source.encoding != encoding) || (!source.is_bigendian !=
-    (rcpputils::endian::native != rcpputils::endian::big)))
+    (std::endian::native != std::endian::big)))
   {
     return toCvCopy(source, encoding);
   }

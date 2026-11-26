@@ -1,0 +1,19 @@
+## This 'attic section' self-documents this file's type and version.
+type: 'rosdoc2 config'
+version: 1
+
+---
+
+settings:
+    ## Generate the standard package index (package.xml metadata, README, CHANGELOG, ...).
+    generate_package_index: true
+
+    ## This metapackage has no code, so there is no API to document.
+    always_run_doxygen: false
+    always_run_sphinx_apidoc: false
+
+builders:
+    - sphinx: {
+        name: 'vision_opencv',
+        output_dir: ''
+    }

@@ -3,12 +3,12 @@
 <package format="2">
   <name>vision_opencv</name>
   <version>4.1.0</version>
-  <description>Packages for interfacing ROS2 with OpenCV, a library of programming functions for real time computer vision.</description>
+  <description>Packages for interfacing ROS 2 with OpenCV, a library of programming functions for real time computer vision.</description>
   <maintainer email="kenjibrameld@gmail.com">Kenji Brameld</maintainer>
   <license>Apache License 2.0</license>
   <license>BSD</license>
 
-  <url type="website">http://www.ros.org/wiki/vision_opencv</url>
+  <url type="website">https://docs.ros.org/en/rolling/p/vision_opencv/</url>
   <url type="bugtracker">https://github.com/ros-perception/vision_opencv/issues</url>
   <url type="repository">https://github.com/ros-perception/vision_opencv</url>
 
@@ -24,6 +24,7 @@
 
   <export>
     <build_type>ament_cmake</build_type>
+    <rosdoc2>rosdoc2.yaml</rosdoc2>
   </export>
 
 </package>

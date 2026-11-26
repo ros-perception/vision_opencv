@@ -6,4 +6,4 @@ ros2 vision_opencv contains packages to interface ROS 2 with [OpenCV](http://ope
 * `opencv_tests`: Integration tests to use the capability of the packages with opencv
 * `vision_opencv`: Meta-package to install both `cv_bridge` and `image_geometry`
 
-In order to use ROS 2 with OpenCV, please see the details within [cv_bridge](https://github.com/ros-perception/vision_opencv/tree/ros2/cv_bridge) package.
+In order to use ROS 2 with OpenCV, please see the details within [cv_bridge](https://github.com/ros-perception/vision_opencv/tree/rolling/cv_bridge) package.

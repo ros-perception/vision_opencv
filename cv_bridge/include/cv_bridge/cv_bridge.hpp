@@ -54,18 +54,28 @@
 namespace cv_bridge
 {
 
+/**
+ * \brief Exception thrown by the functions of cv_bridge when a conversion is not possible.
+ */
 class CV_BRIDGE_EXPORT Exception : public std::runtime_error
 {
 public:
+  /**
+   * \brief Constructor.
+   * \param description Description of the error
+   */
   explicit Exception(const std::string & description)
   : std::runtime_error(description) {}
 };
 
 class CvImage;
 
+/// Shared pointer to a CvImage
 typedef std::shared_ptr<CvImage> CvImagePtr;
+/// Shared pointer to a constant CvImage
 typedef std::shared_ptr<CvImage const> CvImageConstPtr;
 
+/// Image file formats supported by CvImage::toCompressedImageMsg().
 // From: http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat
 // imread(const string& filename, int flags)
 typedef enum
@@ -86,9 +96,9 @@ typedef enum
 class CV_BRIDGE_EXPORT CvImage
 {
 public:
-  std_msgs::msg::Header header;  // !< ROS header
-  std::string encoding;    // !< Image encoding ("mono8", "bgr8", etc.)
-  cv::Mat image;           // !< Image data for use with OpenCV
+  std_msgs::msg::Header header;  ///< ROS header
+  std::string encoding;    ///< Image encoding ("mono8", "bgr8", etc.)
+  cv::Mat image;           ///< Image data for use with OpenCV
 
   /**
    * \brief Empty constructor.
@@ -143,11 +153,13 @@ public:
     const Format dst_format = JPG) const;
 
 
+  /// Shared pointer to a CvImage
   typedef std::shared_ptr<CvImage> Ptr;
+  /// Shared pointer to a constant CvImage
   typedef std::shared_ptr<CvImage const> ConstPtr;
 
 protected:
-  std::shared_ptr<void const> tracked_object_;  // for sharing ownership
+  std::shared_ptr<void const> tracked_object_;  ///< for sharing ownership
 
   /// @cond DOXYGEN_IGNORE
   friend
@@ -179,6 +191,15 @@ CV_BRIDGE_EXPORT CvImagePtr toCvCopy(
   const sensor_msgs::msg::Image::ConstSharedPtr & source,
   const std::string & encoding = std::string());
 
+/**
+ * \brief Convert a sensor_msgs::msg::CompressedImage message to an OpenCV-compatible CvImage,
+ * decoding the image data.
+ *
+ * \param source   A shared_ptr to a sensor_msgs::msg::CompressedImage message
+ * \param encoding The desired encoding of the image data. If it is the empty string (the
+ * default), the returned CvImage has the encoding of the decoded image: "mono8", "bgr8" or
+ * "bgra8".
+ */
 CV_BRIDGE_EXPORT CvImagePtr toCvCopy(
   const sensor_msgs::msg::CompressedImage::ConstSharedPtr & source,
   const std::string & encoding = std::string());
@@ -206,6 +227,15 @@ CV_BRIDGE_EXPORT CvImagePtr toCvCopy(
   const sensor_msgs::msg::Image & source,
   const std::string & encoding = std::string());
 
+/**
+ * \brief Convert a sensor_msgs::msg::CompressedImage message to an OpenCV-compatible CvImage,
+ * decoding the image data.
+ *
+ * \param source   A sensor_msgs::msg::CompressedImage message
+ * \param encoding The desired encoding of the image data. If it is the empty string (the
+ * default), the returned CvImage has the encoding of the decoded image: "mono8", "bgr8" or
+ * "bgra8".
+ */
 CV_BRIDGE_EXPORT CvImagePtr toCvCopy(
   const sensor_msgs::msg::CompressedImage & source,
   const std::string & encoding = std::string());
@@ -270,18 +300,27 @@ CV_BRIDGE_EXPORT CvImagePtr cvtColor(
   const CvImageConstPtr & source,
   const std::string & encoding);
 
+/**
+ * \brief Options of cvtColorForDisplay().
+ */
 struct CvtColorForDisplayOptions
 {
+  /// Constructor, with the default value of every option.
   CvtColorForDisplayOptions()
   : do_dynamic_scaling(false),
     min_image_value(0.0),
     max_image_value(0.0),
     colormap(-1),
     bg_label(-1) {}
+  /// Scale the image between its minimum and maximum values
   bool do_dynamic_scaling;
+  /// Minimum value used to scale the image, if different from max_image_value
   double min_image_value;
+  /// Maximum value used to scale the image, if different from min_image_value
   double max_image_value;
+  /// OpenCV colormap applied to scaled images, or -1 for none
   int colormap;
+  /// Label drawn in black in label (32SC1) images
   int bg_label;
 };
 

@@ -45,7 +45,6 @@
 #include <utility>
 #include <vector>
 
-#include <boost/endian/conversion.hpp>
 #include <cv_bridge/rgb_colors.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc/imgproc.hpp>

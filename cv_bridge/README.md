@@ -59,5 +59,4 @@ colcon test
 ```
 
 # Known issues
-* `boost endian`: remove boost endian APIs with standard C++ 11 or higher instead
 * Not tested with Windows or macOS environments so there may be issues building or running

@@ -23,6 +23,12 @@ def test_cvtColorForDisplay():
     assert label_viz.min() == 0
     assert label_viz.max() == 255
 
+    # Float images are scaled between their minimum and maximum by default (#271)
+    depth = np.array([[0.5, 1.0, 1.5]], dtype=np.float32)
+    depth_viz = cv_bridge.cvtColorForDisplay(depth, '32FC1', 'mono8')
+    assert depth_viz.dtype == np.uint8
+    assert depth_viz.tolist() == [[0, 128, 255]]
+
     # Check that mono8 conversion returns the right shape.
     bridge = cv_bridge.CvBridge()
     mono = np.random.random((100, 100)) * 255

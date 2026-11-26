@@ -693,6 +693,12 @@ CvImageConstPtr cvtColorForDisplay(
   if (!source) {
     throw Exception("cv_bridge.cvtColorForDisplay() called with empty image.");
   }
+  // A single channel floating point image (e.g. a depth image in meters) has no natural 8 bit
+  // range, so it is scaled between its minimum and maximum unless a range is given. #271
+  const bool is_float_mono = source->image.channels() == 1 &&
+    (source->image.depth() == CV_32F || source->image.depth() == CV_64F);
+  const bool do_dynamic_scaling = options.do_dynamic_scaling ||
+    (is_float_mono && min_image_value == max_image_value);
   // let's figure out what to do with the empty encoding
   std::string encoding = encoding_out;
   if (encoding.empty()) {
@@ -761,7 +767,7 @@ CvImageConstPtr cvtColorForDisplay(
   }
 
   // Perform scaling if asked for
-  if (options.do_dynamic_scaling) {
+  if (do_dynamic_scaling) {
     float inf = std::numeric_limits<float>::infinity();
     cv::Mat mask = ((source->image != inf) & (source->image != -inf));
     cv::minMaxLoc(source->image, &min_image_value, &max_image_value, NULL, NULL, mask);

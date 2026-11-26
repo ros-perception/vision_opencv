@@ -434,21 +434,24 @@ class StereoCameraModel:
 
         assert self._right._p is not None
         fx = self._right.projection_matrix()[0, 0]
+        fy = self._right.projection_matrix()[1, 1]
         cx = self._right.projection_matrix()[0, 2]
         cy = self._right.projection_matrix()[1, 2]
         tx = -self._right.projection_matrix()[0, 3] / fx
 
         # Q is:
-        #    [ 1, 0,  0, -Clx ]
-        #    [ 0, 1,  0, -Cy ]
+        #    [ 1, 0,     0, -Clx ]
+        #    [ 0, Fx/Fy, 0, -Cy*Fx/Fy ]
         #    [ 0, 0,  0,  Fx ]
         #    [ 0, 0, 1 / Tx, (Crx-Clx)/Tx ]
 
         self._q = numpy.zeros((4, 4), dtype='float64')
         self._q[0, 0] = 1.0
         self._q[0, 3] = -cx
-        self._q[1, 1] = 1.0
-        self._q[1, 3] = -cy
+        # Y = (v - Cy) * Z / Fy, and Z = Fx / W, so the Y row is scaled by Fx / Fy.
+        # Binning differently in x and y makes Fx != Fy.
+        self._q[1, 1] = fx / fy
+        self._q[1, 3] = -cy * fx / fy
         self._q[2, 3] = fx
         self._q[3, 2] = 1 / tx
 

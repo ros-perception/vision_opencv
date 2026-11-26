@@ -464,6 +464,38 @@ class TestDirected(unittest.TestCase):
         binned_ty = stereo(2, ty=-30.0).get_right_camera().project_3d_to_pixel(point)
         assert_almost_equal(binned_ty, (full_ty[0] / 2, full_ty[1] / 2), 6)
 
+    def test_stereo_fx_different_from_fy(self):
+        # Q must scale the Y row by fx / fy, otherwise Y comes back scaled by fy / fx.
+        # Binning differently in x and y is the usual way to get fx != fy.
+        def stereo(binning_x, binning_y, fy=500.0):
+            lmsg = sensor_msgs.msg.CameraInfo()
+            rmsg = sensor_msgs.msg.CameraInfo()
+            for m, tx in ((lmsg, 0.0), (rmsg, -50.0)):
+                m.width = self.width
+                m.height = self.height
+                m.binning_x = binning_x
+                m.binning_y = binning_y
+                m.k = [500.0, 0.0, 320.0, 0.0, fy, 240.0, 0.0, 0.0, 1.0]
+                m.r = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+                m.p = [500.0, 0.0, 320.0, tx, 0.0, fy, 240.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+            cam = StereoCameraModel()
+            cam.from_camera_info(lmsg, rmsg)
+            return cam
+
+        # (camera, expected fx, fy, cy)
+        cases = ((stereo(2, 1), 250.0, 500.0, 240.0),
+                 (stereo(1, 2), 500.0, 250.0, 120.0),
+                 (stereo(1, 1, fy=400.0), 500.0, 400.0, 240.0))
+        for cam, fx, fy, cy in cases:
+            left = cam.get_left_camera()
+            assert_almost_equal((left.fx(), left.fy(), left.cy()), (fx, fy, cy), 9)
+            q = cam.reprojection_matrix()
+            assert_almost_equal(q[1, 1], fx / fy, 9)
+            assert_almost_equal(q[1, 3], -cy * fx / fy, 9)
+            for point in ((0.3, -0.2, 3.0), (-1.0, 0.7, 0.8), (0.0, 0.5, 10.0)):
+                ((lu, lv), (ru, rv)) = cam.project_3d_to_pixel(point)
+                assert_almost_equal(cam.project_pixel_to_3d((lu, lv), lu - ru), point, 6)
+
 
 if __name__ == '__main__':
     suite = unittest.TestSuite()
@@ -505,5 +537,6 @@ if __name__ == '__main__':
     suite.addTest(TestDirected('test_stereo_get_z'))
     suite.addTest(TestDirected('test_stereo_get_disparity'))
     suite.addTest(TestDirected('test_binned_tx_ty'))
+    suite.addTest(TestDirected('test_stereo_fx_different_from_fy'))
     suite.addTest(TestDirected('test_deprecation'))
     unittest.TextTestRunner(verbosity=3).run(suite)

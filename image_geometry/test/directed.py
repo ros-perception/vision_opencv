@@ -497,7 +497,6 @@ class TestDirected(unittest.TestCase):
         binned_ty = stereo(2, ty=-30.0).get_right_camera().project_3d_to_pixel(point)
         assert_almost_equal(binned_ty, (full_ty[0] / 2, full_ty[1] / 2), 6)
 
-<<<<<<< HEAD
     def test_deprecation(self):
         pinholeCam = self.cam.get_left_camera()
         with self.assertWarns(DeprecationWarning):
@@ -536,7 +535,7 @@ class TestDirected(unittest.TestCase):
             self.assertEqual(self.cam.right, self.cam.get_right_camera())
         with self.assertWarns(DeprecationWarning):
             assert_almost_equal(self.cam.Q, self.cam._q)
-=======
+
     def _offset_stereo(self, binning=1):
         # Rectifying without CALIB_ZERO_DISPARITY can leave cx different in
         # the two cameras. The disparity x_left - x_right then includes the
@@ -560,7 +559,7 @@ class TestDirected(unittest.TestCase):
         assert_almost_equal(cam.project_pixel_to_3d((lu, lv), disparity), point, 6)
         assert_almost_equal(cam.get_z(disparity), point[2], 6)
         assert_almost_equal(cam.get_disparity(point[2]), disparity, 6)
-        xyzw = cam.reprojection_matrix() @ np.array([lu, lv, disparity, 1.0])
+        xyzw = cam._q @ np.array([lu, lv, disparity, 1.0])
         assert_almost_equal(xyzw[:3] / xyzw[3], point, 6)
 
     def test_stereo_principal_point_offset(self):
@@ -583,7 +582,7 @@ class TestDirected(unittest.TestCase):
                       [0.0, 1.0, 0.0, -240.0],
                       [0.0, 0.0, 0.0, 500.0],
                       [0.0, 0.0, 10.0, 200.0]]
-        assert_almost_equal(cam.reprojection_matrix(), expected_q, 6)
+        assert_almost_equal(cam._q, expected_q, 6)
 
     def test_stereo_principal_point_offset_binning(self):
         cam = self._offset_stereo(binning=2)
@@ -615,11 +614,10 @@ class TestDirected(unittest.TestCase):
         cam.from_camera_info(*msgs)
 
         # OpenCV's Q is the same up to scale
-        python_q = cam.reprojection_matrix()
+        python_q = cam._q
         assert_almost_equal(python_q, q * (python_q[2, 3] / q[2, 3]), 6)
         for point in ((0.3, -0.2, 3.0), (-0.5, 0.4, 1.0)):
             self._assert_stereo_round_trip(cam, point)
->>>>>>> 150a326 (Account for the principal point offset in the Python stereo model (#637))
 
 
 if __name__ == '__main__':

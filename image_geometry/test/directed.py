@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import unittest
 
+import cv2
 from image_geometry import PinholeCameraModel, StereoCameraModel
 import numpy as np
 from numpy.testing import assert_almost_equal
@@ -464,7 +465,7 @@ class TestDirected(unittest.TestCase):
         binned_ty = stereo(2, ty=-30.0).get_right_camera().project_3d_to_pixel(point)
         assert_almost_equal(binned_ty, (full_ty[0] / 2, full_ty[1] / 2), 6)
 
-    def test_stereo_principal_point_offset(self):
+    def _offset_stereo(self, binning=1):
         # Rectifying without CALIB_ZERO_DISPARITY can leave cx different in
         # the two cameras. The disparity x_left - x_right then includes the
         # offset cx_left - cx_right, so Q and get_z() have to remove it.
@@ -473,22 +474,37 @@ class TestDirected(unittest.TestCase):
         for m, cx, tx in ((lmsg, 320.0, 0.0), (rmsg, 340.0, -50.0)):
             m.width = self.width
             m.height = self.height
+            m.binning_x = m.binning_y = binning
             m.k = [500.0, 0.0, cx, 0.0, 500.0, 240.0, 0.0, 0.0, 1.0]
             m.r = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
             m.p = [500.0, 0.0, cx, tx, 0.0, 500.0, 240.0, 0.0, 0.0, 0.0, 1.0, 0.0]
         cam = StereoCameraModel()
         cam.from_camera_info(lmsg, rmsg)
+        return cam
+
+    def _assert_stereo_round_trip(self, cam, point):
+        ((lu, lv), (ru, rv)) = cam.project_3d_to_pixel(point)
+        disparity = lu - ru
+        assert_almost_equal(cam.project_pixel_to_3d((lu, lv), disparity), point, 6)
+        assert_almost_equal(cam.get_z(disparity), point[2], 6)
+        assert_almost_equal(cam.get_disparity(point[2]), disparity, 6)
+        xyzw = cam.reprojection_matrix() @ np.array([lu, lv, disparity, 1.0])
+        assert_almost_equal(xyzw[:3] / xyzw[3], point, 6)
+
+    def test_stereo_principal_point_offset(self):
+        cam = self._offset_stereo()
 
         # u_left = 500 * 0.2 / 2 + 320, u_right = 500 * 0.2 / 2 + 340 - 50 / 2
         point = (0.2, 0.1, 2.0)
         ((lu, lv), (ru, rv)) = cam.project_3d_to_pixel(point)
         assert_almost_equal(((lu, lv), (ru, rv)), ((370.0, 265.0), (365.0, 265.0)), 6)
-        disparity = lu - ru
+        for point in ((0.2, 0.1, 2.0), (-0.5, -0.4, 1.0), (0.0, 0.0, 50.0), (1.0, -1.0, 0.5)):
+            self._assert_stereo_round_trip(cam, point)
 
-        assert_almost_equal(cam.project_pixel_to_3d((lu, lv), disparity), point, 6)
-        assert_almost_equal(cam.get_z(disparity), point[2], 6)
-        assert_almost_equal(cam.get_disparity(point[2]), disparity, 6)
+        # A disparity equal to the offset cx_left - cx_right = -20 is at infinity,
+        # while a disparity of zero is not: z = 50 / (0 + 20)
         self.assertEqual(float('inf'), cam.get_z(-20.0))
+        self.assertEqual(2.5, cam.get_z(0.0))
 
         # Baseline 0.1: Q[3, 3] = (cx_right - cx_left) / 0.1
         expected_q = [[1.0, 0.0, 0.0, -320.0],
@@ -496,6 +512,41 @@ class TestDirected(unittest.TestCase):
                       [0.0, 0.0, 0.0, 500.0],
                       [0.0, 0.0, 10.0, 200.0]]
         assert_almost_equal(cam.reprojection_matrix(), expected_q, 6)
+
+    def test_stereo_principal_point_offset_binning(self):
+        cam = self._offset_stereo(binning=2)
+        # Binning halves cx, Tx and the offset: cx_left - cx_right = 160 - 170
+        self.assertEqual(-10.0, cam.get_left_camera().cx() - cam.get_right_camera().cx())
+        self.assertEqual(float('inf'), cam.get_z(-10.0))
+        for point in ((0.2, 0.1, 2.0), (-0.5, -0.4, 1.0), (1.0, -1.0, 0.5)):
+            self._assert_stereo_round_trip(cam, point)
+
+    def test_stereo_principal_point_offset_opencv(self):
+        # A toed-in pair rectified by OpenCV without CALIB_ZERO_DISPARITY
+        k = np.array([[500.0, 0.0, 320.0], [0.0, 500.0, 240.0], [0.0, 0.0, 1.0]])
+        rotation, _ = cv2.Rodrigues(np.array([0.0, -0.05, 0.0]))
+        r1, r2, p1, p2, q, _, _ = cv2.stereoRectify(
+            k, np.zeros(5), k, np.zeros(5), (self.width, self.height), rotation,
+            np.array([-0.1, 0.0, 0.0]), flags=0, alpha=-1)
+        self.assertGreater(abs(p1[0, 2] - p2[0, 2]), 1.0)
+
+        msgs = []
+        for r, p in ((r1, p1), (r2, p2)):
+            m = sensor_msgs.msg.CameraInfo()
+            m.width = self.width
+            m.height = self.height
+            m.k = k.flatten().tolist()
+            m.r = r.flatten().tolist()
+            m.p = p.flatten().tolist()
+            msgs.append(m)
+        cam = StereoCameraModel()
+        cam.from_camera_info(*msgs)
+
+        # OpenCV's Q is the same up to scale
+        python_q = cam.reprojection_matrix()
+        assert_almost_equal(python_q, q * (python_q[2, 3] / q[2, 3]), 6)
+        for point in ((0.3, -0.2, 3.0), (-0.5, 0.4, 1.0)):
+            self._assert_stereo_round_trip(cam, point)
 
 
 if __name__ == '__main__':
@@ -539,5 +590,7 @@ if __name__ == '__main__':
     suite.addTest(TestDirected('test_stereo_get_disparity'))
     suite.addTest(TestDirected('test_binned_tx_ty'))
     suite.addTest(TestDirected('test_stereo_principal_point_offset'))
+    suite.addTest(TestDirected('test_stereo_principal_point_offset_binning'))
+    suite.addTest(TestDirected('test_stereo_principal_point_offset_opencv'))
     suite.addTest(TestDirected('test_deprecation'))
     unittest.TextTestRunner(verbosity=3).run(suite)

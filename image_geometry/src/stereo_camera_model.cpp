@@ -69,7 +69,7 @@ void StereoCameraModel::updateQ()
          [ Fx    0  Cx' FxTx ]
     P' = [ 0     Fy Cy   0    ]
          [ 0     0  1    0    ]
-    where primed parameters are from the left projection matrix, unprimed from the right.
+    where unprimed parameters are from the left projection matrix, primed from the right.
 
     [u   v 1]^T = P  * [x y z 1]^T
     [u-d v 1]^T = P' * [x y z 1]^T

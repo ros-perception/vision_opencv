@@ -191,6 +191,55 @@ TEST(CvBridgeTest, imageMessageConversion)
   ASSERT_EQ(imgmsg.step, cv_ptr->image.step[0]);
 }
 
+// Converting from a generic OpenCV type to a mono/color encoding is rejected.
+// The error message must not claim that the destination is a "color" encoding. #431
+TEST(CvBridgeTest, genericToColorConversionErrorMessage)
+{
+  sensor_msgs::msg::Image imgmsg;
+  imgmsg.height = 4;
+  imgmsg.width = 4;
+  imgmsg.is_bigendian = false;
+  imgmsg.encoding = sensor_msgs::image_encodings::TYPE_16UC1;
+  imgmsg.step = imgmsg.width * 2;
+  imgmsg.data.resize(imgmsg.height * imgmsg.step);
+
+  try {
+    cv_bridge::toCvCopy(imgmsg, sensor_msgs::image_encodings::MONO16);
+    FAIL() << "Expected cv_bridge::Exception";
+  } catch (const cv_bridge::Exception & e) {
+    const std::string what = e.what();
+    EXPECT_NE(what.find("Cannot convert from [16UC1] to [mono16]"), std::string::npos) << what;
+    EXPECT_NE(what.find("not a known image format"), std::string::npos) << what;
+    EXPECT_EQ(what.find("is not a color encoding"), std::string::npos) << what;
+  }
+}
+
+// Converting from a mono/color encoding to a generic OpenCV type needs the same number of
+// channels. The error message must not call a mono encoding a "color" encoding.
+TEST(CvBridgeTest, knownToGenericConversionErrorMessage)
+{
+  sensor_msgs::msg::Image imgmsg;
+  imgmsg.height = 4;
+  imgmsg.width = 4;
+  imgmsg.is_bigendian = false;
+  imgmsg.encoding = sensor_msgs::image_encodings::MONO8;
+  imgmsg.step = imgmsg.width;
+  imgmsg.data.resize(imgmsg.height * imgmsg.step);
+
+  try {
+    cv_bridge::toCvCopy(imgmsg, sensor_msgs::image_encodings::TYPE_16UC3);
+    FAIL() << "Expected cv_bridge::Exception";
+  } catch (const cv_bridge::Exception & e) {
+    const std::string what = e.what();
+    EXPECT_NE(what.find("Cannot convert from [mono8] to [16UC3]"), std::string::npos) << what;
+    EXPECT_NE(what.find("[16UC3] is not a known image format"), std::string::npos) << what;
+    EXPECT_EQ(what.find("is a color encoding"), std::string::npos) << what;
+  }
+
+  // The same number of channels is fine
+  EXPECT_NO_THROW(cv_bridge::toCvCopy(imgmsg, sensor_msgs::image_encodings::TYPE_8UC1));
+}
+
 TEST(CvBridgeTest, semiPlanarYUV420)
 {
   namespace enc = sensor_msgs::image_encodings;

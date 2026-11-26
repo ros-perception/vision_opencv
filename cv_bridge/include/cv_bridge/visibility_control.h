@@ -15,12 +15,18 @@
 #ifndef CV_BRIDGE__VISIBILITY_CONTROL_H_
 #define CV_BRIDGE__VISIBILITY_CONTROL_H_
 
-#ifdef _MSC_VER
-#pragma message("This header has been deprecated. Please use cv_bridge/visibility_control.hpp")
-#else
-#warning This header has been deprecated. Please use cv_bridge/visibility_control.hpp
-#endif
-
+// Kept for compatibility. New code should include cv_bridge/visibility_control.hpp.
 #include "cv_bridge/visibility_control.hpp"
+
+// No longer used by cv_bridge, still defined so that code using it keeps compiling.
+#if defined _WIN32 || defined __CYGWIN__
+  #ifdef __GNUC__
+    #define CV_BRIDGE_IMPORT __attribute__ ((dllimport))
+  #else
+    #define CV_BRIDGE_IMPORT __declspec(dllimport)
+  #endif
+#else
+  #define CV_BRIDGE_IMPORT
+#endif
 
 #endif  // CV_BRIDGE__VISIBILITY_CONTROL_H_

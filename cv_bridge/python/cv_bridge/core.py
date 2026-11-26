@@ -232,11 +232,9 @@ class CvBridge(object):
         Convert an OpenCV :cpp:type:`cv::Mat` type to a ROS sensor_msgs::CompressedImage message.
 
         :param cvim:      An OpenCV :cpp:type:`cv::Mat`
-        :param dst_format:  The format of the image data, one of the following strings:
+        :param dst_format:  The format of the image data, one of the file extensions
+           supported by the OpenCV ``imencode`` function:
 
-        http://docs.opencv.org/2.4/modules/highgui/doc/reading_and_writing_images_and_video.html
-        http://docs.opencv.org/2.4/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat
-        * imread(const string& filename, int flags)
            * bmp, dib
            * jpeg, jpg, jpe
            * jp2
@@ -248,8 +246,7 @@ class CvBridge(object):
         :rtype:           A sensor_msgs.msg.CompressedImage message
         :raises CvBridgeError: when the ``cvim`` has a type that is incompatible with ``format``
 
-
-        This function returns a sensor_msgs::Image message on success,
+        This function returns a sensor_msgs::CompressedImage message on success,
         or raises :exc:`cv_bridge.CvBridgeError` on failure.
         """
         import cv2

@@ -308,6 +308,8 @@ struct CvtColorForDisplayOptions
  * respectively converted to mono, BGR or BGRA.
  * - if the input encoding is 32SC1, this estimate that image as label image and will convert it as
  * bgr image with different colors for each label.
+ * - if the input image has one floating point channel (e.g. 32FC1), it is scaled between its minimum
+ * and maximum finite values, unless min_image_value and max_image_value give another range.
  *
  * \param source   A shared_ptr to a sensor_msgs::msg::Image message
  * \param encoding Either an encoding string that returns true in sensor_msgs::msg::image_encodings::isColor

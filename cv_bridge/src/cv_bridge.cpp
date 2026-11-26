@@ -249,21 +249,22 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
 {
   Encoding src_encod = getEncoding(src_encoding);
   Encoding dst_encod = getEncoding(dst_encoding);
-  bool is_src_color_encoding = enc::isColor(src_encoding) || enc::isMono(src_encoding) ||
+  bool is_src_known_format = enc::isColor(src_encoding) || enc::isMono(src_encoding) ||
     enc::isBayer(src_encoding) || (src_encoding == enc::YUV422) ||
     (src_encoding == enc::YUV422_YUY2);
-  bool is_dst_color_encoding = enc::isColor(dst_encoding) || enc::isMono(dst_encoding) ||
+  bool is_dst_known_format = enc::isColor(dst_encoding) || enc::isMono(dst_encoding) ||
     enc::isBayer(dst_encoding) || (dst_encoding == enc::YUV422) ||
     (dst_encoding == enc::YUV422_YUY2);
   bool is_num_channels_the_same =
     (enc::numChannels(src_encoding) == enc::numChannels(dst_encoding));
 
-  // If we have no color info in the source, we can only convert to the same encoding which
-  // was resolved in the previous condition. Otherwise, fail
-  if (!is_src_color_encoding) {
-    if (is_dst_color_encoding) {
-      throw Exception("[" + src_encoding + "] is not a color encoding. but [" + dst_encoding +
-              "] is. The conversion does not make sense");
+  // A known image format is mono, color, bayer or YUV. If the source is not one (a generic type
+  // such as 16UC1), we can only keep the data as it is. Otherwise, fail
+  if (!is_src_known_format) {
+    if (is_dst_known_format) {
+      throw Exception("Cannot convert from [" + src_encoding + "] to [" + dst_encoding +
+              "]: source encoding is not a known image format (e.g. mono or color), "
+              "so conversion is semantically invalid.");
     }
     if (!is_num_channels_the_same) {
       throw Exception(
@@ -273,12 +274,13 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
     return std::vector<int>(1, SAME_ENCODING);
   }
 
-  // If we are converting from a color type to a non color type, we can only do so if we stick
-  // to the number of channels
-  if (!is_dst_color_encoding) {
+  // If we are converting from a known image format to a generic type, we can only do so if we
+  // stick to the number of channels
+  if (!is_dst_known_format) {
     if (!is_num_channels_the_same) {
-      throw Exception("[" + src_encoding + "] is a color encoding but [" + dst_encoding + "] " +
-              "is not so they must have the same OpenCV type, CV_8UC3, CV16UC1 ....");
+      throw Exception("Cannot convert from [" + src_encoding + "] to [" + dst_encoding +
+              "]: [" + dst_encoding + "] is not a known image format, so both must have the "
+              "same number of channels.");
     }
     return std::vector<int>(1, SAME_ENCODING);
   }

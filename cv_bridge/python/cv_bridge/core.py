@@ -267,7 +267,7 @@ class CvBridge(object):
             cmprs_img_msg.format = '%s; %s compressed' % (cv_type, dst_format)
         ext_format = '.' + dst_format
         try:
-            cmprs_img_msg.data.frombytes(np.array(cv2.imencode(ext_format, cvim)[1]).tobytes())
+            cmprs_img_msg.data.frombytes(cv2.imencode(ext_format, cvim)[1].reshape(-1))
         except RuntimeError as e:
             raise CvBridgeError(e)
 
@@ -322,7 +322,9 @@ class CvBridge(object):
                                     % (encoding, cv_type))
         if cvim.dtype.byteorder == '>':
             img_msg.is_bigendian = True
-        img_msg.data.frombytes(cvim.tobytes())
+        # Copy the pixels once: view the (C contiguous) array as bytes instead of going through
+        # tobytes(), which makes a second copy. #443
+        img_msg.data.frombytes(np.ascontiguousarray(cvim).reshape(-1).view(np.uint8))
         img_msg.step = len(img_msg.data) // cvim.shape[0]
 
         return img_msg

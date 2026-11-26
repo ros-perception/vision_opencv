@@ -156,6 +156,35 @@ class TestConversions(unittest.TestCase):
         self.assertTrue(msg.is_bigendian)
         self.assertTrue((br.imgmsg_to_cv2(msg) == img).all())
 
+    def test_cv2_to_imgmsg_data(self):
+        # The message holds the pixels in row order, whatever the dtype and memory layout. #443
+        br = CvBridge()
+        rng = np.random.default_rng(0)
+        for dtype in (np.uint8, np.int8, np.uint16, np.int16, np.int32, np.float32, np.float64):
+            for shape in ((6, 8), (6, 8, 1), (6, 8, 3), (6, 8, 4)):
+                img = (rng.random(shape) * 100).astype(dtype)
+                msg = br.cv2_to_imgmsg(img)
+                self.assertEqual(bytes(msg.data), img.tobytes(), msg=(dtype, shape))
+                self.assertEqual(msg.step, img.strides[0], msg=(dtype, shape))
+                np.testing.assert_array_equal(br.imgmsg_to_cv2(msg).reshape(shape), img)
+
+        # Arrays that are not C contiguous are copied in row order
+        base = np.arange(10 * 12 * 3, dtype=np.float32).reshape(10, 12, 3)
+        for img in (base[::2, 1:7], base[:, :, ::-1], np.asfortranarray(base),
+                    base.transpose(1, 0, 2)):
+            self.assertFalse(img.flags['C_CONTIGUOUS'])
+            msg = br.cv2_to_imgmsg(img)
+            self.assertEqual(bytes(msg.data), img.tobytes())
+            self.assertEqual(msg.step, img.shape[1] * 3 * 4)
+            np.testing.assert_array_equal(br.imgmsg_to_cv2(msg), img)
+
+        # Big endian floats keep their byte order
+        img = np.linspace(0, 1, 20, dtype='>f4').reshape(4, 5)
+        msg = br.cv2_to_imgmsg(img)
+        self.assertTrue(msg.is_bigendian)
+        self.assertEqual(bytes(msg.data), img.tobytes())
+        np.testing.assert_array_equal(br.imgmsg_to_cv2(msg), img)
+
     def test_row_padding(self):
         # Rows padded to a 4-byte boundary: the padding is not a whole number of pixels.
         br = CvBridge()
@@ -200,6 +229,7 @@ if __name__ == '__main__':
     suite.addTest(TestConversions('test_compressed_format'))
     suite.addTest(TestConversions('test_yuv420_semi_planar'))
     suite.addTest(TestConversions('test_endianness'))
+    suite.addTest(TestConversions('test_cv2_to_imgmsg_data'))
     suite.addTest(TestConversions('test_row_padding'))
     suite.addTest(TestConversions('test_malformed_image'))
     unittest.TextTestRunner(verbosity=2).run(suite)

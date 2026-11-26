@@ -1,0 +1,36 @@
+## This 'attic section' self-documents this file's type and version.
+type: 'rosdoc2 config'
+version: 1
+
+---
+
+settings:
+    ## Generate the standard package index (package.xml metadata, README, CHANGELOG, ...).
+    generate_package_index: true
+
+    ## This is an 'ament_cmake' package that also installs a Python module, which does
+    ## not live in the standard location, so tell 'sphinx-apidoc' where to find it
+    ## (relative to the 'package.xml' file).
+    python_source: 'python/cv_bridge'
+
+    ## The C++ API is documented because of the 'ament_cmake' build type.
+    always_run_doxygen: false
+
+    ## Also document the Python API, which is not done by default for 'ament_cmake' packages.
+    always_run_sphinx_apidoc: true
+
+builders:
+    - doxygen: {
+        name: 'cv_bridge Public C/C++ API',
+        output_dir: 'generated/doxygen',
+        extra_doxyfile_statements: [
+            'PREDEFINED += CV_BRIDGE_EXPORT=',
+            'PREDEFINED += CV_BRIDGE_PUBLIC=',
+            'PREDEFINED += CV_BRIDGE_LOCAL='
+        ]
+    }
+    - sphinx: {
+        name: 'cv_bridge',
+        doxygen_xml_directory: 'generated/doxygen/xml',
+        output_dir: ''
+    }

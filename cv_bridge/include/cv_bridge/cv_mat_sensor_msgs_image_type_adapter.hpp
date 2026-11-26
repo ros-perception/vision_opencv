@@ -88,6 +88,7 @@ class ROSCvMatContainer
   static constexpr bool is_bigendian_system = detail::endian::native == detail::endian::big;
 
 public:
+  /// Storage of the sensor_msgs::msg::Image that the cv::Mat may reference.
   using SensorMsgsImageStorageType = std::variant<
     std::nullptr_t,
     std::unique_ptr<sensor_msgs::msg::Image>,
@@ -97,6 +98,7 @@ public:
   CV_BRIDGE_PUBLIC
   ROSCvMatContainer() = default;
 
+  /// Copy constructor, which makes a deep copy of the cv::Mat.
   CV_BRIDGE_PUBLIC
   explicit ROSCvMatContainer(const ROSCvMatContainer & other)
   : header_(other.header_), frame_(other.frame_.clone()), is_bigendian_(other.is_bigendian_)
@@ -109,6 +111,7 @@ public:
     }
   }
 
+  /// Copy assignment, which makes a deep copy of the cv::Mat.
   CV_BRIDGE_PUBLIC
   ROSCvMatContainer & operator=(const ROSCvMatContainer & other)
   {
@@ -266,12 +269,19 @@ static void fill_sensor_msgs_image_from_cvmat(
   image.header = header;
 }
 
+/// Type adapter to publish and subscribe to cv_bridge::ROSCvMatContainer as
+/// sensor_msgs::msg::Image.
 template<>
 struct rclcpp::TypeAdapter<cv_bridge::ROSCvMatContainer, sensor_msgs::msg::Image>
 {
+  /// Marks this adapter as specialized
   using is_specialized = std::true_type;
+  /// The type used in the code
   using custom_type = cv_bridge::ROSCvMatContainer;
+  /// The message sent over the topic
   using ros_message_type = sensor_msgs::msg::Image;
+
+  /// Copy the image and the header of the container into a message.
 
   static void convert_to_ros_message(
     const custom_type & source,
@@ -281,6 +291,7 @@ struct rclcpp::TypeAdapter<cv_bridge::ROSCvMatContainer, sensor_msgs::msg::Image
       source.cv_mat(), destination, source.header(), source.encoding_override());
   }
 
+  /// Copy the message into the container, and reference it from its cv::Mat.
   static void convert_to_custom(
     const ros_message_type & source,
     custom_type & destination)

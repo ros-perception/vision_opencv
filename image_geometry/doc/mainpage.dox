@@ -1,7 +1,5 @@
 /**
 \mainpage
-\htmlinclude manifest.html
-
 \b image_geometry contains camera model classes that simplify interpreting
 images geometrically using the calibration parameters from
 sensor_msgs/CameraInfo messages. They may be efficiently updated in your
@@ -10,8 +8,8 @@ image callback:
 \code
 image_geometry::PinholeCameraModel model_;
 
-void imageCb(const sensor_msgs::ImageConstPtr& raw_image,
-             const sensor_msgs::CameraInfoConstPtr& cam_info)
+void imageCb(const sensor_msgs::msg::Image::ConstSharedPtr& raw_image,
+             const sensor_msgs::msg::CameraInfo::ConstSharedPtr& cam_info)
 {
   // Update the camera model (usually a no-op)
   model_.fromCameraInfo(cam_info);

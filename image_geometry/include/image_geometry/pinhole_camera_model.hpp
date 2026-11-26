@@ -17,9 +17,13 @@
 namespace image_geometry
 {
 
+/**
+ * \brief Exception thrown when an operation needs a distortion model that is not supported.
+ */
 class Exception : public std::runtime_error
 {
 public:
+  /// Constructor, with the description of the error.
   explicit Exception(const std::string & description)
   : std::runtime_error(description) {}
 };
@@ -34,20 +38,30 @@ public:
   IMAGE_GEOMETRY_PUBLIC
   PinholeCameraModel();
 
+  /// Copy constructor.
   IMAGE_GEOMETRY_PUBLIC
   PinholeCameraModel(const PinholeCameraModel & other);
 
+  /// Copy assignment.
   IMAGE_GEOMETRY_PUBLIC
   PinholeCameraModel & operator=(const PinholeCameraModel & other);
 
   /**
    * \brief Set the camera parameters from the sensor_msgs/CameraInfo message.
+   *
+   * This is cheap if the calibration did not change, so it can be called with every image.
+   *
+   * \return true if the calibration, the binning or the region of interest changed.
    */
   IMAGE_GEOMETRY_PUBLIC
   bool fromCameraInfo(const sensor_msgs::msg::CameraInfo & msg);
 
   /**
    * \brief Set the camera parameters from the sensor_msgs/CameraInfo message.
+   *
+   * This is cheap if the calibration did not change, so it can be called with every image.
+   *
+   * \return true if the calibration, the binning or the region of interest changed.
    */
   IMAGE_GEOMETRY_PUBLIC
   bool fromCameraInfo(const sensor_msgs::msg::CameraInfo::ConstSharedPtr & msg);
@@ -83,15 +97,19 @@ public:
   IMAGE_GEOMETRY_PUBLIC
   cv::Size reducedResolution() const;
 
+  /// Convert a pixel of the reduced (binned or cropped) image to the full resolution.
   IMAGE_GEOMETRY_PUBLIC
   cv::Point2d toFullResolution(const cv::Point2d & uv_reduced) const;
 
+  /// Convert a ROI of the reduced (binned or cropped) image to the full resolution.
   IMAGE_GEOMETRY_PUBLIC
   cv::Rect toFullResolution(const cv::Rect & roi_reduced) const;
 
+  /// Convert a pixel of the full resolution image to the reduced (binned or cropped) image.
   IMAGE_GEOMETRY_PUBLIC
   cv::Point2d toReducedResolution(const cv::Point2d & uv_full) const;
 
+  /// Convert a ROI of the full resolution image to the reduced (binned or cropped) image.
   IMAGE_GEOMETRY_PUBLIC
   cv::Rect toReducedResolution(const cv::Rect & roi_full) const;
 
@@ -121,16 +139,18 @@ public:
   /**
    * \brief Project a rectified pixel to a 3d ray.
    *
-   * Returns the unit vector in the camera coordinate frame in the direction of rectified
-   * pixel (u,v) in the image plane. This is the inverse of project3dToPixel().
+   * Returns the vector in the camera coordinate frame in the direction of rectified
+   * pixel (u,v) in the image plane, scaled to z = 1.0. This is the inverse of
+   * project3dToPixel().
    *
-   * In 1.4.x, the vector has z = 1.0. Previously, this function returned a unit vector.
+   * Before 1.4.x, this function returned a unit vector, as the Python version still does.
    *
    * \param uv_rect Rectified pixel coordinates
    * \return 3d ray passing through (u,v)
    */
   IMAGE_GEOMETRY_PUBLIC
   cv::Point3d projectPixelTo3dRay(const cv::Point2d & uv_rect) const;
+  /// Project a rectified pixel to a 3d ray, using the given projection matrix.
   cv::Point3d projectPixelTo3dRay(const cv::Point2d & uv_rect, const cv::Matx34d & P) const;
 
   /**
@@ -154,6 +174,7 @@ public:
    */
   IMAGE_GEOMETRY_PUBLIC
   cv::Point2d rectifyPoint(const cv::Point2d & uv_raw) const;
+  /// Compute the rectified image coordinates of a raw pixel, using the given K and P matrices.
   cv::Point2d rectifyPoint(
     const cv::Point2d & uv_raw, const cv::Matx33d & K,
     const cv::Matx34d & P) const;
@@ -163,6 +184,7 @@ public:
    */
   IMAGE_GEOMETRY_PUBLIC
   cv::Point2d unrectifyPoint(const cv::Point2d & uv_rect) const;
+  /// Compute the raw image coordinates of a rectified pixel, using the given K and P matrices.
   cv::Point2d unrectifyPoint(
     const cv::Point2d & uv_rect, const cv::Matx33d & K,
     const cv::Matx34d & P) const;
@@ -330,20 +352,22 @@ public:
   bool initialized() const {return static_cast<bool>(cache_);}
 
 protected:
-  sensor_msgs::msg::CameraInfo cam_info_;
-  cv::Mat_<double> D_;  // Unaffected by binning, ROI
-  cv::Matx33d R_;  // Unaffected by binning, ROI
-  cv::Matx33d K_;  // Describe current image (includes binning, ROI)
-  cv::Matx34d P_;  // Describe current image (includes binning, ROI)
-  cv::Matx33d K_full_;  // Describe full-res image, needed for full maps
-  cv::Matx34d P_full_;  // Describe full-res image, needed for full maps
+  sensor_msgs::msg::CameraInfo cam_info_;  ///< The latest CameraInfo
+  cv::Mat_<double> D_;  ///< Unaffected by binning, ROI
+  cv::Matx33d R_;  ///< Unaffected by binning, ROI
+  cv::Matx33d K_;  ///< Describe current image (includes binning, ROI)
+  cv::Matx34d P_;  ///< Describe current image (includes binning, ROI)
+  cv::Matx33d K_full_;  ///< Describe full-res image, needed for full maps
+  cv::Matx34d P_full_;  ///< Describe full-res image, needed for full maps
 
   // Use PIMPL here so we can change internals in patch updates if needed
   struct Cache;
-  std::shared_ptr<Cache> cache_;  // Holds cached data for internal use
+  std::shared_ptr<Cache> cache_;  ///< Holds cached data for internal use
 
+  /// Compute the rectification maps, if they are out of date.
   IMAGE_GEOMETRY_PUBLIC
   void initRectificationMaps() const;
+  /// Compute the unrectification maps, if they are out of date.
   void initUnrectificationMaps() const;
 
   friend class StereoCameraModel;

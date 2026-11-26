@@ -17,7 +17,7 @@ if(OpenCV_VERSION_MAJOR VERSION_GREATER_EQUAL 5)
 else()
   set(OPENCV_CALIB3D_COMPONENT calib3d)
 endif()
-find_package(OpenCV REQUIRED COMPONENTS ${OPENCV_CALIB3D_COMPONENT} core highgui imgproc)
+find_package(OpenCV REQUIRED COMPONENTS ${OPENCV_CALIB3D_COMPONENT} core imgproc)
 find_package(sensor_msgs REQUIRED)
 
 add_library(${PROJECT_NAME}
@@ -30,7 +30,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 target_link_libraries(${PROJECT_NAME} PUBLIC
   opencv_${OPENCV_CALIB3D_COMPONENT}
   opencv_core
-  opencv_highgui
   opencv_imgproc
   ${sensor_msgs_TARGETS}
   ament_cmake_ros_core::ament_ros_defaults)

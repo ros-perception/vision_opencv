@@ -464,6 +464,39 @@ class TestDirected(unittest.TestCase):
         binned_ty = stereo(2, ty=-30.0).get_right_camera().project_3d_to_pixel(point)
         assert_almost_equal(binned_ty, (full_ty[0] / 2, full_ty[1] / 2), 6)
 
+    def test_stereo_principal_point_offset(self):
+        # Rectifying without CALIB_ZERO_DISPARITY can leave cx different in
+        # the two cameras. The disparity x_left - x_right then includes the
+        # offset cx_left - cx_right, so Q and get_z() have to remove it.
+        lmsg = sensor_msgs.msg.CameraInfo()
+        rmsg = sensor_msgs.msg.CameraInfo()
+        for m, cx, tx in ((lmsg, 320.0, 0.0), (rmsg, 340.0, -50.0)):
+            m.width = self.width
+            m.height = self.height
+            m.k = [500.0, 0.0, cx, 0.0, 500.0, 240.0, 0.0, 0.0, 1.0]
+            m.r = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+            m.p = [500.0, 0.0, cx, tx, 0.0, 500.0, 240.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+        cam = StereoCameraModel()
+        cam.from_camera_info(lmsg, rmsg)
+
+        # u_left = 500 * 0.2 / 2 + 320, u_right = 500 * 0.2 / 2 + 340 - 50 / 2
+        point = (0.2, 0.1, 2.0)
+        ((lu, lv), (ru, rv)) = cam.project_3d_to_pixel(point)
+        assert_almost_equal(((lu, lv), (ru, rv)), ((370.0, 265.0), (365.0, 265.0)), 6)
+        disparity = lu - ru
+
+        assert_almost_equal(cam.project_pixel_to_3d((lu, lv), disparity), point, 6)
+        assert_almost_equal(cam.get_z(disparity), point[2], 6)
+        assert_almost_equal(cam.get_disparity(point[2]), disparity, 6)
+        self.assertEqual(float('inf'), cam.get_z(-20.0))
+
+        # Baseline 0.1: Q[3, 3] = (cx_right - cx_left) / 0.1
+        expected_q = [[1.0, 0.0, 0.0, -320.0],
+                      [0.0, 1.0, 0.0, -240.0],
+                      [0.0, 0.0, 0.0, 500.0],
+                      [0.0, 0.0, 10.0, 200.0]]
+        assert_almost_equal(cam.reprojection_matrix(), expected_q, 6)
+
 
 if __name__ == '__main__':
     suite = unittest.TestSuite()
@@ -505,5 +538,6 @@ if __name__ == '__main__':
     suite.addTest(TestDirected('test_stereo_get_z'))
     suite.addTest(TestDirected('test_stereo_get_disparity'))
     suite.addTest(TestDirected('test_binned_tx_ty'))
+    suite.addTest(TestDirected('test_stereo_principal_point_offset'))
     suite.addTest(TestDirected('test_deprecation'))
     unittest.TextTestRunner(verbosity=3).run(suite)

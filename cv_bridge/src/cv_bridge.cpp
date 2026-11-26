@@ -262,9 +262,17 @@ const std::vector<int> getConversionCode(std::string src_encoding, std::string d
   // such as 16UC1), we can only keep the data as it is. Otherwise, fail
   if (!is_src_known_format) {
     if (is_dst_known_format) {
+      // The pixels can be labelled with a known format of the same OpenCV type, e.g. 16UC3 as
+      // bgr16. The caller says what the channels mean. NV12/NV21 also hold a second plane, so
+      // a single channel image cannot just be relabelled as one. #497
+      if (getCvType(src_encoding) == getCvType(dst_encoding) &&
+        !isYUV420SemiPlanar(dst_encoding))
+      {
+        return std::vector<int>(1, SAME_ENCODING);
+      }
       throw Exception("Cannot convert from [" + src_encoding + "] to [" + dst_encoding +
               "]: source encoding is not a known image format (e.g. mono or color), "
-              "so conversion is semantically invalid.");
+              "so it can only become a format of the same type.");
     }
     if (!is_num_channels_the_same) {
       throw Exception(

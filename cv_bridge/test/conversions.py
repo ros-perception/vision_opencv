@@ -156,6 +156,17 @@ class TestConversions(unittest.TestCase):
         self.assertTrue(msg.is_bigendian)
         self.assertTrue((br.imgmsg_to_cv2(msg) == img).all())
 
+    def test_generic_to_known_format(self):
+        # A generic type can be labelled as a known format of the same type (#497)
+        br = CvBridge()
+        img = np.arange(2 * 3 * 3, dtype=np.uint16).reshape(2, 3, 3) * 1000
+        msg = br.cv2_to_imgmsg(img, '16UC3')
+        np.testing.assert_array_equal(br.imgmsg_to_cv2(msg, 'bgr16'), img)
+        np.testing.assert_array_equal(br.imgmsg_to_cv2(msg, 'rgb16'), img)
+        # A different depth or number of channels is still rejected
+        self.assertRaises(CvBridgeError, br.imgmsg_to_cv2, msg, 'bgr8')
+        self.assertRaises(CvBridgeError, br.imgmsg_to_cv2, msg, 'mono16')
+
     def test_row_padding(self):
         # Rows padded to a 4-byte boundary: the padding is not a whole number of pixels.
         br = CvBridge()
@@ -200,6 +211,7 @@ if __name__ == '__main__':
     suite.addTest(TestConversions('test_compressed_format'))
     suite.addTest(TestConversions('test_yuv420_semi_planar'))
     suite.addTest(TestConversions('test_endianness'))
+    suite.addTest(TestConversions('test_generic_to_known_format'))
     suite.addTest(TestConversions('test_row_padding'))
     suite.addTest(TestConversions('test_malformed_image'))
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -191,7 +191,7 @@ TEST(CvBridgeTest, imageMessageConversion)
   ASSERT_EQ(imgmsg.step, cv_ptr->image.step[0]);
 }
 
-// Converting from a generic OpenCV type to a mono/color encoding is rejected.
+// Converting from a generic OpenCV type to a mono/color encoding of another type is rejected.
 // The error message must not claim that the destination is a "color" encoding. #431
 TEST(CvBridgeTest, genericToColorConversionErrorMessage)
 {
@@ -204,14 +204,53 @@ TEST(CvBridgeTest, genericToColorConversionErrorMessage)
   imgmsg.data.resize(imgmsg.height * imgmsg.step);
 
   try {
-    cv_bridge::toCvCopy(imgmsg, sensor_msgs::image_encodings::MONO16);
+    cv_bridge::toCvCopy(imgmsg, sensor_msgs::image_encodings::BGR16);
     FAIL() << "Expected cv_bridge::Exception";
   } catch (const cv_bridge::Exception & e) {
     const std::string what = e.what();
-    EXPECT_NE(what.find("Cannot convert from [16UC1] to [mono16]"), std::string::npos) << what;
+    EXPECT_NE(what.find("Cannot convert from [16UC1] to [bgr16]"), std::string::npos) << what;
     EXPECT_NE(what.find("not a known image format"), std::string::npos) << what;
     EXPECT_EQ(what.find("is not a color encoding"), std::string::npos) << what;
   }
+}
+
+// A generic OpenCV type can be labelled as a known format of the same type. #497
+TEST(CvBridgeTest, genericToKnownFormatOfSameType)
+{
+  const std::vector<std::pair<std::string, std::string>> cases = {
+    {"16UC3", "bgr16"}, {"16UC3", "rgb16"}, {"16UC4", "bgra16"}, {"16UC1", "mono16"},
+    {"8UC3", "bgr8"}, {"8UC4", "rgba8"}, {"8UC1", "mono8"}, {"8UC1", "bayer_rggb8"},
+    {"8UC2", "yuv422"}};
+  cv::RNG rng(0);
+  for (const auto & c : cases) {
+    cv::Mat image(4, 6, cv_bridge::getCvType(c.first));
+    rng.fill(image, cv::RNG::UNIFORM, 0, 256);
+    const sensor_msgs::msg::Image::SharedPtr msg =
+      cv_bridge::CvImage(std_msgs::msg::Header(), c.first, image).toImageMsg();
+
+    cv_bridge::CvImagePtr out;
+    ASSERT_NO_THROW(out = cv_bridge::toCvCopy(msg, c.second)) << c.first << " -> " << c.second;
+    EXPECT_EQ(out->encoding, c.second);
+    // The pixels are kept as they are
+    ASSERT_EQ(out->image.type(), image.type()) << c.first << " -> " << c.second;
+    EXPECT_EQ(cv::norm(out->image, image, cv::NORM_INF), 0) << c.first << " -> " << c.second;
+  }
+
+  // Once labelled, it converts like any image of that format
+  cv::Mat bgr16(2, 2, CV_16UC3, cv::Scalar(100, 200, 300));
+  const sensor_msgs::msg::Image::SharedPtr msg =
+    cv_bridge::CvImage(std_msgs::msg::Header(), "16UC3", bgr16).toImageMsg();
+  const cv_bridge::CvImagePtr rgb = cv_bridge::cvtColor(cv_bridge::toCvCopy(msg, "bgr16"), "rgb16");
+  EXPECT_EQ(rgb->image.at<cv::Vec3w>(0, 0), cv::Vec3w(300, 200, 100));
+
+  // A different depth or number of channels is still rejected
+  for (const std::string dst : {"bgr8", "mono16", "bgra16"}) {
+    EXPECT_THROW(cv_bridge::toCvCopy(msg, dst), cv_bridge::Exception) << dst;
+  }
+  // NV12 also holds a second plane, so a single channel image cannot just be relabelled as one
+  const sensor_msgs::msg::Image::SharedPtr mono_msg = cv_bridge::CvImage(
+    std_msgs::msg::Header(), "8UC1", cv::Mat(6, 4, CV_8UC1, cv::Scalar(0))).toImageMsg();
+  EXPECT_THROW(cv_bridge::toCvCopy(mono_msg, "nv12"), cv_bridge::Exception);
 }
 
 // Converting from a mono/color encoding to a generic OpenCV type needs the same number of

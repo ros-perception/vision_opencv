@@ -2,14 +2,13 @@
   <name>cv_bridge</name>
   <version>4.1.0</version>
   <description>
-    This contains CvBridge, which converts between ROS2
-    Image messages and OpenCV images.
+    This contains CvBridge, which converts between ROS 2 Image messages and OpenCV images.
   </description>
   <maintainer email="kenjibrameld@gmail.com">Kenji Brameld</maintainer>
   <license>Apache License 2.0</license>
   <license>BSD</license>
-  <url type="website">http://www.ros.org/wiki/cv_bridge</url>
-  <url type="repository">https://github.com/ros-perception/vision_opencv/tree/ros2</url>
+  <url type="website">https://docs.ros.org/en/rolling/p/cv_bridge/</url>
+  <url type="repository">https://github.com/ros-perception/vision_opencv</url>
   <url type="bugtracker">https://github.com/ros-perception/vision_opencv/issues</url>
 
   <author>Patrick Mihelich</author>
@@ -42,6 +41,7 @@
 
   <export>
     <build_type>ament_cmake</build_type>
+    <rosdoc2>rosdoc2.yaml</rosdoc2>
   </export>
 
 </package>

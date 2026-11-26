@@ -2,7 +2,7 @@
 
 `cv_bridge` converts between ROS 2 image messages and [OpenCV](https://opencv.org/) images, in C++ and in Python.
 
-![cv_bridge overview](https://raw.githubusercontent.com/ros-perception/vision_opencv/rolling/cv_bridge/doc/cv_bridge_overview.png)
+![cv_bridge overview](https://raw.githubusercontent.com/ros-perception/vision_opencv/kilted/cv_bridge/doc/cv_bridge_overview.png)
 
 ## Usage
 
@@ -16,18 +16,8 @@ void image_callback(const sensor_msgs::msg::Image::ConstSharedPtr & msg)
   // ROS image message to OpenCV image, converted to bgr8 if needed
   cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, "bgr8");
 
-<<<<<<< HEAD
-## Install dependencies
-OpenCV3+ is a must to install, please refer to the official installation guide from [OpenCV Tutorials](http://docs.opencv.org/master/d9/df8/tutorial_root.html)
-Since ROS 2 uses Python 3, please make sure that python3-numpy is installed, or install like this:
-
-```bash
-
-sudo apt install python3-numpy
-=======
   // cv_ptr->image is a cv::Mat
   cv::circle(cv_ptr->image, cv::Point(50, 50), 10, CV_RGB(255, 0, 0), 2);
->>>>>>> f1ae65e (Migrate and improve cv_bridge documentation from wiki.ros.org (#593))
 
   // OpenCV image to ROS image message
   sensor_msgs::msg::Image::SharedPtr out_msg = cv_ptr->toImageMsg();
@@ -60,7 +50,7 @@ The methods raise `cv_bridge.CvBridgeError` if the conversion is not possible.
 
 ## Encodings
 
-When a ROS image is converted to an OpenCV image, `cv_bridge` can convert between the grayscale and color encodings (`mono8`, `mono16`, `bgr8`, `rgb8`, `bgra8`, `rgba8`, ...), and from Bayer, YUV 4:2:2 and NV12/NV21 images.
+When a ROS image is converted to an OpenCV image, `cv_bridge` can convert between the grayscale and color encodings (`mono8`, `mono16`, `bgr8`, `rgb8`, `bgra8`, `rgba8`, ...), and from Bayer and YUV 4:2:2 images.
 If no encoding is requested, the image keeps the encoding of the message.
 
 Images with a generic encoding, like the `16UC1` and `32FC1` depth images, cannot be converted to a color encoding.
@@ -78,7 +68,7 @@ To build it from source, clone this repository into the `src` directory of a ROS
 
 ```console
 cd <YOUR_ROS2_WORKSPACE>/src
-git clone https://github.com/ros-perception/vision_opencv.git -b rolling
+git clone https://github.com/ros-perception/vision_opencv.git -b kilted
 cd ..
 rosdep install --from-paths src --ignore-src -y
 colcon build --packages-up-to cv_bridge
@@ -88,4 +78,4 @@ The Python module needs Boost.Python. To build only the C++ library, add `--cmak
 
 ## Documentation
 
-The full documentation, including tutorials and the API reference, is in the [doc](https://github.com/ros-perception/vision_opencv/tree/rolling/cv_bridge/doc) directory, and it is published at [docs.ros.org](https://docs.ros.org/en/rolling/p/cv_bridge/).
+The full documentation, including tutorials and the API reference, is in the [doc](https://github.com/ros-perception/vision_opencv/tree/kilted/cv_bridge/doc) directory, and it is published at [docs.ros.org](https://docs.ros.org/en/rolling/p/cv_bridge/).

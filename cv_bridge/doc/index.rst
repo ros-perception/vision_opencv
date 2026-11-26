@@ -51,11 +51,6 @@ The names of the encodings are defined in ``sensor_msgs/image_encodings.hpp``.
    * - ``yuv422``, ``yuv422_yuy2``
      - ``CV_8UC2``
      - YUV 4:2:2 image, in UYVY or YUY2 order
-   * - ``nv12``, ``nv21``
-     - ``CV_8UC1``
-     - YUV 4:2:0 semi-planar image: the Y plane followed by the interleaved UV (``nv12``) or VU
-       (``nv21``) plane. The ``cv::Mat`` has ``height * 3 / 2`` rows, and the width and height of
-       the image must be even.
    * - ``8UC1`` ... ``64FC4``
      - ``CV_8UC1`` ... ``CV_64FC4``
      - Generic encodings: a depth (``8U``, ``8S``, ``16U``, ``16S``, ``32S``, ``32F`` or ``64F``) and a number of channels.
@@ -71,7 +66,7 @@ The supported conversions are:
 
 * **No conversion.** If no encoding is requested, the OpenCV image has the encoding of the message.
 * **Color conversions** between the grayscale and the color encodings (``mono``, ``bgr``, ``rgb``, ``bgra`` and ``rgba``).
-* **From Bayer, YUV 4:2:2 and NV12/NV21** images to grayscale and color images. Converting *to* these encodings is not supported.
+* **From Bayer and YUV 4:2:2** images to grayscale and color images. Converting *to* these encodings is not supported.
 * **Bit depth conversions** between the 8-bit and 16-bit variants of the encodings above. The values are scaled, so ``255`` becomes ``65535`` and the other way around.
 * **To a generic encoding** with the same number of channels, from a generic or from a color encoding, for example from ``16UC1`` to ``32FC1`` or from ``bgr8`` to ``8UC3``.
   The values are scaled between 8 and 16 bits as above, and converted without scaling otherwise: ``1000`` stays ``1000`` from ``16UC1`` to ``32FC1``, but it becomes ``4`` from ``16UC1`` to ``8UC1``.
@@ -79,7 +74,7 @@ The supported conversions are:
 .. warning::
 
    The generic encodings do not describe the color of the pixels, so they cannot be converted to the color encodings.
-   For example, a ``16UC1`` depth image cannot be converted to ``mono8``: the conversion fails with the error ``[16UC1] is not a color encoding. but [mono8] is``.
+   For example, a ``16UC1`` depth image cannot be converted to ``mono8``: the conversion fails with the error ``Cannot convert from [16UC1] to [mono8]: source encoding is not a known image format``.
    To show such an image use ``cvtColorForDisplay()``, see `4. Displaying images`_.
 
 A conversion that is not supported, or a message with an unknown or malformed encoding, raises an exception: ``cv_bridge::Exception`` in C++ and ``cv_bridge.CvBridgeError`` in Python.

@@ -177,13 +177,19 @@ TEST(OpencvTests, testCase_encode_decode)
         (dst_encoding == enc::YUV422) ||
         (dst_encoding == enc::YUV422_YUY2);
       bool is_num_channels_the_same = (numChannels(src_encoding) == numChannels(dst_encoding));
+      // A generic type can become a known format of the same OpenCV type, except NV12/NV21
+      // which also hold a second plane
+      auto can_relabel = [](const std::string & from, const std::string & to) {
+          return cv_bridge::getCvType(from) == cv_bridge::getCvType(to) &&
+                 to != enc::NV12 && to != enc::NV21;
+        };
 
       cv_bridge::CvImageConstPtr cv_image;
       cv::Mat image_back;
       // If the first type does not contain any color information
       if (!is_src_color_format) {
-        // Converting from a non color type to a color type does no make sense
-        if (is_dst_color_format) {
+        // Converting from a non color type to a color type only relabels data of the same type
+        if (is_dst_color_format && !can_relabel(src_encoding, dst_encoding)) {
           EXPECT_THROW(cv_bridge::toCvShare(image_msg, dst_encoding), cv_bridge::Exception);
           continue;
         }
@@ -201,30 +207,33 @@ TEST(OpencvTests, testCase_encode_decode)
             continue;
           }
           cv_image = cv_bridge::toCvShare(image_msg, dst_encoding);
-          // We cannot convert from non-color to color
-          EXPECT_THROW((void)cvtColor(cv_image, src_encoding)->image, cv_bridge::Exception);
-          continue;
-        }
-        // We do not support conversion to YUV422/NV12/NV21 for now, except from themselves
-        if (((dst_encoding == enc::YUV422) && (src_encoding != enc::YUV422)) ||
-          ((dst_encoding == enc::YUV422_YUY2) && (src_encoding != enc::YUV422_YUY2)) ||
-          ((dst_encoding == enc::NV12) && (src_encoding != enc::NV12)) ||
-          ((dst_encoding == enc::NV21) && (src_encoding != enc::NV21)))
-        {
-          EXPECT_THROW(cv_bridge::toCvShare(image_msg, dst_encoding), cv_bridge::Exception);
-          continue;
-        }
+          // We cannot convert from non-color to color, except to relabel data of the same type
+          if (!can_relabel(dst_encoding, src_encoding)) {
+            EXPECT_THROW((void)cvtColor(cv_image, src_encoding)->image, cv_bridge::Exception);
+            continue;
+          }
+        } else {
+          // We do not support conversion to YUV422/NV12/NV21 for now, except from themselves
+          if (((dst_encoding == enc::YUV422) && (src_encoding != enc::YUV422)) ||
+            ((dst_encoding == enc::YUV422_YUY2) && (src_encoding != enc::YUV422_YUY2)) ||
+            ((dst_encoding == enc::NV12) && (src_encoding != enc::NV12)) ||
+            ((dst_encoding == enc::NV21) && (src_encoding != enc::NV21)))
+          {
+            EXPECT_THROW(cv_bridge::toCvShare(image_msg, dst_encoding), cv_bridge::Exception);
+            continue;
+          }
 
-        cv_image = cv_bridge::toCvShare(image_msg, dst_encoding);
+          cv_image = cv_bridge::toCvShare(image_msg, dst_encoding);
 
-        // We do not support conversion to YUV422/NV12/NV21 for now, except from themselves
-        if (((src_encoding == enc::YUV422) && (dst_encoding != enc::YUV422)) ||
-          ((src_encoding == enc::YUV422_YUY2) && (dst_encoding != enc::YUV422_YUY2)) ||
-          ((src_encoding == enc::NV12) && (dst_encoding != enc::NV12)) ||
-          ((src_encoding == enc::NV21) && (dst_encoding != enc::NV21)))
-        {
-          EXPECT_THROW((void)cvtColor(cv_image, src_encoding)->image, cv_bridge::Exception);
-          continue;
+          // We do not support conversion to YUV422/NV12/NV21 for now, except from themselves
+          if (((src_encoding == enc::YUV422) && (dst_encoding != enc::YUV422)) ||
+            ((src_encoding == enc::YUV422_YUY2) && (dst_encoding != enc::YUV422_YUY2)) ||
+            ((src_encoding == enc::NV12) && (dst_encoding != enc::NV12)) ||
+            ((src_encoding == enc::NV21) && (dst_encoding != enc::NV21)))
+          {
+            EXPECT_THROW((void)cvtColor(cv_image, src_encoding)->image, cv_bridge::Exception);
+            continue;
+          }
         }
       }
       // And convert back to a cv::Mat

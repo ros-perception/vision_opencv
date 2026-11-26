@@ -19,6 +19,7 @@ ament_add_gtest(${PROJECT_NAME}-utest
   utest.cpp utest2.cpp
   test_rgb_colors.cpp
   test_dynamic_scaling.cpp
+  test_type_adapter.cpp
   APPEND_LIBRARY_DIRS "${cv_bridge_lib_dir}")
 target_link_libraries(${PROJECT_NAME}-utest
   ${PROJECT_NAME}

@@ -131,7 +131,10 @@ ROSCvMatContainer::ROSCvMatContainer(
 
 ROSCvMatContainer::ROSCvMatContainer(
   std::shared_ptr<sensor_msgs::msg::Image> shared_sensor_msgs_image)
-: header_(shared_sensor_msgs_image->header),
+: header_(NotNull(
+      shared_sensor_msgs_image.get(),
+      "shared_sensor_msgs_image cannot be nullptr"
+).pointer->header),
   frame_(mat_referencing_image(*shared_sensor_msgs_image)),
   storage_(shared_sensor_msgs_image)
 {}

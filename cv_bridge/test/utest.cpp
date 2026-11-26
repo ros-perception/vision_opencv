@@ -214,6 +214,32 @@ TEST(CvBridgeTest, genericToColorConversionErrorMessage)
   }
 }
 
+// Converting from a mono/color encoding to a generic OpenCV type needs the same number of
+// channels. The error message must not call a mono encoding a "color" encoding.
+TEST(CvBridgeTest, knownToGenericConversionErrorMessage)
+{
+  sensor_msgs::msg::Image imgmsg;
+  imgmsg.height = 4;
+  imgmsg.width = 4;
+  imgmsg.is_bigendian = false;
+  imgmsg.encoding = sensor_msgs::image_encodings::MONO8;
+  imgmsg.step = imgmsg.width;
+  imgmsg.data.resize(imgmsg.height * imgmsg.step);
+
+  try {
+    cv_bridge::toCvCopy(imgmsg, sensor_msgs::image_encodings::TYPE_16UC3);
+    FAIL() << "Expected cv_bridge::Exception";
+  } catch (const cv_bridge::Exception & e) {
+    const std::string what = e.what();
+    EXPECT_NE(what.find("Cannot convert from [mono8] to [16UC3]"), std::string::npos) << what;
+    EXPECT_NE(what.find("[16UC3] is not a known image format"), std::string::npos) << what;
+    EXPECT_EQ(what.find("is a color encoding"), std::string::npos) << what;
+  }
+
+  // The same number of channels is fine
+  EXPECT_NO_THROW(cv_bridge::toCvCopy(imgmsg, sensor_msgs::image_encodings::TYPE_8UC1));
+}
+
 TEST(CvBridgeTest, semiPlanarYUV420)
 {
   namespace enc = sensor_msgs::image_encodings;

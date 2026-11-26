@@ -434,9 +434,10 @@ class StereoCameraModel:
 
         assert self._right._p is not None
         fx = self._right.projection_matrix()[0, 0]
-        fy = self._right.projection_matrix()[1, 1]
-        cx = self._right.projection_matrix()[0, 2]
-        cy = self._right.projection_matrix()[1, 2]
+        fy = self._left.projection_matrix()[1, 1]
+        clx = self._left.projection_matrix()[0, 2]
+        crx = self._right.projection_matrix()[0, 2]
+        cy = self._left.projection_matrix()[1, 2]
         tx = -self._right.projection_matrix()[0, 3] / fx
 
         # Q is:
@@ -447,13 +448,14 @@ class StereoCameraModel:
 
         self._q = numpy.zeros((4, 4), dtype='float64')
         self._q[0, 0] = 1.0
-        self._q[0, 3] = -cx
+        self._q[0, 3] = -clx
         # Y = (v - Cy) * Z / Fy, and Z = Fx / W, so the Y row is scaled by Fx / Fy.
         # Binning differently in x and y makes Fx != Fy.
         self._q[1, 1] = fx / fy
         self._q[1, 3] = -cy * fx / fy
         self._q[2, 3] = fx
         self._q[3, 2] = 1 / tx
+        self._q[3, 3] = (crx - clx) / tx
 
     def get_tf_frame(self) -> str:
         """
@@ -498,7 +500,9 @@ class StereoCameraModel:
         Uses the cameras' :math:`P` matrices.
         This is the inverse of project_3d_to_pixel().
 
-        Note that a disparity of zero implies that the 3D point is at infinity.
+        The disparity is x_left - x_right. A disparity equal to the offset between the
+        principal points, cx_left - cx_right (zero when they match), implies that the
+        3D point is at infinity.
 
         :param left_uv:        rectified pixel coordinates
         :type left_uv:         (u, v)
@@ -523,16 +527,18 @@ class StereoCameraModel:
 
         This is the inverse of get_disparity().
 
-        Note that a disparity of zero implies Z is infinite.
+        The disparity is x_left - x_right. A disparity equal to the offset between the
+        principal points, cx_left - cx_right (zero when they match), implies Z is infinite.
 
         :param disparity:        disparity, in pixels
         :type disparity:         float
         :rtype:                  float
         """
-        if disparity == 0:
+        offset = self._left.cx() - self._right.cx()
+        if disparity == offset:
             return float('inf')
         Tx = -self._right.projection_matrix()[0, 3]
-        return Tx / disparity
+        return Tx / (disparity - offset)
 
     def get_disparity(self, z) -> float:
         """
@@ -547,7 +553,7 @@ class StereoCameraModel:
         if z == 0:
             return float('inf')
         tx = -self._right.projection_matrix()[0, 3]
-        return tx / z
+        return tx / z + (self._left.cx() - self._right.cx())
 
     def get_left_camera(self) -> PinholeCameraModel:
         """

@@ -36,6 +36,8 @@
 
 #include <cv_bridge/cv_bridge.hpp>
 
+#include <cstdint>
+#include <limits>
 #include <map>
 #include <memory>
 #include <regex>
@@ -284,7 +286,33 @@ cv::Mat matFromImage(const sensor_msgs::msg::Image & source)
   int byte_depth = enc::bitDepth(source.encoding) / 8;
   int num_channels = enc::numChannels(source.encoding);
 
-  if (source.step < source.width * byte_depth * num_channels) {
+  if (byte_depth <= 0 || num_channels <= 0) {
+    std::stringstream ss;
+    ss << "Image is wrongly formed: invalid byte_depth (" << byte_depth <<
+      ") or num_channels (" << num_channels << ") for encoding '" << source.encoding << "'";
+    throw Exception(ss.str());
+  }
+
+  // cv::Mat stores its dimensions as int
+  if (source.height > static_cast<uint32_t>(std::numeric_limits<int>::max()) ||
+    source.width > static_cast<uint32_t>(std::numeric_limits<int>::max()))
+  {
+    std::stringstream ss;
+    ss << "Image is wrongly formed: height (" << source.height << ") or width (" <<
+      source.width << ") is too large";
+    throw Exception(ss.str());
+  }
+
+  // The fields of the message are 32 bits wide: widen them before multiplying, otherwise the
+  // products wrap around and a message whose data is far smaller than its declared geometry
+  // passes the checks below.
+  const uint64_t width = source.width;
+  const uint64_t height = source.height;
+  const uint64_t step = source.step;
+  const uint64_t min_step =
+    width * static_cast<uint64_t>(byte_depth) * static_cast<uint64_t>(num_channels);
+
+  if (step < min_step) {
     std::stringstream ss;
     ss << "Image is wrongly formed: step < width * byte_depth * num_channels  or  " <<
       source.step << " != " <<
@@ -292,7 +320,7 @@ cv::Mat matFromImage(const sensor_msgs::msg::Image & source)
     throw Exception(ss.str());
   }
 
-  if (source.height * source.step != source.data.size()) {
+  if (height * step != static_cast<uint64_t>(source.data.size())) {
     std::stringstream ss;
     ss << "Image is wrongly formed: height * step != size  or  " << source.height << " * " <<
       source.step << " != " << source.data.size();
@@ -300,7 +328,7 @@ cv::Mat matFromImage(const sensor_msgs::msg::Image & source)
   }
 
   // If the endianness is the same as locally, share the data
-  cv::Mat mat(source.height, source.width, source_type, const_cast<uchar *>(&source.data[0]),
+  cv::Mat mat(source.height, source.width, source_type, const_cast<uchar *>(source.data.data()),
     source.step);
 
   if ((rcpputils::endian::native == rcpputils::endian::big && source.is_bigendian) ||
@@ -312,7 +340,7 @@ cv::Mat matFromImage(const sensor_msgs::msg::Image & source)
 
   // Otherwise, reinterpret the data as bytes and switch the channels accordingly
   mat = cv::Mat(source.height, source.width, CV_MAKETYPE(CV_8U, num_channels * byte_depth),
-      const_cast<uchar *>(&source.data[0]), source.step);
+      const_cast<uchar *>(source.data.data()), source.step);
   cv::Mat mat_swap(source.height, source.width, mat.type());
 
   std::vector<int> fromTo;

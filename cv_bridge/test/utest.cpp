@@ -72,6 +72,52 @@ TEST(CvBridgeTest, initialization)
   }
 }
 
+// The geometry checks must not wrap around in 32-bit arithmetic, otherwise a message whose
+// data is much smaller than its declared geometry is accepted and read out of bounds.
+TEST(CvBridgeTest, imageGeometryOverflow)
+{
+  // height * step == 65537 * 65536 wraps to 65536 in 32 bits, which equals data.size()
+  {
+    sensor_msgs::msg::Image image;
+    image.encoding = "bgr8";
+    image.width = 16384;
+    image.height = 65537;
+    image.step = 65536;
+    image.is_bigendian = false;
+    image.data.resize(65536);
+
+    EXPECT_THROW(cv_bridge::toCvCopy(image, "bgr8"), cv_bridge::Exception);
+    EXPECT_THROW(cv_bridge::toCvCopy(image, "mono8"), cv_bridge::Exception);
+    EXPECT_THROW(cv_bridge::toCvShare(image, nullptr), cv_bridge::Exception);
+  }
+
+  // width * byte_depth * num_channels == 0x40000001 * 1 * 4 wraps to 4 in 32 bits
+  {
+    sensor_msgs::msg::Image image;
+    image.encoding = "bgra8";
+    image.width = 0x40000001u;
+    image.height = 1;
+    image.step = 4;
+    image.is_bigendian = false;
+    image.data.resize(4);
+
+    EXPECT_THROW(cv_bridge::toCvCopy(image, "bgra8"), cv_bridge::Exception);
+    EXPECT_THROW(cv_bridge::toCvShare(image, nullptr), cv_bridge::Exception);
+  }
+
+  // Dimensions that do not fit in the int used by cv::Mat
+  {
+    sensor_msgs::msg::Image image;
+    image.encoding = "mono8";
+    image.width = 0;
+    image.height = 0x80000000u;
+    image.step = 0;
+    image.is_bigendian = false;
+
+    EXPECT_THROW(cv_bridge::toCvCopy(image, "mono8"), cv_bridge::Exception);
+  }
+}
+
 TEST(CvBridgeTest, imageMessageStep)
 {
   // Test 1: image step is padded

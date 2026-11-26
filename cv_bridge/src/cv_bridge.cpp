@@ -635,8 +635,15 @@ void CvImage::toCompressedImageMsg(
     image = image8;
   }
 
-  std::string format = getFormat(dst_format);
-  ros_image.format = format;
+  const std::string format = getFormat(dst_format);
+  // A reader cannot tell the depth from the bare format and assumes 8 bits, so 16 bit images
+  // are announced as '<type>; <format> compressed', the form used by compressed_image_transport
+  // and by the Python cv_bridge.
+  if (image.depth() == CV_16U) {
+    ros_image.format = "16UC" + std::to_string(image.channels()) + "; " + format + " compressed";
+  } else {
+    ros_image.format = format;
+  }
   cv::imencode("." + format, image, ros_image.data);
 }
 

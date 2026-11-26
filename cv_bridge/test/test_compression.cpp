@@ -23,6 +23,7 @@ TEST(CvBridgeTest, compression)
 
     sensor_msgs::msg::CompressedImage::SharedPtr msg =
       cv_bridge::CvImage(header, format, in).toCompressedImageMsg(cv_bridge::PNG);
+    EXPECT_EQ(msg->format, "png");
     const cv_bridge::CvImageConstPtr out = cv_bridge::toCvCopy(msg, format);
 
     EXPECT_EQ(out->image.channels(), 3);
@@ -81,6 +82,9 @@ TEST(CvBridgeTest, compression16bit)
       msg = cv_bridge::CvImage(header, src_encoding, in).toCompressedImageMsg(cv_bridge::PNG))
       << src_encoding;
 
+    // The format tells readers that the data is 16 bit. #382
+    EXPECT_EQ(msg->format, "16UC1; png compressed") << src_encoding;
+
     // The payload itself is 16 bit
     const cv::Mat buffer(1, static_cast<int>(msg->data.size()), CV_8UC1, msg->data.data());
     const cv::Mat decoded = cv::imdecode(buffer, cv::IMREAD_UNCHANGED);
@@ -113,6 +117,8 @@ TEST(CvBridgeTest, compression16bitTo8bitFormat)
   for (const std::string src_encoding : {"mono16", "16UC1"}) {
     const sensor_msgs::msg::CompressedImage::SharedPtr msg =
       cv_bridge::CvImage(header, src_encoding, in).toCompressedImageMsg(cv_bridge::BMP);
+    // The payload is 8 bit, so the format stays bare
+    EXPECT_EQ(msg->format, "bmp") << src_encoding;
     const cv_bridge::CvImageConstPtr out = cv_bridge::toCvCopy(msg, "");
     EXPECT_EQ(out->encoding, "mono8") << src_encoding;
     EXPECT_EQ(out->image.type(), CV_8UC1) << src_encoding;
